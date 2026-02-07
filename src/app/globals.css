@@ -1,0 +1,172 @@
+@import 'tailwindcss';
+
+@theme {
+  /* primary */
+  --color-primary: #fa5454;
+  --color-primary-darkest: #8f3030;
+  --color-primary-dark: #b23c3c;
+  --color-primary-light: #fb7373;
+  --color-primary-lightest: #fdb5b5;
+
+  /* background */
+  --color-background-normal: #ffffff;
+  --color-background-lime: #58cf04;
+  --color-background-cyan: #00bdde;
+  --color-background-lightBlue: #00aeff;
+  --color-background-violet: #6541f2;
+  --color-background-purple: #cb59ff;
+  --color-background-pink: #ff6363;
+
+  /* line */
+  --color-line-normal: #dcdcdc;
+  --color-line-active: #303030;
+
+  /* fill */
+  --color-fill-normal: rgb(112 115 124 / 0.08);
+  --color-fill-background: #f7f7f7;
+  --color-fill-alternative: rgb(112 115 124 / 0.05);
+  --color-fill-pressed: #feecec;
+  --color-fill-icon: #2a2a2a;
+
+  /* status */
+  --color-status-positive: #00bf40;
+  --color-status-cautionary: #ff9200;
+  --color-status-negative: #ff4242;
+
+  /* static */
+  --color-static-white: #ffffff;
+  --color-static-black: #000000;
+
+  /* neutral scale */
+  --color-neutral-5: #0f0f0f;
+  --color-neutral-10: #171717;
+  --color-neutral-20: #2a2a2a;
+  --color-neutral-30: #474747;
+  --color-neutral-40: #5c5c5c;
+  --color-neutral-50: #737373;
+  --color-neutral-60: #8a8a8a;
+  --color-neutral-70: #9b9b9b;
+  --color-neutral-80: #b0b0b0;
+  --color-neutral-90: #c4c4c4;
+  --color-neutral-95: #dcdcdc;
+  --color-neutral-99: #f7f7f7;
+
+  /* label */
+  --color-label-normal: #171717;
+  --color-label-strong: #000000;
+  --color-label-neutral: #2e2f33;
+  --color-label-alternative: rgb(55 56 60 / 0.61);
+  --color-label-assistive: rgb(55 56 60 / 0.28);
+  --color-label-disable: rgb(55 56 60 / 0.28);
+
+  /* material */
+  --color-material-dimmer: rgb(23 23 25 / 0.52);
+
+  /* font */
+  --font-pretendard: 'Pretendard', sans-serif;
+}
+
+/* global base */
+body {
+  font-family: var(--font-pretendard);
+}
+
+.body-20 {
+  font-size: 20px;
+  line-height: 150%;
+}
+
+.body-18 {
+  font-size: 18px;
+  line-height: 160%;
+}
+
+.body-16 {
+  font-size: 16px;
+  line-height: 160%;
+}
+
+.body-14 {
+  font-size: 14px;
+  line-height: 160%;
+}
+
+.body-12 {
+  font-size: 12px;
+  line-height: 150%;
+}
+
+/* semantic color utilities */
+
+/* background */
+.bg-background-normal {
+  background: var(--color-background-normal);
+}
+
+/* primary */
+.bg-primary {
+  background: var(--color-primary);
+}
+
+.bg-primary-dark {
+  background: var(--color-primary-dark);
+}
+
+.bg-primary-darkest {
+  background: var(--color-primary-darkest);
+}
+
+.bg-primary-light {
+  background: var(--color-primary-light);
+}
+
+.bg-primary-lightest {
+  background: var(--color-primary-lightest);
+}
+
+/* status */
+.bg-status-positive {
+  background: var(--color-status-positive);
+}
+
+.bg-status-cautionary {
+  background: var(--color-status-cautionary);
+}
+
+.bg-status-negative {
+  background: var(--color-status-negative);
+}
+
+/* neutral */
+.bg-neutral-10 {
+  background: var(--color-neutral-10);
+}
+
+.bg-neutral-30 {
+  background: var(--color-neutral-30);
+}
+
+.bg-neutral-60 {
+  background: var(--color-neutral-60);
+}
+
+.bg-neutral-90 {
+  background: var(--color-neutral-90);
+}
+
+.bg-neutral-99 {
+  background: var(--color-neutral-99);
+}
+
+/* fill */
+.bg-fill-normal {
+  background: var(--color-fill-normal);
+}
+
+.bg-fill-alternative {
+  background: var(--color-fill-alternative);
+}
+
+.bg-fill-pressed {
+  background: var(--color-fill-pressed);
+}
