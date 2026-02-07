@@ -1,60 +1,60 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   /* primary */
-  --color-primary: #FA5454;
-  --color-primary-darkest: #8F3030;
-  --color-primary-dark: #B23C3C;
-  --color-primary-light: #FB7373;
-  --color-primary-lightest: #FDB5B5;
+  --color-primary: #fa5454;
+  --color-primary-darkest: #8f3030;
+  --color-primary-dark: #b23c3c;
+  --color-primary-light: #fb7373;
+  --color-primary-lightest: #fdb5b5;
 
   /* background */
-  --color-background-normal: #FFFFFF;
-  --color-background-lime: #58CF04;
-  --color-background-cyan: #00BDDE;
-  --color-background-lightBlue: #00AEFF;
-  --color-background-violet: #6541F2;
-  --color-background-purple: #CB59FF;
-  --color-background-pink: #FF6363;
+  --color-background-normal: #ffffff;
+  --color-background-lime: #58cf04;
+  --color-background-cyan: #00bdde;
+  --color-background-lightBlue: #00aeff;
+  --color-background-violet: #6541f2;
+  --color-background-purple: #cb59ff;
+  --color-background-pink: #ff6363;
 
   /* line */
-  --color-line-normal: #DCDCDC;
+  --color-line-normal: #dcdcdc;
   --color-line-active: #303030;
 
   /* fill */
   --color-fill-normal: rgb(112 115 124 / 0.08);
-  --color-fill-background: #F7F7F7;
+  --color-fill-background: #f7f7f7;
   --color-fill-alternative: rgb(112 115 124 / 0.05);
-  --color-fill-pressed: #FEECEC;
-  --color-fill-icon: #2A2A2A;
+  --color-fill-pressed: #feecec;
+  --color-fill-icon: #2a2a2a;
 
   /* status */
-  --color-status-positive: #00BF40;
-  --color-status-cautionary: #FF9200;
-  --color-status-negative: #FF4242;
+  --color-status-positive: #00bf40;
+  --color-status-cautionary: #ff9200;
+  --color-status-negative: #ff4242;
 
   /* static */
-  --color-static-white: #FFFFFF;
+  --color-static-white: #ffffff;
   --color-static-black: #000000;
 
   /* neutral scale */
-  --color-neutral-5: #0F0F0F;
+  --color-neutral-5: #0f0f0f;
   --color-neutral-10: #171717;
-  --color-neutral-20: #2A2A2A;
+  --color-neutral-20: #2a2a2a;
   --color-neutral-30: #474747;
-  --color-neutral-40: #5C5C5C;
+  --color-neutral-40: #5c5c5c;
   --color-neutral-50: #737373;
-  --color-neutral-60: #8A8A8A;
-  --color-neutral-70: #9B9B9B;
-  --color-neutral-80: #B0B0B0;
-  --color-neutral-90: #C4C4C4;
-  --color-neutral-95: #DCDCDC;
-  --color-neutral-99: #F7F7F7;
+  --color-neutral-60: #8a8a8a;
+  --color-neutral-70: #9b9b9b;
+  --color-neutral-80: #b0b0b0;
+  --color-neutral-90: #c4c4c4;
+  --color-neutral-95: #dcdcdc;
+  --color-neutral-99: #f7f7f7;
 
   /* label */
   --color-label-normal: #171717;
   --color-label-strong: #000000;
-  --color-label-neutral: #2E2F33;
+  --color-label-neutral: #2e2f33;
   --color-label-alternative: rgb(55 56 60 / 0.61);
   --color-label-assistive: rgb(55 56 60 / 0.28);
   --color-label-disable: rgb(55 56 60 / 0.28);
@@ -63,7 +63,7 @@
   --color-material-dimmer: rgb(23 23 25 / 0.52);
 
   /* font */
-  --font-pretendard: "Pretendard", sans-serif;
+  --font-pretendard: 'Pretendard', sans-serif;
 }
 
 /* global base */
