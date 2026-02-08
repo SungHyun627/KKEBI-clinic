@@ -6,10 +6,12 @@ export interface InputProps extends React.ComponentProps<'input'> {
   icon?: React.ReactNode;
   onClear?: () => void;
   status?: 'POSTIVE' | 'COMPLETE' | 'NEGATIVE';
+  rightIcon?: React.ReactNode;
+  onRightIconClick?: () => void;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, icon, onClear, status, ...props }, ref) => {
+  ({ className, type, icon, onClear, status, rightIcon, onRightIconClick, ...props }, ref) => {
     return (
       <div
         className={cn(
@@ -33,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               className={cn(
                 'flex items-center justify-center shrink-0 h-6 w-6 transition-colors duration-200',
                 'text-label-alternative',
-                'group-focus-within:text-label-normal',
+                'group-focus-within:text-label-strong',
                 'group-has-disabled:text-label-disable',
               )}
             >
@@ -51,25 +53,37 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
 
-        {onClear && (
-          <button
-            type="button"
-            onClick={onClear}
-            className="flex items-center justify-center text-label-assistive hover:text-label-strong transition-colors cursor-pointer shrink-0 ml-1"
-            aria-label="입력 내용 초기화"
-          >
-            <div
-              className="h-6 w-6 bg-neutral-20"
-              style={{
-                maskImage: 'url(/assets/icons/xmark-circle.svg)',
-                WebkitMaskImage: 'url(/assets/icons/xmark-circle.svg)',
-                maskSize: 'contain',
-                maskRepeat: 'no-repeat',
-                maskPosition: 'center',
-              }}
-            />
-          </button>
-        )}
+        <div className="flex items-center gap-2 shrink-0 ml-1">
+          {rightIcon && (
+            <button
+              type="button"
+              onClick={onRightIconClick}
+              className="flex items-center justify-center text-label-assistive hover:text-label-strong transition-colors cursor-pointer opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
+              aria-label="입력 보조 버튼"
+            >
+              {rightIcon}
+            </button>
+          )}
+          {onClear && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="flex items-center justify-center text-label-assistive hover:text-label-strong transition-colors cursor-pointer opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
+              aria-label="입력 내용 초기화"
+            >
+              <div
+                className="h-6 w-6 bg-neutral-20"
+                style={{
+                  maskImage: 'url(/icons/xmark-circle.svg)',
+                  WebkitMaskImage: 'url(/icons/xmark-circle.svg)',
+                  maskSize: 'contain',
+                  maskRepeat: 'no-repeat',
+                  maskPosition: 'center',
+                }}
+              />
+            </button>
+          )}
+        </div>
       </div>
     );
   },
