@@ -73,6 +73,10 @@
   --color-label-alternative: rgb(55 56 60 / 0.61);
   --color-label-assistive: rgb(55 56 60 / 0.28);
   --color-label-disable: rgb(55 56 60 / 0.28);
+  --color-fill-normal: rgba(112, 115, 124, 0.08);
+  --color-fill-background: #f7f7f7;
+  --color-fill-alternative: rgba(112, 115, 124, 0.05);
+  --color-fill-pressed: '#feecec'
 }
 
 :root {
