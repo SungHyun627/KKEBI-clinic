@@ -3,12 +3,22 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { Button } from '@/shared/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
+import { VisuallyHidden } from '@/shared/ui/visually-hidden';
+import { login } from '@/features/auth/api/login';
 
 type LoginFormValues = {
   email: string;
@@ -18,6 +28,8 @@ type LoginFormValues = {
 
 export default function LoginPage() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoginFailed, setIsLoginFailed] = useState(false);
+  const router = useRouter();
   const form = useForm<LoginFormValues>({
     defaultValues: {
       email: '',
@@ -26,8 +38,14 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (values: LoginFormValues) => {
-    void values;
+  const onSubmit = async (values: LoginFormValues) => {
+    const result = await login({ email: values.email, password: values.password });
+    if (result.ok) {
+      router.push('/login/verify');
+      return;
+    }
+
+    setIsLoginFailed(true);
   };
   const onInvalid = () => {
     const { errors } = form.formState;
@@ -217,6 +235,25 @@ export default function LoginPage() {
           상담사 등록 문의
         </Link>
       </div>
+
+      <Dialog open={isLoginFailed} onOpenChange={setIsLoginFailed}>
+        <DialogContent>
+          <DialogTitle>
+            <VisuallyHidden>로그인 실패</VisuallyHidden>
+          </DialogTitle>
+          <div className="flex w-full flex-col items-center gap-6">
+            <DialogHeader>
+              <p className="text-[14px] leading-[21px] font-normal text-neutral-40">로그인 실패</p>
+              <p className="text-[18px] leading-[28.8px] font-semibold text-neutral-0">
+                관리자 계정 정보가 없습니다.
+              </p>
+            </DialogHeader>
+            <Button type="button" className="w-full" onClick={() => setIsLoginFailed(false)}>
+              확인
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
