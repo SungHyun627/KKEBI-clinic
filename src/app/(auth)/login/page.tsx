@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -38,9 +38,17 @@ export default function LoginPage() {
     },
   });
 
+  useEffect(() => {
+    const storedRemember = window.localStorage.getItem('kkebi_remember_login');
+    if (storedRemember === 'true') {
+      form.setValue('remember', true);
+    }
+  }, [form]);
+
   const onSubmit = async (values: LoginFormValues) => {
     const result = await login({ email: values.email, password: values.password });
     if (result.ok) {
+      window.localStorage.setItem('kkebi_remember_login', values.remember ? 'true' : 'false');
       router.push('/login/verify');
       return;
     }
