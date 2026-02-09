@@ -14,6 +14,7 @@ import { mockRequestPasswordResetEmail } from '@/features/auth/api/password-rese
 export function LoginCard() {
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
   const [isEmailSentOpen, setIsEmailSentOpen] = useState(false);
+  const [sentEmail, setSentEmail] = useState('');
 
   function handlePasswordResetClose(nextOpen: boolean) {
     setIsPasswordResetOpen(nextOpen);
@@ -147,8 +148,10 @@ export function LoginCard() {
                   const email = emailForm.getValues('email');
                   const res = await mockRequestPasswordResetEmail(email);
                   if (res.success) {
+                    setSentEmail(email);
                     setIsPasswordResetOpen(false);
                     setIsEmailSentOpen(true);
+                    emailForm.reset({ email: '' });
                   }
                 }}
               >
@@ -183,7 +186,7 @@ export function LoginCard() {
                 <Image src="/images/checkmark.png" alt="발송 완료" width={120} height={120} />
                 <div className="flex flex-col w-full items-center gap-[6px]">
                   <span className="font-pretendard text-[18px] font-semibold leading-[28.8px] text-center text-label-strong">
-                    kkebi@naver.com
+                    {sentEmail}
                   </span>
                   <span className="font-pretendard text-[14px] font-normal leading-[21px] text-center text-neutral-30">
                     (으)로 비밀번호 재설정 링크가 발송되었습니다.
