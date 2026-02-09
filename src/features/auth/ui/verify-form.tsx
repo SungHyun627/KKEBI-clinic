@@ -1,80 +1,97 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '@/shared/ui/button';
+import { Form } from '@/shared/ui/form';
 import { CodeInput } from './verify-code-input';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface VerifyFormValues {
   code: string;
 }
 
 export function VerifyForm() {
+  const router = useRouter();
   const form = useForm<VerifyFormValues>({
     defaultValues: { code: '' },
   });
-  const code = form.watch('code');
-  const codeArr = (code ?? '').padEnd(6).slice(0, 6).split('');
+  const code = useWatch({ control: form.control, name: 'code' });
+  const codeArr = (code ?? '').split('');
 
   const handleChange = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
     if (!val) return;
-    const newCode = codeArr.map((c, i) => (i === idx ? val : c)).join('');
-    form.setValue('code', newCode);
+    let arr = codeArr.slice();
+    arr[idx] = val;
+    arr = arr.slice(0, 6);
+    form.setValue('code', arr.join(''));
     if (idx < 5 && val) {
       const next = document.getElementById(`code-input-${idx + 1}`) as HTMLInputElement;
       if (next) next.focus();
     }
   };
+
   const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !codeArr[idx] && idx > 0) {
-      const prev = document.getElementById(`code-input-${idx - 1}`) as HTMLInputElement;
-      if (prev) prev.focus();
+    if (e.key === 'Backspace') {
+      const arr = codeArr.slice();
+      if (arr[idx]) {
+        arr[idx] = '';
+        form.setValue('code', arr.join(''));
+      } else if (idx > 0) {
+        arr[idx - 1] = '';
+        form.setValue('code', arr.join(''));
+        const prev = document.getElementById(`code-input-${idx - 1}`) as HTMLInputElement;
+        if (prev) prev.focus();
+      }
     }
   };
 
   return (
     <div className="flex flex-col items-center gap-10.5 w-full">
-      {/* Phone icon */}
-      <div
-        className="flex flex-col justify-center items-center rounded-full bg-white"
-        style={{ width: 83, height: 84, padding: '18px 17px 18px 18px' }}
-      >
-        <Image src="/icons/phone.svg" alt="phone" width={47} height={48} />
-      </div>
-      {/* Code input + 버튼 */}
-      <form className="w-full flex flex-col gap-6 items-center" autoComplete="off">
-        <CodeInput codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
-        {/* 버튼 영역 + 안내 텍스트 묶음 */}
-        <div className="flex flex-col items-center gap-4.5 w-full">
-          <div className="flex items-center gap-2 w-full">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="flex items-center justify-center gap-3 min-w-0 shrink-0 basis-[35.3%] md:w-30 sm:w-full"
-            >
-              뒤로가기
-            </Button>
-            <Button
-              type="button"
-              variant="default"
-              size="lg"
-              className="min-w-0 flex-1 basis-[64.7%]"
-            >
-              인증하기
-            </Button>
-          </div>
-          <div className="flex items-center justify-center gap-2 w-full cursor-pointer text-center">
-            <span className="text-[16px] leading-[25.6px] font-normal font-pretendard text-label-alternative">
-              코드를 받지 못하셨나요?
-            </span>
-            <span className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary">
-              새 코드받기
-            </span>
-          </div>
+      <Form {...form}>
+        <div
+          className="flex flex-col justify-center items-center rounded-full bg-white"
+          style={{ width: 83, height: 84, padding: '18px 17px 18px 18px' }}
+        >
+          <Image src="/icons/phone.svg" alt="phone" width={47} height={48} />
         </div>
-      </form>
+        {/* Code input + 버튼 */}
+        <form className="w-full flex flex-col gap-6 items-center" autoComplete="off">
+          <CodeInput codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
+          {/* 버튼 영역 + 안내 텍스트 묶음 */}
+          <div className="flex flex-col items-center gap-4.5 w-full">
+            <div className="flex items-center gap-2 w-full">
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="flex items-center justify-center gap-3 min-w-0 shrink-0 basis-[35.3%] md:w-30 sm:w-full"
+                onClick={() => router.push('/login')}
+              >
+                뒤로가기
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                size="lg"
+                className="min-w-0 flex-1 basis-[64.7%]"
+                disabled={!(code && code.length === 6 && /^[0-9]{6}$/.test(code))}
+              >
+                인증하기
+              </Button>
+            </div>
+            <div className="flex items-center justify-center gap-2 w-full cursor-pointer text-center">
+              <span className="text-[16px] leading-[25.6px] font-normal font-pretendard text-label-alternative">
+                코드를 받지 못하셨나요?
+              </span>
+              <span className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary">
+                새 코드받기
+              </span>
+            </div>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }
