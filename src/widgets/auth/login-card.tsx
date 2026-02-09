@@ -9,11 +9,19 @@ import { Input } from '@/shared/ui/input';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { Button } from '@/shared/ui/button';
+import { mockRequestPasswordResetEmail } from '@/features/auth/api/password-reset';
 
 export function LoginCard() {
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
+  const [isEmailSentOpen, setIsEmailSentOpen] = useState(false);
+
+  function handlePasswordResetClose(nextOpen: boolean) {
+    setIsPasswordResetOpen(nextOpen);
+  }
+
   // 비밀번호 찾기 이메일 입력용 폼
   const emailForm = useForm<{ email: string }>({ defaultValues: { email: '' } });
+  const watchedEmail = emailForm.watch('email');
 
   return (
     <div className="w-full max-w-[480px] shrink-0 flex flex-col items-center gap-[45px] bg-white">
@@ -44,7 +52,7 @@ export function LoginCard() {
         </Link>
       </div>
 
-      <Dialog open={isPasswordResetOpen} onOpenChange={setIsPasswordResetOpen}>
+      <Dialog open={isPasswordResetOpen} onOpenChange={handlePasswordResetClose}>
         <DialogContent className="flex max-w-[480px] p-7 md:p-6 flex-col justify-center items-center gap-[26px] rounded-[24px] bg-white">
           <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
             <VisuallyHidden>비밀번호 찾기</VisuallyHidden>
@@ -134,13 +142,46 @@ export function LoginCard() {
                 variant="default"
                 size="lg"
                 className="min-w-0 flex-1 basis-[64.7%]"
-                onClick={() => {
-                  /* TODO: 재설정 링크 발송 로직 */
+                disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail)}
+                onClick={async () => {
+                  const email = emailForm.getValues('email');
+                  const res = await mockRequestPasswordResetEmail(email);
+                  if (res.success) {
+                    setIsPasswordResetOpen(false);
+                    setIsEmailSentOpen(true);
+                  }
                 }}
               >
                 재설정 링크 발송
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isEmailSentOpen} onOpenChange={setIsEmailSentOpen}>
+        <DialogContent className="flex max-w-[480px] p-7 md:p-6 flex-col justify-center items-center gap-[26px] rounded-[24px] bg-white">
+          <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
+            <VisuallyHidden>이메일 발송 완료</VisuallyHidden>
+          </DialogTitle>
+          <div className="flex flex-col w-full flex-shrink-0 flex-grow-0 items-center gap-[23px]">
+            <span className="text-lg font-semibold">이메일이 발송되었습니다</span>
+            <span
+              className="font-pretendard text-[14px] font-normal leading-[21px] text-center"
+              style={{ color: 'var(--Semantic-Neutral-30, var(--Neutral-30, #474747))' }}
+            >
+              입력하신 이메일 주소로 비밀번호 재설정 링크를 보냈습니다.
+              <br />
+              메일을 확인해 주세요.
+            </span>
+            <Button
+              type="button"
+              variant="default"
+              size="lg"
+              className="w-full"
+              onClick={() => setIsEmailSentOpen(false)}
+            >
+              닫기
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
