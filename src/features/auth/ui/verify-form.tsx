@@ -6,6 +6,8 @@ import { Button } from '@/shared/ui/button';
 import { Form } from '@/shared/ui/form';
 import { CodeInput } from './verify-code-input';
 import { verify2FA } from '../api/verify';
+import { resend2FA } from '../api/resend';
+import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
@@ -98,11 +100,21 @@ export function VerifyForm() {
                   인증하기
                 </Button>
               </div>
-              <div className="flex items-center justify-center gap-2 w-full cursor-pointer text-center">
+              <div className="flex items-center justify-center gap-2 w-full text-center">
                 <span className="text-[16px] leading-[25.6px] font-normal font-pretendard text-label-alternative">
                   코드를 받지 못하셨나요?
                 </span>
-                <span className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary">
+                <span
+                  className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary cursor-pointer"
+                  onClick={async () => {
+                    const result = await resend2FA();
+                    if (result.ok) {
+                      toast(result.message || '새 인증 코드가 발송되었습니다.');
+                    } else {
+                      toast('인증 코드 발송에 실패했습니다.');
+                    }
+                  }}
+                >
                   새 코드받기
                 </span>
               </div>
@@ -123,7 +135,14 @@ export function VerifyForm() {
                 인증 번호를 다시 확인해주세요
               </p>
             </DialogHeader>
-            <Button type="button" className="w-full" onClick={() => setIsVerifyFailed(false)}>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => {
+                setIsVerifyFailed(false);
+                form.setValue('code', '');
+              }}
+            >
               확인
             </Button>
           </div>
