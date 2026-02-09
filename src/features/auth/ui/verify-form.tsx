@@ -4,6 +4,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '@/shared/ui/button';
 import { Form } from '@/shared/ui/form';
 import { CodeInput } from './verify-code-input';
+import { verify2FA } from '../api/verify';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -18,6 +19,15 @@ export function VerifyForm() {
   });
   const code = useWatch({ control: form.control, name: 'code' });
   const codeArr = (code ?? '').split('');
+
+  const handleVerify = async () => {
+    if (!(code && code.length === 6 && /^[0-9]{6}$/.test(code))) return;
+    const result = await verify2FA({ code });
+    if (result.ok) {
+      router.push('/');
+    } else {
+    }
+  };
 
   const handleChange = (idx: number, e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
@@ -56,10 +66,10 @@ export function VerifyForm() {
         >
           <Image src="/icons/phone.svg" alt="phone" width={47} height={48} />
         </div>
-        {/* Code input + 버튼 */}
+
         <form className="w-full flex flex-col gap-6 items-center" autoComplete="off">
           <CodeInput codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
-          {/* 버튼 영역 + 안내 텍스트 묶음 */}
+
           <div className="flex flex-col items-center gap-4.5 w-full">
             <div className="flex items-center gap-2 w-full">
               <Button
@@ -77,6 +87,7 @@ export function VerifyForm() {
                 size="lg"
                 className="min-w-0 flex-1 basis-[64.7%]"
                 disabled={!(code && code.length === 6 && /^[0-9]{6}$/.test(code))}
+                onClick={handleVerify}
               >
                 인증하기
               </Button>
