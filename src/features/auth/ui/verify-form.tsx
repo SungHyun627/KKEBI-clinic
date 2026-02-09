@@ -1,12 +1,15 @@
 'use client';
 
 import { useForm, useWatch } from 'react-hook-form';
+import { useState } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Form } from '@/shared/ui/form';
 import { CodeInput } from './verify-code-input';
 import { verify2FA } from '../api/verify';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
+import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 
 interface VerifyFormValues {
   code: string;
@@ -20,12 +23,14 @@ export function VerifyForm() {
   const code = useWatch({ control: form.control, name: 'code' });
   const codeArr = (code ?? '').split('');
 
+  const [isVerifyFailed, setIsVerifyFailed] = useState(false);
   const handleVerify = async () => {
     if (!(code && code.length === 6 && /^[0-9]{6}$/.test(code))) return;
     const result = await verify2FA({ code });
     if (result.ok) {
       router.push('/');
     } else {
+      setIsVerifyFailed(true);
     }
   };
 
@@ -58,51 +63,72 @@ export function VerifyForm() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-10.5 w-full">
-      <Form {...form}>
-        <div
-          className="flex flex-col justify-center items-center rounded-full bg-white"
-          style={{ width: 83, height: 84, padding: '18px 17px 18px 18px' }}
-        >
-          <Image src="/icons/phone.svg" alt="phone" width={47} height={48} />
-        </div>
-
-        <form className="w-full flex flex-col gap-6 items-center" autoComplete="off">
-          <CodeInput codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
-
-          <div className="flex flex-col items-center gap-4.5 w-full">
-            <div className="flex items-center gap-2 w-full">
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="flex items-center justify-center gap-3 min-w-0 shrink-0 basis-[35.3%] md:w-30 sm:w-full"
-                onClick={() => router.push('/login')}
-              >
-                뒤로가기
-              </Button>
-              <Button
-                type="button"
-                variant="default"
-                size="lg"
-                className="min-w-0 flex-1 basis-[64.7%]"
-                disabled={!(code && code.length === 6 && /^[0-9]{6}$/.test(code))}
-                onClick={handleVerify}
-              >
-                인증하기
-              </Button>
-            </div>
-            <div className="flex items-center justify-center gap-2 w-full cursor-pointer text-center">
-              <span className="text-[16px] leading-[25.6px] font-normal font-pretendard text-label-alternative">
-                코드를 받지 못하셨나요?
-              </span>
-              <span className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary">
-                새 코드받기
-              </span>
-            </div>
+    <>
+      <div className="flex flex-col items-center gap-10.5 w-full">
+        <Form {...form}>
+          <div
+            className="flex flex-col justify-center items-center rounded-full bg-white"
+            style={{ width: 83, height: 84, padding: '18px 17px 18px 18px' }}
+          >
+            <Image src="/icons/phone.svg" alt="phone" width={47} height={48} />
           </div>
-        </form>
-      </Form>
-    </div>
+
+          <form className="w-full flex flex-col gap-6 items-center" autoComplete="off">
+            <CodeInput codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
+
+            <div className="flex flex-col items-center gap-4.5 w-full">
+              <div className="flex items-center gap-2 w-full">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="flex items-center justify-center gap-3 min-w-0 shrink-0 basis-[35.3%] md:w-30 sm:w-full"
+                  onClick={() => router.push('/login')}
+                >
+                  뒤로가기
+                </Button>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="lg"
+                  className="min-w-0 flex-1 basis-[64.7%]"
+                  disabled={!(code && code.length === 6 && /^[0-9]{6}$/.test(code))}
+                  onClick={handleVerify}
+                >
+                  인증하기
+                </Button>
+              </div>
+              <div className="flex items-center justify-center gap-2 w-full cursor-pointer text-center">
+                <span className="text-[16px] leading-[25.6px] font-normal font-pretendard text-label-alternative">
+                  코드를 받지 못하셨나요?
+                </span>
+                <span className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary">
+                  새 코드받기
+                </span>
+              </div>
+            </div>
+          </form>
+        </Form>
+      </div>
+
+      <Dialog open={isVerifyFailed} onOpenChange={setIsVerifyFailed}>
+        <DialogContent>
+          <DialogTitle>
+            <VisuallyHidden>인증 실패</VisuallyHidden>
+          </DialogTitle>
+          <div className="flex w-full flex-col items-center gap-6">
+            <DialogHeader>
+              <p className="text-[14px] leading-[21px] font-normal text-neutral-40">인증 실패</p>
+              <p className="text-[18px] leading-[28.8px] font-semibold text-neutral-0">
+                인증 번호를 다시 확인해주세요
+              </p>
+            </DialogHeader>
+            <Button type="button" className="w-full" onClick={() => setIsVerifyFailed(false)}>
+              확인
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
