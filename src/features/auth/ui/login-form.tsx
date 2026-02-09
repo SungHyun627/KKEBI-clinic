@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-
 import { login } from '@/features/auth/api/login';
 import { Button } from '@/shared/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
+import { toast } from '@/shared/ui/toast';
 
 type LoginFormValues = {
   email: string;

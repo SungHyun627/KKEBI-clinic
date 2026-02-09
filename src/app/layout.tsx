@@ -1,7 +1,5 @@
 import './globals.css';
-
 import type { Metadata } from 'next';
-import { Toaster } from '@/shared/ui/sonner';
 
 export const metadata: Metadata = {
   title: 'Kkebi Clinic',
@@ -17,7 +15,6 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen bg-white text-foreground antialiased">
         <div className="min-h-screen w-full">{children}</div>
-        <Toaster />
       </body>
     </html>
   );
