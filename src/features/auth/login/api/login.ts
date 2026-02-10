@@ -21,5 +21,13 @@ export const login = async ({ email, password }: LoginFormValues): Promise<Login
   }
 
   const data = await res.json();
+  // mock API는 ok, 실제 API는 success를 반환할 수 있으므로 변환 처리
+  if ('ok' in data) {
+    return {
+      success: data.ok,
+      message: data.message,
+      data: data.data,
+    };
+  }
   return data;
 };

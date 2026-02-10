@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { LoginForm } from '@/features/auth/ui/login-form';
+import LoginForm from '@/features/auth/login/ui/LoginForm';
 import { useForm } from 'react-hook-form';
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoginFailDialog } from './LoginFailDialog';
 import { useForm } from 'react-hook-form';
@@ -10,11 +10,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/f
 import { Input } from '@/shared/ui/input';
 import { toast } from '@/shared/ui/toast';
 import { LoginFormValues } from '../types/loginForm';
+import { getInitialLoginInfo } from '../lib/getInitialLoginInfo';
 
-export function LoginForm() {
+const LoginForm = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
-  const [keepSignedIn, setKeepSignedIn] = useState(false);
+  const [saveLoginInfo, setSaveLoginInfo] = useState(getInitialLoginInfo().saveLoginInfo || false);
+  const checkboxRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const form = useForm<LoginFormValues>({
     defaultValues: {
@@ -23,11 +25,35 @@ export function LoginForm() {
     },
   });
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem('kkebi-login-info');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.saveLoginInfo) {
+          form.setValue('email', parsed.email || '');
+          form.setValue('password', parsed.password || '');
+        }
+      } catch {}
+    }
+  }, [form]);
+
   const onSubmit = async (values: LoginFormValues) => {
     const result = await login({ email: values.email, password: values.password });
     if (result.success) {
-      // 로그인 상태 유지 체크박스 값은 keepSignedIn에서 관리
-      // 필요시 localStorage 등으로 저장 가능
+      if (saveLoginInfo) {
+        localStorage.setItem(
+          'kkebi-login-info',
+          JSON.stringify({
+            saveLoginInfo: true,
+            email: values.email,
+            password: values.password,
+          }),
+        );
+      } else {
+        localStorage.removeItem('kkebi-login-info');
+      }
       router.push('/login/verify');
       return;
     }
@@ -154,24 +180,35 @@ export function LoginForm() {
               />
             </div>
           </div>
-
-          {/* 로그인 상태 유지 체크박스: form 상태와 분리 */}
-          <div className="flex items-center gap-2 mb-4">
-            <input
-              type="checkbox"
-              id="keepSignedIn"
-              checked={keepSignedIn}
-              onChange={(e) => setKeepSignedIn(e.target.checked)}
-              className="h-4 w-4 rounded border border-neutral-95 bg-neutral-95 transition-colors checked:border-primary checked:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
-            />
-            <label
-              htmlFor="keepSignedIn"
-              className="text-[14px] leading-[21px] font-normal text-label-neutral"
-            >
-              로그인 상태 유지
-            </label>
-          </div>
-
+          <label className="flex items-center gap-[6px] body-14 text-label-neutral">
+            <span className="relative flex h-4 w-4 items-center justify-center">
+              <input
+                ref={checkboxRef}
+                type="checkbox"
+                className="peer h-4 w-4 appearance-none rounded-[4px] border border-neutral-95 bg-neutral-95 transition-colors checked:border-primary checked:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
+                checked={saveLoginInfo}
+                onChange={(e) => setSaveLoginInfo(e.target.checked)}
+              />
+              <svg
+                className="pointer-events-none absolute text-white opacity-100 transition-opacity"
+                width="9.589"
+                height="6.393"
+                viewBox="0 0 12 10"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M1 5L4.5 8.5L11 1.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            로그인 상태 유지
+          </label>
           <Button type="submit" className="w-full">
             로그인
           </Button>
@@ -180,4 +217,6 @@ export function LoginForm() {
       <LoginFailDialog open={isLoginFailed} onOpenChange={setIsLoginFailed} />
     </>
   );
-}
+};
+
+export default LoginForm;
