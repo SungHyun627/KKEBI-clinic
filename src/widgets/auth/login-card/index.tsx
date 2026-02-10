@@ -1,4 +1,5 @@
 'use client';
+
 import Image from 'next/image';
 import LoginForm from '@/features/auth/login/ui/LoginForm';
 

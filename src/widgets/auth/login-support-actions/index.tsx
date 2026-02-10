@@ -1,25 +1,15 @@
 'use client';
+
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
-import { Form, FormField, FormItem, FormLabel, FormControl } from '@/shared/ui/form';
-import { Input } from '@/shared/ui/input';
-import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
-import { VisuallyHidden } from '@/shared/ui/visually-hidden';
-import { Button } from '@/shared/ui/button';
-import Image from 'next/image';
-import { mockResetPassword } from '@/features/auth/reset-password/api/reset-password';
 import Link from 'next/link';
+import ResetPasswordDialog from '@/features/auth/reset-password/ui/ResetPasswordDialog';
+import EmailSentDialog from '@/features/auth/reset-password/ui/EmailSentDialog';
 
 const LoginSupportActions = () => {
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
   const [isEmailSentOpen, setIsEmailSentOpen] = useState(false);
   const [sentEmail, setSentEmail] = useState('');
-  const emailForm = useForm<{ email: string }>({ defaultValues: { email: '' } });
-  const watchedEmail = useWatch({ control: emailForm.control, name: 'email' });
 
-  function handlePasswordResetClose(nextOpen: boolean) {
-    setIsPasswordResetOpen(nextOpen);
-  }
   return (
     <>
       <div className="flex items-center gap-3 text-[18px] leading-[28.8px] font-medium text-neutral-60">
@@ -35,169 +25,17 @@ const LoginSupportActions = () => {
           상담사 등록 문의
         </Link>
       </div>
-
-      <Dialog open={isPasswordResetOpen} onOpenChange={handlePasswordResetClose}>
-        <DialogContent className="flex max-w-[480px] p-7 md:p-6 flex-col justify-center items-center gap-[26px] rounded-[24px] bg-white">
-          <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
-            <VisuallyHidden>비밀번호 찾기</VisuallyHidden>
-          </DialogTitle>
-          <div className="flex flex-col w-full flex-shrink-0 flex-grow-0 items-start gap-[26px]">
-            <div className="flex flex-col w-full items-start gap-[23px]">
-              <div className="flex flex-col w-full justify-center items-start gap-[6px] self-stretch">
-                <div className="flex w-full justify-between items-center">
-                  <span className="text-lg font-semibold">비밀번호 찾기</span>
-                  <button
-                    type="button"
-                    aria-label="닫기"
-                    className="p-1 ml-2 hover:opacity-80 cursor-pointer"
-                    onClick={() => setIsPasswordResetOpen(false)}
-                    style={{ display: 'flex', alignItems: 'center' }}
-                  >
-                    <Image src="/icons/close.svg" alt="닫기" width={28} height={28} />
-                  </button>
-                </div>
-                <span
-                  className="font-pretendard text-[14px] font-normal leading-[21px]"
-                  style={{
-                    color: 'var(--Semantic-Neutral-30, var(--Neutral-30, #474747))',
-                    fontStyle: 'normal',
-                  }}
-                >
-                  등록된 이메일 주소를 입력하시면
-                  <br />
-                  비밀번호 재설정 링크를 보내드립니다.
-                </span>
-              </div>
-              <div className="w-full">
-                <Form {...emailForm}>
-                  <FormField
-                    control={emailForm.control}
-                    name="email"
-                    rules={{
-                      required: '아이디를 다시 한번 확인해주세요.',
-                      pattern: {
-                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: '아이디를 다시 한번 확인해주세요.',
-                      },
-                    }}
-                    render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                          이메일
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="example@kkebi.com"
-                            {...field}
-                            onClear={() => emailForm.setValue('email', '')}
-                            icon={
-                              <div
-                                className="h-6 w-6 bg-current"
-                                style={{
-                                  maskImage: 'url(/icons/mail.svg)',
-                                  WebkitMaskImage: 'url(/icons/mail.svg)',
-                                  maskSize: 'contain',
-                                  maskRepeat: 'no-repeat',
-                                  maskPosition: 'center',
-                                }}
-                              />
-                            }
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </Form>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 w-full">
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="flex items-center justify-center gap-3 min-w-0 shrink-0 basis-[35.3%] md:w-30 sm:w-full"
-                onClick={() => setIsPasswordResetOpen(false)}
-              >
-                취소
-              </Button>
-              <Button
-                type="button"
-                variant="default"
-                size="lg"
-                className="min-w-0 flex-1 basis-[64.7%]"
-                disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail)}
-                onClick={async () => {
-                  const email = emailForm.getValues('email');
-                  const res = await mockResetPassword(email);
-                  if (res.success) {
-                    setSentEmail(email);
-                    setIsPasswordResetOpen(false);
-                    setIsEmailSentOpen(true);
-                    emailForm.reset({ email: '' });
-                  }
-                }}
-              >
-                재설정 링크 발송
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={isEmailSentOpen} onOpenChange={setIsEmailSentOpen}>
-        <DialogContent className="flex max-w-[480px] p-7 md:p-6 flex-col justify-center items-center gap-[26px] rounded-[24px] bg-white">
-          <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
-            <VisuallyHidden>이메일 발송 완료</VisuallyHidden>
-          </DialogTitle>
-          <div className="flex flex-col w-full flex-shrink-0 flex-grow-0 items-center gap-[26px]">
-            <div className="flex flex-col w-full items-center gap-[28px]">
-              <div className="flex w-full justify-between items-center">
-                <span className="font-pretendard text-[20px] font-semibold leading-[30px] text-center">
-                  이메일 발송 완료
-                </span>
-                <button
-                  type="button"
-                  aria-label="닫기"
-                  className="p-1 ml-2 hover:opacity-80 cursor-pointer"
-                  onClick={() => setIsEmailSentOpen(false)}
-                  style={{ display: 'flex', alignItems: 'center' }}
-                >
-                  <Image src="/icons/close.svg" alt="닫기" width={28} height={28} />
-                </button>
-              </div>
-              <div className="flex flex-col w-full items-center gap-[23px]">
-                <Image src="/images/checkmark.png" alt="발송 완료" width={120} height={120} />
-                <div className="flex flex-col w-full items-center gap-[6px]">
-                  <span className="font-pretendard text-[18px] font-semibold leading-[28.8px] text-center text-label-strong">
-                    {sentEmail}
-                  </span>
-                  <span className="font-pretendard text-[14px] font-normal leading-[21px] text-center text-neutral-30">
-                    (으)로 비밀번호 재설정 링크가 발송되었습니다.
-                    <br />
-                    안내된 메일에 따라 비밀번호 재설정을 완료해 주세요.
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col w-full items-start justify-center px-3 py-4 gap-[6px] rounded-2xl bg-neutral-99">
-                <p className="body-14 text-neutral-50">
-                  • 이메일이 도착하지 않았다면 스팸 폴더를 확인해 주세요.
-                </p>
-                <p className="body-14 text-neutral-50">• 링크는 24시간 동안 유효합니다.</p>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="default"
-              size="lg"
-              className="w-full"
-              onClick={() => setIsEmailSentOpen(false)}
-            >
-              로그인으로 돌아가기
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ResetPasswordDialog
+        isOpen={isPasswordResetOpen}
+        handleDialogOpen={setIsPasswordResetOpen}
+        setSentEmail={setSentEmail}
+        setIsEmailSentOpen={setIsEmailSentOpen}
+      />
+      <EmailSentDialog
+        isOpen={isEmailSentOpen}
+        handleDialogOpen={setIsEmailSentOpen}
+        sentEmail={sentEmail}
+      />
     </>
   );
 };
