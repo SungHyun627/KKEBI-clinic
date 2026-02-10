@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { LoginFailDialog } from './LoginFailDialog';
 import { useForm } from 'react-hook-form';
 import { login } from '@/features/auth/api/login';
 import { Button } from '@/shared/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
-import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { toast } from '@/shared/ui/toast';
 
 type LoginFormValues = {
@@ -214,25 +213,7 @@ export function LoginForm() {
           </div>
         </form>
       </Form>
-
-      <Dialog open={isLoginFailed} onOpenChange={setIsLoginFailed}>
-        <DialogContent>
-          <DialogTitle>
-            <VisuallyHidden>로그인 실패</VisuallyHidden>
-          </DialogTitle>
-          <div className="flex w-full flex-col items-center gap-6">
-            <DialogHeader>
-              <p className="text-[14px] leading-[21px] font-normal text-neutral-40">로그인 실패</p>
-              <p className="text-[18px] leading-[28.8px] font-semibold text-neutral-0">
-                관리자 계정 정보가 없습니다.
-              </p>
-            </DialogHeader>
-            <Button type="button" className="w-full" onClick={() => setIsLoginFailed(false)}>
-              확인
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <LoginFailDialog open={isLoginFailed} onOpenChange={setIsLoginFailed} />
     </>
   );
 }
