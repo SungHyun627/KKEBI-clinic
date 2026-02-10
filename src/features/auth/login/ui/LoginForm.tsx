@@ -95,7 +95,7 @@ const LoginForm = () => {
                   },
                 }}
                 render={({ field }) => (
-                  <FormItem className="space-y-2">
+                  <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
                       이메일
                     </FormLabel>
@@ -138,7 +138,7 @@ const LoginForm = () => {
                   },
                 }}
                 render={({ field }) => (
-                  <FormItem className="space-y-2">
+                  <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
                       비밀번호
                     </FormLabel>
