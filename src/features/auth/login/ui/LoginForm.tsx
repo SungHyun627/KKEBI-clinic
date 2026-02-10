@@ -9,7 +9,7 @@ import { Button } from '@/shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { toast } from '@/shared/ui/toast';
-import { LoginFormValues } from '../types/loginForm';
+import { LoginForm as LoginFromFields } from '../types/login';
 import { getInitialLoginInfo } from '../lib/getInitialLoginInfo';
 
 const LoginForm = () => {
@@ -18,7 +18,7 @@ const LoginForm = () => {
   const [saveLoginInfo, setSaveLoginInfo] = useState(getInitialLoginInfo().saveLoginInfo || false);
   const checkboxRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const form = useForm<LoginFormValues>({
+  const form = useForm<LoginFromFields>({
     defaultValues: {
       email: '',
       password: '',
@@ -39,7 +39,7 @@ const LoginForm = () => {
     }
   }, [form]);
 
-  const onSubmit = async (values: LoginFormValues) => {
+  const onSubmit = async (values: LoginFromFields) => {
     const result = await login({ email: values.email, password: values.password });
     if (result.success) {
       if (saveLoginInfo) {

@@ -1,4 +1,4 @@
-import type { LoginFormValues } from '../types/loginForm';
+import type { LoginForm } from '../types/login';
 
 interface LoginResponse {
   success: boolean;
@@ -9,7 +9,7 @@ interface LoginResponse {
   };
 }
 
-export const login = async ({ email, password }: LoginFormValues): Promise<LoginResponse> => {
+export const login = async ({ email, password }: LoginForm): Promise<LoginResponse> => {
   const res = await fetch('/api/v1/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

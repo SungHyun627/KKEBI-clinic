@@ -1,44 +1,27 @@
 'use client';
-import Image from 'next/image';
-import Link from 'next/link';
 import { useState } from 'react';
-import LoginForm from '@/features/auth/login/ui/LoginForm';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Form, FormField, FormItem, FormLabel, FormControl } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { Button } from '@/shared/ui/button';
-import { mockRequestPasswordResetEmail } from '@/features/auth/api/password-reset';
+import Image from 'next/image';
+import { mockResetPassword } from '@/features/auth/reset-password/api/reset-password';
+import Link from 'next/link';
 
-export function LoginCard() {
+const LoginSupportActions = () => {
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
   const [isEmailSentOpen, setIsEmailSentOpen] = useState(false);
   const [sentEmail, setSentEmail] = useState('');
+  const emailForm = useForm<{ email: string }>({ defaultValues: { email: '' } });
+  const watchedEmail = useWatch({ control: emailForm.control, name: 'email' });
 
   function handlePasswordResetClose(nextOpen: boolean) {
     setIsPasswordResetOpen(nextOpen);
   }
-
-  // 비밀번호 찾기 이메일 입력용 폼
-  const emailForm = useForm<{ email: string }>({ defaultValues: { email: '' } });
-  const watchedEmail = emailForm.watch('email');
-
   return (
     <>
-      <div className="w-full flex flex-col items-center gap-[35px]">
-        <div className="flex flex-col items-center gap-3">
-          <Image src="/images/logo.png" alt="KKEBI" width={88} height={88} />
-          <h1 className="text-center text-[24px] leading-[30px] font-semibold text-label-normal">
-            KKEBI for Counselor
-          </h1>
-        </div>
-
-        <div className="w-full rounded-[24px] bg-neutral-99 p-8">
-          <LoginForm />
-        </div>
-      </div>
-
       <div className="flex items-center gap-3 text-[18px] leading-[28.8px] font-medium text-neutral-60">
         <button
           type="button"
@@ -146,7 +129,7 @@ export function LoginCard() {
                 disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail)}
                 onClick={async () => {
                   const email = emailForm.getValues('email');
-                  const res = await mockRequestPasswordResetEmail(email);
+                  const res = await mockResetPassword(email);
                   if (res.success) {
                     setSentEmail(email);
                     setIsPasswordResetOpen(false);
@@ -217,4 +200,6 @@ export function LoginCard() {
       </Dialog>
     </>
   );
-}
+};
+
+export default LoginSupportActions;
