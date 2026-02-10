@@ -25,7 +25,7 @@ export function LoginCard() {
   const watchedEmail = emailForm.watch('email');
 
   return (
-    <>
+    <div className="w-full max-w-[480px] shrink-0 flex flex-col items-center gap-[45px] bg-white">
       <div className="w-full flex flex-col items-center gap-[35px]">
         <div className="flex flex-col items-center gap-3">
           <Image src="/images/logo.png" alt="KKEBI" width={88} height={88} />
@@ -215,6 +215,6 @@ export function LoginCard() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

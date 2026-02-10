@@ -2,7 +2,7 @@ import { VerifyForm } from '@/features/auth/ui/verify-form';
 
 export function VerifyCard() {
   return (
-    <div className="flex flex-col items-center bg-white shrink-0 w-full max-w-[480px] gap-[45px]">
+    <>
       <div className="flex flex-col items-center gap-3 pt-0">
         <img src="/images/logo.png" alt="KKEBI" width={88} height={88} />
         <h1 className="text-center text-[24px] leading-[30px] font-semibold text-label-normal">
@@ -22,6 +22,6 @@ export function VerifyCard() {
           <VerifyForm />
         </div>
       </div>
-    </div>
+    </>
   );
 }
