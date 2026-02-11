@@ -50,7 +50,6 @@ const WeeklyStatisticsSection = () => {
         <WeeklyStatisticsCard
           label="완료 상담 수"
           value={statistics.completedSessions}
-          unit="건"
           icon="/icons/complete.svg"
         />
         <WeeklyStatisticsCard
