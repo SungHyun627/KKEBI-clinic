@@ -1,8 +1,8 @@
-import { WeeklyStatisticsSection } from '@/features/dashboard';
+import WeeklyStatisticsSection from '@/widgets/dashboard/weekly-statistics';
 
 export default function DashBoard() {
   return (
-    <div className="flex flex-col w-full gap-[46px]">
+    <div className="flex w-full flex-col gap-[46px]">
       <WeeklyStatisticsSection />
     </div>
   );

@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getWeeklyStatistics } from '../api/getWeeklyStatistics';
-import type { WeeklyStatistics } from '../types/statistics';
-import WeeklyStatisticsCard from './WeeklyStatisticsCard';
 import { Title } from '@/shared/ui/title';
+import { getWeeklyStatistics } from '@/features/dashboard';
+import type { WeeklyStatistics } from '@/features/dashboard';
+import WeeklyStatisticsCard from './ui/WeeklyStatisticsCard';
 
 const WeeklyStatisticsSection = () => {
   const [statistics, setStatistics] = useState<WeeklyStatistics | null>(null);
@@ -44,9 +44,9 @@ const WeeklyStatisticsSection = () => {
   if (!statistics) return null;
 
   return (
-    <section className="flex flex-col w-full items-start gap-3">
-      <Title title={'주간 통계'} />
-      <div className="flex w-full justify-between items-center gap-8">
+    <section className="flex w-full flex-col items-start gap-3">
+      <Title title="주간 통계" />
+      <div className="flex w-full items-center justify-between gap-8">
         <WeeklyStatisticsCard
           label="완료 상담 수"
           value={statistics.completedSessions}
