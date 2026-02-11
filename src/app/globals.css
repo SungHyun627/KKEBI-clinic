@@ -1,43 +1,60 @@
 @import 'tailwindcss';
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* primary */
-  --color-primary: #fa5454;
+  /* --- 1. Typography & Radius --- */
+  --font-pretendard: 'Pretendard', sans-serif;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* --- 2. shadcn UI 필수 매핑 (기존 oklch 기반 시스템 유지) --- */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  /* 브랜드 레드(#fa5454)가 할당됨 */
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* 차트 & 사이드바 (기존 설정 그대로 유지) */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* --- 3. 브랜드 디자인 시스템 전용 컬러 (추가 반영) --- */
   --color-primary-darkest: #8f3030;
   --color-primary-dark: #b23c3c;
   --color-primary-light: #fb7373;
   --color-primary-lightest: #fdb5b5;
-
-  /* background */
-  --color-background-normal: #ffffff;
-  --color-background-lime: #58cf04;
-  --color-background-cyan: #00bdde;
-  --color-background-lightBlue: #00aeff;
-  --color-background-violet: #6541f2;
-  --color-background-purple: #cb59ff;
-  --color-background-pink: #ff6363;
-
-  /* line */
-  --color-line-normal: #dcdcdc;
-  --color-line-active: #303030;
-
-  /* fill */
-  --color-fill-normal: rgb(112 115 124 / 0.08);
-  --color-fill-background: #f7f7f7;
-  --color-fill-alternative: rgb(112 115 124 / 0.05);
-  --color-fill-pressed: #feecec;
-  --color-fill-icon: #2a2a2a;
-
-  /* status */
   --color-status-positive: #00bf40;
   --color-status-cautionary: #ff9200;
   --color-status-negative: #ff4242;
-
-  /* static */
-  --color-static-white: #ffffff;
-  --color-static-black: #000000;
-
-  /* neutral scale */
   --color-neutral-5: #0f0f0f;
   --color-neutral-10: #171717;
   --color-neutral-20: #2a2a2a;
@@ -50,123 +67,151 @@
   --color-neutral-90: #c4c4c4;
   --color-neutral-95: #dcdcdc;
   --color-neutral-99: #f7f7f7;
-
-  /* label */
   --color-label-normal: #171717;
   --color-label-strong: #000000;
   --color-label-neutral: #2e2f33;
   --color-label-alternative: rgb(55 56 60 / 0.61);
   --color-label-assistive: rgb(55 56 60 / 0.28);
   --color-label-disable: rgb(55 56 60 / 0.28);
-
-  /* material */
-  --color-material-dimmer: rgb(23 23 25 / 0.52);
-
-  /* font */
-  --font-pretendard: 'Pretendard', sans-serif;
+  --color-fill-normal: rgba(112, 115, 124, 0.08);
+  --color-fill-background: #f7f7f7;
+  --color-fill-alternative: rgba(112, 115, 124, 0.05);
+  --color-fill-pressed: '#feecec'
 }
 
-/* global base */
-body {
-  font-family: var(--font-pretendard);
+:root {
+  /* --- 핵심: Primary를 브랜드 컬러로 변경 --- */
+  --primary: #fa5454;
+  --primary-foreground: #ffffff;
+  --ring: #fa5454;
+
+  /* --- 기존 시스템 값 유지 (oklch) --- */
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+
+  /* 차트 & 사이드바 값 그대로 반영 */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
 }
 
-.body-20 {
-  font-size: 20px;
-  line-height: 150%;
+.dark {
+  /* --- 다크모드에서도 Primary 브랜드 컬러 유지/조정 --- */
+  --primary: #fb7373;
+  --primary-foreground: #000000;
+
+  /* --- 기존 다크모드 oklch 값 유지 --- */
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+
+  /* 다크모드 사이드바/차트 값 반영 */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
-.body-18 {
-  font-size: 18px;
-  line-height: 160%;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    font-family: var(--font-pretendard);
+    @apply bg-background text-foreground;
+  }
 }
 
-.body-16 {
-  font-size: 16px;
-  line-height: 160%;
-}
+/* --- 커스텀 타이포그래피 유틸리티 --- */
+@layer utilities {
+  .body-20 {
+    font-size: 20px;
+    line-height: 150%;
+  }
 
-.body-14 {
-  font-size: 14px;
-  line-height: 160%;
-}
+  .body-18 {
+    font-size: 18px;
+    line-height: 160%;
+  }
 
-.body-12 {
-  font-size: 12px;
-  line-height: 150%;
-}
+  .body-16 {
+    font-size: 16px;
+    line-height: 160%;
+  }
 
-/* semantic color utilities */
+  .body-14 {
+    font-size: 14px;
+    line-height: 160%;
+  }
 
-/* background */
-.bg-background-normal {
-  background: var(--color-background-normal);
-}
+  .body-12 {
+    font-size: 12px;
+    line-height: 150%;
+  }
 
-/* primary */
-.bg-primary {
-  background: var(--color-primary);
-}
+  .counselor-inquiry-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--Neutral-95, #dcdcdc) transparent;
+  }
 
-.bg-primary-dark {
-  background: var(--color-primary-dark);
-}
+  .counselor-inquiry-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
 
-.bg-primary-darkest {
-  background: var(--color-primary-darkest);
-}
+  .counselor-inquiry-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-.bg-primary-light {
-  background: var(--color-primary-light);
-}
-
-.bg-primary-lightest {
-  background: var(--color-primary-lightest);
-}
-
-/* status */
-.bg-status-positive {
-  background: var(--color-status-positive);
-}
-
-.bg-status-cautionary {
-  background: var(--color-status-cautionary);
-}
-
-.bg-status-negative {
-  background: var(--color-status-negative);
-}
-
-/* neutral */
-.bg-neutral-10 {
-  background: var(--color-neutral-10);
-}
-
-.bg-neutral-30 {
-  background: var(--color-neutral-30);
-}
-
-.bg-neutral-60 {
-  background: var(--color-neutral-60);
-}
-
-.bg-neutral-90 {
-  background: var(--color-neutral-90);
-}
-
-.bg-neutral-99 {
-  background: var(--color-neutral-99);
-}
-
-/* fill */
-.bg-fill-normal {
-  background: var(--color-fill-normal);
-}
-
-.bg-fill-alternative {
-  background: var(--color-fill-alternative);
-}
-
-.bg-fill-pressed {
-  background: var(--color-fill-pressed);
+  .counselor-inquiry-scroll::-webkit-scrollbar-thumb {
+    min-height: 168px;
+    border-radius: 999px;
+    background: var(--Neutral-95, #dcdcdc);
+  }
 }
