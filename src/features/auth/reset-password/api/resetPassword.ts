@@ -1,27 +1,64 @@
-export async function requestResetPassword(email: string) {
-  return fetch('/api/v1/auth/reset-password/request', {
+const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+
+type ResetPasswordResult = {
+  success: boolean;
+  message?: string;
+};
+
+const postJson = async <T>(url: string, body: unknown): Promise<T> => {
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  }).then((res) => res.json());
+    body: JSON.stringify(body),
+  });
+  return response.json();
+};
+
+export async function requestResetPasswordDemo(email: string): Promise<ResetPasswordResult> {
+  return postJson<ResetPasswordResult>('/api/v1/auth/reset-password/request', { email });
 }
 
-export async function resetPassword({
+export async function resetPasswordDemo({
   email,
   newPassword,
 }: {
   email: string;
   newPassword: string;
-}) {
-  return fetch('/api/v1/auth/reset-password', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, newPassword }),
-  }).then((res) => res.json());
+}): Promise<ResetPasswordResult> {
+  return postJson<ResetPasswordResult>('/api/v1/auth/reset-password', { email, newPassword });
 }
 
-export async function mockResetPassword(email: string) {
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  // 성공 응답 예시
-  return { success: true, message: '비밀번호 재설정 링크가 이메일로 발송되었습니다.' };
+export async function requestResetPasswordServer(email: string): Promise<ResetPasswordResult> {
+  if (!SERVER_API_BASE_URL) {
+    return { success: false, message: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
+  }
+  return postJson<ResetPasswordResult>(
+    `${SERVER_API_BASE_URL}/api/v1/auth/reset-password/request`,
+    {
+      email,
+    },
+  );
 }
+
+export async function resetPasswordServer({
+  email,
+  newPassword,
+}: {
+  email: string;
+  newPassword: string;
+}): Promise<ResetPasswordResult> {
+  if (!SERVER_API_BASE_URL) {
+    return { success: false, message: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
+  }
+  return postJson<ResetPasswordResult>(`${SERVER_API_BASE_URL}/api/v1/auth/reset-password`, {
+    email,
+    newPassword,
+  });
+}
+
+// 현재 화면은 데모 API를 기본으로 사용합니다.
+export const requestResetPassword = requestResetPasswordDemo;
+export const resetPassword = resetPasswordDemo;
+
+// 하위 호환: 기존 mock 호출 지점에서 그대로 사용 가능
+export const mockResetPassword = requestResetPasswordDemo;

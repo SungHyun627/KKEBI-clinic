@@ -8,7 +8,7 @@ import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from '@/shared/ui/toast';
-import { mockResetPassword } from '../api/resetPassword';
+import { requestResetPassword } from '../api/resetPassword';
 
 interface RequestResetPasswordDialogProps {
   isOpen: boolean;
@@ -121,7 +121,7 @@ const RequestResetPasswordDialog = ({
               onClick={async () => {
                 const email = emailForm.getValues('email');
                 try {
-                  const res = await mockResetPassword(email);
+                  const res = await requestResetPassword(email);
                   if (res.success) {
                     setSentEmail(email);
                     handleDialogOpen(false);
@@ -130,7 +130,7 @@ const RequestResetPasswordDialog = ({
                   } else {
                     toast(res.message || '비밀번호 재설정 링크 발송에 실패했습니다.');
                   }
-                } catch (error) {
+                } catch {
                   toast('네트워크 오류가 발생했습니다.');
                 }
               }}

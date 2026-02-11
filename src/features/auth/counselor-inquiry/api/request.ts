@@ -12,9 +12,9 @@ interface CounselorInquiryResult {
   message?: string;
 }
 
-export async function requestCounselorInquiry(
-  payload: CounselorInquiryPayload,
-): Promise<CounselorInquiryResult> {
+const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+
+const validatePayload = (payload: CounselorInquiryPayload) => {
   if (
     !payload.name ||
     !payload.email ||
@@ -22,10 +22,47 @@ export async function requestCounselorInquiry(
     !payload.organization ||
     !payload.licenseNumber
   ) {
-    return { success: false, message: '필수 항목을 입력해주세요.' };
+    return {
+      success: false,
+      message: '필수 항목을 입력해주세요.',
+    } satisfies CounselorInquiryResult;
+  }
+  return null;
+};
+
+const postInquiry = async (url: string, payload: CounselorInquiryPayload) => {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return response.json() as Promise<CounselorInquiryResult>;
+};
+
+export async function requestCounselorInquiryDemo(
+  payload: CounselorInquiryPayload,
+): Promise<CounselorInquiryResult> {
+  const invalid = validatePayload(payload);
+  if (invalid) return invalid;
+
+  return postInquiry('/api/v1/auth/counselor-inquiry', payload);
+}
+
+export async function requestCounselorInquiryServer(
+  payload: CounselorInquiryPayload,
+): Promise<CounselorInquiryResult> {
+  const invalid = validatePayload(payload);
+  if (invalid) return invalid;
+
+  if (!SERVER_API_BASE_URL) {
+    return { success: false, message: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
   }
 
-  // TODO: 상담사 등록 문의 API가 준비되면 실제 엔드포인트 호출로 교체합니다.
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return { success: true, message: '문의가 접수되었습니다.' };
+  return postInquiry(`${SERVER_API_BASE_URL}/api/v1/auth/counselor-inquiry`, payload);
 }
+
+// 현재 화면은 데모 API를 기본으로 사용합니다.
+export const requestCounselorInquiry = requestCounselorInquiryDemo;
