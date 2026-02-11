@@ -33,7 +33,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <SidebarHeader>
               <Image src="/images/kkebi-logo.png" alt="Kkebi Clinic" width={104} height={37} />
             </SidebarHeader>
-            <SidebarContent className="gap-5 px-4">
+            <SidebarContent className="gap-5">
               <SidebarMenu>
                 {navItems.map((item) => {
                   const isActive =
@@ -65,9 +65,22 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             </SidebarContent>
           </div>
 
-          <SidebarFooter className="p-4">
-            <div className="rounded-2xl bg-fill-background px-4 py-3 text-sm text-label-alternative">
-              오늘 일정이 많아요. 내담자 상태를 한 번 더 확인해보세요.
+          <SidebarFooter className="p-0">
+            <div className="flex h-[59px] w-[255px] items-center justify-between border-t-[0.5px] border-neutral-95 px-4">
+              <div className="flex items-center gap-2">
+                <Image src="/icons/profile.svg" alt="profile" width={24} height={24} />
+                <div className="flex items-center gap-[3px] body-14 font-medium">
+                  <span>홍길동</span>
+                  <span>님</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                aria-label="로그아웃"
+                className="flex items-center justify-center hover:cursor-pointer"
+              >
+                <Image src="/icons/logout.svg" alt="로그아웃" width={20} height={20} />
+              </button>
             </div>
           </SidebarFooter>
         </Sidebar>

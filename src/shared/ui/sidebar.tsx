@@ -28,9 +28,7 @@ SidebarHeader.displayName = 'SidebarHeader';
 
 const SidebarContent = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
-    return (
-      <div ref={ref} className={cn('flex flex-1 flex-col gap-2 px-4', className)} {...props} />
-    );
+    return <div ref={ref} className={cn('flex flex-1 flex-col gap-2', className)} {...props} />;
   },
 );
 SidebarContent.displayName = 'SidebarContent';
