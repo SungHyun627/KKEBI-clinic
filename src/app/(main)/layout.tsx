@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +14,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/shared/ui/sidebar';
+import { logout } from '@/features/auth/login/api/logout';
+import { toast } from '@/shared/ui/toast';
 
 const navItems = [
   { label: '대시보드', href: '/', icon: '/icons/dashboard.svg' },
@@ -24,6 +26,7 @@ const navItems = [
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -78,6 +81,13 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 type="button"
                 aria-label="로그아웃"
                 className="flex items-center justify-center hover:cursor-pointer"
+                onClick={async () => {
+                  const result = await logout();
+                  if (!result.success) {
+                    toast(result.message || '로그아웃 처리 중 오류가 발생했습니다.');
+                  }
+                  router.push('/login');
+                }}
               >
                 <Image src="/icons/logout.svg" alt="로그아웃" width={20} height={20} />
               </button>
