@@ -38,6 +38,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 'group-focus-within:text-label-strong',
                 'group-has-disabled:text-label-disable',
               )}
+              tabIndex={-1}
             >
               {icon}
             </div>
@@ -60,6 +61,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               onClick={onRightIconClick}
               className="flex items-center justify-center text-label-assistive hover:text-label-strong transition-colors cursor-pointer opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
               aria-label="입력 보조 버튼"
+              tabIndex={-1}
             >
               {rightIcon}
             </button>
@@ -70,6 +72,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               onClick={onClear}
               className="flex items-center justify-center text-label-assistive hover:text-label-strong transition-colors cursor-pointer opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
               aria-label="입력 내용 초기화"
+              tabIndex={-1}
             >
               <div
                 className="h-6 w-6 bg-neutral-20"
