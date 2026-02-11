@@ -73,7 +73,14 @@ const TwoFactorAuthForm = () => {
             <Image src="/icons/phone.svg" alt="phone" width={47} height={48} />
           </div>
 
-          <form className="w-full flex flex-col gap-6 items-center" autoComplete="off">
+          <form
+            className="w-full flex flex-col gap-6 items-center"
+            autoComplete="off"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleVerify();
+            }}
+          >
             <TwoFactorCode codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
 
             <div className="flex flex-col items-center gap-4.5 w-full">
@@ -88,12 +95,11 @@ const TwoFactorAuthForm = () => {
                   뒤로가기
                 </Button>
                 <Button
-                  type="button"
+                  type="submit"
                   variant="default"
                   size="lg"
                   className="min-w-0 flex-1 basis-[64.7%]"
                   disabled={!(code && code.length === 6 && /^[0-9]{6}$/.test(code))}
-                  onClick={handleVerify}
                 >
                   인증하기
                 </Button>
