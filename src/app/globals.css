@@ -195,4 +195,23 @@
     font-size: 12px;
     line-height: 150%;
   }
+
+  .counselor-inquiry-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--Neutral-95, #dcdcdc) transparent;
+  }
+
+  .counselor-inquiry-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .counselor-inquiry-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .counselor-inquiry-scroll::-webkit-scrollbar-thumb {
+    min-height: 168px;
+    border-radius: 999px;
+    background: var(--Neutral-95, #dcdcdc);
+  }
 }

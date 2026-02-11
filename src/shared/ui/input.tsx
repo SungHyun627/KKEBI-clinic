@@ -20,7 +20,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           status === 'NEGATIVE' && 'border-status-negative',
           status === 'COMPLETE' && 'border-label-normal',
           !status && 'border-neutral-95 hover:border-label-strong',
-          'focus-within:ring-1',
           status === 'POSTIVE'
             ? 'focus-within:border-positive'
             : status === 'NEGATIVE'
@@ -29,7 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           'has-disabled:bg-fill-normal has-disabled:cursor-not-allowed',
         )}
       >
-        <div className="flex items-center gap-2 w-full">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {icon && (
             <div
               className={cn(
@@ -46,7 +45,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             type={type}
             className={cn(
-              'flex-1 bg-transparent outline-none border-none p-0 text-base placeholder:text-muted-foreground disabled:text-label-disable disabled:placeholder:text-label-disable disabled:cursor-not-allowed',
+              'min-w-0 flex-1 bg-transparent outline-none border-none p-0 text-base placeholder:text-muted-foreground disabled:text-label-disable disabled:placeholder:text-label-disable disabled:cursor-not-allowed',
               className,
             )}
             ref={ref}
