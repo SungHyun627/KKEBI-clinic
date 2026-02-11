@@ -27,6 +27,12 @@ const navItems = [
 export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const currentTitle =
+    navItems.find(
+      (item) =>
+        (item.href === '/' && pathname === '/') ||
+        (item.href !== '/' && pathname.startsWith(item.href)),
+    )?.label ?? '대시보드';
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -96,22 +102,14 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         </Sidebar>
 
         <SidebarInset>
-          <header className="flex h-20 items-center justify-between border-b border-neutral-95 bg-white px-10">
-            <div>
-              <p className="text-sm text-label-alternative">Kkebi Clinic</p>
-              <h1 className="text-lg font-semibold text-label-normal">상담사 대시보드</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <button className="rounded-xl border border-neutral-95 px-4 py-2 text-sm text-label-alternative">
-                오늘 일정 보기
-              </button>
-              <div className="flex items-center gap-3 rounded-full border border-neutral-95 px-4 py-2 text-sm">
-                <span className="h-2 w-2 rounded-full bg-status-positive" />
-                <span className="text-label-normal">김세라 상담사</span>
-              </div>
-            </div>
-          </header>
-
+          <div className="flex w-full max-w-[calc(100%-33px)] items-center justify-between bg-white p-5">
+            <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
+              {currentTitle}
+            </p>
+            <button>
+              <Image src="/icons/bell.svg" alt="알림" width={24} height={24} />
+            </button>
+          </div>
           <main className="flex-1 px-10 py-8">{children}</main>
         </SidebarInset>
       </div>
