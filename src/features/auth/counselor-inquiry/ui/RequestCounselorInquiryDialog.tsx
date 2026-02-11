@@ -14,6 +14,7 @@ import { requestCounselorInquiry } from '../api/request';
 interface RequestCounselorInquiryDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  onSubmitSuccess: (values: CounselorInquiryFormValues) => void;
 }
 
 interface CounselorInquiryFormValues {
@@ -31,6 +32,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RequestCounselorInquiryDialog = ({
   isOpen,
   onOpenChange,
+  onSubmitSuccess,
 }: RequestCounselorInquiryDialogProps) => {
   const createIcon = (iconPath: string) => (
     <div
@@ -89,9 +91,10 @@ const RequestCounselorInquiryDialog = ({
               onSubmit={form.handleSubmit(async (values) => {
                 const result = await requestCounselorInquiry(values);
                 if (result.success) {
-                  toast(result.message || '문의가 제출되었습니다.');
+                  const submittedValues = values;
                   form.reset();
                   onOpenChange(false);
+                  onSubmitSuccess(submittedValues);
                 } else {
                   toast(result.message || '문의 제출에 실패했습니다.');
                 }

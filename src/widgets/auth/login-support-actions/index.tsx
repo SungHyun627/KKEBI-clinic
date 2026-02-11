@@ -3,12 +3,21 @@
 import { useState } from 'react';
 import RequestResetPasswordDialog from '@/features/auth/reset-password/ui/RequestResetPasswordDialog';
 import EmailSentConfirmDialog from '@/features/auth/reset-password/ui/EmailSentConfirmDialog';
-import { RequestCounselorInquiryDialog } from '@/features/auth/counselor-inquiry';
+import {
+  CounselorInquiryCompleteDialog,
+  RequestCounselorInquiryDialog,
+} from '@/features/auth/counselor-inquiry';
 
 const LoginSupportActions = () => {
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
   const [isEmailSentOpen, setIsEmailSentOpen] = useState(false);
   const [isCounselorInquiryOpen, setIsCounselorInquiryOpen] = useState(false);
+  const [isCounselorInquiryCompleteOpen, setIsCounselorInquiryCompleteOpen] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
+  const [submittedOrganization, setSubmittedOrganization] = useState('');
+  const [submittedPhone, setSubmittedPhone] = useState('');
+  const [submittedLicenseNumber, setSubmittedLicenseNumber] = useState('');
+  const [submittedAdditionalInquiry, setSubmittedAdditionalInquiry] = useState('');
   const [sentEmail, setSentEmail] = useState('');
 
   return (
@@ -44,6 +53,23 @@ const LoginSupportActions = () => {
       <RequestCounselorInquiryDialog
         isOpen={isCounselorInquiryOpen}
         onOpenChange={setIsCounselorInquiryOpen}
+        onSubmitSuccess={(values) => {
+          setSubmittedEmail(values.email);
+          setSubmittedOrganization(values.organization);
+          setSubmittedPhone(values.phone);
+          setSubmittedLicenseNumber(values.licenseNumber);
+          setSubmittedAdditionalInquiry(values.additionalInquiry);
+          setIsCounselorInquiryCompleteOpen(true);
+        }}
+      />
+      <CounselorInquiryCompleteDialog
+        isOpen={isCounselorInquiryCompleteOpen}
+        handleDialogOpen={setIsCounselorInquiryCompleteOpen}
+        submittedEmail={submittedEmail}
+        submittedOrganization={submittedOrganization}
+        submittedPhone={submittedPhone}
+        submittedLicenseNumber={submittedLicenseNumber}
+        submittedAdditionalInquiry={submittedAdditionalInquiry}
       />
     </>
   );
