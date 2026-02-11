@@ -1,10 +1,10 @@
-interface CodeInputProps {
+interface TwoFactorCodeProps {
   codeArr: string[];
   onChange: (idx: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown: (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
-export function CodeInput({ codeArr, onChange, onKeyDown }: CodeInputProps) {
+const TwoFactorCode = ({ codeArr, onChange, onKeyDown }: TwoFactorCodeProps) => {
   return (
     <div className="flex justify-between items-center self-stretch w-full mb-2 gap-[2px]">
       {Array.from({ length: 6 }).map((_, idx) => (
@@ -23,4 +23,6 @@ export function CodeInput({ codeArr, onChange, onKeyDown }: CodeInputProps) {
       ))}
     </div>
   );
-}
+};
+
+export default TwoFactorCode;

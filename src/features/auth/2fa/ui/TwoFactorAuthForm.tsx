@@ -4,22 +4,20 @@ import { useForm, useWatch } from 'react-hook-form';
 import { useState } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Form } from '@/shared/ui/form';
-import { CodeInput } from './verify-code-input';
-import { verify2FA } from '../api/verify';
-import { resend2FA } from '../api/resend';
+import TwoFactorCode from './TwoFactorCode';
+import { resend2FA, verify2FA } from '../api/2fa';
 import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
-import { VisuallyHidden } from '@/shared/ui/visually-hidden';
+import TwoFactorAuthFailDialog from './TwoFactorAuthFailDialog';
 
-interface VerifyFormValues {
+interface TwofactorAuthFormValues {
   code: string;
 }
 
-export function VerifyForm() {
+const TwoFactorAuthForm = () => {
   const router = useRouter();
-  const form = useForm<VerifyFormValues>({
+  const form = useForm<TwofactorAuthFormValues>({
     defaultValues: { code: '' },
   });
   const code = useWatch({ control: form.control, name: 'code' });
@@ -76,7 +74,7 @@ export function VerifyForm() {
           </div>
 
           <form className="w-full flex flex-col gap-6 items-center" autoComplete="off">
-            <CodeInput codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
+            <TwoFactorCode codeArr={codeArr} onChange={handleChange} onKeyDown={handleKeyDown} />
 
             <div className="flex flex-col items-center gap-4.5 w-full">
               <div className="flex items-center gap-2 w-full">
@@ -123,31 +121,16 @@ export function VerifyForm() {
         </Form>
       </div>
 
-      <Dialog open={isVerifyFailed} onOpenChange={setIsVerifyFailed}>
-        <DialogContent>
-          <DialogTitle>
-            <VisuallyHidden>인증 실패</VisuallyHidden>
-          </DialogTitle>
-          <div className="flex w-full flex-col items-center gap-6">
-            <DialogHeader>
-              <p className="text-[14px] leading-[21px] font-normal text-neutral-40">인증 실패</p>
-              <p className="text-[18px] leading-[28.8px] font-semibold text-neutral-0">
-                인증 번호를 다시 확인해주세요
-              </p>
-            </DialogHeader>
-            <Button
-              type="button"
-              className="w-full"
-              onClick={() => {
-                setIsVerifyFailed(false);
-                form.setValue('code', '');
-              }}
-            >
-              확인
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TwoFactorAuthFailDialog
+        open={isVerifyFailed}
+        onOpenChange={setIsVerifyFailed}
+        onConfirm={() => {
+          setIsVerifyFailed(false);
+          form.setValue('code', '');
+        }}
+      />
     </>
   );
-}
+};
+
+export default TwoFactorAuthForm;

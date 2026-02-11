@@ -54,7 +54,7 @@ const LoginForm = () => {
       } else {
         localStorage.removeItem('kkebi-login-info');
       }
-      router.push('/login/verify');
+      router.push('/login/2fa');
       return;
     }
     setIsLoginFailed(true);
