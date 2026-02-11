@@ -76,7 +76,7 @@
   --color-fill-normal: rgba(112, 115, 124, 0.08);
   --color-fill-background: #f7f7f7;
   --color-fill-alternative: rgba(112, 115, 124, 0.05);
-  --color-fill-pressed: '#feecec'
+  --color-fill-pressed: #feecec;
 }
 
 :root {
