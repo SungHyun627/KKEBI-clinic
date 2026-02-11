@@ -1,3 +1,3 @@
 export default function ClientsPage() {
-  return <div className="flex min-h-screen items-center justify-center font-sans"></div>;
+  return <div className="flex items-center justify-center font-sans"></div>;
 }
