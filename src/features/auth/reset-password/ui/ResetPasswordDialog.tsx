@@ -7,15 +7,13 @@ import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { mockResetPassword } from '../api/reset-password';
-
+import { useForm, useWatch } from 'react-hook-form';
 interface ResetPasswordDialogProps {
   isOpen: boolean;
   handleDialogOpen: (open: boolean) => void;
   setSentEmail: (email: string) => void;
   setIsEmailSentOpen: (open: boolean) => void;
 }
-
-import { useForm, useWatch } from 'react-hook-form';
 
 const ResetPasswordDialog = ({
   isOpen,
