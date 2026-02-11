@@ -43,7 +43,11 @@ SidebarFooter.displayName = 'SidebarFooter';
 const SidebarInset = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('flex min-h-screen flex-1 flex-col', className)} {...props} />
+      <div
+        ref={ref}
+        className={cn('flex min-h-screen flex-1 flex-col gap-8 pr-8', className)}
+        {...props}
+      />
     );
   },
 );

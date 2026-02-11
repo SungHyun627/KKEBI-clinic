@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -16,6 +16,7 @@ import {
 } from '@/shared/ui/sidebar';
 import { logout } from '@/features/auth/login/api/logout';
 import { toast } from '@/shared/ui/toast';
+import { NotificationDrawer } from '@/features/notification';
 
 const navItems = [
   { label: '대시보드', href: '/', icon: '/icons/dashboard.svg' },
@@ -27,6 +28,7 @@ const navItems = [
 export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const currentTitle =
     navItems.find(
       (item) =>
@@ -102,17 +104,23 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         </Sidebar>
 
         <SidebarInset>
-          <div className="flex w-full max-w-[calc(100%-33px)] items-center justify-between bg-white p-5">
+          <div className="flex w-full items-center justify-between bg-white p-5">
             <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
               {currentTitle}
             </p>
-            <button>
+            <button
+              className="hover:cursor-pointer"
+              type="button"
+              onClick={() => setIsNotificationOpen(true)}
+            >
               <Image src="/icons/bell.svg" alt="알림" width={24} height={24} />
             </button>
           </div>
-          <main className="flex-1 px-10 py-8">{children}</main>
+          <main className="flex flex-col pl-5">{children}</main>
         </SidebarInset>
       </div>
+
+      <NotificationDrawer open={isNotificationOpen} onOpenChange={setIsNotificationOpen} />
     </div>
   );
 }
