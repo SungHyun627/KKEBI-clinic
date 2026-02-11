@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import ResetPasswordDialog from '@/features/auth/reset-password/ui/ResetPasswordDialog';
-import EmailSentDialog from '@/features/auth/reset-password/ui/EmailSentDialog';
+import RequestResetPasswordDialog from '@/features/auth/reset-password/ui/RequestResetPasswordDialog';
+import EmailSentConfirmDialog from '@/features/auth/reset-password/ui/EmailSentConfirmDialog';
 
 const LoginSupportActions = () => {
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
@@ -25,13 +25,13 @@ const LoginSupportActions = () => {
           상담사 등록 문의
         </Link>
       </div>
-      <ResetPasswordDialog
+      <RequestResetPasswordDialog
         isOpen={isPasswordResetOpen}
         handleDialogOpen={setIsPasswordResetOpen}
         setSentEmail={setSentEmail}
         setIsEmailSentOpen={setIsEmailSentOpen}
       />
-      <EmailSentDialog
+      <EmailSentConfirmDialog
         isOpen={isEmailSentOpen}
         handleDialogOpen={setIsEmailSentOpen}
         sentEmail={sentEmail}

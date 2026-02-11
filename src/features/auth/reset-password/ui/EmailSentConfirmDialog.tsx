@@ -5,13 +5,17 @@ import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 
-interface EmailSentDialogProps {
+interface EmailSentConfirmDialogProps {
   isOpen: boolean;
   handleDialogOpen: (open: boolean) => void;
   sentEmail: string;
 }
 
-const EmailSentDialog = ({ isOpen, handleDialogOpen, sentEmail }: EmailSentDialogProps) => {
+const EmailSentConfirmDialog = ({
+  isOpen,
+  handleDialogOpen,
+  sentEmail,
+}: EmailSentConfirmDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogOpen}>
       <DialogContent className="flex max-w-[480px] p-7 md:p-6 flex-col justify-center items-center gap-[26px] rounded-[24px] bg-white">
@@ -70,4 +74,4 @@ const EmailSentDialog = ({ isOpen, handleDialogOpen, sentEmail }: EmailSentDialo
   );
 };
 
-export default EmailSentDialog;
+export default EmailSentConfirmDialog;

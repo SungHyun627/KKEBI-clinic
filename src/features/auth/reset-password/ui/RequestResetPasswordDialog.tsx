@@ -6,21 +6,23 @@ import Image from 'next/image';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
-import { mockResetPassword } from '../api/reset-password';
 import { useForm, useWatch } from 'react-hook-form';
-interface ResetPasswordDialogProps {
+import { toast } from '@/shared/ui/toast';
+import { mockResetPassword } from '../api/resetPassword';
+
+interface RequestResetPasswordDialogProps {
   isOpen: boolean;
   handleDialogOpen: (open: boolean) => void;
   setSentEmail: (email: string) => void;
   setIsEmailSentOpen: (open: boolean) => void;
 }
 
-const ResetPasswordDialog = ({
+const RequestResetPasswordDialog = ({
   isOpen,
   handleDialogOpen,
   setSentEmail,
   setIsEmailSentOpen,
-}: ResetPasswordDialogProps) => {
+}: RequestResetPasswordDialogProps) => {
   const emailForm = useForm<{ email: string }>({ defaultValues: { email: '' } });
   const watchedEmail = useWatch({ control: emailForm.control, name: 'email' });
 
@@ -118,12 +120,18 @@ const ResetPasswordDialog = ({
               disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail)}
               onClick={async () => {
                 const email = emailForm.getValues('email');
-                const res = await mockResetPassword(email);
-                if (res.success) {
-                  setSentEmail(email);
-                  handleDialogOpen(false);
-                  setIsEmailSentOpen(true);
-                  emailForm.reset({ email: '' });
+                try {
+                  const res = await mockResetPassword(email);
+                  if (res.success) {
+                    setSentEmail(email);
+                    handleDialogOpen(false);
+                    setIsEmailSentOpen(true);
+                    emailForm.reset({ email: '' });
+                  } else {
+                    toast(res.message || '비밀번호 재설정 링크 발송에 실패했습니다.');
+                  }
+                } catch (error) {
+                  toast('네트워크 오류가 발생했습니다.');
                 }
               }}
             >
@@ -136,4 +144,4 @@ const ResetPasswordDialog = ({
   );
 };
 
-export default ResetPasswordDialog;
+export default RequestResetPasswordDialog;
