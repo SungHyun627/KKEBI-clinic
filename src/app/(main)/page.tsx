@@ -1,7 +1,11 @@
-export default function Home() {
+import WeeklyStatisticsSection from '@/widgets/dashboard/weekly-statistics';
+import TodayScheduleSection from '@/widgets/dashboard/today-schedule';
+
+export default function DashBoard() {
   return (
-    <div className="flex min-h-screen items-center justify-center font-sans">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 sm:items-start"></main>
+    <div className="flex w-full flex-col gap-[46px]">
+      <WeeklyStatisticsSection />
+      <TodayScheduleSection />
     </div>
   );
 }
