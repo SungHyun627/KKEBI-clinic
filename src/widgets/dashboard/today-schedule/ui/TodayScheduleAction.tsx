@@ -7,7 +7,7 @@ interface TodayScheduleActionProps {
 
 export default function TodayScheduleAction({ clientName }: TodayScheduleActionProps) {
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex w-full items-center justify-end gap-2 pl-6">
       <Button
         type="button"
         variant="icon"
