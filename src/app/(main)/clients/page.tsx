@@ -151,7 +151,7 @@ export default function ClientsPage() {
           </div>
         </div>
 
-        <div className="w-full">
+        <div className="w-full mb-12">
           <div className="grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
             <span className="body-14 font-semibold text-label-neutral">시간</span>
             <span className="body-14 font-semibold text-label-neutral">내담자명</span>
@@ -193,9 +193,9 @@ export default function ClientsPage() {
                     setIsDrawerOpen(true);
                   }}
                 >
-                  <span className="body-14 text-label-normal">{client.time}</span>
+                  <span className="body-16 text-label-normal">{client.time}</span>
                   <span className="flex min-w-0 items-center gap-3">
-                    <span className="body-14 truncate text-label-normal">{client.clientName}</span>
+                    <span className="body-16 truncate text-label-normal">{client.clientName}</span>
                     <StreakChip days={client.streakDays} />
                   </span>
                   <span className="justify-self-center">
