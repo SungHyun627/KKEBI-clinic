@@ -6,7 +6,7 @@ interface NotificationBase {
   id: string;
   type: NotificationType;
   createdAt: string;
-  detailPath: string;
+  clientId: string;
 }
 
 export interface RiskNotification extends NotificationBase {
