@@ -2,7 +2,7 @@ import TodayScheduleHeaderCell from './TodayScheduleHeaderCell';
 
 export default function TodayScheduleHeader() {
   return (
-    <div className="grid w-full grid-cols-[72px_minmax(160px,220px)_96px_96px_minmax(180px,1fr)_180px] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
+    <div className="grid w-full grid-cols-[72px_minmax(160px,220px)_96px_72px_minmax(260px,1fr)_250px] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
       <TodayScheduleHeaderCell label="시간" />
       <TodayScheduleHeaderCell label="내담자명" />
       <TodayScheduleHeaderCell label="상담 유형" align="center" />

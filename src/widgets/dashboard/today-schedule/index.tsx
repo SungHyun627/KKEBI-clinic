@@ -54,8 +54,17 @@ export default function TodayScheduleSection() {
           </div>
         ) : (
           <ul className="counselor-inquiry-scroll flex max-h-[420px] w-full flex-col overflow-y-auto">
-            {schedules.map((schedule) => (
-              <TodayScheduleListItem key={schedule.id} schedule={schedule} />
+            {schedules.map((schedule, index) => (
+              <TodayScheduleListItem
+                key={schedule.id}
+                schedule={schedule}
+                className={[
+                  index === 0 ? 'pt-4' : '',
+                  index === schedules.length - 1 ? 'rounded-bl-[8px] rounded-br-[8px] pb-4' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              />
             ))}
           </ul>
         )}
