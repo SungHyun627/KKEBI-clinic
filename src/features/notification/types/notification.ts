@@ -1,5 +1,6 @@
 export type NotificationType = 'risk' | 'schedule_change';
 export type NotificationViewMode = 'risk' | 'all';
+export type NotificationMockSet = 'all' | 'risk' | 'empty';
 
 interface NotificationBase {
   id: string;

@@ -1,6 +1,12 @@
-import type { NotificationListResponse, NotificationViewMode } from '../types/notification';
+import type {
+  NotificationListResponse,
+  NotificationMockSet,
+  NotificationViewMode,
+} from '../types/notification';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+
+const DEMO_NOTIFICATION_MOCK_SET: NotificationMockSet = 'all';
 
 const requestNotifications = async (url: string): Promise<NotificationListResponse> => {
   try {
@@ -27,17 +33,32 @@ const requestNotifications = async (url: string): Promise<NotificationListRespon
   }
 };
 
-const buildNotificationsUrl = (baseUrl: string, viewMode: NotificationViewMode) =>
-  `${baseUrl}?viewMode=${viewMode}`;
+const buildNotificationsUrl = (
+  baseUrl: string,
+  viewMode: NotificationViewMode,
+  mockSet?: NotificationMockSet,
+) => {
+  const query = new URLSearchParams({ viewMode });
+  if (mockSet) query.set('mockSet', mockSet);
+  return `${baseUrl}?${query.toString()}`;
+};
 
-export const getNotificationsDemo = (viewMode: NotificationViewMode = 'all') =>
-  requestNotifications(buildNotificationsUrl('/api/v1/notifications', viewMode));
+export const getNotificationsDemo = (
+  viewMode: NotificationViewMode = 'all',
+  mockSet: NotificationMockSet = 'all',
+) => requestNotifications(buildNotificationsUrl('/api/v1/notifications', viewMode, mockSet));
 
-export const getAllNotificationsDemo = () => getNotificationsDemo('all');
+export const getAllNotificationsDemo = () => getNotificationsDemo('all', 'all');
 
-export const getRiskNotificationsDemo = () => getNotificationsDemo('risk');
+export const getRiskNotificationsDemo = () => getNotificationsDemo('risk', 'risk');
 
-export const getNotificationsServer = (viewMode: NotificationViewMode = 'all') => {
+export const getEmptyNotificationsDemo = (viewMode: NotificationViewMode = 'all') =>
+  getNotificationsDemo(viewMode, 'empty');
+
+export const getNotificationsServer = (
+  viewMode: NotificationViewMode = 'all',
+  mockSet?: NotificationMockSet,
+) => {
   if (!SERVER_API_BASE_URL) {
     return Promise.resolve({
       success: false,
@@ -46,13 +67,17 @@ export const getNotificationsServer = (viewMode: NotificationViewMode = 'all') =
   }
 
   return requestNotifications(
-    buildNotificationsUrl(`${SERVER_API_BASE_URL}/api/v1/notifications`, viewMode),
+    buildNotificationsUrl(`${SERVER_API_BASE_URL}/api/v1/notifications`, viewMode, mockSet),
   );
 };
 
-export const getAllNotificationsServer = () => getNotificationsServer('all');
+export const getAllNotificationsServer = () => getNotificationsServer('all', 'all');
 
-export const getRiskNotificationsServer = () => getNotificationsServer('risk');
+export const getRiskNotificationsServer = () => getNotificationsServer('risk', 'risk');
+
+export const getEmptyNotificationsServer = (viewMode: NotificationViewMode = 'all') =>
+  getNotificationsServer(viewMode, 'empty');
 
 // 현재 화면은 데모 API를 기본으로 사용합니다.
-export const getNotifications = getAllNotificationsDemo;
+// DEMO_NOTIFICATION_MOCK_SET을 'all' | 'risk' | 'empty' 중에서 바꿔 사용하세요.
+export const getNotifications = () => getNotificationsDemo('all', DEMO_NOTIFICATION_MOCK_SET);

@@ -3,6 +3,7 @@ export type {
   NotificationItem,
   NotificationListData,
   NotificationListResponse,
+  NotificationMockSet,
   NotificationType,
   NotificationViewMode,
   RiskNotification,
@@ -11,6 +12,8 @@ export type {
 export {
   getAllNotificationsDemo,
   getAllNotificationsServer,
+  getEmptyNotificationsDemo,
+  getEmptyNotificationsServer,
   getNotifications,
   getNotificationsDemo,
   getNotificationsServer,

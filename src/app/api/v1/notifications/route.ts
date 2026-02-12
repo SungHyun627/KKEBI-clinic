@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import type {
+  NotificationMockSet,
   NotificationItem,
   NotificationViewMode,
 } from '@/features/notification/types/notification';
 
-const MOCK_NOTIFICATIONS: NotificationItem[] = [
+const MOCK_ALL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n-risk-1',
     type: 'risk',
@@ -69,21 +70,36 @@ const MOCK_NOTIFICATIONS: NotificationItem[] = [
   },
 ];
 
+const MOCK_RISK_NOTIFICATIONS: NotificationItem[] = MOCK_ALL_NOTIFICATIONS.filter(
+  (notification) => notification.type === 'risk',
+).slice(0, 5);
+
+const MOCK_EMPTY_NOTIFICATIONS: NotificationItem[] = [];
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const viewMode = (searchParams.get('viewMode') as NotificationViewMode | null) ?? 'all';
+  const mockSet = (searchParams.get('mockSet') as NotificationMockSet | null) ?? 'all';
 
   const normalizedViewMode: NotificationViewMode = viewMode === 'risk' ? 'risk' : 'all';
+  const normalizedMockSet: NotificationMockSet =
+    mockSet === 'risk' || mockSet === 'empty' ? mockSet : 'all';
 
-  const items =
-    normalizedViewMode === 'risk'
-      ? MOCK_NOTIFICATIONS.filter((notification) => notification.type === 'risk').slice(0, 5)
-      : MOCK_NOTIFICATIONS;
+  const itemsByMockSet: Record<NotificationMockSet, NotificationItem[]> = {
+    all: MOCK_ALL_NOTIFICATIONS,
+    risk: MOCK_RISK_NOTIFICATIONS,
+    empty: MOCK_EMPTY_NOTIFICATIONS,
+  };
+
+  const items = itemsByMockSet[normalizedMockSet];
+
+  const responseViewMode: NotificationViewMode =
+    normalizedMockSet === 'risk' ? 'risk' : normalizedViewMode;
 
   return NextResponse.json({
     success: true,
     data: {
-      viewMode: normalizedViewMode,
+      viewMode: responseViewMode,
       items,
     },
   });
