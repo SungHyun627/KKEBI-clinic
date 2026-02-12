@@ -43,33 +43,42 @@ const WeeklyStatisticsSection = () => {
   }
 
   if (!statistics) return null;
+  const riskAlert = statistics.riskAlerts?.[0];
 
   return (
     <section className="flex w-full flex-col items-start gap-3">
       <Title title="주간 통계" />
-      <div className="flex w-full items-start gap-8">
+      <div className="flex w-full items-start gap-4">
         <div className="flex min-w-0 flex-[1.5] items-stretch gap-4">
-          <WeeklyStatisticsCard
-            label="완료 상담 수"
-            value={statistics.completedSessions}
-            icon="/icons/complete.svg"
-          />
-          <WeeklyStatisticsCard
-            label="평균 상담 시간"
-            value={statistics.averageSessionMinutes}
-            unit="분"
-            icon="/icons/headset.svg"
-          />
-          <WeeklyStatisticsCard
-            label="내담자 개선율"
-            value={statistics.clientImprovementRate}
-            unit="%"
-            icon="/icons/person.svg"
-          />
+          <div className="flex min-w-0 flex-1">
+            <WeeklyStatisticsCard
+              label="완료 상담 수"
+              value={statistics.completedSessions}
+              icon="/icons/complete.svg"
+            />
+          </div>
+          <div className="flex min-w-0 flex-1">
+            <WeeklyStatisticsCard
+              label="평균 상담 시간"
+              value={statistics.averageSessionMinutes}
+              unit="분"
+              icon="/icons/headset.svg"
+            />
+          </div>
+          <div className="flex min-w-0 flex-1">
+            <WeeklyStatisticsCard
+              label="내담자 개선율"
+              value={statistics.clientImprovementRate}
+              unit="%"
+              icon="/icons/person.svg"
+            />
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <RiskAlert alerts={statistics.riskAlerts ?? []} />
-        </div>
+        {riskAlert ? (
+          <div className="min-w-0 flex-1">
+            <RiskAlert alert={riskAlert} />
+          </div>
+        ) : null}
       </div>
     </section>
   );
