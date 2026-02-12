@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { getTodaySchedules } from '@/features/dashboard';
 import type { TodayScheduleItem } from '@/features/dashboard';
 import { Title } from '@/shared/ui/title';
+import TodayScheduleHeader from './ui/TodayScheduleHeader';
 import TodayScheduleListItem from './ui/TodayScheduleItem';
 
 export default function TodayScheduleSection() {
@@ -45,15 +46,20 @@ export default function TodayScheduleSection() {
   return (
     <section className="flex w-full flex-col items-start gap-3">
       <Title title="오늘의 일정" />
-      {schedules.length === 0 ? (
-        <p className="body-14 text-label-alternative">오늘 예정된 일정이 없습니다.</p>
-      ) : (
-        <ul className="flex w-full flex-col gap-3">
-          {schedules.map((schedule) => (
-            <TodayScheduleListItem key={schedule.id} schedule={schedule} />
-          ))}
-        </ul>
-      )}
+      <div className="w-full">
+        <TodayScheduleHeader />
+        {schedules.length === 0 ? (
+          <div className="body-14 flex w-full items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
+            오늘 예정된 일정이 없습니다.
+          </div>
+        ) : (
+          <ul className="counselor-inquiry-scroll flex max-h-[420px] w-full flex-col overflow-y-auto">
+            {schedules.map((schedule) => (
+              <TodayScheduleListItem key={schedule.id} schedule={schedule} />
+            ))}
+          </ul>
+        )}
+      </div>
     </section>
   );
 }
