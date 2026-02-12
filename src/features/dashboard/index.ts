@@ -1,4 +1,4 @@
-export type { WeeklyStatistics, WeeklyStatisticsResponse } from './types/statistics';
+export type { RiskAlert, WeeklyStatistics, WeeklyStatisticsResponse } from './types/statistics';
 export {
   getWeeklyStatistics,
   getWeeklyStatisticsMock,
