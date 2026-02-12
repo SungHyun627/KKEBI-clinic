@@ -2,6 +2,7 @@ import MoodStressToken from './MoodStressToken';
 import type { TodayScheduleItem as TodayScheduleItemType } from '@/features/dashboard/types/schedule';
 import { cn } from '@/shared/lib/utils';
 import RiskTypeChip from './RiskTypeChip';
+import SessionTypeChip from './SessionTypeChip';
 import StreakChip from './StreakChip';
 import TodayScheduleAction from './TodayScheduleAction';
 
@@ -27,8 +28,8 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         <span className="body-14 truncate text-label-normal">{schedule.clientName}</span>
         <StreakChip days={streakDays} />
       </span>
-      <span className="body-14 justify-self-center text-center text-label-normal">
-        {schedule.sessionType}
+      <span className="justify-self-center">
+        <SessionTypeChip value={schedule.sessionType} />
       </span>
       <span className="justify-self-center">
         <RiskTypeChip value={schedule.riskType} />
