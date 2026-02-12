@@ -9,7 +9,7 @@ const Sidebar = React.forwardRef<HTMLElement, React.ComponentProps<'aside'>>(
       <aside
         ref={ref}
         className={cn(
-          'flex h-screen w-full max-w-[258px] flex-col border-r border-neutral-95 bg-neutral-99',
+          'flex h-screen w-full max-w-[258px] flex-col border-r border-neutral-95 bg-neutral-99 max-[800px]:max-w-[88px]',
           className,
         )}
         {...props}

@@ -48,8 +48,8 @@ const WeeklyStatisticsSection = () => {
   return (
     <section className="flex w-full flex-col items-start gap-3">
       <Title title="주간 통계" />
-      <div className="flex w-full items-start gap-4">
-        <div className="flex min-w-0 flex-[1.5] items-stretch gap-4">
+      <div className="flex w-full min-w-0 flex-wrap items-start gap-4">
+        <div className="flex min-w-0 flex-[1.5] basis-[560px] items-stretch gap-4">
           <div className="flex min-w-0 flex-1">
             <WeeklyStatisticsCard
               label="완료 상담 수"
@@ -75,7 +75,7 @@ const WeeklyStatisticsSection = () => {
           </div>
         </div>
         {riskAlert ? (
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 basis-[320px]">
             <RiskAlert alert={riskAlert} />
           </div>
         ) : null}

@@ -40,9 +40,22 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen w-full bg-white">
       <div className="flex min-h-screen w-full">
         <Sidebar>
-          <div className="flex w-full flex-col pl-5 pt-[18px] pr-[21px] gap-5">
+          <div className="flex w-full flex-col gap-5 pl-5 pr-[21px] pt-[18px] max-[800px]:items-center max-[800px]:px-2">
             <SidebarHeader>
-              <Image src="/images/kkebi-logo.png" alt="Kkebi Clinic" width={104} height={37} />
+              <Image
+                src="/images/kkebi-logo.png"
+                alt="Kkebi Clinic"
+                width={104}
+                height={37}
+                className="block max-[800px]:hidden"
+              />
+              <Image
+                src="/images/logo.png"
+                alt="Kkebi Clinic logo"
+                width={32}
+                height={32}
+                className="hidden max-[800px]:block"
+              />
             </SidebarHeader>
             <SidebarContent className="gap-5">
               <SidebarMenu>
@@ -53,8 +66,15 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild active={isActive}>
-                        <Link href={item.href} className="flex items-center gap-2">
+                      <SidebarMenuButton
+                        asChild
+                        active={isActive}
+                        className="max-[800px]:justify-center max-[800px]:px-0"
+                      >
+                        <Link
+                          href={item.href}
+                          className="flex items-center gap-2 max-[800px]:justify-center"
+                        >
                           <span
                             className="h-6 w-6 shrink-0 bg-current"
                             style={{
@@ -66,7 +86,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                             }}
                             aria-hidden
                           />
-                          <span>{item.label}</span>
+                          <span className="max-[800px]:hidden">{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -77,10 +97,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
           </div>
 
           <SidebarFooter className="p-0">
-            <div className="flex h-[59px] w-[255px] items-center justify-between border-t-[0.5px] border-neutral-95 px-4">
+            <div className="flex h-[59px] w-full items-center justify-between border-t-[0.5px] border-neutral-95 px-4 max-[800px]:justify-center max-[800px]:gap-3 max-[800px]:px-2">
               <div className="flex items-center gap-2">
                 <Image src="/icons/profile.svg" alt="profile" width={24} height={24} />
-                <div className="flex items-center gap-[3px] body-14 font-medium">
+                <div className="body-14 flex items-center gap-[3px] font-medium max-[800px]:hidden">
                   <span>홍길동</span>
                   <span>님</span>
                 </div>
