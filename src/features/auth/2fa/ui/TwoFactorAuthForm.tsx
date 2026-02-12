@@ -10,6 +10,7 @@ import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import TwoFactorAuthFailDialog from './TwoFactorAuthFailDialog';
+import { setAuthSessionAuthenticated } from '@/features/auth/login/lib/authSession';
 
 interface TwofactorAuthFormValues {
   code: string;
@@ -28,6 +29,7 @@ const TwoFactorAuthForm = () => {
     if (!(code && code.length === 6 && /^[0-9]{6}$/.test(code))) return;
     const result = await verify2FA({ code });
     if (result.ok) {
+      setAuthSessionAuthenticated(true);
       router.push('/');
     } else {
       setIsVerifyFailed(true);
