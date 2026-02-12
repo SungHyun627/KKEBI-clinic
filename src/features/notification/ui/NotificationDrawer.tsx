@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { getNotifications } from '@/features/notification/api/getNotifications';
 import type {
-  NotificationItem,
+  NotificationItem as NotificationItemType,
   RiskNotification,
   NotificationViewMode,
 } from '@/features/notification/types/notification';
@@ -19,8 +18,7 @@ interface NotificationDrawerProps {
 }
 
 export default function NotificationDrawer({ open, onOpenChange }: NotificationDrawerProps) {
-  const router = useRouter();
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItemType[]>([]);
   const [viewMode, setViewMode] = useState<NotificationViewMode>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,11 +47,6 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
     void loadNotifications();
   }, [open]);
 
-  const handleNotificationClick = (detailPath: string) => {
-    onOpenChange(false);
-    router.push(detailPath);
-  };
-
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
@@ -75,12 +68,7 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
             <DrawerTitle>{viewMode === 'risk' ? '위험 알림' : '알림'}</DrawerTitle>
           </div>
 
-          <div className="flex-1 w-full space-y-2 overflow-y-auto rounded-t-[12px] p-3">
-            {!isLoading && !errorMessage ? (
-              <p className="body-12 text-label-alternative">
-                {viewMode === 'risk' ? '위험 알림만 표시 중' : '전체 알림 표시 중'}
-              </p>
-            ) : null}
+          <div className="flex flex-col counselor-inquiry-scroll flex-1 w-full overflow-y-auto gap-4">
             {isLoading ? (
               <p className="body-14 text-label-alternative">알림을 불러오는 중입니다.</p>
             ) : null}
@@ -99,22 +87,14 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
                   (notification): notification is RiskNotification => notification.type === 'risk',
                 )
                 .map((notification) => (
-                  <RiskNotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onClick={() => handleNotificationClick(notification.detailPath)}
-                  />
+                  <RiskNotificationItem key={notification.id} notification={notification} />
                 ))}
 
             {!isLoading &&
               !errorMessage &&
               viewMode === 'all' &&
               notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onClick={() => handleNotificationClick(notification.detailPath)}
-                />
+                <NotificationItem key={notification.id} notification={notification} />
               ))}
           </div>
         </div>

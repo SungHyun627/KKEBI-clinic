@@ -1,31 +1,20 @@
 import type { NotificationItem as NotificationItemType } from '@/features/notification/types/notification';
+import NotificationTypeChip from './NotificationTypeChip';
 
 interface NotificationItemProps {
   notification: NotificationItemType;
-  onClick: () => void;
 }
 
-export default function NotificationItem({ notification, onClick }: NotificationItemProps) {
+export default function NotificationItem({ notification }: NotificationItemProps) {
   return (
-    <button
-      type="button"
-      className="w-full rounded-xl border px-4 py-3 text-left hover:cursor-pointer"
-      onClick={onClick}
-    >
-      {notification.type === 'risk' ? (
-        <div className="rounded-lg border border-status-negative/20 bg-status-negative/5 p-3">
-          <p className="body-14 font-semibold text-status-negative">
-            위험 알림 · {notification.name}
-          </p>
-          <p className="mt-1 body-14 text-label-normal">{notification.description}</p>
-        </div>
-      ) : (
-        <div className="rounded-lg border border-neutral-95 bg-neutral-99 p-3">
-          <p className="body-14 font-medium text-label-normal">{notification.title}</p>
-          <p className="mt-1 body-14 text-neutral-40">{notification.description}</p>
-        </div>
-      )}
-      <p className="mt-2 body-12 text-label-alternative">{notification.createdAt}</p>
-    </button>
+    <div className="flex w-full flex-col items-start gap-[18px] rounded-2xl bg-white p-5 text-left">
+      <div className="flex w-full items-center justify-between">
+        <NotificationTypeChip type={notification.type} />
+        <span className="body-14 text-label-alternative align-center">
+          {notification.createdAt}
+        </span>
+      </div>
+      <div className="body-14 text-label-normal">{notification.description}</div>
+    </div>
   );
 }
