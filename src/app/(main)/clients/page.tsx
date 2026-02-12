@@ -133,7 +133,7 @@ export default function ClientsPage() {
             <button
               type="button"
               aria-label="이전 10개"
-              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal disabled:text-label-disable hover:cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:bg-neutral-99 hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
@@ -142,7 +142,7 @@ export default function ClientsPage() {
             <button
               type="button"
               aria-label="다음 10개"
-              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal disabled:text-label-disable hover:cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:bg-neutral-99 hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage >= totalPages}
             >
