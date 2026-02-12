@@ -1,15 +1,27 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import type { RiskNotification } from '@/features/notification/types/notification';
+import { Button } from '@/shared/ui/button';
 
 interface RiskNotificationItemProps {
   notification: RiskNotification;
 }
 
 export default function RiskNotificationItem({ notification }: RiskNotificationItemProps) {
+  const router = useRouter();
+
   return (
-    <div className="w-full rounded-xl border border-status-negative/20 bg-status-negative/5 px-4 py-3 text-left">
-      <p className="body-14 font-semibold text-status-negative">위험 알림 · {notification.name}</p>
-      <p className="mt-1 body-14 text-label-normal">{notification.description}</p>
-      <p className="mt-2 body-12 text-label-alternative">{notification.createdAt}</p>
+    <div className="flex w-full flex-col items-start gap-4 rounded-2xl bg-white p-5 text-left">
+      <div className="flex min-w-0 flex-col items-start gap-[6px]">
+        <p className="body-16 font-semibold text-label-normal">{notification.name}</p>
+        <p className="body-14 w-full min-w-0 truncate text-neutral-40">
+          {notification.description}
+        </p>
+      </div>
+      <Button type="button" onClick={() => router.push(notification.detailPath)}>
+        즉시 확인하기
+      </Button>
     </div>
   );
 }
