@@ -14,6 +14,6 @@ export {
   getNotifications,
   getNotificationsDemo,
   getNotificationsServer,
-  getRiskOnlyNotificationsDemo,
-  getRiskOnlyNotificationsServer,
+  getRiskNotificationsDemo,
+  getRiskNotificationsServer,
 } from './api/getNotifications';

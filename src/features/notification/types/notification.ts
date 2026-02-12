@@ -1,5 +1,5 @@
 export type NotificationType = 'risk' | 'schedule_change';
-export type NotificationViewMode = 'risk_only' | 'all';
+export type NotificationViewMode = 'risk' | 'all';
 
 interface NotificationBase {
   id: string;

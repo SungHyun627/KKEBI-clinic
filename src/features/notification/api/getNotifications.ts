@@ -35,7 +35,7 @@ export const getNotificationsDemo = (viewMode: NotificationViewMode = 'all') =>
 
 export const getAllNotificationsDemo = () => getNotificationsDemo('all');
 
-export const getRiskOnlyNotificationsDemo = () => getNotificationsDemo('risk_only');
+export const getRiskNotificationsDemo = () => getNotificationsDemo('risk');
 
 export const getNotificationsServer = (viewMode: NotificationViewMode = 'all') => {
   if (!SERVER_API_BASE_URL) {
@@ -52,7 +52,7 @@ export const getNotificationsServer = (viewMode: NotificationViewMode = 'all') =
 
 export const getAllNotificationsServer = () => getNotificationsServer('all');
 
-export const getRiskOnlyNotificationsServer = () => getNotificationsServer('risk_only');
+export const getRiskNotificationsServer = () => getNotificationsServer('risk');
 
 // 현재 화면은 데모 API를 기본으로 사용합니다.
 export const getNotifications = getAllNotificationsDemo;

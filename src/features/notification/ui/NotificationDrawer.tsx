@@ -64,7 +64,7 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
           <div className="flex-1 space-y-2 overflow-y-auto pr-1">
             {!isLoading && !errorMessage ? (
               <p className="body-12 text-label-alternative">
-                {viewMode === 'risk_only' ? '위험 알림만 표시 중' : '전체 알림 표시 중'}
+                {viewMode === 'risk' ? '위험 알림만 표시 중' : '전체 알림 표시 중'}
               </p>
             ) : null}
             {isLoading ? (

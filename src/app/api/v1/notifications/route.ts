@@ -73,10 +73,10 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const viewMode = (searchParams.get('viewMode') as NotificationViewMode | null) ?? 'all';
 
-  const normalizedViewMode: NotificationViewMode = viewMode === 'risk_only' ? 'risk_only' : 'all';
+  const normalizedViewMode: NotificationViewMode = viewMode === 'risk' ? 'risk' : 'all';
 
   const items =
-    normalizedViewMode === 'risk_only'
+    normalizedViewMode === 'risk'
       ? MOCK_NOTIFICATIONS.filter((notification) => notification.type === 'risk').slice(0, 5)
       : MOCK_NOTIFICATIONS;
 
