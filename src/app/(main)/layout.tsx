@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -15,6 +15,7 @@ import {
   SidebarMenuItem,
 } from '@/shared/ui/sidebar';
 import { logout } from '@/features/auth/login/api/logout';
+import { clearAuthSession, getAuthSession } from '@/features/auth/login/lib/authSession';
 import { toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
 
@@ -29,6 +30,15 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const userName = getAuthSession()?.userName || '홍길동';
+
+  useEffect(() => {
+    const session = getAuthSession();
+    if (!session?.authenticated) {
+      router.replace('/login');
+    }
+  }, [router]);
+
   const currentTitle =
     navItems.find(
       (item) =>
@@ -101,7 +111,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-2">
                 <Image src="/icons/profile.svg" alt="profile" width={24} height={24} />
                 <div className="body-14 flex items-center gap-[3px] font-medium max-[800px]:hidden">
-                  <span>홍길동</span>
+                  <span>{userName}</span>
                   <span>님</span>
                 </div>
               </div>
@@ -111,6 +121,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 className="flex items-center justify-center hover:cursor-pointer"
                 onClick={async () => {
                   const result = await logout();
+                  clearAuthSession();
+                  localStorage.removeItem('kkebi-login-info');
                   if (!result.success) {
                     toast(result.message || '로그아웃 처리 중 오류가 발생했습니다.');
                   }

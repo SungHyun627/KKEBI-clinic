@@ -11,6 +11,7 @@ import { Input } from '@/shared/ui/input';
 import { toast } from '@/shared/ui/toast';
 import { LoginForm as LoginFromFields } from '../types/login';
 import { getInitialLoginInfo } from '../lib/getInitialLoginInfo';
+import { setAuthSession } from '../lib/authSession';
 
 const LoginForm = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -42,6 +43,14 @@ const LoginForm = () => {
   const onSubmit = async (values: LoginFromFields) => {
     const result = await login({ email: values.email, password: values.password });
     if (result.success) {
+      setAuthSession({
+        email: values.email,
+        password: values.password,
+        userId: result.data?.userId,
+        userName: values.email.split('@')[0] || '상담사',
+        authenticated: false,
+      });
+
       if (saveLoginInfo) {
         localStorage.setItem(
           'kkebi-login-info',
