@@ -30,7 +30,7 @@ const DrawerContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed right-0 top-0 z-50 h-screen w-full max-w-[360px] border-l border-neutral-95 bg-white p-6 shadow-xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right',
+        'fixed right-0 top-0 z-50 h-screen w-full max-w-[360px] border-l border-neutral-95 bg-white p-6 shadow-[0_6px_12px_0_rgba(0,0,0,0.12),0_4px_8px_0_rgba(0,0,0,0.08),0_0_4px_0_rgba(0,0,0,0.08)] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-right data-[state=closed]:slide-out-to-right',
         className,
       )}
       {...props}
@@ -50,7 +50,7 @@ const DrawerTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
-  <DialogPrimitive.Title ref={ref} className={cn('text-lg font-semibold', className)} {...props} />
+  <DialogPrimitive.Title ref={ref} className={cn('body-20 font-semibold', className)} {...props} />
 ));
 DrawerTitle.displayName = DialogPrimitive.Title.displayName;
 

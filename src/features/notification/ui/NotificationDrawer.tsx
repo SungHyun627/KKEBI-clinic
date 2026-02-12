@@ -1,14 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { getNotifications } from '@/features/notification/api/getNotifications';
 import type {
   NotificationItem,
+  RiskNotification,
   NotificationViewMode,
 } from '@/features/notification/types/notification';
-import { Button } from '@/shared/ui/button';
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
+import { Drawer, DrawerClose, DrawerContent, DrawerTitle } from '@/shared/ui/drawer';
+import NotificationItem from './NotificationItem';
+import RiskNotificationItem from './RiskNotificationItem';
 
 interface NotificationDrawerProps {
   open: boolean;
@@ -46,22 +49,33 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
     void loadNotifications();
   }, [open]);
 
+  const handleNotificationClick = (detailPath: string) => {
+    onOpenChange(false);
+    router.push(detailPath);
+  };
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <div className="flex h-full flex-col">
-          <DrawerHeader className="pb-4">
-            <DrawerTitle className="font-pretendard text-[20px] leading-[30px] text-label-normal">
-              알림
-            </DrawerTitle>
-            <DrawerClose asChild>
-              <Button type="button" variant="outline" size="sm">
-                접기
-              </Button>
-            </DrawerClose>
-          </DrawerHeader>
+      <DrawerContent
+        className={`flex flex-col items-start gap-[26px] px-[20px] pb-0 pt-[23px] ${
+          viewMode === 'risk' ? 'bg-fill-pressed' : 'bg-neutral-99'
+        }`}
+      >
+        <DrawerClose asChild>
+          <button
+            type="button"
+            aria-label="접기"
+            className="flex h-6 w-6 items-center justify-center hover:cursor-pointer"
+          >
+            <Image src="/icons/fold.svg" alt="접기" width={20} height={20} />
+          </button>
+        </DrawerClose>
+        <div className="flex h-full w-full flex-col items-start gap-4">
+          <div className="w-full">
+            <DrawerTitle>{viewMode === 'risk' ? '위험 알림' : '알림'}</DrawerTitle>
+          </div>
 
-          <div className="flex-1 space-y-2 overflow-y-auto pr-1">
+          <div className="flex-1 w-full space-y-2 overflow-y-auto rounded-t-[12px] p-3">
             {!isLoading && !errorMessage ? (
               <p className="body-12 text-label-alternative">
                 {viewMode === 'risk' ? '위험 알림만 표시 중' : '전체 알림 표시 중'}
@@ -79,31 +93,28 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
 
             {!isLoading &&
               !errorMessage &&
+              viewMode === 'risk' &&
+              notifications
+                .filter(
+                  (notification): notification is RiskNotification => notification.type === 'risk',
+                )
+                .map((notification) => (
+                  <RiskNotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onClick={() => handleNotificationClick(notification.detailPath)}
+                  />
+                ))}
+
+            {!isLoading &&
+              !errorMessage &&
+              viewMode === 'all' &&
               notifications.map((notification) => (
-                <button
+                <NotificationItem
                   key={notification.id}
-                  type="button"
-                  className="w-full rounded-xl border px-4 py-3 text-left hover:cursor-pointer"
-                  onClick={() => {
-                    onOpenChange(false);
-                    router.push(notification.detailPath);
-                  }}
-                >
-                  {notification.type === 'risk' ? (
-                    <div className="rounded-lg border border-status-negative/20 bg-status-negative/5 p-3">
-                      <p className="body-14 font-semibold text-status-negative">
-                        위험 알림 · {notification.name}
-                      </p>
-                      <p className="mt-1 body-14 text-label-normal">{notification.description}</p>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-neutral-95 bg-neutral-99 p-3">
-                      <p className="body-14 font-medium text-label-normal">{notification.title}</p>
-                      <p className="mt-1 body-14 text-neutral-40">{notification.description}</p>
-                    </div>
-                  )}
-                  <p className="mt-2 body-12 text-label-alternative">{notification.createdAt}</p>
-                </button>
+                  notification={notification}
+                  onClick={() => handleNotificationClick(notification.detailPath)}
+                />
               ))}
           </div>
         </div>
