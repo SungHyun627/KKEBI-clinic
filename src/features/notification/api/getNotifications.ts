@@ -80,4 +80,4 @@ export const getEmptyNotificationsServer = (viewMode: NotificationViewMode = 'al
 
 // 현재 화면은 데모 API를 기본으로 사용합니다.
 // DEMO_NOTIFICATION_MOCK_SET을 'all' | 'risk' | 'empty' 중에서 바꿔 사용하세요.
-export const getNotifications = () => getNotificationsDemo('all', DEMO_NOTIFICATION_MOCK_SET);
+export const getNotifications = () => getNotificationsDemo('all', 'empty');

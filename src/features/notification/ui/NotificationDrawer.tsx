@@ -68,15 +68,19 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
             <DrawerTitle>{viewMode === 'risk' ? '위험 알림' : '알림'}</DrawerTitle>
           </div>
 
-          <div className="flex flex-col counselor-inquiry-scroll flex-1 w-full overflow-y-auto gap-4">
+          <div className="relative flex flex-col counselor-inquiry-scroll flex-1 w-full overflow-y-auto gap-4">
             {isLoading ? (
-              <p className="body-14 text-label-alternative">알림을 불러오는 중입니다.</p>
+              <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
+                <p className="body-16 text-label-alternative">알림을 불러오는 중입니다.</p>
+              </div>
             ) : null}
             {!isLoading && errorMessage ? (
-              <p className="body-14 text-status-negative">{errorMessage}</p>
+              <p className="body-16 text-status-negative">{errorMessage}</p>
             ) : null}
             {!isLoading && !errorMessage && notifications.length === 0 ? (
-              <p className="body-14 text-label-alternative">최근 온 알림이 없습니다.</p>
+              <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
+                <p className="body-16 text-label-alternative">최근 온 알림이 없습니다.</p>
+              </div>
             ) : null}
 
             {!isLoading &&
