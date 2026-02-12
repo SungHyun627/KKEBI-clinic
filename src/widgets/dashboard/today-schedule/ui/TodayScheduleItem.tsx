@@ -38,7 +38,7 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         <MoodStressToken label="기분" score={schedule.moodScore} />
         <MoodStressToken label="스트레스" score={schedule.stressScore} />
       </span>
-      <TodayScheduleAction clientName={schedule.clientName} />
+      <TodayScheduleAction clientId={schedule.clientId} clientName={schedule.clientName} />
     </li>
   );
 }

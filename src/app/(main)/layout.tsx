@@ -31,6 +31,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userName = getAuthSession()?.userName || '홍길동';
+  const isSessionDetailPage = pathname.startsWith('/sessions/');
 
   useEffect(() => {
     const session = getAuthSession();
@@ -45,6 +46,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         (item.href === '/' && pathname === '/') ||
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.label ?? '대시보드';
+
+  if (isSessionDetailPage) {
+    return <main className="min-h-screen w-full bg-white p-5">{children}</main>;
+  }
 
   return (
     <div className="min-h-screen w-full bg-white">

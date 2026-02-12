@@ -1,11 +1,17 @@
+'use client';
+
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/shared/ui/button';
 
 interface TodayScheduleActionProps {
+  clientId: string;
   clientName: string;
 }
 
-export default function TodayScheduleAction({ clientName }: TodayScheduleActionProps) {
+export default function TodayScheduleAction({ clientId, clientName }: TodayScheduleActionProps) {
+  const router = useRouter();
+
   return (
     <div className="flex w-full items-center justify-end gap-3 pl-6">
       <Button
@@ -17,7 +23,12 @@ export default function TodayScheduleAction({ clientName }: TodayScheduleActionP
       >
         <Image src="/icons/sent.svg" alt="send-notification" width={24} height={24} aria-hidden />
       </Button>
-      <Button type="button" size="md" className="w-full">
+      <Button
+        type="button"
+        size="md"
+        className="w-full"
+        onClick={() => router.push(`/sessions/${clientId}`)}
+      >
         시작하기
       </Button>
     </div>

@@ -19,12 +19,7 @@ export default function RiskNotificationItem({ notification }: RiskNotificationI
           {notification.description}
         </p>
       </div>
-      <Button
-        className="w-full"
-        type="button"
-        size="md"
-        onClick={() => router.push(`/clients/${notification.clientId}`)}
-      >
+      <Button className="w-full" type="button" size="md" onClick={() => router.push('/clients')}>
         즉시 확인하기
       </Button>
     </div>

@@ -22,7 +22,7 @@ const RiskAlert = ({ alert }: RiskAlertProps) => {
           type="button"
           size="sm"
           className="shrink-0"
-          onClick={() => router.push(alert.detailPath)}
+          onClick={() => router.push('/clients')}
         >
           확인하기
         </Button>
