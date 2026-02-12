@@ -1,16 +1,74 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
 import { Button } from '@/shared/ui/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import { Input } from '@/shared/ui/input';
 import { Select } from '@/shared/ui/select';
 
+type RiskFilter = 'all' | RiskType;
+
+interface ClientLookupItem {
+  time: string;
+  clientId: string;
+  clientName: string;
+  riskType: RiskType;
+  moodScore: number;
+  stressScore: number;
+  energyScore: number;
+  chiefConcern: string;
+}
+
 export default function ClientsPage() {
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
+  const [clients, setClients] = useState<ClientLookupItem[]>([]);
+  const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadClients = async () => {
+      setIsLoading(true);
+      const result = await getTodaySchedules();
+
+      if (!result.success || !result.data) {
+        setClients([]);
+        setErrorMessage(result.message || '내담자 목록을 불러오지 못했습니다.');
+        setIsLoading(false);
+        return;
+      }
+
+      const uniqueClients = mapSchedulesToClients(result.data);
+      setClients(uniqueClients);
+      setErrorMessage(null);
+      setIsLoading(false);
+    };
+
+    void loadClients();
+  }, []);
+
+  const filteredClients = useMemo(() => {
+    const normalizedKeyword = searchKeyword.trim();
+    return clients.filter((client) => {
+      const matchesRisk = riskFilter === 'all' ? true : client.riskType === riskFilter;
+      const matchesName = normalizedKeyword ? client.clientName.includes(normalizedKeyword) : true;
+      return matchesRisk && matchesName;
+    });
+  }, [clients, riskFilter, searchKeyword]);
+
   return (
-    <section className="flex flex-col w-full items-start gap-7">
-      <div className="flex w-full justify-between items-center">
-        <div className="flex w-full flex-1 min-w-0 items-center gap-4">
-          <div className="w-full max-w-[416px] min-w-0">
+    <section className="flex w-full flex-col items-start gap-7">
+      <div className="flex w-full items-center justify-between">
+        <div className="flex w-full min-w-0 flex-1 items-center gap-4">
+          <div className="w-full min-w-0 max-w-[416px]">
             <Input
               placeholder="내담자 성함을 검색해 보세요."
               className="min-w-0"
+              value={searchKeyword}
+              onChange={(event) => setSearchKeyword(event.target.value)}
               icon={
                 <div
                   className="h-6 w-6 bg-current"
@@ -27,6 +85,8 @@ export default function ClientsPage() {
           </div>
           <Select
             placeholder="위험 유형"
+            value={riskFilter}
+            onValueChange={(value) => setRiskFilter(value as RiskFilter)}
             options={[
               { label: '전체', value: 'all' },
               { label: '안정', value: '안정' },
@@ -38,11 +98,132 @@ export default function ClientsPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button size="sm">내담자 등록</Button>
-          <Button size="sm" variant={'outline'}>
+          <Button size="sm" variant="outline">
             종결 상담 확인
           </Button>
         </div>
       </div>
+      <div className="flex flex-col items-start gap-[23px]">
+        <div className="body-18 text-label-normal font-semibold">총 {filteredClients.length}명</div>
+        <div className="w-full overflow-hidden rounded-2xl border border-neutral-95 bg-white">
+          <div className="grid grid-cols-[90px_1fr_100px_220px_180px] border-b border-neutral-95 bg-neutral-99 px-4 py-3">
+            <span className="body-14 font-semibold text-label-alternative">시간</span>
+            <span className="body-14 font-semibold text-label-alternative">내담자명</span>
+            <span className="body-14 text-center font-semibold text-label-alternative">
+              위험 유형
+            </span>
+            <span className="body-14 text-center font-semibold text-label-alternative">
+              기분/스트레스/에너지
+            </span>
+            <span className="body-14 text-center font-semibold text-label-alternative">
+              주 호소 문제
+            </span>
+          </div>
+
+          {isLoading ? (
+            <div className="body-14 flex h-[180px] items-center justify-center text-label-alternative">
+              내담자 목록을 불러오는 중입니다.
+            </div>
+          ) : errorMessage ? (
+            <div className="body-14 flex h-[180px] items-center justify-center text-status-negative">
+              {errorMessage}
+            </div>
+          ) : filteredClients.length === 0 ? (
+            <div className="body-14 flex h-[180px] items-center justify-center text-label-alternative">
+              조건에 맞는 내담자가 없습니다.
+            </div>
+          ) : (
+            <ul className="flex w-full flex-col">
+              {filteredClients.map((client) => (
+                <li
+                  key={client.clientId}
+                  className="grid grid-cols-[90px_1fr_100px_220px_180px] items-center border-b border-neutral-95 px-4 py-3 last:border-b-0 hover:cursor-pointer hover:bg-neutral-99"
+                  onClick={() => {
+                    setSelectedClient(client);
+                    setIsDrawerOpen(true);
+                  }}
+                >
+                  <span className="body-14 text-label-normal">{client.time}</span>
+                  <span className="body-14 text-label-normal">{client.clientName}</span>
+                  <span className="body-14 text-center text-label-normal">{client.riskType}</span>
+                  <span className="body-14 text-center text-label-normal">
+                    {client.moodScore}/{client.stressScore}/{client.energyScore}
+                  </span>
+                  <span className="body-14 text-center text-label-normal">
+                    {client.chiefConcern}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent className="max-w-[420px]">
+          <DrawerHeader>
+            <DrawerTitle>{selectedClient?.clientName ?? '내담자 상세 정보'}</DrawerTitle>
+            <DrawerClose asChild>
+              <button type="button" aria-label="닫기" className="body-14 text-label-alternative">
+                닫기
+              </button>
+            </DrawerClose>
+          </DrawerHeader>
+
+          {selectedClient ? (
+            <div className="mt-6 flex flex-col gap-3">
+              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
+                <p className="body-14 text-label-alternative">내담자 ID</p>
+                <p className="body-16 font-semibold text-label-normal">{selectedClient.clientId}</p>
+              </div>
+              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
+                <p className="body-14 text-label-alternative">위험 유형</p>
+                <p className="body-16 font-semibold text-label-normal">{selectedClient.riskType}</p>
+              </div>
+              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
+                <p className="body-14 text-label-alternative">점수 (기분/스트레스/에너지)</p>
+                <p className="body-16 font-semibold text-label-normal">
+                  {selectedClient.moodScore}/{selectedClient.stressScore}/
+                  {selectedClient.energyScore}
+                </p>
+              </div>
+              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
+                <p className="body-14 text-label-alternative">주 호소 문제</p>
+                <p className="body-16 font-semibold text-label-normal">
+                  {selectedClient.chiefConcern}
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </DrawerContent>
+      </Drawer>
     </section>
   );
 }
+
+const mapSchedulesToClients = (schedules: TodayScheduleItem[]): ClientLookupItem[] => {
+  const sortedByTime = [...schedules].sort((a, b) => a.time.localeCompare(b.time));
+  const concerns = ['직장', '건강', '돈', '가족', '연애·결혼', '우정', '진로·취업', '학업', '기타'];
+
+  return sortedByTime
+    .map((schedule, index) => ({
+      time: schedule.time,
+      clientId: schedule.clientId,
+      clientName: schedule.clientName,
+      riskType: schedule.riskType,
+      moodScore: schedule.moodScore ?? 0,
+      stressScore: schedule.stressScore ?? 0,
+      energyScore:
+        schedule.moodScore === null && schedule.stressScore === null
+          ? 0
+          : Math.max(
+              0,
+              Math.min(
+                5,
+                (schedule.moodScore ?? 0) + 1 - Math.floor((schedule.stressScore ?? 0) / 2),
+              ),
+            ),
+      chiefConcern: concerns[index % concerns.length],
+    }))
+    .sort((a, b) => a.time.localeCompare(b.time));
+};
