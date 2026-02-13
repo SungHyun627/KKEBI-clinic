@@ -27,6 +27,7 @@ export interface ClientCheckinRecord {
   moodScore: number;
   stressScore: number;
   energyScore: number;
+  sleepScore: number;
 }
 
 export interface ClientCounselingRecord {

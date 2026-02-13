@@ -65,6 +65,7 @@ export async function GET(_request: Request, context: { params: Promise<{ client
         moodScore,
         stressScore,
         energyScore,
+        sleepScore: Math.max(0, Math.min(5, energyScore + 1)),
       },
       {
         date: '2026-02-08',
@@ -72,6 +73,15 @@ export async function GET(_request: Request, context: { params: Promise<{ client
         moodScore: Math.max(0, moodScore - 1),
         stressScore: Math.min(5, stressScore + 1),
         energyScore: Math.max(0, energyScore - 1),
+        sleepScore: Math.max(0, Math.min(5, energyScore)),
+      },
+      {
+        date: '2026-02-03',
+        time: '23:10',
+        moodScore: Math.max(0, moodScore - 2),
+        stressScore: Math.min(5, stressScore + 2),
+        energyScore: Math.max(0, energyScore - 2),
+        sleepScore: Math.max(0, Math.min(5, energyScore - 1)),
       },
     ],
     counselingHistory: [

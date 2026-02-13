@@ -7,11 +7,11 @@ import Image from 'next/image';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import { Button } from '@/shared/ui/button';
-import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
 import { useRouter } from 'next/navigation';
 import ClientInfoField from './ClientInfoField';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
+import CheckinHistorySection from './CheckinHistorySection';
 import type {
   ClientDetailData,
   ClientLookupItem,
@@ -205,30 +205,7 @@ export default function ClientDetailDrawer({
               </section>
 
               <Divider />
-              <section className="rounded-xl border border-neutral-95 bg-white p-4">
-                <h3 className="body-16 font-semibold text-label-normal">체크인 내역</h3>
-                {detail && detail.recentCheckins.length > 0 ? (
-                  <ul className="mt-3 flex flex-col gap-2">
-                    {detail.recentCheckins.map((checkin) => (
-                      <li
-                        key={`${detail.clientId}-${checkin.date}-${checkin.time}`}
-                        className="flex flex-wrap items-center gap-2"
-                      >
-                        <span className="body-14 text-label-alternative">
-                          {checkin.date} {checkin.time}
-                        </span>
-                        <MoodScoreChip label="기분" score={checkin.moodScore} />
-                        <MoodScoreChip label="스트레스" score={checkin.stressScore} />
-                        <MoodScoreChip label="에너지" score={checkin.energyScore} />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="body-14 mt-2 text-label-alternative">
-                    1달 간 체크인 이력이 없습니다.
-                  </p>
-                )}
-              </section>
+              <CheckinHistorySection checkins={detail.recentCheckins} />
 
               <section className="rounded-xl border border-neutral-95 bg-white p-4">
                 <h3 className="body-16 font-semibold text-label-normal">상담 내역</h3>
