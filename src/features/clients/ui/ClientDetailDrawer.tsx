@@ -11,12 +11,14 @@ import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
 import { useRouter } from 'next/navigation';
 import ClientInfoField from './ClientInfoField';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
+import RiskReasonChip from './RiskReasonChip';
 import type {
   ClientDetailData,
   ClientLookupItem,
   PaymentStatus,
   TaskStatus,
 } from '../types/client';
+import Divider from '@/shared/ui/divider';
 
 interface ClientDetailDrawerProps {
   open: boolean;
@@ -120,10 +122,10 @@ export default function ClientDetailDrawer({
                 </div>
               </DrawerHeader>
 
-              <section className="flex items-center justify-between">
+              <section className="flex items-stretch justify-between">
                 {detail ? (
                   <>
-                    <div className="flex h-90 w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4">
+                    <div className="flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4">
                       <div className="flex w-full items-center justify-between">
                         <span className="body-18 font-semibold text-neutral-20">내담자 정보</span>
                         <div className="flex items-center gap-[6px]">
@@ -162,43 +164,47 @@ export default function ClientDetailDrawer({
                         <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
                       </div>
                     </div>
-                    <div className="flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4"></div>
+                    <div className="flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4">
+                      <span className="body-18 font-semibold text-primary">최근 위험</span>
+                      <div className="flex w-full flex-col gap-[23px]">
+                        {detail.recentRisks.length > 0 ? (
+                          detail.recentRisks.map((risk, index) => (
+                            <div
+                              key={`${detail.clientId}-risk-card-${risk.date}`}
+                              className={[
+                                'flex w-full flex-col gap-[14px] pb-[14px]',
+                                index !== detail.recentRisks.length - 1
+                                  ? 'border-b border-neutral-95'
+                                  : '',
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                            >
+                              <span className="body-14 text-label-neutral">
+                                {toKoreanDate(risk.date)}
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {risk.reasons.map((reason) => (
+                                  <RiskReasonChip
+                                    key={`${detail.clientId}-${risk.date}-${reason}`}
+                                    value={reason}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="body-14 text-label-alternative">
+                            1달 간 감지된 위험 요소가 없습니다.
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </>
                 ) : null}
               </section>
 
-              <section className="rounded-xl border border-neutral-95 bg-white p-4">
-                <h3 className="body-16 font-semibold text-label-normal">최근 위험</h3>
-                {detail && detail.recentRisks.length > 0 ? (
-                  <ul className="mt-3 flex flex-col gap-2">
-                    {detail.recentRisks.map((item) => (
-                      <li
-                        key={`${detail.clientId}-${item.date}`}
-                        className="flex items-center gap-3"
-                      >
-                        <span className="body-14 min-w-[88px] text-label-alternative">
-                          {item.date}
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {item.reasons.map((reason) => (
-                            <span
-                              key={`${detail.clientId}-${item.date}-${reason}`}
-                              className="body-12 rounded-[100px] border border-[rgba(229,34,34,0.35)] bg-[rgba(229,34,34,0.10)] px-2 py-1 text-[#E52222]"
-                            >
-                              {reason}
-                            </span>
-                          ))}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="body-14 mt-2 text-label-alternative">
-                    1달 간 감지된 위험 요소가 없습니다.
-                  </p>
-                )}
-              </section>
-
+              <Divider />
               <section className="rounded-xl border border-neutral-95 bg-white p-4">
                 <h3 className="body-16 font-semibold text-label-normal">체크인 내역</h3>
                 {detail && detail.recentCheckins.length > 0 ? (

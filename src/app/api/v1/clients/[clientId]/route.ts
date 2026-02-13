@@ -3,11 +3,8 @@ import { TODAY_SCHEDULES_MOCK } from '@/shared/mock/today-schedules';
 import type { ClientDetailData, RiskReason } from '@/features/clients';
 
 const CHIEF_CONCERNS = ['우울', '스트레스', '수면'] as const;
-const RISK_REASON_MAP: Record<string, RiskReason[]> = {
-  위험: ['자살 언급', '자해 시도'],
-  주의: ['자해 시도'],
-  안정: [],
-};
+const RISK_REASONS: RiskReason[] = ['자살 언급', '자해 시도', '타해 위험'];
+const RECENT_RISK_DATES = ['2026-02-10', '2026-02-03', '2026-01-28'] as const;
 
 export async function GET(_request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
@@ -33,7 +30,6 @@ export async function GET(_request: Request, context: { params: Promise<{ client
 
   const concernIndex = idNumber % CHIEF_CONCERNS.length;
   const primaryConcern = CHIEF_CONCERNS[concernIndex];
-  const riskReasons = RISK_REASON_MAP[target.riskType];
   const currentSession = (idNumber % 6) + 1;
   const totalSession = currentSession + (idNumber % 4) + 2;
   const startMonth = (idNumber % 10) + 1;
@@ -58,13 +54,10 @@ export async function GET(_request: Request, context: { params: Promise<{ client
     totalSession,
     visitPurpose: `${primaryConcern} 관련 정서 조절`,
     nextCounselingAt: `2026-02-${String(nextDay).padStart(2, '0')} ${String(nextHour).padStart(2, '0')}:00`,
-    recentRisks:
-      riskReasons.length > 0
-        ? [
-            { date: '2026-02-10', reasons: riskReasons },
-            { date: '2026-02-03', reasons: [riskReasons[0]] },
-          ]
-        : [],
+    recentRisks: RECENT_RISK_DATES.map((date) => ({
+      date,
+      reasons: [...RISK_REASONS],
+    })),
     recentCheckins: [
       {
         date: '2026-02-12',
