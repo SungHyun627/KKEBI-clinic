@@ -13,6 +13,7 @@ import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
 import CheckinHistorySection from './CheckinHistorySection';
 import CounselingHistorySection from './CounselingHistorySection';
+import AssessmentResultsSection from './AssessmentResultsSection';
 import type { ClientDetailData, ClientLookupItem } from '../types/client';
 import Divider from '@/shared/ui/divider';
 
@@ -203,35 +204,7 @@ export default function ClientDetailDrawer({
               <Divider />
               <CheckinHistorySection checkins={detail?.recentCheckins ?? []} />
               <CounselingHistorySection records={detail?.counselingHistory ?? []} />
-
-              <section className="rounded-xl border border-neutral-95 bg-white p-4">
-                <h3 className="body-16 font-semibold text-label-normal">평가 척도 결과</h3>
-                {detail ? (
-                  <div className="mt-3 flex flex-col gap-2">
-                    <p className="body-14 text-label-normal">PHQ-9: {detail.scaleResults.phq9}점</p>
-                    <p className="body-14 text-label-normal">
-                      PSS-10: {detail.scaleResults.pss10}점
-                    </p>
-                    <p className="body-14 text-label-normal">MBI: {detail.scaleResults.mbi}점</p>
-                    <p className="body-14 text-label-normal">{detail.scaleResults.etc}</p>
-                    <div className="mt-2 rounded-lg bg-neutral-99 p-3">
-                      <p className="body-14 text-label-normal">
-                        1. 상담 방문 이유: {detail.intakeAnswers.reasonForVisit}
-                      </p>
-                      <p className="body-14 mt-1 text-label-normal">
-                        2. 기대 변화: {detail.intakeAnswers.expectedChange}
-                      </p>
-                      <p className="body-14 mt-1 text-label-normal">
-                        3. 현재 가장 고민되는 문제: {detail.intakeAnswers.biggestConcern}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="body-14 mt-2 text-label-alternative">
-                    아직 평가 척도 결과가 없습니다.
-                  </p>
-                )}
-              </section>
+              <AssessmentResultsSection detail={detail} />
             </>
           ) : null}
         </div>
