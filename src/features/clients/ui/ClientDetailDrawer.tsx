@@ -205,7 +205,7 @@ export default function ClientDetailDrawer({
               </section>
 
               <Divider />
-              <CheckinHistorySection checkins={detail.recentCheckins} />
+              <CheckinHistorySection checkins={detail?.recentCheckins ?? []} />
 
               <section className="rounded-xl border border-neutral-95 bg-white p-4">
                 <h3 className="body-16 font-semibold text-label-normal">상담 내역</h3>
