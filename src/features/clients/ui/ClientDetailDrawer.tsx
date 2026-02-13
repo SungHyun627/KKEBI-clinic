@@ -25,6 +25,8 @@ interface ClientDetailDrawerBodyProps {
   detail: ClientDetailData | null;
 }
 
+const DRAWER_BODY_CLASSNAME = 'flex w-full flex-col gap-[42px]';
+
 export default function ClientDetailDrawer({
   open,
   onOpenChange,
@@ -97,7 +99,7 @@ function ClientDetailDrawerBody({
 }: ClientDetailDrawerBodyProps) {
   if (isLoading) {
     return (
-      <div className="flex w-full flex-col gap-[42px]">
+      <div className={DRAWER_BODY_CLASSNAME}>
         <div className="body-14 text-label-alternative">상세 정보를 불러오는 중입니다.</div>
       </div>
     );
@@ -105,18 +107,18 @@ function ClientDetailDrawerBody({
 
   if (errorMessage) {
     return (
-      <div className="flex w-full flex-col gap-[42px]">
+      <div className={DRAWER_BODY_CLASSNAME}>
         <div className="body-14 text-status-negative">{errorMessage}</div>
       </div>
     );
   }
 
   if (!displayClient) {
-    return <div className="flex w-full flex-col gap-[42px]" />;
+    return <div className={DRAWER_BODY_CLASSNAME} />;
   }
 
   return (
-    <div className="flex w-full flex-col gap-[42px]">
+    <div className={DRAWER_BODY_CLASSNAME}>
       <ClientDetailHeader client={displayClient} />
       {detail ? <ClientOverviewSection detail={detail} /> : null}
 

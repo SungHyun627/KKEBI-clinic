@@ -11,12 +11,16 @@ interface ClientOverviewSectionProps {
   detail: ClientDetailData;
 }
 
+const CARD_CLASSNAME =
+  'flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4';
+const SECTION_TITLE_CLASSNAME = 'body-18 font-semibold';
+
 export default function ClientOverviewSection({ detail }: ClientOverviewSectionProps) {
   return (
     <section className="flex items-stretch justify-between">
-      <div className="flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4">
+      <div className={CARD_CLASSNAME}>
         <div className="flex w-full items-center justify-between">
-          <span className="body-18 font-semibold text-neutral-20">내담자 정보</span>
+          <span className={`${SECTION_TITLE_CLASSNAME} text-neutral-20`}>내담자 정보</span>
           <div className="flex items-center gap-[6px]">
             <Button
               type="button"
@@ -48,8 +52,8 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
         </div>
       </div>
 
-      <div className="flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4">
-        <span className="body-18 font-semibold text-primary">최근 위험</span>
+      <div className={CARD_CLASSNAME}>
+        <span className={`${SECTION_TITLE_CLASSNAME} text-primary`}>최근 위험</span>
         <div className="flex w-full flex-col gap-[23px]">
           {detail.recentRisks.length > 0 ? (
             detail.recentRisks.map((risk, index) => (
