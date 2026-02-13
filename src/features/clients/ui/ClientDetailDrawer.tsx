@@ -60,7 +60,11 @@ export default function ClientDetailDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="flex max-w-[695px] flex-col gap-[26px] overflow-y-auto px-8 py-[23px]">
+      <DrawerContent
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => event.preventDefault()}
+        className="flex max-w-[695px] flex-col gap-[26px] overflow-y-auto px-8 py-[23px]"
+      >
         <DrawerClose asChild>
           <button
             type="button"
