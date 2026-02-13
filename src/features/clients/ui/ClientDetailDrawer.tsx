@@ -4,16 +4,14 @@ import { useEffect, useState } from 'react';
 import { getClientDetail } from '@/features/clients';
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import Image from 'next/image';
-import StreakChip from '@/shared/ui/chips/streak-chip';
-import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import { Button } from '@/shared/ui/button';
-import { useRouter } from 'next/navigation';
 import ClientInfoField from './ClientInfoField';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
 import CheckinHistorySection from './CheckinHistorySection';
 import CounselingHistorySection from './CounselingHistorySection';
 import AssessmentResultsSection from './AssessmentResultsSection';
+import ClientDetailHeader from './ClientDetailHeader';
 import type { ClientDetailData, ClientLookupItem } from '../types/client';
 import Divider from '@/shared/ui/divider';
 import { toKoreanDate } from '../lib/format';
@@ -29,7 +27,6 @@ export default function ClientDetailDrawer({
   onOpenChange,
   client,
 }: ClientDetailDrawerProps) {
-  const router = useRouter();
   const [detail, setDetail] = useState<ClientDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -85,40 +82,7 @@ export default function ClientDetailDrawer({
             <div className="body-14 text-status-negative">{errorMessage}</div>
           ) : displayClient ? (
             <>
-              <DrawerHeader className="flex w-full items-center justify-between p-0">
-                <div className="flex min-w-0 items-center gap-3">
-                  <DrawerTitle className="text-[24px] font-semibold leading-[30px] text-label-strong">
-                    {displayClient.clientName}
-                  </DrawerTitle>
-                  <StreakChip days={displayClient.streakDays} />
-                  <RiskTypeChip value={displayClient.riskType} />
-                </div>
-                <div className="flex w-full max-w-[235px] items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="icon"
-                    size="icon"
-                    aria-label={`${displayClient.clientName} 알림 전송`}
-                    className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
-                  >
-                    <Image
-                      src="/icons/sent.svg"
-                      alt="send-notification"
-                      width={24}
-                      height={24}
-                      aria-hidden
-                    />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="md"
-                    className="w-full"
-                    onClick={() => router.push(`/sessions/${displayClient.clientId}`)}
-                  >
-                    시작하기
-                  </Button>
-                </div>
-              </DrawerHeader>
+              <ClientDetailHeader client={displayClient} />
 
               <section className="flex items-stretch justify-between">
                 {detail ? (
