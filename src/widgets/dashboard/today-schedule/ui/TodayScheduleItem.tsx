@@ -17,7 +17,7 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
   return (
     <li
       className={cn(
-        'grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_5fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 hover:cursor-pointer hover:bg-neutral-99',
+        'grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_5fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3',
         className,
       )}
     >
