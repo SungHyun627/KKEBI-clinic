@@ -18,6 +18,13 @@ interface ClientDetailDrawerProps {
   client: ClientLookupItem | null;
 }
 
+interface ClientDetailDrawerBodyProps {
+  isLoading: boolean;
+  errorMessage: string | null;
+  displayClient: ClientLookupItem | null;
+  detail: ClientDetailData | null;
+}
+
 export default function ClientDetailDrawer({
   open,
   onOpenChange,
@@ -71,24 +78,52 @@ export default function ClientDetailDrawer({
             <Image src="/icons/fold.svg" alt="접기" width={20} height={20} />
           </button>
         </DrawerClose>
-        <div className="flex w-full flex-col gap-[42px]">
-          {isLoading ? (
-            <div className="body-14 text-label-alternative">상세 정보를 불러오는 중입니다.</div>
-          ) : errorMessage ? (
-            <div className="body-14 text-status-negative">{errorMessage}</div>
-          ) : displayClient ? (
-            <>
-              <ClientDetailHeader client={displayClient} />
-              {detail ? <ClientOverviewSection detail={detail} /> : null}
-
-              <Divider />
-              <CheckinHistorySection checkins={detail?.recentCheckins ?? []} />
-              <CounselingHistorySection records={detail?.counselingHistory ?? []} />
-              <AssessmentResultsSection detail={detail} />
-            </>
-          ) : null}
-        </div>
+        <ClientDetailDrawerBody
+          isLoading={isLoading}
+          errorMessage={errorMessage}
+          displayClient={displayClient}
+          detail={detail}
+        />
       </DrawerContent>
     </Drawer>
+  );
+}
+
+function ClientDetailDrawerBody({
+  isLoading,
+  errorMessage,
+  displayClient,
+  detail,
+}: ClientDetailDrawerBodyProps) {
+  if (isLoading) {
+    return (
+      <div className="flex w-full flex-col gap-[42px]">
+        <div className="body-14 text-label-alternative">상세 정보를 불러오는 중입니다.</div>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="flex w-full flex-col gap-[42px]">
+        <div className="body-14 text-status-negative">{errorMessage}</div>
+      </div>
+    );
+  }
+
+  if (!displayClient) {
+    return <div className="flex w-full flex-col gap-[42px]" />;
+  }
+
+  return (
+    <div className="flex w-full flex-col gap-[42px]">
+      <ClientDetailHeader client={displayClient} />
+      {detail ? <ClientOverviewSection detail={detail} /> : null}
+
+      <Divider />
+      <CheckinHistorySection checkins={detail?.recentCheckins ?? []} />
+      <CounselingHistorySection records={detail?.counselingHistory ?? []} />
+      <AssessmentResultsSection detail={detail} />
+    </div>
   );
 }
