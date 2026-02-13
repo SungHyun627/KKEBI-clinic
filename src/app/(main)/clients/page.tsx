@@ -122,20 +122,20 @@ export default function ClientsPage() {
             <button
               type="button"
               aria-label="이전 10개"
-              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:bg-neutral-99 hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
+              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
-              <Image src="/icons/left.svg" alt="" width={32} height={32} aria-hidden />
+              <Image src="/icons/small-left.svg" alt="" width={32} height={32} aria-hidden />
             </button>
             <button
               type="button"
               aria-label="다음 10개"
-              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:bg-neutral-99 hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
+              className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage >= totalPages}
             >
-              <Image src="/icons/right.svg" alt="" width={32} height={32} aria-hidden />
+              <Image src="/icons/small-right.svg" alt="" width={32} height={32} aria-hidden />
             </button>
           </div>
         </div>

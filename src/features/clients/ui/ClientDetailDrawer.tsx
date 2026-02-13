@@ -8,9 +8,9 @@ import StreakChip from '@/shared/ui/chips/streak-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import { Button } from '@/shared/ui/button';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
-import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import { useRouter } from 'next/navigation';
 import ClientInfoField from './ClientInfoField';
+import NextCounselingDatePicker from './NextCounselingDatePicker';
 import type {
   ClientDetailData,
   ClientLookupItem,
@@ -145,7 +145,7 @@ export default function ClientDetailDrawer({
                           </Button>
                         </div>
                       </div>
-                      <div className="flex flex-col items-start gap-[18px]">
+                      <div className="flex flex-col w-full items-start gap-[18px]">
                         <ClientInfoField
                           label="나이 및 성별"
                           value={`${detail.age}세 ${detail.gender}`}
@@ -159,10 +159,7 @@ export default function ClientDetailDrawer({
                           value={`${detail.currentSession}회/${detail.totalSession}회`}
                         />
                         <ClientInfoField label="방문 목적" value={detail.visitPurpose} />
-                        <ClientInfoField
-                          label="다음 상담일"
-                          value={toKoreanDateTime(detail.nextCounselingAt)}
-                        />
+                        <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
                       </div>
                     </div>
                     <div className="flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4"></div>
@@ -318,12 +315,4 @@ function toKoreanDate(input: string) {
   const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
   if (Number.isNaN(parsed.getTime())) return input;
   return `${parsed.getFullYear()}년 ${parsed.getMonth() + 1}월 ${parsed.getDate()}일`;
-}
-
-function toKoreanDateTime(input: string) {
-  const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
-  if (Number.isNaN(parsed.getTime())) return input;
-  const hours = String(parsed.getHours()).padStart(2, '0');
-  const minutes = String(parsed.getMinutes()).padStart(2, '0');
-  return `${parsed.getFullYear()}년 ${parsed.getMonth() + 1}월 ${parsed.getDate()}일 ${hours}:${minutes}`;
 }
