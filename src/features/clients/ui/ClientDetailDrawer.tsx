@@ -16,6 +16,7 @@ import CounselingHistorySection from './CounselingHistorySection';
 import AssessmentResultsSection from './AssessmentResultsSection';
 import type { ClientDetailData, ClientLookupItem } from '../types/client';
 import Divider from '@/shared/ui/divider';
+import { toKoreanDate } from '../lib/format';
 
 interface ClientDetailDrawerProps {
   open: boolean;
@@ -211,10 +212,4 @@ export default function ClientDetailDrawer({
       </DrawerContent>
     </Drawer>
   );
-}
-
-function toKoreanDate(input: string) {
-  const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
-  if (Number.isNaN(parsed.getTime())) return input;
-  return `${parsed.getFullYear()}년 ${parsed.getMonth() + 1}월 ${parsed.getDate()}일`;
 }
