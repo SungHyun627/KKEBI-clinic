@@ -10,6 +10,7 @@ import { Button } from '@/shared/ui/button';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import { useRouter } from 'next/navigation';
+import ClientInfoField from './ClientInfoField';
 import type {
   ClientDetailData,
   ClientLookupItem,
@@ -77,7 +78,7 @@ export default function ClientDetailDrawer({
             <Image src="/icons/fold.svg" alt="접기" width={20} height={20} />
           </button>
         </DrawerClose>
-        <div className="flex w-full flex-col gap-[22px]">
+        <div className="flex w-full flex-col gap-[42px]">
           {isLoading ? (
             <div className="body-14 text-label-alternative">상세 정보를 불러오는 중입니다.</div>
           ) : errorMessage ? (
@@ -119,43 +120,53 @@ export default function ClientDetailDrawer({
                 </div>
               </DrawerHeader>
 
-              <section className="rounded-xl border border-neutral-95 bg-white p-4">
-                <h3 className="body-16 font-semibold text-label-normal">내담자 정보</h3>
+              <section className="flex items-center justify-between">
                 {detail ? (
-                  <div className="mt-3 flex flex-col gap-3">
-                    <div className="body-14 text-label-normal">
-                      {detail.age}세 | {detail.gender}
-                    </div>
-                    <div className="body-14 text-label-normal">
-                      상담 시작일 {detail.counselingStartDate} | 현재 상담 {detail.currentSession}
-                      회기 / 총 {detail.totalSession}회기
-                    </div>
-                    <div className="body-14 text-label-normal">
-                      방문 목적: {detail.visitPurpose}
-                    </div>
-                    <div className="body-14 text-label-normal">
-                      다음 상담 일정: {detail.nextCounselingAt}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {detail.chiefConcern.map((concern) => (
-                        <ChiefConcernChip
-                          key={`drawer-${detail.clientId}-${concern}`}
-                          value={concern}
+                  <>
+                    <div className="flex h-90 w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4">
+                      <div className="flex w-full items-center justify-between">
+                        <span className="body-18 font-semibold text-neutral-20">내담자 정보</span>
+                        <div className="flex items-center gap-[6px]">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-label-neutral rounded-lg"
+                          >
+                            수정하기
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-primary bg-[rgba(250,84,84,0.10)] rounded-lg"
+                          >
+                            종결하기
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-start gap-[18px]">
+                        <ClientInfoField
+                          label="나이 및 성별"
+                          value={`${detail.age}세 ${detail.gender}`}
                         />
-                      ))}
+                        <ClientInfoField
+                          label="시작일"
+                          value={toKoreanDate(detail.counselingStartDate)}
+                        />
+                        <ClientInfoField
+                          label="상담 횟수"
+                          value={`${detail.currentSession}회/${detail.totalSession}회`}
+                        />
+                        <ClientInfoField label="방문 목적" value={detail.visitPurpose} />
+                        <ClientInfoField
+                          label="다음 상담일"
+                          value={toKoreanDateTime(detail.nextCounselingAt)}
+                        />
+                      </div>
                     </div>
-                    <div className="mt-1 flex flex-wrap gap-2">
-                      <Button type="button" variant="outline" size="sm">
-                        일정 변경
-                      </Button>
-                      <Button type="button" variant="outline" size="sm">
-                        상담 종결하기
-                      </Button>
-                      <Button type="button" variant="outline" size="sm">
-                        수정하기
-                      </Button>
-                    </div>
-                  </div>
+                    <div className="flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4"></div>
+                  </>
                 ) : null}
               </section>
 
@@ -301,4 +312,18 @@ function PaymentStatusChip({ status }: { status: PaymentStatus }) {
       {status}
     </span>
   );
+}
+
+function toKoreanDate(input: string) {
+  const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
+  if (Number.isNaN(parsed.getTime())) return input;
+  return `${parsed.getFullYear()}년 ${parsed.getMonth() + 1}월 ${parsed.getDate()}일`;
+}
+
+function toKoreanDateTime(input: string) {
+  const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
+  if (Number.isNaN(parsed.getTime())) return input;
+  const hours = String(parsed.getHours()).padStart(2, '0');
+  const minutes = String(parsed.getMinutes()).padStart(2, '0');
+  return `${parsed.getFullYear()}년 ${parsed.getMonth() + 1}월 ${parsed.getDate()}일 ${hours}:${minutes}`;
 }

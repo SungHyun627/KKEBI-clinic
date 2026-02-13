@@ -23,6 +23,7 @@ export async function GET(_request: Request, context: { params: Promise<{ client
     );
   }
 
+  const idNumber = Number(target.clientId.replace(/\D/g, '')) || 1;
   const moodScore = target.moodScore ?? 0;
   const stressScore = target.stressScore ?? 0;
   const energyScore =
@@ -30,9 +31,15 @@ export async function GET(_request: Request, context: { params: Promise<{ client
       ? 0
       : Math.max(0, Math.min(5, moodScore + 1 - Math.floor(stressScore / 2)));
 
-  const concernIndex = Number(target.clientId.replace(/\D/g, '')) % CHIEF_CONCERNS.length;
+  const concernIndex = idNumber % CHIEF_CONCERNS.length;
   const primaryConcern = CHIEF_CONCERNS[concernIndex];
   const riskReasons = RISK_REASON_MAP[target.riskType];
+  const currentSession = (idNumber % 6) + 1;
+  const totalSession = currentSession + (idNumber % 4) + 2;
+  const startMonth = (idNumber % 10) + 1;
+  const startDay = (idNumber % 20) + 1;
+  const nextDay = (idNumber % 18) + 10;
+  const nextHour = 9 + (idNumber % 7);
 
   const detail: ClientDetailData = {
     time: target.time,
@@ -44,13 +51,13 @@ export async function GET(_request: Request, context: { params: Promise<{ client
     stressScore,
     energyScore,
     chiefConcern: [...CHIEF_CONCERNS],
-    age: 29 + (Number(target.clientId.replace(/\D/g, '')) % 12),
-    gender: Number(target.clientId.replace(/\D/g, '')) % 2 === 0 ? '여성' : '남성',
-    counselingStartDate: '2025-03-05',
-    currentSession: 4,
-    totalSession: 10,
-    visitPurpose: primaryConcern,
-    nextCounselingAt: `2026-02-20 ${target.time}`,
+    age: 24 + (idNumber % 13),
+    gender: idNumber % 2 === 0 ? '여성' : '남성',
+    counselingStartDate: `2025-${String(startMonth).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`,
+    currentSession,
+    totalSession,
+    visitPurpose: `${primaryConcern} 관련 정서 조절`,
+    nextCounselingAt: `2026-02-${String(nextDay).padStart(2, '0')} ${String(nextHour).padStart(2, '0')}:00`,
     recentRisks:
       riskReasons.length > 0
         ? [
@@ -76,14 +83,14 @@ export async function GET(_request: Request, context: { params: Promise<{ client
     ],
     counselingHistory: [
       {
-        dateTime: '2026-02-11 14:00',
+        dateTime: `2026-02-${String(nextDay - 2).padStart(2, '0')} ${String(nextHour).padStart(2, '0')}:00`,
         chiefConcern: primaryConcern,
         taskName: '감정 기록 3회 작성',
         taskStatus: '진행중',
         paymentStatus: '완납',
       },
       {
-        dateTime: '2026-02-04 14:00',
+        dateTime: `2026-02-${String(nextDay - 9).padStart(2, '0')} ${String(nextHour).padStart(2, '0')}:00`,
         chiefConcern: CHIEF_CONCERNS[(concernIndex + 1) % CHIEF_CONCERNS.length],
         taskName: '수면 루틴 체크',
         taskStatus: '완수',
