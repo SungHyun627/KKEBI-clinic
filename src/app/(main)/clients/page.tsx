@@ -3,28 +3,17 @@
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
+import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
+import type { ClientLookupItem } from '@/features/clients/types/client';
 import { Button } from '@/shared/ui/button';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import StreakChip from '@/shared/ui/chips/streak-chip';
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import { Input } from '@/shared/ui/input';
 import { Select } from '@/shared/ui/select';
 
 type RiskFilter = 'all' | RiskType;
-
-interface ClientLookupItem {
-  time: string;
-  clientId: string;
-  clientName: string;
-  streakDays: number;
-  riskType: RiskType;
-  moodScore: number;
-  stressScore: number;
-  energyScore: number;
-  chiefConcern: string[];
-}
 
 export default function ClientsPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -218,49 +207,11 @@ export default function ClientsPage() {
         </div>
       </div>
 
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="max-w-[420px]">
-          <DrawerHeader>
-            <DrawerTitle>{selectedClient?.clientName ?? '내담자 상세 정보'}</DrawerTitle>
-            <DrawerClose asChild>
-              <button type="button" aria-label="닫기" className="body-14 text-label-alternative">
-                닫기
-              </button>
-            </DrawerClose>
-          </DrawerHeader>
-
-          {selectedClient ? (
-            <div className="mt-6 flex flex-col gap-3">
-              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
-                <p className="body-14 text-label-alternative">내담자 ID</p>
-                <p className="body-16 font-semibold text-label-normal">{selectedClient.clientId}</p>
-              </div>
-              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
-                <p className="body-14 text-label-alternative">위험 유형</p>
-                <p className="body-16 font-semibold text-label-normal">{selectedClient.riskType}</p>
-              </div>
-              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
-                <p className="body-14 text-label-alternative">점수 (기분/스트레스/에너지)</p>
-                <p className="body-16 font-semibold text-label-normal">
-                  {selectedClient.moodScore}/{selectedClient.stressScore}/
-                  {selectedClient.energyScore}
-                </p>
-              </div>
-              <div className="rounded-xl border border-neutral-95 bg-neutral-99 p-4">
-                <p className="body-14 text-label-alternative">주 호소 문제</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  {selectedClient.chiefConcern.map((concern) => (
-                    <ChiefConcernChip
-                      key={`drawer-${selectedClient.clientId}-${concern}`}
-                      value={concern}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </DrawerContent>
-      </Drawer>
+      <ClientDetailDrawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+        client={selectedClient}
+      />
     </section>
   );
 }
