@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
@@ -19,8 +19,10 @@ type RiskFilter = 'all' | RiskType;
 export default function ClientsPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const targetClientId = searchParams.get('clientId');
+  const targetClientId =
+    typeof window === 'undefined'
+      ? null
+      : new URLSearchParams(window.location.search).get('clientId');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
