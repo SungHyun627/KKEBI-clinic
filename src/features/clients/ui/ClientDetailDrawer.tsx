@@ -65,6 +65,9 @@ export default function ClientDetailDrawer({
         onCloseAutoFocus={(event) => event.preventDefault()}
         className="flex max-w-[695px] flex-col gap-[26px] overflow-y-auto px-8 py-[23px]"
       >
+        <DrawerHeader className="sr-only p-0">
+          <DrawerTitle>내담자 상세 정보</DrawerTitle>
+        </DrawerHeader>
         <DrawerClose asChild>
           <button
             type="button"
