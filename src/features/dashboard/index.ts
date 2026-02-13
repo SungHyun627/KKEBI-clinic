@@ -1,5 +1,10 @@
 export type { RiskAlert, WeeklyStatistics, WeeklyStatisticsResponse } from './types/statistics';
-export type { TodayScheduleItem, TodayScheduleResponse } from './types/schedule';
+export type {
+  SessionType,
+  RiskType,
+  TodayScheduleItem,
+  TodayScheduleResponse,
+} from './types/schedule';
 export {
   getWeeklyStatistics,
   getWeeklyStatisticsMock,
