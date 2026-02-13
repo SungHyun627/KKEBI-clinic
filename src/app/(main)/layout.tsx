@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -30,7 +30,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const userName = getAuthSession()?.userName || '홍길동';
+  const userName = useSyncExternalStore(
+    () => () => {},
+    () => getAuthSession()?.userName || '홍길동',
+    () => '홍길동',
+  );
   const isSessionDetailPage = pathname.startsWith('/sessions/');
 
   useEffect(() => {
