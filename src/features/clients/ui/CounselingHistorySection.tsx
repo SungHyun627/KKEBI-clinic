@@ -2,12 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import { Select } from '@/shared/ui/select';
-import type {
-  ClientCounselingRecord,
-  CounselingChiefConcern,
-  PaymentStatus,
-  TaskStatus,
-} from '../types/client';
+import type { ClientCounselingRecord, CounselingChiefConcern } from '../types/client';
+import Divider from '@/shared/ui/divider';
+import { Button } from '@/shared/ui/button';
 
 interface CounselingHistorySectionProps {
   records: ClientCounselingRecord[];
@@ -27,6 +24,27 @@ const COUNSELING_FILTERS: CounselingChiefConcern[] = [
 ];
 
 type FilterValue = '전체' | CounselingChiefConcern;
+
+const formatCounselingDateTime = (raw: string) => {
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) {
+    const year = parsed.getFullYear();
+    const month = parsed.getMonth() + 1;
+    const day = parsed.getDate();
+    const hours = String(parsed.getHours()).padStart(2, '0');
+    const minutes = String(parsed.getMinutes()).padStart(2, '0');
+    return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
+  }
+
+  const normalized = raw.replace('T', ' ');
+  const matched = normalized.match(
+    /^(\d{4})[-./](\d{1,2})[-./](\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?$/,
+  );
+  if (!matched) return raw;
+
+  const [, year, month, day, hour = '00', minute = '00'] = matched;
+  return `${year}년 ${Number(month)}월 ${Number(day)}일 ${hour.padStart(2, '0')}:${minute}`;
+};
 
 export default function CounselingHistorySection({ records }: CounselingHistorySectionProps) {
   const [filterValue, setFilterValue] = useState<FilterValue>('전체');
@@ -64,17 +82,60 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
       </div>
 
       {filteredRecords.length > 0 ? (
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="flex flex-col w-full gap-4">
           {filteredRecords.map((history) => (
-            <li
-              key={`${history.dateTime}-${history.taskName}`}
-              className="grid grid-cols-[1.6fr_1fr_1.8fr_auto_auto] items-center gap-2 rounded-lg border border-neutral-95 px-3 py-2"
-            >
-              <span className="body-12 text-label-alternative">{history.dateTime}</span>
-              <span className="body-12 text-label-normal">{history.chiefConcern}</span>
-              <span className="body-12 text-label-normal">{history.taskName}</span>
-              <TaskStatusChip status={history.taskStatus} />
-              <PaymentStatusChip status={history.paymentStatus} />
+            <li key={`${history.dateTime}-${history.taskName}`} className="flex w-full">
+              <div className="flex flex-col w-full justify-center items-start gap-[18px] p-[26px] rounded-3xl bg-white">
+                <div className="flex w-full justify-between items-center">
+                  <span className="body-18 font-semibold text-label-strong">
+                    {formatCounselingDateTime(history.dateTime)}
+                  </span>
+                  <Button size="sm">리포트 보기</Button>
+                </div>
+                <Divider />
+                <div className="grid w-full grid-cols-2 items-start gap-x-10">
+                  <div className="flex min-w-0 flex-col items-start gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="body-16 w-[78px] text-label-alternative">
+                        {'주 호소 문제'}
+                      </span>
+                      <span className="flex items-center justify-center gap-[3px] font-semibold rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 leading-none text-label-normal">
+                        {history.chiefConcern}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="body-16 w-[78px] text-label-alternative">{'지불 여부'}</span>
+                      <span
+                        className={`body-16 font-medium ${
+                          history.paymentStatus === '미납' ? 'text-[#FF6363]' : 'text-label-neutral'
+                        }`}
+                      >
+                        {history.paymentStatus}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex min-w-0 flex-col items-start gap-2">
+                    <div className="flex items-center gap-3">
+                      <span className="body-16 w-[78px] text-label-alternative">{'과제명'}</span>
+                      <span className="body-16 text-label-neutral">{history.taskName}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="body-16 w-[78px] text-label-alternative">{'과제 여부'}</span>
+                      <span
+                        className={`body-16 ${
+                          history.taskStatus === '미완수'
+                            ? 'text-[#FF6363]'
+                            : history.taskStatus === '진행중'
+                              ? 'text-[#FF9200]'
+                              : 'text-[#009632]'
+                        }`}
+                      >
+                        {history.taskStatus}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
@@ -82,32 +143,5 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
         <p className="body-14 mt-2 text-label-alternative">조건에 맞는 상담 내역이 없습니다.</p>
       )}
     </section>
-  );
-}
-
-function TaskStatusChip({ status }: { status: TaskStatus }) {
-  const styleByStatus: Record<TaskStatus, string> = {
-    완수: 'border-[rgba(66,158,0,0.50)] bg-[rgba(66,158,0,0.10)] text-[#429E00]',
-    진행중: 'border-[rgba(255,146,0,0.50)] bg-[rgba(255,146,0,0.10)] text-[#FF9200]',
-    미완수: 'border-[rgba(229,34,34,0.50)] bg-[rgba(229,34,34,0.10)] text-[#E52222]',
-  };
-
-  return (
-    <span className={`body-12 rounded-[100px] border px-2 py-1 ${styleByStatus[status]}`}>
-      {status}
-    </span>
-  );
-}
-
-function PaymentStatusChip({ status }: { status: PaymentStatus }) {
-  const styleByStatus: Record<PaymentStatus, string> = {
-    납부: 'border-neutral-90 bg-neutral-95 text-label-neutral',
-    미납: 'border-[rgba(229,34,34,0.50)] bg-[rgba(229,34,34,0.10)] text-[#E52222]',
-  };
-
-  return (
-    <span className={`body-12 rounded-[100px] border px-2 py-1 ${styleByStatus[status]}`}>
-      {status}
-    </span>
   );
 }
