@@ -91,7 +91,11 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
                   (notification): notification is RiskNotification => notification.type === 'risk',
                 )
                 .map((notification) => (
-                  <RiskNotificationItem key={notification.id} notification={notification} />
+                  <RiskNotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onImmediateCheck={() => onOpenChange(false)}
+                  />
                 ))}
 
             {!isLoading &&

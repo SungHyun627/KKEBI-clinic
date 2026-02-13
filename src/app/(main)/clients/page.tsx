@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
@@ -16,6 +17,10 @@ import { Select } from '@/shared/ui/select';
 type RiskFilter = 'all' | RiskType;
 
 export default function ClientsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const targetClientId = searchParams.get('clientId');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
@@ -46,6 +51,22 @@ export default function ClientsPage() {
 
     void loadClients();
   }, []);
+
+  useEffect(() => {
+    if (!targetClientId || clients.length === 0) return;
+    const hasMatchedClient = clients.some((item) => item.clientId === targetClientId);
+    if (!hasMatchedClient) {
+      router.replace(pathname, { scroll: false });
+    }
+  }, [clients, pathname, router, targetClientId]);
+
+  const selectedClientFromQuery = useMemo(() => {
+    if (!targetClientId) return null;
+    return clients.find((item) => item.clientId === targetClientId) ?? null;
+  }, [clients, targetClientId]);
+
+  const activeClient = selectedClientFromQuery ?? selectedClient;
+  const isQueryDrawerOpen = Boolean(targetClientId && selectedClientFromQuery);
 
   const filteredClients = useMemo(() => {
     const normalizedKeyword = searchKeyword.trim();
@@ -211,9 +232,17 @@ export default function ClientsPage() {
       </div>
 
       <ClientDetailDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        client={selectedClient}
+        open={isDrawerOpen || isQueryDrawerOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && targetClientId) {
+            router.replace(pathname, { scroll: false });
+          }
+          if (!nextOpen) {
+            setSelectedClient(null);
+          }
+          setIsDrawerOpen(nextOpen);
+        }}
+        client={activeClient}
       />
     </section>
   );
