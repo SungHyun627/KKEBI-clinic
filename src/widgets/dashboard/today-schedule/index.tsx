@@ -44,16 +44,22 @@ export default function TodayScheduleSection() {
   }
 
   return (
-    <section className="flex w-full flex-col items-start gap-3">
+    <section className="flex w-full flex-col items-start gap-4">
       <Title title="오늘의 일정" />
-      <div className="w-full">
-        <TodayScheduleHeader />
+      <div className="w-full mb-3">
+        <div className="grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
+          <span className="body-14 font-semibold text-label-neutral">시간</span>
+          <span className="body-14 font-semibold text-label-neutral">상담 유형</span>
+          <span className="body-14 text-center font-semibold text-label-neutral">위험 유형</span>
+          <span className="body-14 font-semibold text-label-neutral">기분 및 스트레스 점수</span>
+          <span className="body-14  font-semibold text-label-neutral"></span>
+        </div>
         {schedules.length === 0 ? (
           <div className="body-14 flex w-full items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
             오늘 예정된 일정이 없습니다.
           </div>
         ) : (
-          <ul className="counselor-inquiry-scroll flex max-h-[420px] w-full flex-col overflow-y-auto">
+          <ul className="flex w-full flex-col">
             {schedules.map((schedule, index) => (
               <TodayScheduleListItem
                 key={schedule.id}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -30,7 +30,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const userName = getAuthSession()?.userName || '홍길동';
+  const userName = useSyncExternalStore(
+    () => () => {},
+    () => getAuthSession()?.userName || '홍길동',
+    () => '홍길동',
+  );
   const isSessionDetailPage = pathname.startsWith('/sessions/');
 
   useEffect(() => {
@@ -57,20 +61,26 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <Sidebar>
           <div className="flex w-full flex-col gap-5 pl-5 pr-[21px] pt-[18px] max-[800px]:items-center max-[800px]:px-2">
             <SidebarHeader>
-              <Image
-                src="/images/kkebi-logo.png"
-                alt="Kkebi Clinic"
-                width={104}
-                height={37}
-                className="block max-[800px]:hidden"
-              />
-              <Image
-                src="/images/logo.png"
-                alt="Kkebi Clinic logo"
-                width={32}
-                height={32}
-                className="hidden max-[800px]:block"
-              />
+              <Link
+                href="/"
+                aria-label="대시보드로 이동"
+                className="inline-flex hover:cursor-pointer"
+              >
+                <Image
+                  src="/images/kkebi-logo.png"
+                  alt="Kkebi Clinic"
+                  width={104}
+                  height={37}
+                  className="block max-[800px]:hidden"
+                />
+                <Image
+                  src="/images/logo.png"
+                  alt="Kkebi Clinic logo"
+                  width={32}
+                  height={32}
+                  className="hidden max-[800px]:block"
+                />
+              </Link>
             </SidebarHeader>
             <SidebarContent className="gap-5">
               <SidebarMenu>

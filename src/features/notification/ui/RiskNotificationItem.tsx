@@ -6,9 +6,13 @@ import { Button } from '@/shared/ui/button';
 
 interface RiskNotificationItemProps {
   notification: RiskNotification;
+  onImmediateCheck?: () => void;
 }
 
-export default function RiskNotificationItem({ notification }: RiskNotificationItemProps) {
+export default function RiskNotificationItem({
+  notification,
+  onImmediateCheck,
+}: RiskNotificationItemProps) {
   const router = useRouter();
 
   return (
@@ -19,7 +23,15 @@ export default function RiskNotificationItem({ notification }: RiskNotificationI
           {notification.description}
         </p>
       </div>
-      <Button className="w-full" type="button" size="md" onClick={() => router.push('/clients')}>
+      <Button
+        className="w-full"
+        type="button"
+        size="md"
+        onClick={() => {
+          onImmediateCheck?.();
+          router.push(`/clients?clientId=${encodeURIComponent(notification.clientId)}`);
+        }}
+      >
         즉시 확인하기
       </Button>
     </div>
