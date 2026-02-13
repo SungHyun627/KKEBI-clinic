@@ -22,7 +22,7 @@ const RiskAlert = ({ alert }: RiskAlertProps) => {
           type="button"
           size="sm"
           className="shrink-0"
-          onClick={() => router.push('/clients')}
+          onClick={() => router.push(`/clients?clientId=${encodeURIComponent(alert.clientId)}`)}
         >
           확인하기
         </Button>

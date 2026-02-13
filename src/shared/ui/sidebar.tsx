@@ -9,7 +9,7 @@ const Sidebar = React.forwardRef<HTMLElement, React.ComponentProps<'aside'>>(
       <aside
         ref={ref}
         className={cn(
-          'flex h-screen w-full max-w-[258px] flex-col border-r border-neutral-95 bg-neutral-99 max-[800px]:max-w-[88px]',
+          'relative flex min-h-full w-full max-w-[258px] self-stretch flex-col border-r border-neutral-95 bg-neutral-99 max-[800px]:max-w-[88px]',
           className,
         )}
         {...props}
@@ -35,7 +35,13 @@ SidebarContent.displayName = 'SidebarContent';
 
 const SidebarFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
-    return <div ref={ref} className={cn('mt-auto p-4', className)} {...props} />;
+    return (
+      <div
+        ref={ref}
+        className={cn('sticky bottom-0 mt-auto bg-neutral-99 p-4', className)}
+        {...props}
+      />
+    );
   },
 );
 SidebarFooter.displayName = 'SidebarFooter';
