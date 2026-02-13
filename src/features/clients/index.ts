@@ -3,5 +3,6 @@ export type {
   ClientLookupItem,
   ClientDetailData,
   ClientDetailResponse,
+  CounselingChiefConcern,
   RiskReason,
 } from './types/client';

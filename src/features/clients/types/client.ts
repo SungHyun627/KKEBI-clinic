@@ -14,7 +14,18 @@ export interface ClientLookupItem {
 
 export type RiskReason = '자살 언급' | '자해 시도' | '타해 위험';
 export type TaskStatus = '완수' | '진행중' | '미완수';
-export type PaymentStatus = '완납' | '미납';
+export type PaymentStatus = '납부' | '미납';
+export type CounselingChiefConcern =
+  | '직장'
+  | '건강'
+  | '돈'
+  | '가족'
+  | '연애•결혼'
+  | '우정'
+  | '진로•취업'
+  | '반려동물'
+  | '학업'
+  | '기타';
 
 export interface ClientRiskRecord {
   date: string;
@@ -32,7 +43,7 @@ export interface ClientCheckinRecord {
 
 export interface ClientCounselingRecord {
   dateTime: string;
-  chiefConcern: string;
+  chiefConcern: CounselingChiefConcern;
   taskName: string;
   taskStatus: TaskStatus;
   paymentStatus: PaymentStatus;

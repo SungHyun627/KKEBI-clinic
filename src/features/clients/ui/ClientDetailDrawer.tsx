@@ -12,12 +12,8 @@ import ClientInfoField from './ClientInfoField';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
 import CheckinHistorySection from './CheckinHistorySection';
-import type {
-  ClientDetailData,
-  ClientLookupItem,
-  PaymentStatus,
-  TaskStatus,
-} from '../types/client';
+import CounselingHistorySection from './CounselingHistorySection';
+import type { ClientDetailData, ClientLookupItem } from '../types/client';
 import Divider from '@/shared/ui/divider';
 
 interface ClientDetailDrawerProps {
@@ -206,30 +202,7 @@ export default function ClientDetailDrawer({
 
               <Divider />
               <CheckinHistorySection checkins={detail?.recentCheckins ?? []} />
-
-              <section className="rounded-xl border border-neutral-95 bg-white p-4">
-                <h3 className="body-16 font-semibold text-label-normal">상담 내역</h3>
-                {detail && detail.counselingHistory.length > 0 ? (
-                  <ul className="mt-3 flex flex-col gap-2">
-                    {detail.counselingHistory.map((history) => (
-                      <li
-                        key={`${detail.clientId}-${history.dateTime}-${history.taskName}`}
-                        className="grid grid-cols-[1.4fr_1fr_1.8fr_auto_auto] items-center gap-2 rounded-lg border border-neutral-95 px-3 py-2"
-                      >
-                        <span className="body-12 text-label-alternative">{history.dateTime}</span>
-                        <span className="body-12 text-label-normal">{history.chiefConcern}</span>
-                        <span className="body-12 text-label-normal">{history.taskName}</span>
-                        <TaskStatusChip status={history.taskStatus} />
-                        <PaymentStatusChip status={history.paymentStatus} />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="body-14 mt-2 text-label-alternative">
-                    등록된 상담 내역이 없습니다.
-                  </p>
-                )}
-              </section>
+              <CounselingHistorySection records={detail?.counselingHistory ?? []} />
 
               <section className="rounded-xl border border-neutral-95 bg-white p-4">
                 <h3 className="body-16 font-semibold text-label-normal">평가 척도 결과</h3>
@@ -264,33 +237,6 @@ export default function ClientDetailDrawer({
         </div>
       </DrawerContent>
     </Drawer>
-  );
-}
-
-function TaskStatusChip({ status }: { status: TaskStatus }) {
-  const styleByStatus: Record<TaskStatus, string> = {
-    완수: 'border-[rgba(66,158,0,0.50)] bg-[rgba(66,158,0,0.10)] text-[#429E00]',
-    진행중: 'border-[rgba(255,146,0,0.50)] bg-[rgba(255,146,0,0.10)] text-[#FF9200]',
-    미완수: 'border-[rgba(229,34,34,0.50)] bg-[rgba(229,34,34,0.10)] text-[#E52222]',
-  };
-
-  return (
-    <span className={`body-12 rounded-[100px] border px-2 py-1 ${styleByStatus[status]}`}>
-      {status}
-    </span>
-  );
-}
-
-function PaymentStatusChip({ status }: { status: PaymentStatus }) {
-  const styleByStatus: Record<PaymentStatus, string> = {
-    완납: 'border-neutral-90 bg-neutral-95 text-label-neutral',
-    미납: 'border-[rgba(229,34,34,0.50)] bg-[rgba(229,34,34,0.10)] text-[#E52222]',
-  };
-
-  return (
-    <span className={`body-12 rounded-[100px] border px-2 py-1 ${styleByStatus[status]}`}>
-      {status}
-    </span>
   );
 }
 

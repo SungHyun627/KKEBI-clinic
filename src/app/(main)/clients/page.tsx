@@ -18,6 +18,7 @@ type RiskFilter = 'all' | RiskType;
 export default function ClientsPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
+  const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
   const [clients, setClients] = useState<ClientLookupItem[]>([]);
   const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -93,8 +94,10 @@ export default function ClientsPage() {
           <Select
             placeholder="위험 유형"
             value={riskFilter}
+            triggerLabel={!isRiskFilterInteracted ? '위험 유형' : undefined}
             onValueChange={(value) => {
               setRiskFilter(value as RiskFilter);
+              setIsRiskFilterInteracted(true);
               setPage(1);
             }}
             options={[

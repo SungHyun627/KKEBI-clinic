@@ -11,15 +11,31 @@ export interface SelectOption {
 
 interface SelectProps {
   className?: string;
+  triggerClassName?: string;
+  contentClassName?: string;
   options: SelectOption[];
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
   placeholder?: string;
+  triggerLabel?: string;
 }
 
 const Select = React.forwardRef<HTMLDivElement, SelectProps>(
-  ({ className, options, value, defaultValue, onValueChange, placeholder }, ref) => {
+  (
+    {
+      className,
+      triggerClassName,
+      contentClassName,
+      options,
+      value,
+      defaultValue,
+      onValueChange,
+      placeholder,
+      triggerLabel,
+    },
+    ref,
+  ) => {
     const rootRef = React.useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = React.useState(false);
     const [internalValue, setInternalValue] = React.useState(defaultValue ?? '');
@@ -60,14 +76,17 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       <div ref={setRefs} className={cn('relative w-full', className)}>
         <button
           type="button"
-          className="flex h-10 w-full items-center rounded-[12px] bg-neutral-99 px-4 py-2 outline-none transition-colors hover:border-label-strong focus:border-label-normal"
+          className={cn(
+            'flex h-10 w-full items-center rounded-[12px] bg-neutral-99 px-4 py-2 outline-none transition-colors hover:border-label-strong focus:border-label-normal',
+            triggerClassName,
+          )}
           onClick={() => setIsOpen((prev) => !prev)}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
         >
           <span className="flex w-full items-center justify-between gap-2 hover:cursor-pointer">
             <span className="truncate body-16 text-label-normal">
-              {selected?.label ?? placeholder ?? ''}
+              {triggerLabel ?? selected?.label ?? placeholder ?? ''}
             </span>
             <Image
               src={isOpen ? '/icons/up.svg' : '/icons/down.svg'}
@@ -80,8 +99,9 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
         </button>
         <div
           className={cn(
-            'absolute top-full w-full flex flex-col items-start shadow-[0_2px_8px_rgba(0,0,0,0.12)] z-50 mt-3 overflow-hidden rounded-[12px] bg-white',
+            'absolute top-full z-50 mt-3 flex w-full flex-col items-start overflow-hidden rounded-[12px] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.12)]',
             isOpen ? 'block' : 'hidden',
+            contentClassName,
           )}
           role="listbox"
         >

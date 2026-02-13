@@ -1,10 +1,22 @@
 import { NextResponse } from 'next/server';
 import { TODAY_SCHEDULES_MOCK } from '@/shared/mock/today-schedules';
-import type { ClientDetailData, RiskReason } from '@/features/clients';
+import type { ClientDetailData, CounselingChiefConcern, RiskReason } from '@/features/clients';
 
 const CHIEF_CONCERNS = ['우울', '스트레스', '수면'] as const;
 const RISK_REASONS: RiskReason[] = ['자살 언급', '자해 시도', '타해 위험'];
 const RECENT_RISK_DATES = ['2026-02-10', '2026-02-03', '2026-01-28'] as const;
+const COUNSELING_CHIEF_CONCERNS: CounselingChiefConcern[] = [
+  '직장',
+  '건강',
+  '돈',
+  '가족',
+  '연애•결혼',
+  '우정',
+  '진로•취업',
+  '반려동물',
+  '학업',
+  '기타',
+];
 
 export async function GET(_request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
@@ -84,22 +96,20 @@ export async function GET(_request: Request, context: { params: Promise<{ client
         sleepScore: Math.max(0, Math.min(5, energyScore - 1)),
       },
     ],
-    counselingHistory: [
-      {
-        dateTime: `2026-02-${String(nextDay - 2).padStart(2, '0')} ${String(nextHour).padStart(2, '0')}:00`,
-        chiefConcern: primaryConcern,
-        taskName: '감정 기록 3회 작성',
-        taskStatus: '진행중',
-        paymentStatus: '완납',
-      },
-      {
-        dateTime: `2026-02-${String(nextDay - 9).padStart(2, '0')} ${String(nextHour).padStart(2, '0')}:00`,
-        chiefConcern: CHIEF_CONCERNS[(concernIndex + 1) % CHIEF_CONCERNS.length],
-        taskName: '수면 루틴 체크',
-        taskStatus: '완수',
-        paymentStatus: '완납',
-      },
-    ],
+    counselingHistory: Array.from({ length: 4 }).map((_, idx) => ({
+      dateTime: `2026-02-${String(nextDay - (idx + 1) * 2).padStart(2, '0')} ${String(nextHour + (idx % 2)).padStart(2, '0')}:${idx % 2 === 0 ? '00' : '30'}`,
+      chiefConcern: COUNSELING_CHIEF_CONCERNS[(idNumber + idx) % COUNSELING_CHIEF_CONCERNS.length],
+      taskName:
+        idx % 4 === 0
+          ? '감정 기록 3회 작성'
+          : idx % 4 === 1
+            ? '수면 루틴 체크'
+            : idx % 4 === 2
+              ? '주간 운동 계획 실천'
+              : '스트레스 기록지 작성',
+      taskStatus: idx % 3 === 0 ? '완수' : idx % 3 === 1 ? '진행중' : '미완수',
+      paymentStatus: idx % 2 === 0 ? '납부' : '미납',
+    })),
     scaleResults: {
       phq9: target.riskType === '위험' ? 21 : target.riskType === '주의' ? 13 : 6,
       pss10: target.riskType === '위험' ? 31 : target.riskType === '주의' ? 24 : 16,
