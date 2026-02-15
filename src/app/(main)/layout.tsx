@@ -1,9 +1,10 @@
 'use client';
+import { useLocale } from 'next-intl';
 
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {
   Sidebar,
@@ -32,6 +33,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const nextLocale = locale === 'ko' ? 'en' : 'ko';
+
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userName = useSyncExternalStore(
     () => () => {},
@@ -158,13 +162,22 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
               {tNav(currentTitle)}
             </p>
-            <button
-              className="hover:cursor-pointer"
-              type="button"
-              onClick={() => setIsNotificationOpen(true)}
-            >
-              <Image src="/icons/bell.svg" alt={tNav('notifications')} width={24} height={24} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                className="hover:cursor-pointer"
+                type="button"
+                onClick={() => router.replace(pathname, { locale: nextLocale })}
+              >
+                <Image src="/icons/global.svg" alt={'한, 영변환'} width={24} height={24} />
+              </button>
+              <button
+                className="hover:cursor-pointer"
+                type="button"
+                onClick={() => setIsNotificationOpen(true)}
+              >
+                <Image src="/icons/bell.svg" alt={tNav('notifications')} width={24} height={24} />
+              </button>
+            </div>
           </div>
           <main className="flex flex-col pl-5">{children}</main>
         </SidebarInset>
