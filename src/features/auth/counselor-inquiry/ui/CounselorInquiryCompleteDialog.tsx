@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';

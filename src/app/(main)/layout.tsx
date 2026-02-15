@@ -3,8 +3,7 @@ import { useLocale } from 'next-intl';
 
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import {
   Sidebar,

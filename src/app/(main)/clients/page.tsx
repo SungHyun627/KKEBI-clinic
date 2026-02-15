@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';

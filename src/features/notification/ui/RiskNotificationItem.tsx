@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import type { RiskNotification } from '@/features/notification/types/notification';
 import { Button } from '@/shared/ui/button';
 

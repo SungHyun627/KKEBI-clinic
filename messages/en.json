@@ -19,6 +19,7 @@
     "submit": "Submit inquiry",
     "verify": "Verify",
     "resendCode": "Resend code",
+    "change": "Change",
     "all": "All",
     "profileSuffix": ","
   },
@@ -38,7 +39,10 @@
       "passwordPlaceholder": "Please enter your password",
       "keepSignedIn": "Keep me signed in",
       "forgotPassword": "Forgot password",
-      "counselorInquiry": "Counselor account inquiry"
+      "counselorInquiry": "Counselor account inquiry",
+      "invalidEmail": "Please check your email again.",
+      "failTitle": "Login failed",
+      "failBody": "No administrator account information found."
     },
     "reset": {
       "title": "Forgot password",
@@ -50,7 +54,13 @@
       "sentToSuffix": "A password reset link has been sent to {user_email}.",
       "guide1": "Please follow the instructions in the email to reset your password.",
       "guide2": "• If you don’t see the email, please check your spam folder.",
-      "guide3": "• The link is valid for 24 hours."
+      "guide3": "• The link is valid for 24 hours.",
+      "passwordResetTitle": "Reset password",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "Please enter a new password",
+      "confirmPasswordLabel": "Confirm new password",
+      "confirmPasswordPlaceholder": "Please re-enter your password",
+      "passwordRule": "*Must be within 14 characters including letters and numbers. (Special characters allowed)"
     },
     "inquiry": {
       "title": "Counselor account inquiry",

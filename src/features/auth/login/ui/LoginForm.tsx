@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { LoginFailDialog } from './LoginFailDialog';
 import { useForm } from 'react-hook-form';
 import { login } from '../api/login';
@@ -14,6 +15,8 @@ import { getInitialLoginInfo } from '../lib/getInitialLoginInfo';
 import { setAuthSession } from '../lib/authSession';
 
 const LoginForm = () => {
+  const tLogin = useTranslations('auth.login');
+  const tOtp = useTranslations('auth.otp');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
   const [saveLoginInfo, setSaveLoginInfo] = useState(getInitialLoginInfo().saveLoginInfo || false);
@@ -72,11 +75,11 @@ const LoginForm = () => {
   const onInvalid = () => {
     const { errors } = form.formState;
     if (errors.email) {
-      toast('아이디를 다시 한번 확인해주세요.');
+      toast(tLogin('invalidEmail'));
       return;
     }
     if (errors.password) {
-      toast('비밀번호를 다시 한번 확인해주세요.');
+      toast(tOtp('passwordMismatch'));
     }
   };
 
@@ -90,7 +93,7 @@ const LoginForm = () => {
         >
           <div className="flex flex-col gap-8">
             <h2 className="text-center text-[20px] leading-[30px] font-semibold text-label-normal">
-              로그인
+              {tLogin('title')}
             </h2>
             <div className="flex flex-col gap-4">
               <FormField
@@ -106,12 +109,12 @@ const LoginForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      이메일
+                      {tLogin('emailLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="example@kkebi.com"
+                        placeholder={tLogin('emailPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('email', '')}
                         icon={
@@ -149,12 +152,12 @@ const LoginForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      비밀번호
+                      {tLogin('passwordLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type={isPasswordVisible ? 'text' : 'password'}
-                        placeholder="비밀번호를 입력해주세요"
+                        placeholder={tLogin('passwordPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('password', '')}
                         rightIcon={
@@ -216,10 +219,10 @@ const LoginForm = () => {
                 />
               </svg>
             </span>
-            로그인 상태 유지
+            {tLogin('keepSignedIn')}
           </label>
           <Button type="submit" className="w-full">
-            로그인
+            {tLogin('title')}
           </Button>
         </form>
       </Form>

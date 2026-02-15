@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/shared/ui/button';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';

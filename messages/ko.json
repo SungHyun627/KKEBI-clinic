@@ -19,6 +19,7 @@
     "submit": "문의 제출",
     "verify": "인증하기",
     "resendCode": "새 코드받기",
+    "change": "변경하기",
     "all": "전체",
     "profileSuffix": "님"
   },
@@ -38,7 +39,10 @@
       "passwordPlaceholder": "비밀번호를 입력해주세요",
       "keepSignedIn": "로그인 상태 유지",
       "forgotPassword": "비밀번호 찾기",
-      "counselorInquiry": "상담사 등록 문의"
+      "counselorInquiry": "상담사 등록 문의",
+      "invalidEmail": "아이디를 다시 한번 확인해주세요.",
+      "failTitle": "로그인 실패",
+      "failBody": "관리자 계정 정보가 없습니다."
     },
     "reset": {
       "title": "비밀번호 찾기",
@@ -50,7 +54,13 @@
       "sentToSuffix": "(으)로 비밀번호 재설정 링크가 발송되었습니다.",
       "guide1": "안내된 메일에 따라 비밀번호 재설정을 완료해 주세요.",
       "guide2": "• 이메일이 도착하지 않았다면 스팸 폴더를 확인해 주세요.",
-      "guide3": "• 링크는 24시간 동안 유효합니다."
+      "guide3": "• 링크는 24시간 동안 유효합니다.",
+      "passwordResetTitle": "비밀번호 재설정",
+      "newPasswordLabel": "새 비밀번호",
+      "newPasswordPlaceholder": "새 비밀번호를 입력해주세요",
+      "confirmPasswordLabel": "새 비밀번호 확인",
+      "confirmPasswordPlaceholder": "비밀번호를 다시 입력해주세요",
+      "passwordRule": "*영문+숫자가 포함된 14자리 이내여야 합니다. (특수기호 포함 자유)"
     },
     "inquiry": {
       "title": "상담사 등록 문의",

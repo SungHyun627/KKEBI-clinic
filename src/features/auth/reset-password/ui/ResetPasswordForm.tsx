@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useForm } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
@@ -10,6 +11,8 @@ import { toast } from '@/shared/ui/toast';
 import { ResetPasswordFields } from '../types/resetPassword';
 
 const ResetPasswordForm = () => {
+  const tReset = useTranslations('auth.reset');
+  const tCommon = useTranslations('common');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const router = useRouter();
@@ -49,7 +52,7 @@ const ResetPasswordForm = () => {
       >
         <div className="flex flex-col gap-8">
           <h2 className="text-center text-[20px] leading-[30px] font-semibold text-label-normal">
-            비밀번호 재설정
+            {tReset('passwordResetTitle')}
           </h2>
           <div className="flex flex-col items-start gap-6 w-full">
             <div className="flex flex-col gap-4 w-full">
@@ -74,12 +77,12 @@ const ResetPasswordForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      새 비밀번호
+                      {tReset('newPasswordLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type={isPasswordVisible ? 'text' : 'password'}
-                        placeholder="새 비밀번호를 입력해주세요"
+                        placeholder={tReset('newPasswordPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('newPassword', '')}
                         rightIcon={
@@ -124,12 +127,12 @@ const ResetPasswordForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      새 비밀번호 확인
+                      {tReset('confirmPasswordLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type={isConfirmPasswordVisible ? 'text' : 'password'}
-                        placeholder="비밀번호를 다시 입력해주세요"
+                        placeholder={tReset('confirmPasswordPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('confirmPassword', '')}
                         rightIcon={
@@ -163,9 +166,7 @@ const ResetPasswordForm = () => {
                 )}
               />
             </div>
-            <span className="body-14 text-label-alternative">
-              *영문+숫자가 포함된 14자리 이내여야 합니다. (특수기호 포함 자유){' '}
-            </span>
+            <span className="body-14 text-label-alternative">{tReset('passwordRule')}</span>
           </div>
         </div>
         <Button
@@ -173,7 +174,7 @@ const ResetPasswordForm = () => {
           className="w-full"
           disabled={!form.watch('newPassword') || !form.watch('confirmPassword')}
         >
-          변경하기
+          {tCommon('change')}
         </Button>
       </form>
     </Form>
