@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import type { ClientCheckinRecord } from '../types/client';
 
 interface CheckinHistorySectionProps {
@@ -12,13 +13,14 @@ const CHECKIN_METRICS = [
 ] as const;
 
 export default function CheckinHistorySection({ checkins }: CheckinHistorySectionProps) {
+  const tCheckin = useTranslations('clients.checkin');
   if (checkins.length === 0) {
     return (
       <section className="flex w-full flex-col items-start gap-5">
         <div className="flex w-full items-center justify-between">
-          <span className="body-18 font-semibold text-neutral-20">체크인 내역</span>
+          <span className="body-18 font-semibold text-neutral-20">{tCheckin('title')}</span>
         </div>
-        <p className="body-14 text-label-alternative">1달 간 체크인 이력이 없습니다.</p>
+        <p className="body-14 text-label-alternative">{tCheckin('emptyLastMonth')}</p>
       </section>
     );
   }
@@ -28,9 +30,9 @@ export default function CheckinHistorySection({ checkins }: CheckinHistorySectio
   return (
     <section className="flex w-full flex-col items-start gap-5">
       <div className="flex w-full items-center justify-between">
-        <span className="body-18 font-semibold text-neutral-20">체크인 내역</span>
+        <span className="body-18 font-semibold text-neutral-20">{tCheckin('title')}</span>
         <div className="flex items-center gap-2">
-          <span className="body-14 text-label-alternative">최근 체크인</span>
+          <span className="body-14 text-label-alternative">{tCheckin('latest')}</span>
           <span className="body-14 text-[#303030]">
             {latest.date} {latest.time}
           </span>
@@ -40,13 +42,21 @@ export default function CheckinHistorySection({ checkins }: CheckinHistorySectio
       <div className="flex w-full items-center justify-between">
         {CHECKIN_METRICS.map(({ key, label }) => {
           const score = latest[key] ?? 0;
+          const metricLabel =
+            label === '기분'
+              ? tCheckin('mood')
+              : label === '스트레스'
+                ? tCheckin('stress')
+                : label === '에너지'
+                  ? tCheckin('energy')
+                  : tCheckin('sleep');
           return (
             <div
               key={key}
               className="flex w-full max-w-[140px] flex-col items-start rounded-[20px] bg-white px-[14px] py-3"
             >
               <span className="body-14 flex justify-center rounded-[10px] border border-neutral-95 px-2 py-[2px]">
-                {label}
+                {metricLabel}
               </span>
               <div className="flex items-center gap-3">
                 <span className="text-[32px] font-semibold leading-[160%] text-label-normal">

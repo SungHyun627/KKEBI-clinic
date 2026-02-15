@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
@@ -17,6 +18,10 @@ import { Select } from '@/shared/ui/select';
 type RiskFilter = 'all' | RiskType;
 
 export default function ClientsPage() {
+  const tClientsList = useTranslations('clients.list');
+  const tClientsFilter = useTranslations('clients.filter.risk');
+  const tClientsCheckin = useTranslations('clients.checkin');
+  const tClientsHistory = useTranslations('clients.history');
   const router = useRouter();
   const pathname = usePathname();
   const targetClientId =
@@ -40,7 +45,7 @@ export default function ClientsPage() {
 
       if (!result.success || !result.data) {
         setClients([]);
-        setErrorMessage(result.message || '내담자 목록을 불러오지 못했습니다.');
+        setErrorMessage(result.message || tClientsList('loadFailed'));
         setIsLoading(false);
         return;
       }
@@ -93,7 +98,7 @@ export default function ClientsPage() {
         <div className="flex w-full min-w-0 flex-1 items-center gap-4">
           <div className="w-full min-w-0 max-w-[416px]">
             <Input
-              placeholder="내담자 성함을 검색해 보세요."
+              placeholder={tClientsList('searchPlaceholder')}
               className="min-w-0"
               value={searchKeyword}
               onChange={(event) => {
@@ -115,39 +120,39 @@ export default function ClientsPage() {
             />
           </div>
           <Select
-            placeholder="위험 유형"
+            placeholder={tClientsList('riskType')}
             value={riskFilter}
-            triggerLabel={!isRiskFilterInteracted ? '위험 유형' : undefined}
+            triggerLabel={!isRiskFilterInteracted ? tClientsList('riskType') : undefined}
             onValueChange={(value) => {
               setRiskFilter(value as RiskFilter);
               setIsRiskFilterInteracted(true);
               setPage(1);
             }}
             options={[
-              { label: '전체', value: 'all' },
-              { label: '안정', value: '안정' },
-              { label: '주의', value: '주의' },
-              { label: '위험', value: '위험' },
+              { label: tClientsList('all'), value: 'all' },
+              { label: tClientsFilter('stable'), value: '안정' },
+              { label: tClientsFilter('caution'), value: '주의' },
+              { label: tClientsFilter('high'), value: '위험' },
             ]}
             className="w-31"
           />
         </div>
         <div className="flex items-center gap-3">
-          <Button size="sm">내담자 등록</Button>
+          <Button size="sm">{tClientsList('register')}</Button>
           <Button size="sm" variant="outline">
-            종결 상담 확인
+            {tClientsList('closedSessions')}
           </Button>
         </div>
       </div>
       <div className="flex w-full flex-col items-start gap-[23px]">
         <div className="flex w-full items-end justify-between">
           <div className="body-18 text-label-normal font-semibold">
-            총 {filteredClients.length}명
+            {tClientsList('totalCount', { count: filteredClients.length })}
           </div>
           <div className="flex items-center gap-[3px]">
             <button
               type="button"
-              aria-label="이전 10개"
+              aria-label={tClientsList('previous10')}
               className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
@@ -156,7 +161,7 @@ export default function ClientsPage() {
             </button>
             <button
               type="button"
-              aria-label="다음 10개"
+              aria-label={tClientsList('next10')}
               className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage >= totalPages}
@@ -168,18 +173,24 @@ export default function ClientsPage() {
 
         <div className="w-full mb-12">
           <div className="grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
-            <span className="body-14 font-semibold text-label-neutral">시간</span>
-            <span className="body-14 font-semibold text-label-neutral">내담자명</span>
-            <span className="body-14 text-center font-semibold text-label-neutral">위험 유형</span>
+            <span className="body-14 font-semibold text-label-neutral">{tClientsList('time')}</span>
             <span className="body-14 font-semibold text-label-neutral">
-              기분/스트레스/에너지 점수
+              {tClientsList('clientName')}
             </span>
-            <span className="body-14  font-semibold text-label-neutral">주 호소 문제</span>
+            <span className="body-14 text-center font-semibold text-label-neutral">
+              {tClientsList('riskType')}
+            </span>
+            <span className="body-14 font-semibold text-label-neutral">
+              {tClientsList('moodStressEnergyScore')}
+            </span>
+            <span className="body-14  font-semibold text-label-neutral">
+              {tClientsHistory('presentingConcern')}
+            </span>
           </div>
 
           {isLoading ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-              내담자 목록을 불러오는 중입니다.
+              {tClientsList('loading')}
             </div>
           ) : errorMessage ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-status-negative">
@@ -187,7 +198,7 @@ export default function ClientsPage() {
             </div>
           ) : filteredClients.length === 0 ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-              조건에 맞는 내담자가 없습니다.
+              {tClientsList('empty')}
             </div>
           ) : (
             <ul className="flex w-full flex-col">
@@ -217,9 +228,9 @@ export default function ClientsPage() {
                     <RiskTypeChip value={client.riskType} />
                   </span>
                   <span className="flex items-center gap-2">
-                    <MoodScoreChip label="기분" score={client.moodScore} />
-                    <MoodScoreChip label="스트레스" score={client.stressScore} />
-                    <MoodScoreChip label="에너지" score={client.energyScore} />
+                    <MoodScoreChip label={tClientsCheckin('mood')} score={client.moodScore} />
+                    <MoodScoreChip label={tClientsCheckin('stress')} score={client.stressScore} />
+                    <MoodScoreChip label={tClientsCheckin('energy')} score={client.energyScore} />
                   </span>
                   <span className="flex flex-wrap gap-2">
                     {client.chiefConcern.map((concern) => (

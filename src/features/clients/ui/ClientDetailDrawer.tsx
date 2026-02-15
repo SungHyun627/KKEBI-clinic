@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { getClientDetail } from '@/features/clients';
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import Image from 'next/image';
@@ -32,6 +33,8 @@ export default function ClientDetailDrawer({
   onOpenChange,
   client,
 }: ClientDetailDrawerProps) {
+  const tClientsDetail = useTranslations('clients.detail');
+  const tNotification = useTranslations('notification.common');
   const [detail, setDetail] = useState<ClientDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -46,7 +49,7 @@ export default function ClientDetailDrawer({
 
       if (!result.success || !result.data) {
         setDetail(null);
-        setErrorMessage(result.message || '내담자 상세 정보를 불러오지 못했습니다.');
+        setErrorMessage(result.message || tClientsDetail('loadFailed'));
         setIsLoading(false);
         return;
       }
@@ -57,7 +60,7 @@ export default function ClientDetailDrawer({
     };
 
     void loadClientDetail();
-  }, [open, client?.clientId]);
+  }, [open, client?.clientId, tClientsDetail]);
 
   const displayClient = detail ?? client;
 
@@ -69,15 +72,15 @@ export default function ClientDetailDrawer({
         className="flex max-w-[695px] flex-col gap-[26px] overflow-y-auto px-8 py-[23px] bg-neutral-99"
       >
         <DrawerHeader className="sr-only p-0">
-          <DrawerTitle>내담자 상세 정보</DrawerTitle>
+          <DrawerTitle>{tClientsDetail('drawerTitle')}</DrawerTitle>
         </DrawerHeader>
         <DrawerClose asChild>
           <button
             type="button"
-            aria-label="접기"
+            aria-label={tNotification('fold')}
             className="flex h-6 w-6 items-center justify-center hover:cursor-pointer"
           >
-            <Image src="/icons/fold.svg" alt="접기" width={20} height={20} />
+            <Image src="/icons/fold.svg" alt={tNotification('fold')} width={20} height={20} />
           </button>
         </DrawerClose>
         <ClientDetailDrawerBody
@@ -97,10 +100,12 @@ function ClientDetailDrawerBody({
   displayClient,
   detail,
 }: ClientDetailDrawerBodyProps) {
+  const tClientsDetail = useTranslations('clients.detail');
+
   if (isLoading) {
     return (
       <div className={DRAWER_BODY_CLASSNAME}>
-        <div className="body-14 text-label-alternative">상세 정보를 불러오는 중입니다.</div>
+        <div className="body-14 text-label-alternative">{tClientsDetail('loading')}</div>
       </div>
     );
   }

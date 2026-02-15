@@ -1,6 +1,7 @@
 'use client';
 
 import { type ReactNode, useMemo, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { Select } from '@/shared/ui/select';
 import type { ClientCounselingRecord, CounselingChiefConcern } from '../types/client';
 import Divider from '@/shared/ui/divider';
@@ -25,23 +26,26 @@ const COUNSELING_FILTERS: CounselingChiefConcern[] = [
 
 type FilterValue = '전체' | CounselingChiefConcern;
 
-const FILTER_OPTIONS = [
-  { label: '전체', value: '전체' as const },
-  ...COUNSELING_FILTERS.map((concern) => ({
-    label: concern,
-    value: concern,
-  })),
-];
-
-const formatCounselingDateTime = (raw: string) => {
+const formatCounselingDateTime = (raw: string, locale: string) => {
   const parsed = new Date(raw);
   if (!Number.isNaN(parsed.getTime())) {
-    const year = parsed.getFullYear();
-    const month = parsed.getMonth() + 1;
-    const day = parsed.getDate();
+    if (locale === 'ko') {
+      const year = parsed.getFullYear();
+      const month = parsed.getMonth() + 1;
+      const day = parsed.getDate();
+      const hours = String(parsed.getHours()).padStart(2, '0');
+      const minutes = String(parsed.getMinutes()).padStart(2, '0');
+      return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
+    }
+
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }).format(parsed);
     const hours = String(parsed.getHours()).padStart(2, '0');
     const minutes = String(parsed.getMinutes()).padStart(2, '0');
-    return `${year}년 ${month}월 ${day}일 ${hours}:${minutes}`;
+    return `${formattedDate} ${hours}:${minutes}`;
   }
 
   const normalized = raw.replace('T', ' ');
@@ -64,8 +68,39 @@ const getTaskStatusClassName = (status: ClientCounselingRecord['taskStatus']) =>
 };
 
 export default function CounselingHistorySection({ records }: CounselingHistorySectionProps) {
+  const tCommon = useTranslations('common');
+  const tHistory = useTranslations('clients.history');
+  const tConcerns = useTranslations('clients.concerns');
+  const locale = useLocale();
   const [filterValue, setFilterValue] = useState<FilterValue>('전체');
   const [isFilterInteracted, setIsFilterInteracted] = useState(false);
+
+  const filterOptions = [
+    { label: tCommon('all'), value: '전체' as const },
+    ...COUNSELING_FILTERS.map((concern) => ({
+      label:
+        concern === '직장'
+          ? tConcerns('work')
+          : concern === '건강'
+            ? tConcerns('health')
+            : concern === '돈'
+              ? tConcerns('money')
+              : concern === '가족'
+                ? tConcerns('family')
+                : concern === '연애•결혼'
+                  ? tConcerns('datingMarriage')
+                  : concern === '우정'
+                    ? tConcerns('friendship')
+                    : concern === '진로•취업'
+                      ? tConcerns('careerJob')
+                      : concern === '반려동물'
+                        ? tConcerns('pet')
+                        : concern === '학업'
+                          ? tConcerns('study')
+                          : tConcerns('other'),
+      value: concern,
+    })),
+  ];
 
   const filteredRecords = useMemo(
     () =>
@@ -78,17 +113,17 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
   return (
     <section className="flex w-full flex-col gap-5">
       <div className="flex w-full items-center justify-between">
-        <span className="body-18 font-semibold text-neutral-20">상담 내역</span>
+        <span className="body-18 font-semibold text-neutral-20">{tHistory('title')}</span>
         <Select
           className="w-[138px]"
           triggerClassName="bg-white"
           value={filterValue}
-          triggerLabel={!isFilterInteracted ? '주호소 문제' : undefined}
+          triggerLabel={!isFilterInteracted ? tHistory('presentingConcernCompact') : undefined}
           onValueChange={(value) => {
             setFilterValue(value as FilterValue);
             setIsFilterInteracted(true);
           }}
-          options={FILTER_OPTIONS}
+          options={filterOptions}
         />
       </div>
 
@@ -98,11 +133,12 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
             <CounselingHistoryCard
               key={`${history.dateTime}-${history.taskName}`}
               history={history}
+              locale={locale}
             />
           ))}
         </ul>
       ) : (
-        <p className="body-14 mt-2 text-label-alternative">조건에 맞는 상담 내역이 없습니다.</p>
+        <p className="body-14 mt-2 text-label-alternative">{tHistory('emptyFiltered')}</p>
       )}
     </section>
   );
@@ -110,50 +146,88 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
 
 interface CounselingHistoryCardProps {
   history: ClientCounselingRecord;
+  locale: string;
 }
 
-function CounselingHistoryCard({ history }: CounselingHistoryCardProps) {
+function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) {
+  const tCommon = useTranslations('common');
+  const tHistory = useTranslations('clients.history');
+  const tConcerns = useTranslations('clients.concerns');
+
+  const concernLabel =
+    history.chiefConcern === '직장'
+      ? tConcerns('work')
+      : history.chiefConcern === '건강'
+        ? tConcerns('health')
+        : history.chiefConcern === '돈'
+          ? tConcerns('money')
+          : history.chiefConcern === '가족'
+            ? tConcerns('family')
+            : history.chiefConcern === '연애•결혼'
+              ? tConcerns('datingMarriage')
+              : history.chiefConcern === '우정'
+                ? tConcerns('friendship')
+                : history.chiefConcern === '진로•취업'
+                  ? tConcerns('careerJob')
+                  : history.chiefConcern === '반려동물'
+                    ? tConcerns('pet')
+                    : history.chiefConcern === '학업'
+                      ? tConcerns('study')
+                      : tConcerns('other');
+
+  const paymentStatusLabel =
+    history.paymentStatus === '미납'
+      ? tHistory('paymentStatus.unpaid')
+      : tHistory('paymentStatus.paid');
+
+  const taskStatusLabel =
+    history.taskStatus === '미완수'
+      ? tHistory('taskStatus.notCompleted')
+      : history.taskStatus === '진행중'
+        ? tHistory('taskStatus.inProgress')
+        : tHistory('taskStatus.completed');
+
   return (
     <li className="flex w-full">
       <div className="flex flex-col w-full justify-center items-start gap-[18px] p-[26px] rounded-3xl bg-white">
         <div className="flex w-full justify-between items-center">
           <span className="body-18 font-semibold text-label-strong">
-            {formatCounselingDateTime(history.dateTime)}
+            {formatCounselingDateTime(history.dateTime, locale)}
           </span>
-          <Button size="sm">리포트 보기</Button>
+          <Button size="sm">{tCommon('viewReport')}</Button>
         </div>
         <Divider />
         <div className="grid w-full grid-cols-2 items-start gap-x-10">
           <div className="flex min-w-0 flex-col items-start gap-2">
             <CounselingField
-              label="주 호소 문제"
+              label={tHistory('presentingConcern')}
               value={
                 <span className="flex items-center justify-center gap-[3px] font-semibold rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 leading-none text-label-normal">
-                  {history.chiefConcern}
+                  {concernLabel}
                 </span>
               }
             />
             <CounselingField
-              label="지불 여부"
+              label={tHistory('paymentStatusLabel')}
               value={
                 <span
                   className={`body-16 font-medium ${getPaymentStatusClassName(history.paymentStatus)}`}
                 >
-                  {history.paymentStatus}
+                  {paymentStatusLabel}
                 </span>
               }
             />
           </div>
           <div className="flex min-w-0 flex-col items-start gap-2">
             <CounselingField
-              label="과제명"
+              label={tHistory('assignment')}
               value={<span className="body-16 text-label-neutral">{history.taskName}</span>}
             />
             <CounselingField
-              label="과제 여부"
+              label={tHistory('assignmentStatus')}
               value={
                 <span className={`body-16 ${getTaskStatusClassName(history.taskStatus)}`}>
-                  {history.taskStatus}
+                  {taskStatusLabel}
                 </span>
               }
             />

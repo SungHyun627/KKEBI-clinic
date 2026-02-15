@@ -124,7 +124,32 @@
   },
   "clients": {
     "list": {
-      "empty": "No clients match the selected criteria."
+      "empty": "No clients match the selected criteria.",
+      "loading": "Loading client list.",
+      "loadFailed": "Failed to load client list.",
+      "searchPlaceholder": "Search by client name.",
+      "riskType": "Risk level",
+      "all": "All",
+      "register": "Register client",
+      "closedSessions": "View closed sessions",
+      "totalCount": "Total {count}",
+      "previous10": "Previous 10",
+      "next10": "Next 10",
+      "time": "Time",
+      "clientName": "Client name",
+      "moodStressEnergyScore": "Mood/Stress/Energy score"
+    },
+    "concerns": {
+      "work": "Work",
+      "health": "Health",
+      "money": "Money",
+      "family": "Family",
+      "datingMarriage": "Dating/Marriage",
+      "friendship": "Friendship",
+      "careerJob": "Career/Job",
+      "pet": "Pet",
+      "study": "Study",
+      "other": "Other"
     },
     "filter": {
       "risk": {
@@ -144,10 +169,14 @@
       "startDate": "Start date",
       "sessions": "Sessions",
       "visitReason": "Visit reason",
-      "nextSession": "Next session"
+      "nextSession": "Next session",
+      "drawerTitle": "Client detail",
+      "loading": "Loading detail information.",
+      "loadFailed": "Failed to load client detail."
     },
     "risk": {
       "title": "Recent risks",
+      "emptyLastMonth": "No risk factors were detected in the last month.",
       "reason": {
         "suicidalIdeationMentioned": "Suicidal ideation mentioned",
         "selfHarmAttempt": "Self-harm attempt",
@@ -160,17 +189,21 @@
       "mood": "Mood",
       "stress": "Stress",
       "energy": "Energy",
-      "sleep": "Sleep"
+      "sleep": "Sleep",
+      "emptyLastMonth": "There are no check-in records in the last month."
     },
     "history": {
       "title": "Session history",
+      "presentingConcernCompact": "Primary concern",
       "presentingConcern": "Presenting concern",
+      "paymentStatusLabel": "Payment status",
       "paymentStatus": {
         "paid": "Paid",
         "unpaid": "Unpaid"
       },
       "assignment": "Assignment",
       "assignmentStatus": "Assignment status",
+      "emptyFiltered": "No session records match the selected condition.",
       "taskStatus": {
         "completed": "Completed",
         "inProgress": "In progress",
@@ -195,7 +228,8 @@
       "supportReason": "Why",
       "familyCohesion": "Family cohesion",
       "familyCohesionReason": "Why",
-      "selfDescription": "Self-description in one sentence"
+      "selfDescription": "Self-description in one sentence",
+      "empty": "There are no scale results yet."
     }
   },
   "notification": {

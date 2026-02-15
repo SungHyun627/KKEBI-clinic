@@ -124,7 +124,32 @@
   },
   "clients": {
     "list": {
-      "empty": "조건에 맞는 내담자가 없습니다."
+      "empty": "조건에 맞는 내담자가 없습니다.",
+      "loading": "내담자 목록을 불러오는 중입니다.",
+      "loadFailed": "내담자 목록을 불러오지 못했습니다.",
+      "searchPlaceholder": "내담자 성함을 검색해 보세요.",
+      "riskType": "위험 유형",
+      "all": "전체",
+      "register": "내담자 등록",
+      "closedSessions": "종결 상담 확인",
+      "totalCount": "총 {count}명",
+      "previous10": "이전 10개",
+      "next10": "다음 10개",
+      "time": "시간",
+      "clientName": "내담자명",
+      "moodStressEnergyScore": "기분/스트레스/에너지 점수"
+    },
+    "concerns": {
+      "work": "직장",
+      "health": "건강",
+      "money": "돈",
+      "family": "가족",
+      "datingMarriage": "연애•결혼",
+      "friendship": "우정",
+      "careerJob": "진로•취업",
+      "pet": "반려동물",
+      "study": "학업",
+      "other": "기타"
     },
     "filter": {
       "risk": {
@@ -144,10 +169,14 @@
       "startDate": "시작일",
       "sessions": "상담 횟수",
       "visitReason": "방문 목적",
-      "nextSession": "다음 상담일"
+      "nextSession": "다음 상담일",
+      "drawerTitle": "내담자 상세 정보",
+      "loading": "상세 정보를 불러오는 중입니다.",
+      "loadFailed": "내담자 상세 정보를 불러오지 못했습니다."
     },
     "risk": {
       "title": "최근 위험",
+      "emptyLastMonth": "1달 간 감지된 위험 요소가 없습니다.",
       "reason": {
         "suicidalIdeationMentioned": "자살 언급",
         "selfHarmAttempt": "자해 시도",
@@ -160,17 +189,21 @@
       "mood": "기분",
       "stress": "스트레스",
       "energy": "에너지",
-      "sleep": "수면"
+      "sleep": "수면",
+      "emptyLastMonth": "1달 간 체크인 이력이 없습니다."
     },
     "history": {
       "title": "상담 내역",
+      "presentingConcernCompact": "주호소 문제",
       "presentingConcern": "주 호소 문제",
+      "paymentStatusLabel": "지불 여부",
       "paymentStatus": {
         "paid": "납부",
         "unpaid": "미납"
       },
       "assignment": "과제명",
       "assignmentStatus": "과제 여부",
+      "emptyFiltered": "조건에 맞는 상담 내역이 없습니다.",
       "taskStatus": {
         "completed": "완수",
         "inProgress": "진행중",
@@ -195,7 +228,8 @@
       "supportReason": "의지하는 이유",
       "familyCohesion": "가족 유대감",
       "familyCohesionReason": "그렇게 생각하는 이유",
-      "selfDescription": "스스로를 한 문장으로 표현"
+      "selfDescription": "스스로를 한 문장으로 표현",
+      "empty": "아직 평가 척도 결과가 없습니다."
     }
   },
   "notification": {
