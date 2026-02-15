@@ -1,24 +1,192 @@
 {
-  "common": {
-    "appName": "Kkebi Clinic"
+  "app": {
+    "title": "KKEBI for Counselor",
+    "clinicName": "Kkebi Clinic"
   },
-  "mainLayout": {
-    "nav": {
-      "dashboard": "대시보드",
-      "clients": "내담자 관리",
-      "sessions": "상담 세션",
-      "settings": "설정"
+  "common": {
+    "close": "닫기",
+    "cancel": "취소",
+    "confirm": "확인",
+    "back": "뒤로가기",
+    "backToLogin": "로그인으로 돌아가기",
+    "logout": "로그아웃",
+    "start": "시작하기",
+    "view": "확인하기",
+    "checkNow": "즉시 확인하기",
+    "edit": "수정하기",
+    "closeCase": "종결하기",
+    "viewReport": "리포트 보기",
+    "submit": "문의 제출",
+    "verify": "인증하기",
+    "resendCode": "새 코드받기",
+    "all": "전체",
+    "profileSuffix": "님"
+  },
+  "nav": {
+    "dashboard": "대시보드",
+    "clients": "내담자 관리",
+    "sessions": "상담 세션",
+    "settings": "설정",
+    "notifications": "알림"
+  },
+  "auth": {
+    "login": {
+      "title": "로그인",
+      "emailLabel": "이메일",
+      "emailPlaceholder": "example@kkebi.com",
+      "passwordLabel": "비밀번호",
+      "passwordPlaceholder": "비밀번호를 입력해주세요",
+      "keepSignedIn": "로그인 상태 유지",
+      "forgotPassword": "비밀번호 찾기",
+      "counselorInquiry": "상담사 등록 문의"
     },
-    "profile": {
-      "suffix": "님"
+    "reset": {
+      "title": "비밀번호 찾기",
+      "description1": "등록된 이메일 주소를 입력하시면",
+      "description2": "비밀번호 재설정 링크를 보내드립니다.",
+      "sendLink": "재설정 링크 발송",
+      "emailSentTitle": "이메일 발송 완료",
+      "sent": "발송 완료",
+      "sentToSuffix": "(으)로 비밀번호 재설정 링크가 발송되었습니다.",
+      "guide1": "안내된 메일에 따라 비밀번호 재설정을 완료해 주세요.",
+      "guide2": "• 이메일이 도착하지 않았다면 스팸 폴더를 확인해 주세요.",
+      "guide3": "• 링크는 24시간 동안 유효합니다."
     },
-    "a11y": {
-      "goDashboard": "대시보드로 이동",
-      "logout": "로그아웃",
-      "notification": "알림"
+    "inquiry": {
+      "title": "상담사 등록 문의",
+      "description1": "상담사 계정 등록을 위해 아래 정보를 입력해 주세요.",
+      "description2": "검토 후 연락드리겠습니다.",
+      "name": "이름",
+      "email": "이메일",
+      "phone": "연락처",
+      "organization": "소속 기관",
+      "licenseNumber": "자격증 번호",
+      "additionalNotes": "추가 문의사항",
+      "requiredNotice": "* 표시 항목은 필수입력입니다.",
+      "reviewNotice": "자격 검증 후 영업일 기준 2-3일 내 연락드립니다.",
+      "receivedTitle": "문의 접수 완료",
+      "receivedStatus": "접수 완료",
+      "receivedBody": "문의가 접수되었습니다.",
+      "contactWindow": "자격 검증 후 영업일 기준 2-3일 내",
+      "contactToSuffix": "{email}(으)로 연락드리겠습니다.",
+      "submittedInfo": "접수된 정보",
+      "affiliation": "소속",
+      "license": "자격증"
     },
-    "message": {
-      "logoutError": "로그아웃 처리 중 오류가 발생했습니다."
+    "otp": {
+      "title": "2단계 인증",
+      "description": "등록된 기기로 전송된 인증 코드 6자리를 입력하세요.",
+      "notReceived": "코드를 받지 못하셨나요?",
+      "failedTitle": "인증 실패",
+      "failedBody": "인증 번호를 다시 확인해주세요",
+      "resent": "새 인증 코드가 발송되었습니다.",
+      "passwordMismatch": "비밀번호를 다시 한번 확인해주세요."
+    }
+  },
+  "dashboard": {
+    "weeklyStats": {
+      "title": "주간 통계",
+      "completedSessions": "완료 상담 수",
+      "averageSessionLength": "평균 상담 시간",
+      "clientImprovementRate": "내담자 개선율"
+    },
+    "riskAlerts": {
+      "title": "위험 알림",
+      "phqIncreased": "최근 PHQ-9 점수가 21점으로 상승했습니다."
+    },
+    "todaySchedule": {
+      "title": "오늘의 일정",
+      "time": "시간",
+      "sessionType": "상담 유형",
+      "riskLevel": "위험 유형",
+      "moodStressScore": "기분 및 스트레스 점수",
+      "mood": "기분",
+      "stress": "스트레스"
+    }
+  },
+  "clients": {
+    "list": {
+      "empty": "조건에 맞는 내담자가 없습니다."
+    },
+    "filter": {
+      "risk": {
+        "stable": "안정",
+        "caution": "주의",
+        "high": "위험"
+      }
+    },
+    "sessionType": {
+      "regular": "정기",
+      "crisis": "위기",
+      "intake": "초기"
+    },
+    "detail": {
+      "title": "내담자 정보",
+      "ageGender": "나이 및 성별",
+      "startDate": "시작일",
+      "sessions": "상담 횟수",
+      "visitReason": "방문 목적",
+      "nextSession": "다음 상담일"
+    },
+    "risk": {
+      "title": "최근 위험",
+      "reason": {
+        "suicidalIdeationMentioned": "자살 언급",
+        "selfHarmAttempt": "자해 시도",
+        "riskOfHarmToOthers": "타해 위험"
+      }
+    },
+    "checkin": {
+      "title": "체크인 내역",
+      "latest": "최근 체크인",
+      "mood": "기분",
+      "stress": "스트레스",
+      "energy": "에너지",
+      "sleep": "수면"
+    },
+    "history": {
+      "title": "상담 내역",
+      "presentingConcern": "주 호소 문제",
+      "paymentStatus": {
+        "paid": "납부",
+        "unpaid": "미납"
+      },
+      "assignment": "과제명",
+      "assignmentStatus": "과제 여부",
+      "taskStatus": {
+        "completed": "완수",
+        "inProgress": "진행중",
+        "notCompleted": "미완수"
+      }
+    },
+    "scale": {
+      "title": "평가 척도 결과",
+      "phq9": "PHQ-9",
+      "pss10": "PSS-10",
+      "mbi": "MBI",
+      "reasonForVisit": "상담 방문 이유",
+      "desiredChange": "상담을 통해 얻고 싶은 변화",
+      "solutionsTried": "시도한 해결 방법",
+      "effectiveness": "방법 효과성",
+      "biggestConcern": "지금 가장 고민되는 문제",
+      "averageSleepPattern": "평균 수면 패턴",
+      "sleepQuality": "수면의 질",
+      "exerciseFrequency": "운동 정도와 빈도",
+      "mealsPerDay": "하루 끼니 수",
+      "mainSupportPerson": "가장 의지하는 사람",
+      "supportReason": "의지하는 이유",
+      "familyCohesion": "가족 유대감",
+      "familyCohesionReason": "그렇게 생각하는 이유",
+      "selfDescription": "스스로를 한 문장으로 표현"
+    }
+  },
+  "notification": {
+    "risk": {
+      "title": "위험 알림",
+      "phq22": "PHQ-9 점수가 22점으로 상승했습니다.",
+      "noAppActivity7Days": "7일 이상 앱 미사용이 감지되었습니다.",
+      "selfHarmKeywordDetected": "자해 키워드가 감지되었습니다.",
+      "suicideKeywordDetected": "자살 키워드가 감지되었습니다."
     }
   }
 }

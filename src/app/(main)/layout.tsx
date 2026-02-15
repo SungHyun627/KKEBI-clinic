@@ -30,7 +30,8 @@ const navItems = [
 export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const t = useTranslations('mainLayout');
+  const tNav = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userName = useSyncExternalStore(
     () => () => {},
@@ -65,7 +66,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <SidebarHeader>
               <Link
                 href="/"
-                aria-label={t('a11y.goDashboard')}
+                aria-label={`${tNav('dashboard')}로 이동`}
                 className="inline-flex hover:cursor-pointer"
               >
                 <Image
@@ -113,7 +114,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                             }}
                             aria-hidden
                           />
-                          <span className="max-[800px]:hidden">{t(`nav.${item.key}`)}</span>
+                          <span className="max-[800px]:hidden">{tNav(item.key)}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -129,24 +130,24 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 <Image src="/icons/profile.svg" alt="profile" width={24} height={24} />
                 <div className="body-14 flex items-center gap-[3px] font-medium max-[800px]:hidden">
                   <span>{userName}</span>
-                  <span>{t('profile.suffix')}</span>
+                  <span>{tCommon('profileSuffix')}</span>
                 </div>
               </div>
               <button
                 type="button"
-                aria-label={t('a11y.logout')}
+                aria-label={tCommon('logout')}
                 className="flex items-center justify-center hover:cursor-pointer"
                 onClick={async () => {
                   const result = await logout();
                   clearAuthSession();
                   localStorage.removeItem('kkebi-login-info');
                   if (!result.success) {
-                    toast(result.message || t('message.logoutError'));
+                    toast(result.message || '로그아웃 처리 중 오류가 발생했습니다.');
                   }
                   router.push('/login');
                 }}
               >
-                <Image src="/icons/logout.svg" alt={t('a11y.logout')} width={20} height={20} />
+                <Image src="/icons/logout.svg" alt={tCommon('logout')} width={20} height={20} />
               </button>
             </div>
           </SidebarFooter>
@@ -155,14 +156,14 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <SidebarInset>
           <div className="flex w-full items-center justify-between bg-white p-5">
             <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
-              {t(`nav.${currentTitle}`)}
+              {tNav(currentTitle)}
             </p>
             <button
               className="hover:cursor-pointer"
               type="button"
               onClick={() => setIsNotificationOpen(true)}
             >
-              <Image src="/icons/bell.svg" alt={t('a11y.notification')} width={24} height={24} />
+              <Image src="/icons/bell.svg" alt={tNav('notifications')} width={24} height={24} />
             </button>
           </div>
           <main className="flex flex-col pl-5">{children}</main>

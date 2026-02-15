@@ -1,24 +1,192 @@
 {
-  "common": {
-    "appName": "Kkebi Clinic"
+  "app": {
+    "title": "KKEBI for Counselor",
+    "clinicName": "Kkebi Clinic"
   },
-  "mainLayout": {
-    "nav": {
-      "dashboard": "Dashboard",
-      "clients": "Clients",
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "OK",
+    "back": "Back",
+    "backToLogin": "Back to login",
+    "logout": "Log out",
+    "start": "Start",
+    "view": "View",
+    "checkNow": "Check now",
+    "edit": "Edit",
+    "closeCase": "Close case",
+    "viewReport": "View report",
+    "submit": "Submit inquiry",
+    "verify": "Verify",
+    "resendCode": "Resend code",
+    "all": "All",
+    "profileSuffix": ","
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Client Management",
+    "sessions": "Sessions",
+    "settings": "Settings",
+    "notifications": "Notifications"
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "emailLabel": "Email",
+      "emailPlaceholder": "example@kkebi.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Please enter your password",
+      "keepSignedIn": "Keep me signed in",
+      "forgotPassword": "Forgot password",
+      "counselorInquiry": "Counselor account inquiry"
+    },
+    "reset": {
+      "title": "Forgot password",
+      "description1": "Enter your registered email address",
+      "description2": "We’ll send you a password reset link.",
+      "sendLink": "Send reset link",
+      "emailSentTitle": "Email sent",
+      "sent": "Sent",
+      "sentToSuffix": "A password reset link has been sent to {user_email}.",
+      "guide1": "Please follow the instructions in the email to reset your password.",
+      "guide2": "• If you don’t see the email, please check your spam folder.",
+      "guide3": "• The link is valid for 24 hours."
+    },
+    "inquiry": {
+      "title": "Counselor account inquiry",
+      "description1": "Please enter the information below to create a counselor account.",
+      "description2": "We’ll contact you after review.",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone number",
+      "organization": "Organization",
+      "licenseNumber": "License number",
+      "additionalNotes": "Additional notes",
+      "requiredNotice": "Fields marked with * are required.",
+      "reviewNotice": "After verifying your credentials, we’ll get back to you within 2–3 business days.",
+      "receivedTitle": "Inquiry received",
+      "receivedStatus": "Received",
+      "receivedBody": "Your inquiry has been received.",
+      "contactWindow": "After verifying your credentials, within 2–3 business days",
+      "contactToSuffix": "we’ll contact you at {email}.",
+      "submittedInfo": "Submitted information",
+      "affiliation": "Organization",
+      "license": "License"
+    },
+    "otp": {
+      "title": "Two-step verification",
+      "description": "Enter the 6-digit code sent to your registered device.",
+      "notReceived": "Didn’t receive a code?",
+      "failedTitle": "Verification failed",
+      "failedBody": "Please check the verification code and try again.",
+      "resent": "A new verification code has been sent.",
+      "passwordMismatch": "Please double-check your password."
+    }
+  },
+  "dashboard": {
+    "weeklyStats": {
+      "title": "Weekly stats",
+      "completedSessions": "Completed sessions",
+      "averageSessionLength": "Average session length",
+      "clientImprovementRate": "Client improvement rate"
+    },
+    "riskAlerts": {
+      "title": "Risk alerts",
+      "phqIncreased": "The latest PHQ-9 score increased to 21."
+    },
+    "todaySchedule": {
+      "title": "Today’s schedule",
+      "time": "Time",
+      "sessionType": "Session type",
+      "riskLevel": "Risk level",
+      "moodStressScore": "Mood & stress score",
+      "mood": "Mood",
+      "stress": "Stress"
+    }
+  },
+  "clients": {
+    "list": {
+      "empty": "No clients match the selected criteria."
+    },
+    "filter": {
+      "risk": {
+        "stable": "Stable",
+        "caution": "Caution",
+        "high": "High risk"
+      }
+    },
+    "sessionType": {
+      "regular": "Regular",
+      "crisis": "Crisis",
+      "intake": "Intake"
+    },
+    "detail": {
+      "title": "Client information",
+      "ageGender": "Age & gender",
+      "startDate": "Start date",
       "sessions": "Sessions",
-      "settings": "Settings"
+      "visitReason": "Visit reason",
+      "nextSession": "Next session"
     },
-    "profile": {
-      "suffix": ""
+    "risk": {
+      "title": "Recent risks",
+      "reason": {
+        "suicidalIdeationMentioned": "Suicidal ideation mentioned",
+        "selfHarmAttempt": "Self-harm attempt",
+        "riskOfHarmToOthers": "Risk of harm to others"
+      }
     },
-    "a11y": {
-      "goDashboard": "Go to dashboard",
-      "logout": "Log out",
-      "notification": "Notifications"
+    "checkin": {
+      "title": "Check-ins",
+      "latest": "Latest check-in",
+      "mood": "Mood",
+      "stress": "Stress",
+      "energy": "Energy",
+      "sleep": "Sleep"
     },
-    "message": {
-      "logoutError": "An error occurred while logging out."
+    "history": {
+      "title": "Session history",
+      "presentingConcern": "Presenting concern",
+      "paymentStatus": {
+        "paid": "Paid",
+        "unpaid": "Unpaid"
+      },
+      "assignment": "Assignment",
+      "assignmentStatus": "Assignment status",
+      "taskStatus": {
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notCompleted": "Not completed"
+      }
+    },
+    "scale": {
+      "title": "Scale scores",
+      "phq9": "PHQ-9",
+      "pss10": "PSS-10",
+      "mbi": "MBI",
+      "reasonForVisit": "Reason for visit",
+      "desiredChange": "Desired change from counseling",
+      "solutionsTried": "Solutions tried",
+      "effectiveness": "Effectiveness",
+      "biggestConcern": "Biggest concern right now",
+      "averageSleepPattern": "Average sleep pattern",
+      "sleepQuality": "Sleep quality",
+      "exerciseFrequency": "Exercise frequency",
+      "mealsPerDay": "Meals per day",
+      "mainSupportPerson": "Main support person",
+      "supportReason": "Why",
+      "familyCohesion": "Family cohesion",
+      "familyCohesionReason": "Why",
+      "selfDescription": "Self-description in one sentence"
+    }
+  },
+  "notification": {
+    "risk": {
+      "title": "Risk alerts",
+      "phq22": "PHQ-9 score increased to 22.",
+      "noAppActivity7Days": "No app activity detected for 7+ days.",
+      "selfHarmKeywordDetected": "Self-harm keyword detected.",
+      "suicideKeywordDetected": "Suicide keyword detected."
     }
   }
 }
