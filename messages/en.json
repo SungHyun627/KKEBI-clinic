@@ -1,5 +1,24 @@
 {
   "common": {
     "appName": "Kkebi Clinic"
+  },
+  "mainLayout": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "clients": "Clients",
+      "sessions": "Sessions",
+      "settings": "Settings"
+    },
+    "profile": {
+      "suffix": ""
+    },
+    "a11y": {
+      "goDashboard": "Go to dashboard",
+      "logout": "Log out",
+      "notification": "Notifications"
+    },
+    "message": {
+      "logoutError": "An error occurred while logging out."
+    }
   }
 }

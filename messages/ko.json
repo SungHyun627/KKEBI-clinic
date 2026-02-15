@@ -1,5 +1,24 @@
 {
   "common": {
     "appName": "Kkebi Clinic"
+  },
+  "mainLayout": {
+    "nav": {
+      "dashboard": "대시보드",
+      "clients": "내담자 관리",
+      "sessions": "상담 세션",
+      "settings": "설정"
+    },
+    "profile": {
+      "suffix": "님"
+    },
+    "a11y": {
+      "goDashboard": "대시보드로 이동",
+      "logout": "로그아웃",
+      "notification": "알림"
+    },
+    "message": {
+      "logoutError": "로그아웃 처리 중 오류가 발생했습니다."
+    }
   }
 }
