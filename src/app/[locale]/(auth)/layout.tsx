@@ -3,20 +3,29 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { useLocale } from 'next-intl';
-import { usePathname, useRouter } from '@/i18n/navigation';
 import { Toast } from '@/shared/ui/toast';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const locale = useLocale();
-  const pathname = usePathname();
-  const router = useRouter();
-  const nextLocale = locale === 'ko' ? 'en' : 'ko';
+  const switchLocale = () => {
+    if (typeof window === 'undefined') return;
+    const { pathname, search, hash } = window.location;
+    const currentLocaleFromPath = pathname.startsWith('/en')
+      ? 'en'
+      : pathname.startsWith('/ko')
+        ? 'ko'
+        : locale;
+    const nextLocale = currentLocaleFromPath === 'ko' ? 'en' : 'ko';
+    const normalizedPath = pathname.replace(/^\/(ko|en)(?=\/|$)/, '') || '/';
+    const nextPath = `/${nextLocale}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`;
+    window.location.replace(`${nextPath}${search}${hash}`);
+  };
 
   return (
     <div className="relative min-h-screen w-full bg-white">
       <button
         type="button"
-        onClick={() => router.replace(pathname, { locale: nextLocale })}
+        onClick={switchLocale}
         className="absolute right-6 top-6 z-10 hover:cursor-pointer"
         aria-label="한, 영변환"
       >

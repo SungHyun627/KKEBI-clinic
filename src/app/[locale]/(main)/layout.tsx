@@ -33,7 +33,19 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
   const locale = useLocale();
-  const nextLocale = locale === 'ko' ? 'en' : 'ko';
+  const switchLocale = () => {
+    if (typeof window === 'undefined') return;
+    const { pathname, search, hash } = window.location;
+    const currentLocaleFromPath = pathname.startsWith('/en')
+      ? 'en'
+      : pathname.startsWith('/ko')
+        ? 'ko'
+        : locale;
+    const nextLocale = currentLocaleFromPath === 'ko' ? 'en' : 'ko';
+    const normalizedPath = pathname.replace(/^\/(ko|en)(?=\/|$)/, '') || '/';
+    const nextPath = `/${nextLocale}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`;
+    window.location.replace(`${nextPath}${search}${hash}`);
+  };
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userName = useSyncExternalStore(
@@ -162,11 +174,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
               {tNav(currentTitle)}
             </p>
             <div className="flex items-center gap-2">
-              <button
-                className="hover:cursor-pointer"
-                type="button"
-                onClick={() => router.replace(pathname, { locale: nextLocale })}
-              >
+              <button className="hover:cursor-pointer" type="button" onClick={switchLocale}>
                 <Image src="/icons/global.svg" alt={'한, 영변환'} width={24} height={24} />
               </button>
               <button
