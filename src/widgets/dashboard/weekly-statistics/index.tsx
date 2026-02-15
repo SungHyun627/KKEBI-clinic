@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Title } from '@/shared/ui/title';
 import { getWeeklyStatistics } from '@/features/dashboard';
 import type { WeeklyStatistics } from '@/features/dashboard';
@@ -8,6 +9,7 @@ import WeeklyStatisticsCard from './ui/WeeklyStatisticsCard';
 import RiskAlert from './ui/RiskAlert';
 
 const WeeklyStatisticsSection = () => {
+  const tWeekly = useTranslations('dashboard.weeklyStats');
   const [statistics, setStatistics] = useState<WeeklyStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -18,7 +20,7 @@ const WeeklyStatisticsSection = () => {
       const result = await getWeeklyStatistics();
 
       if (!result.success || !result.data) {
-        setErrorMessage(result.message || '주간 통계를 불러오지 못했습니다.');
+        setErrorMessage(result.message || tWeekly('loadFailed'));
         setStatistics(null);
         setIsLoading(false);
         return;
@@ -33,9 +35,7 @@ const WeeklyStatisticsSection = () => {
   }, []);
 
   if (isLoading) {
-    return (
-      <section className="body-14 text-label-alternative">주간 통계를 불러오는 중입니다.</section>
-    );
+    return <section className="body-14 text-label-alternative">{tWeekly('loading')}</section>;
   }
 
   if (errorMessage) {
@@ -47,27 +47,27 @@ const WeeklyStatisticsSection = () => {
 
   return (
     <section className="flex w-full flex-col items-start gap-3">
-      <Title title="주간 통계" />
+      <Title title={tWeekly('title')} />
       <div className="flex w-full min-w-0 flex-wrap items-start gap-4">
         <div className="flex min-w-0 flex-[1.5] basis-[560px] items-stretch gap-4">
           <div className="flex min-w-0 flex-1">
             <WeeklyStatisticsCard
-              label="완료 상담 수"
+              label={tWeekly('completedSessions')}
               value={statistics.completedSessions}
               icon="/icons/complete.svg"
             />
           </div>
           <div className="flex min-w-0 flex-1">
             <WeeklyStatisticsCard
-              label="평균 상담 시간"
+              label={tWeekly('averageSessionLength')}
               value={statistics.averageSessionMinutes}
-              unit="분"
+              unit={tWeekly('minuteUnit')}
               icon="/icons/headset.svg"
             />
           </div>
           <div className="flex min-w-0 flex-1">
             <WeeklyStatisticsCard
-              label="내담자 개선율"
+              label={tWeekly('clientImprovementRate')}
               value={statistics.clientImprovementRate}
               unit="%"
               icon="/icons/person.svg"

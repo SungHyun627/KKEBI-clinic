@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { getTodaySchedules } from '@/features/dashboard';
 import type { TodayScheduleItem } from '@/features/dashboard';
 import { Title } from '@/shared/ui/title';
@@ -8,6 +9,7 @@ import TodayScheduleHeader from './ui/TodayScheduleHeader';
 import TodayScheduleListItem from './ui/TodayScheduleItem';
 
 export default function TodayScheduleSection() {
+  const tToday = useTranslations('dashboard.todaySchedule');
   const [schedules, setSchedules] = useState<TodayScheduleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export default function TodayScheduleSection() {
 
       if (!result.success || !result.data) {
         setSchedules([]);
-        setErrorMessage(result.message || '오늘의 일정을 불러오지 못했습니다.');
+        setErrorMessage(result.message || tToday('loadFailed'));
         setIsLoading(false);
         return;
       }
@@ -34,9 +36,7 @@ export default function TodayScheduleSection() {
   }, []);
 
   if (isLoading) {
-    return (
-      <section className="body-14 text-label-alternative">오늘의 일정을 불러오는 중입니다.</section>
-    );
+    return <section className="body-14 text-label-alternative">{tToday('loading')}</section>;
   }
 
   if (errorMessage) {
@@ -45,18 +45,12 @@ export default function TodayScheduleSection() {
 
   return (
     <section className="flex w-full flex-col items-start gap-4">
-      <Title title="오늘의 일정" />
+      <Title title={tToday('title')} />
       <div className="w-full mb-3">
-        <div className="grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
-          <span className="body-14 font-semibold text-label-neutral">시간</span>
-          <span className="body-14 font-semibold text-label-neutral">상담 유형</span>
-          <span className="body-14 text-center font-semibold text-label-neutral">위험 유형</span>
-          <span className="body-14 font-semibold text-label-neutral">기분 및 스트레스 점수</span>
-          <span className="body-14  font-semibold text-label-neutral"></span>
-        </div>
+        <TodayScheduleHeader />
         {schedules.length === 0 ? (
           <div className="body-14 flex w-full items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
-            오늘 예정된 일정이 없습니다.
+            {tToday('empty')}
           </div>
         ) : (
           <ul className="flex w-full flex-col">

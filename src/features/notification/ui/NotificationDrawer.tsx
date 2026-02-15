@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { getNotifications } from '@/features/notification/api/getNotifications';
 import type {
   NotificationItem as NotificationItemType,
@@ -18,6 +19,9 @@ interface NotificationDrawerProps {
 }
 
 export default function NotificationDrawer({ open, onOpenChange }: NotificationDrawerProps) {
+  const tNav = useTranslations('nav');
+  const tRisk = useTranslations('notification.risk');
+  const tNotification = useTranslations('notification.common');
   const [notifications, setNotifications] = useState<NotificationItemType[]>([]);
   const [viewMode, setViewMode] = useState<NotificationViewMode>('all');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +37,7 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
       if (!result.success || !result.data) {
         setNotifications([]);
         setViewMode('all');
-        setErrorMessage(result.message || '알림 목록을 불러오지 못했습니다.');
+        setErrorMessage(result.message || tNotification('loadFailed'));
         setIsLoading(false);
         return;
       }
@@ -57,21 +61,23 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
         <DrawerClose asChild>
           <button
             type="button"
-            aria-label="접기"
+            aria-label={tNotification('fold')}
             className="flex h-6 w-6 items-center justify-center hover:cursor-pointer"
           >
-            <Image src="/icons/fold.svg" alt="접기" width={20} height={20} />
+            <Image src="/icons/fold.svg" alt={tNotification('fold')} width={20} height={20} />
           </button>
         </DrawerClose>
         <div className="flex h-full w-full flex-col items-start gap-4">
           <div className="w-full">
-            <DrawerTitle>{viewMode === 'risk' ? '위험 알림' : '알림'}</DrawerTitle>
+            <DrawerTitle>
+              {viewMode === 'risk' ? tRisk('title') : tNav('notifications')}
+            </DrawerTitle>
           </div>
 
           <div className="relative flex flex-col counselor-inquiry-scroll flex-1 w-full overflow-y-auto gap-4">
             {isLoading ? (
               <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="body-16 text-label-alternative">알림을 불러오는 중입니다.</p>
+                <p className="body-16 text-label-alternative">{tNotification('loading')}</p>
               </div>
             ) : null}
             {!isLoading && errorMessage ? (
@@ -79,7 +85,7 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
             ) : null}
             {!isLoading && !errorMessage && notifications.length === 0 ? (
               <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="body-16 text-label-alternative">최근 온 알림이 없습니다.</p>
+                <p className="body-16 text-label-alternative">{tNotification('empty')}</p>
               </div>
             ) : null}
 

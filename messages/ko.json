@@ -98,7 +98,10 @@
       "title": "주간 통계",
       "completedSessions": "완료 상담 수",
       "averageSessionLength": "평균 상담 시간",
-      "clientImprovementRate": "내담자 개선율"
+      "clientImprovementRate": "내담자 개선율",
+      "minuteUnit": "분",
+      "loading": "주간 통계를 불러오는 중입니다.",
+      "loadFailed": "주간 통계를 불러오지 못했습니다."
     },
     "riskAlerts": {
       "title": "위험 알림",
@@ -107,11 +110,16 @@
     "todaySchedule": {
       "title": "오늘의 일정",
       "time": "시간",
+      "clientName": "내담자명",
       "sessionType": "상담 유형",
       "riskLevel": "위험 유형",
       "moodStressScore": "기분 및 스트레스 점수",
       "mood": "기분",
-      "stress": "스트레스"
+      "stress": "스트레스",
+      "loading": "오늘의 일정을 불러오는 중입니다.",
+      "loadFailed": "오늘의 일정을 불러오지 못했습니다.",
+      "empty": "오늘 예정된 일정이 없습니다.",
+      "sendNotification": "{name} 알림 전송"
     }
   },
   "clients": {
@@ -191,6 +199,12 @@
     }
   },
   "notification": {
+    "common": {
+      "fold": "접기",
+      "loading": "알림을 불러오는 중입니다.",
+      "empty": "최근 온 알림이 없습니다.",
+      "loadFailed": "알림 목록을 불러오지 못했습니다."
+    },
     "risk": {
       "title": "위험 알림",
       "phq22": "PHQ-9 점수가 22점으로 상승했습니다.",

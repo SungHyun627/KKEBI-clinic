@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import type { RiskAlert as RiskAlertType } from '@/features/dashboard';
 import { Button } from '@/shared/ui/button';
 
@@ -9,6 +10,7 @@ interface RiskAlertProps {
 }
 
 const RiskAlert = ({ alert }: RiskAlertProps) => {
+  const tCommon = useTranslations('common');
   const router = useRouter();
 
   return (
@@ -24,7 +26,7 @@ const RiskAlert = ({ alert }: RiskAlertProps) => {
           className="shrink-0"
           onClick={() => router.push(`/clients?clientId=${encodeURIComponent(alert.clientId)}`)}
         >
-          확인하기
+          {tCommon('view')}
         </Button>
       </div>
     </div>

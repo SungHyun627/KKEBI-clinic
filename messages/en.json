@@ -98,7 +98,10 @@
       "title": "Weekly stats",
       "completedSessions": "Completed sessions",
       "averageSessionLength": "Average session length",
-      "clientImprovementRate": "Client improvement rate"
+      "clientImprovementRate": "Client improvement rate",
+      "minuteUnit": "min",
+      "loading": "Loading weekly stats.",
+      "loadFailed": "Failed to load weekly stats."
     },
     "riskAlerts": {
       "title": "Risk alerts",
@@ -107,11 +110,16 @@
     "todaySchedule": {
       "title": "Today’s schedule",
       "time": "Time",
+      "clientName": "Client name",
       "sessionType": "Session type",
       "riskLevel": "Risk level",
       "moodStressScore": "Mood & stress score",
       "mood": "Mood",
-      "stress": "Stress"
+      "stress": "Stress",
+      "loading": "Loading today’s schedule.",
+      "loadFailed": "Failed to load today’s schedule.",
+      "empty": "There are no scheduled sessions for today.",
+      "sendNotification": "Send notification to {name}"
     }
   },
   "clients": {
@@ -191,6 +199,12 @@
     }
   },
   "notification": {
+    "common": {
+      "fold": "Collapse",
+      "loading": "Loading notifications.",
+      "empty": "There are no recent notifications.",
+      "loadFailed": "Failed to load notifications."
+    },
     "risk": {
       "title": "Risk alerts",
       "phq22": "PHQ-9 score increased to 22.",
