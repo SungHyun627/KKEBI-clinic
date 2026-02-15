@@ -48,7 +48,7 @@
     "resetSendLink": "Send reset link",
     "resetEmailSentTitle": "Email sent",
     "resetSent": "Sent",
-    "resetSentToSuffix": "A password reset link has been sent to {user_email}.",
+    "resetSentToSuffix": "A password reset link has been sent.",
     "resetGuide1": "Please follow the instructions in the email to reset your password.",
     "resetGuide2": "• If you don’t see the email, please check your spam folder.",
     "resetGuide3": "• The link is valid for 24 hours.",
