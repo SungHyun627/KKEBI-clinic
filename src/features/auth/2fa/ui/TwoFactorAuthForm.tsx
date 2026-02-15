@@ -18,7 +18,7 @@ interface TwofactorAuthFormValues {
 }
 
 const TwoFactorAuthForm = () => {
-  const tOtp = useTranslations('auth.otp');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
   const router = useRouter();
   const form = useForm<TwofactorAuthFormValues>({
@@ -111,7 +111,7 @@ const TwoFactorAuthForm = () => {
               </div>
               <div className="flex items-center justify-center gap-2 w-full text-center">
                 <span className="text-[16px] leading-[25.6px] font-normal font-pretendard text-label-alternative">
-                  {tOtp('notReceived')}
+                  {tAuth('otpNotReceived')}
                 </span>
                 <span
                   className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary cursor-pointer"

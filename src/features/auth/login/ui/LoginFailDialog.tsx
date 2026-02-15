@@ -11,22 +11,22 @@ interface LoginFailDialogProps {
 }
 
 export function LoginFailDialog({ open, onOpenChange }: LoginFailDialogProps) {
-  const tLogin = useTranslations('auth.login');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogTitle>
-          <VisuallyHidden>{tLogin('failTitle')}</VisuallyHidden>
+          <VisuallyHidden>{tAuth('loginFailTitle')}</VisuallyHidden>
         </DialogTitle>
         <div className="flex w-full flex-col items-center gap-6">
           <DialogHeader>
             <p className="text-[14px] leading-[21px] font-normal text-neutral-40">
-              {tLogin('failTitle')}
+              {tAuth('loginFailTitle')}
             </p>
             <p className="text-[18px] leading-[28.8px] font-semibold text-neutral-0">
-              {tLogin('failBody')}
+              {tAuth('loginFailBody')}
             </p>
           </DialogHeader>
           <Button type="button" className="w-full" onClick={() => onOpenChange(false)}>

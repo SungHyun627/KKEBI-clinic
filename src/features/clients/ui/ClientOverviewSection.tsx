@@ -18,15 +18,14 @@ const SECTION_TITLE_CLASSNAME = 'body-18 font-semibold';
 
 export default function ClientOverviewSection({ detail }: ClientOverviewSectionProps) {
   const tCommon = useTranslations('common');
-  const tClientsDetail = useTranslations('clients.detail');
-  const tClientsRisk = useTranslations('clients.risk');
+  const tClients = useTranslations('clients');
 
   return (
     <section className="flex items-stretch justify-between">
       <div className={CARD_CLASSNAME}>
         <div className="flex w-full items-center justify-between">
           <span className={`${SECTION_TITLE_CLASSNAME} text-neutral-20`}>
-            {tClientsDetail('title')}
+            {tClients('detailTitle')}
           </span>
           <div className="flex items-center gap-[6px]">
             <Button
@@ -49,24 +48,24 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
         </div>
         <div className="flex flex-col w-full items-start gap-[18px]">
           <ClientInfoField
-            label={tClientsDetail('ageGender')}
+            label={tClients('detailAgeGender')}
             value={`${detail.age}세 ${detail.gender}`}
           />
           <ClientInfoField
-            label={tClientsDetail('startDate')}
+            label={tClients('detailStartDate')}
             value={toKoreanDate(detail.counselingStartDate)}
           />
           <ClientInfoField
-            label={tClientsDetail('sessions')}
+            label={tClients('detailSessions')}
             value={`${detail.currentSession}회/${detail.totalSession}회`}
           />
-          <ClientInfoField label={tClientsDetail('visitReason')} value={detail.visitPurpose} />
+          <ClientInfoField label={tClients('detailVisitReason')} value={detail.visitPurpose} />
           <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
         </div>
       </div>
 
       <div className={CARD_CLASSNAME}>
-        <span className={`${SECTION_TITLE_CLASSNAME} text-primary`}>{tClientsRisk('title')}</span>
+        <span className={`${SECTION_TITLE_CLASSNAME} text-primary`}>{tClients('riskTitle')}</span>
         <div className="flex w-full flex-col gap-[23px]">
           {detail.recentRisks.length > 0 ? (
             detail.recentRisks.map((risk, index) => (
@@ -91,7 +90,7 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
               </div>
             ))
           ) : (
-            <span className="body-14 text-label-alternative">{tClientsRisk('emptyLastMonth')}</span>
+            <span className="body-14 text-label-alternative">{tClients('riskEmptyLastMonth')}</span>
           )}
         </div>
       </div>

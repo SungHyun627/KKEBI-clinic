@@ -9,7 +9,7 @@ import WeeklyStatisticsCard from './ui/WeeklyStatisticsCard';
 import RiskAlert from './ui/RiskAlert';
 
 const WeeklyStatisticsSection = () => {
-  const tWeekly = useTranslations('dashboard.weeklyStats');
+  const tDashboard = useTranslations('dashboard');
   const [statistics, setStatistics] = useState<WeeklyStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -20,7 +20,7 @@ const WeeklyStatisticsSection = () => {
       const result = await getWeeklyStatistics();
 
       if (!result.success || !result.data) {
-        setErrorMessage(result.message || tWeekly('loadFailed'));
+        setErrorMessage(result.message || tDashboard('weeklyStatsLoadFailed'));
         setStatistics(null);
         setIsLoading(false);
         return;
@@ -35,7 +35,11 @@ const WeeklyStatisticsSection = () => {
   }, []);
 
   if (isLoading) {
-    return <section className="body-14 text-label-alternative">{tWeekly('loading')}</section>;
+    return (
+      <section className="body-14 text-label-alternative">
+        {tDashboard('weeklyStatsLoading')}
+      </section>
+    );
   }
 
   if (errorMessage) {
@@ -47,27 +51,27 @@ const WeeklyStatisticsSection = () => {
 
   return (
     <section className="flex w-full flex-col items-start gap-3">
-      <Title title={tWeekly('title')} />
+      <Title title={tDashboard('weeklyStatsTitle')} />
       <div className="flex w-full min-w-0 flex-wrap items-start gap-4">
         <div className="flex min-w-0 flex-[1.5] basis-[560px] items-stretch gap-4">
           <div className="flex min-w-0 flex-1">
             <WeeklyStatisticsCard
-              label={tWeekly('completedSessions')}
+              label={tDashboard('weeklyStatsCompletedSessions')}
               value={statistics.completedSessions}
               icon="/icons/complete.svg"
             />
           </div>
           <div className="flex min-w-0 flex-1">
             <WeeklyStatisticsCard
-              label={tWeekly('averageSessionLength')}
+              label={tDashboard('weeklyStatsAverageSessionLength')}
               value={statistics.averageSessionMinutes}
-              unit={tWeekly('minuteUnit')}
+              unit={tDashboard('weeklyStatsMinuteUnit')}
               icon="/icons/headset.svg"
             />
           </div>
           <div className="flex min-w-0 flex-1">
             <WeeklyStatisticsCard
-              label={tWeekly('clientImprovementRate')}
+              label={tDashboard('weeklyStatsClientImprovementRate')}
               value={statistics.clientImprovementRate}
               unit="%"
               icon="/icons/person.svg"

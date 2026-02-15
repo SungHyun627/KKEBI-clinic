@@ -11,7 +11,7 @@ interface TodayScheduleActionProps {
 }
 
 export default function TodayScheduleAction({ clientId, clientName }: TodayScheduleActionProps) {
-  const tToday = useTranslations('dashboard.todaySchedule');
+  const tDashboard = useTranslations('dashboard');
   const tCommon = useTranslations('common');
   const router = useRouter();
 
@@ -21,7 +21,7 @@ export default function TodayScheduleAction({ clientId, clientName }: TodaySched
         type="button"
         variant="icon"
         size="icon"
-        aria-label={tToday('sendNotification', { name: clientName })}
+        aria-label={tDashboard('todayScheduleSendNotification', { name: clientName })}
         className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
       >
         <Image src="/icons/sent.svg" alt="send-notification" width={24} height={24} aria-hidden />

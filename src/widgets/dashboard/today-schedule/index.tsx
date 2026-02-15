@@ -9,7 +9,7 @@ import TodayScheduleHeader from './ui/TodayScheduleHeader';
 import TodayScheduleListItem from './ui/TodayScheduleItem';
 
 export default function TodayScheduleSection() {
-  const tToday = useTranslations('dashboard.todaySchedule');
+  const tDashboard = useTranslations('dashboard');
   const [schedules, setSchedules] = useState<TodayScheduleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function TodayScheduleSection() {
 
       if (!result.success || !result.data) {
         setSchedules([]);
-        setErrorMessage(result.message || tToday('loadFailed'));
+        setErrorMessage(result.message || tDashboard('todayScheduleLoadFailed'));
         setIsLoading(false);
         return;
       }
@@ -36,7 +36,11 @@ export default function TodayScheduleSection() {
   }, []);
 
   if (isLoading) {
-    return <section className="body-14 text-label-alternative">{tToday('loading')}</section>;
+    return (
+      <section className="body-14 text-label-alternative">
+        {tDashboard('todayScheduleLoading')}
+      </section>
+    );
   }
 
   if (errorMessage) {
@@ -45,12 +49,12 @@ export default function TodayScheduleSection() {
 
   return (
     <section className="flex w-full flex-col items-start gap-4">
-      <Title title={tToday('title')} />
+      <Title title={tDashboard('todayScheduleTitle')} />
       <div className="w-full mb-3">
         <TodayScheduleHeader />
         {schedules.length === 0 ? (
           <div className="body-14 flex w-full items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
-            {tToday('empty')}
+            {tDashboard('todayScheduleEmpty')}
           </div>
         ) : (
           <ul className="flex w-full flex-col">

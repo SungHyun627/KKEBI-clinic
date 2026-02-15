@@ -11,7 +11,7 @@ import { toast } from '@/shared/ui/toast';
 import { ResetPasswordFields } from '../types/resetPassword';
 
 const ResetPasswordForm = () => {
-  const tReset = useTranslations('auth.reset');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
@@ -52,7 +52,7 @@ const ResetPasswordForm = () => {
       >
         <div className="flex flex-col gap-8">
           <h2 className="text-center text-[20px] leading-[30px] font-semibold text-label-normal">
-            {tReset('passwordResetTitle')}
+            {tAuth('resetPasswordResetTitle')}
           </h2>
           <div className="flex flex-col items-start gap-6 w-full">
             <div className="flex flex-col gap-4 w-full">
@@ -77,12 +77,12 @@ const ResetPasswordForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      {tReset('newPasswordLabel')}
+                      {tAuth('resetNewPasswordLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type={isPasswordVisible ? 'text' : 'password'}
-                        placeholder={tReset('newPasswordPlaceholder')}
+                        placeholder={tAuth('resetNewPasswordPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('newPassword', '')}
                         rightIcon={
@@ -127,12 +127,12 @@ const ResetPasswordForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      {tReset('confirmPasswordLabel')}
+                      {tAuth('resetConfirmPasswordLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type={isConfirmPasswordVisible ? 'text' : 'password'}
-                        placeholder={tReset('confirmPasswordPlaceholder')}
+                        placeholder={tAuth('resetConfirmPasswordPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('confirmPassword', '')}
                         rightIcon={
@@ -166,7 +166,7 @@ const ResetPasswordForm = () => {
                 )}
               />
             </div>
-            <span className="body-14 text-label-alternative">{tReset('passwordRule')}</span>
+            <span className="body-14 text-label-alternative">{tAuth('resetPasswordRule')}</span>
           </div>
         </div>
         <Button

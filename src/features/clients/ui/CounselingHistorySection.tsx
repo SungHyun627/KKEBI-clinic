@@ -69,8 +69,7 @@ const getTaskStatusClassName = (status: ClientCounselingRecord['taskStatus']) =>
 
 export default function CounselingHistorySection({ records }: CounselingHistorySectionProps) {
   const tCommon = useTranslations('common');
-  const tHistory = useTranslations('clients.history');
-  const tConcerns = useTranslations('clients.concerns');
+  const tClients = useTranslations('clients');
   const locale = useLocale();
   const [filterValue, setFilterValue] = useState<FilterValue>('전체');
   const [isFilterInteracted, setIsFilterInteracted] = useState(false);
@@ -80,24 +79,24 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
     ...COUNSELING_FILTERS.map((concern) => ({
       label:
         concern === '직장'
-          ? tConcerns('work')
+          ? tClients('concernsWork')
           : concern === '건강'
-            ? tConcerns('health')
+            ? tClients('concernsHealth')
             : concern === '돈'
-              ? tConcerns('money')
+              ? tClients('concernsMoney')
               : concern === '가족'
-                ? tConcerns('family')
+                ? tClients('concernsFamily')
                 : concern === '연애•결혼'
-                  ? tConcerns('datingMarriage')
+                  ? tClients('concernsDatingMarriage')
                   : concern === '우정'
-                    ? tConcerns('friendship')
+                    ? tClients('concernsFriendship')
                     : concern === '진로•취업'
-                      ? tConcerns('careerJob')
+                      ? tClients('concernsCareerJob')
                       : concern === '반려동물'
-                        ? tConcerns('pet')
+                        ? tClients('concernsPet')
                         : concern === '학업'
-                          ? tConcerns('study')
-                          : tConcerns('other'),
+                          ? tClients('concernsStudy')
+                          : tClients('concernsOther'),
       value: concern,
     })),
   ];
@@ -113,12 +112,14 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
   return (
     <section className="flex w-full flex-col gap-5">
       <div className="flex w-full items-center justify-between">
-        <span className="body-18 font-semibold text-neutral-20">{tHistory('title')}</span>
+        <span className="body-18 font-semibold text-neutral-20">{tClients('historyTitle')}</span>
         <Select
           className="w-[138px]"
           triggerClassName="bg-white"
           value={filterValue}
-          triggerLabel={!isFilterInteracted ? tHistory('presentingConcernCompact') : undefined}
+          triggerLabel={
+            !isFilterInteracted ? tClients('historyPresentingConcernCompact') : undefined
+          }
           onValueChange={(value) => {
             setFilterValue(value as FilterValue);
             setIsFilterInteracted(true);
@@ -138,7 +139,7 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
           ))}
         </ul>
       ) : (
-        <p className="body-14 mt-2 text-label-alternative">{tHistory('emptyFiltered')}</p>
+        <p className="body-14 mt-2 text-label-alternative">{tClients('historyEmptyFiltered')}</p>
       )}
     </section>
   );
@@ -151,41 +152,40 @@ interface CounselingHistoryCardProps {
 
 function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) {
   const tCommon = useTranslations('common');
-  const tHistory = useTranslations('clients.history');
-  const tConcerns = useTranslations('clients.concerns');
+  const tClients = useTranslations('clients');
 
   const concernLabel =
     history.chiefConcern === '직장'
-      ? tConcerns('work')
+      ? tClients('concernsWork')
       : history.chiefConcern === '건강'
-        ? tConcerns('health')
+        ? tClients('concernsHealth')
         : history.chiefConcern === '돈'
-          ? tConcerns('money')
+          ? tClients('concernsMoney')
           : history.chiefConcern === '가족'
-            ? tConcerns('family')
+            ? tClients('concernsFamily')
             : history.chiefConcern === '연애•결혼'
-              ? tConcerns('datingMarriage')
+              ? tClients('concernsDatingMarriage')
               : history.chiefConcern === '우정'
-                ? tConcerns('friendship')
+                ? tClients('concernsFriendship')
                 : history.chiefConcern === '진로•취업'
-                  ? tConcerns('careerJob')
+                  ? tClients('concernsCareerJob')
                   : history.chiefConcern === '반려동물'
-                    ? tConcerns('pet')
+                    ? tClients('concernsPet')
                     : history.chiefConcern === '학업'
-                      ? tConcerns('study')
-                      : tConcerns('other');
+                      ? tClients('concernsStudy')
+                      : tClients('concernsOther');
 
   const paymentStatusLabel =
     history.paymentStatus === '미납'
-      ? tHistory('paymentStatus.unpaid')
-      : tHistory('paymentStatus.paid');
+      ? tClients('historyPaymentStatusUnpaid')
+      : tClients('historyPaymentStatusPaid');
 
   const taskStatusLabel =
     history.taskStatus === '미완수'
-      ? tHistory('taskStatus.notCompleted')
+      ? tClients('historyTaskStatusNotCompleted')
       : history.taskStatus === '진행중'
-        ? tHistory('taskStatus.inProgress')
-        : tHistory('taskStatus.completed');
+        ? tClients('historyTaskStatusInProgress')
+        : tClients('historyTaskStatusCompleted');
 
   return (
     <li className="flex w-full">
@@ -200,7 +200,7 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
         <div className="grid w-full grid-cols-2 items-start gap-x-10">
           <div className="flex min-w-0 flex-col items-start gap-2">
             <CounselingField
-              label={tHistory('presentingConcern')}
+              label={tClients('historyPresentingConcern')}
               value={
                 <span className="flex items-center justify-center gap-[3px] font-semibold rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 leading-none text-label-normal">
                   {concernLabel}
@@ -208,7 +208,7 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
               }
             />
             <CounselingField
-              label={tHistory('paymentStatusLabel')}
+              label={tClients('historyPaymentStatusLabel')}
               value={
                 <span
                   className={`body-16 font-medium ${getPaymentStatusClassName(history.paymentStatus)}`}
@@ -220,11 +220,11 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
           </div>
           <div className="flex min-w-0 flex-col items-start gap-2">
             <CounselingField
-              label={tHistory('assignment')}
+              label={tClients('historyAssignment')}
               value={<span className="body-16 text-label-neutral">{history.taskName}</span>}
             />
             <CounselingField
-              label={tHistory('assignmentStatus')}
+              label={tClients('historyAssignmentStatus')}
               value={
                 <span className={`body-16 ${getTaskStatusClassName(history.taskStatus)}`}>
                   {taskStatusLabel}

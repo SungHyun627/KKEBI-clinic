@@ -13,14 +13,14 @@ const CHECKIN_METRICS = [
 ] as const;
 
 export default function CheckinHistorySection({ checkins }: CheckinHistorySectionProps) {
-  const tCheckin = useTranslations('clients.checkin');
+  const tClients = useTranslations('clients');
   if (checkins.length === 0) {
     return (
       <section className="flex w-full flex-col items-start gap-5">
         <div className="flex w-full items-center justify-between">
-          <span className="body-18 font-semibold text-neutral-20">{tCheckin('title')}</span>
+          <span className="body-18 font-semibold text-neutral-20">{tClients('checkinTitle')}</span>
         </div>
-        <p className="body-14 text-label-alternative">{tCheckin('emptyLastMonth')}</p>
+        <p className="body-14 text-label-alternative">{tClients('checkinEmptyLastMonth')}</p>
       </section>
     );
   }
@@ -30,9 +30,9 @@ export default function CheckinHistorySection({ checkins }: CheckinHistorySectio
   return (
     <section className="flex w-full flex-col items-start gap-5">
       <div className="flex w-full items-center justify-between">
-        <span className="body-18 font-semibold text-neutral-20">{tCheckin('title')}</span>
+        <span className="body-18 font-semibold text-neutral-20">{tClients('checkinTitle')}</span>
         <div className="flex items-center gap-2">
-          <span className="body-14 text-label-alternative">{tCheckin('latest')}</span>
+          <span className="body-14 text-label-alternative">{tClients('checkinLatest')}</span>
           <span className="body-14 text-[#303030]">
             {latest.date} {latest.time}
           </span>
@@ -44,12 +44,12 @@ export default function CheckinHistorySection({ checkins }: CheckinHistorySectio
           const score = latest[key] ?? 0;
           const metricLabel =
             label === '기분'
-              ? tCheckin('mood')
+              ? tClients('checkinMood')
               : label === '스트레스'
-                ? tCheckin('stress')
+                ? tClients('checkinStress')
                 : label === '에너지'
-                  ? tCheckin('energy')
-                  : tCheckin('sleep');
+                  ? tClients('checkinEnergy')
+                  : tClients('checkinSleep');
           return (
             <div
               key={key}

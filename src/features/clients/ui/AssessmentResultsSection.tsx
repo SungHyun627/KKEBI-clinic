@@ -19,35 +19,56 @@ interface QaItemProps {
 }
 
 export default function AssessmentResultsSection({ detail }: AssessmentResultsSectionProps) {
-  const tScale = useTranslations('clients.scale');
+  const tClients = useTranslations('clients');
   const qaItems: QaItemProps[] = detail
     ? [
-        { question: tScale('reasonForVisit'), answer: detail.intakeAnswers.reasonForVisit },
-        { question: tScale('desiredChange'), answer: detail.intakeAnswers.expectedChange },
-        { question: tScale('solutionsTried'), answer: detail.intakeAnswers.triedMethod },
-        { question: tScale('effectiveness'), answer: detail.intakeAnswers.methodEffectiveness },
-        { question: tScale('biggestConcern'), answer: detail.intakeAnswers.biggestConcern },
-        { question: tScale('averageSleepPattern'), answer: detail.intakeAnswers.sleepPattern },
-        { question: tScale('sleepQuality'), answer: detail.intakeAnswers.sleepQuality },
-        { question: tScale('exerciseFrequency'), answer: detail.intakeAnswers.exerciseHabit },
-        { question: tScale('mealsPerDay'), answer: detail.intakeAnswers.mealsPerDay },
-        { question: tScale('mainSupportPerson'), answer: detail.intakeAnswers.mostReliablePerson },
-        { question: tScale('supportReason'), answer: detail.intakeAnswers.reliabilityReason },
-        { question: tScale('familyCohesion'), answer: detail.intakeAnswers.familyBond },
-        { question: tScale('familyCohesionReason'), answer: detail.intakeAnswers.familyBondReason },
-        { question: tScale('selfDescription'), answer: detail.intakeAnswers.selfDescription },
+        { question: tClients('scaleReasonForVisit'), answer: detail.intakeAnswers.reasonForVisit },
+        { question: tClients('scaleDesiredChange'), answer: detail.intakeAnswers.expectedChange },
+        { question: tClients('scaleSolutionsTried'), answer: detail.intakeAnswers.triedMethod },
+        {
+          question: tClients('scaleEffectiveness'),
+          answer: detail.intakeAnswers.methodEffectiveness,
+        },
+        { question: tClients('scaleBiggestConcern'), answer: detail.intakeAnswers.biggestConcern },
+        {
+          question: tClients('scaleAverageSleepPattern'),
+          answer: detail.intakeAnswers.sleepPattern,
+        },
+        { question: tClients('scaleSleepQuality'), answer: detail.intakeAnswers.sleepQuality },
+        {
+          question: tClients('scaleExerciseFrequency'),
+          answer: detail.intakeAnswers.exerciseHabit,
+        },
+        { question: tClients('scaleMealsPerDay'), answer: detail.intakeAnswers.mealsPerDay },
+        {
+          question: tClients('scaleMainSupportPerson'),
+          answer: detail.intakeAnswers.mostReliablePerson,
+        },
+        {
+          question: tClients('scaleSupportReason'),
+          answer: detail.intakeAnswers.reliabilityReason,
+        },
+        { question: tClients('scaleFamilyCohesion'), answer: detail.intakeAnswers.familyBond },
+        {
+          question: tClients('scaleFamilyCohesionReason'),
+          answer: detail.intakeAnswers.familyBondReason,
+        },
+        {
+          question: tClients('scaleSelfDescription'),
+          answer: detail.intakeAnswers.selfDescription,
+        },
       ]
     : [];
 
   return (
     <section className="flex w-full flex-col gap-6 items-start">
-      <h3 className="body-18 font-semibold text-neutral-20">{tScale('title')}</h3>
+      <h3 className="body-18 font-semibold text-neutral-20">{tClients('scaleTitle')}</h3>
       {detail ? (
         <>
           <div className="grid w-full grid-cols-3 gap-3">
-            <ScoreItem label={tScale('phq9')} score={detail.scaleResults.phq9} />
-            <ScoreItem label={tScale('pss10')} score={detail.scaleResults.pss10} />
-            <ScoreItem label={tScale('mbi')} score={detail.scaleResults.mbi} />
+            <ScoreItem label={tClients('scalePhq9')} score={detail.scaleResults.phq9} />
+            <ScoreItem label={tClients('scalePss10')} score={detail.scaleResults.pss10} />
+            <ScoreItem label={tClients('scaleMbi')} score={detail.scaleResults.mbi} />
           </div>
 
           <div className="flex w-full flex-col items-start gap-[18px] px-5 py-6 rounded-2xl bg-white">
@@ -60,7 +81,7 @@ export default function AssessmentResultsSection({ detail }: AssessmentResultsSe
           </div>
         </>
       ) : (
-        <p className="body-14 mt-2 text-label-alternative">{tScale('empty')}</p>
+        <p className="body-14 mt-2 text-label-alternative">{tClients('scaleEmpty')}</p>
       )}
     </section>
   );

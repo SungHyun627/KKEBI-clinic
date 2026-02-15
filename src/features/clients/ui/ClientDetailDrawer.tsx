@@ -33,8 +33,8 @@ export default function ClientDetailDrawer({
   onOpenChange,
   client,
 }: ClientDetailDrawerProps) {
-  const tClientsDetail = useTranslations('clients.detail');
-  const tNotification = useTranslations('notification.common');
+  const tClients = useTranslations('clients');
+  const tNotification = useTranslations('notification');
   const [detail, setDetail] = useState<ClientDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function ClientDetailDrawer({
 
       if (!result.success || !result.data) {
         setDetail(null);
-        setErrorMessage(result.message || tClientsDetail('loadFailed'));
+        setErrorMessage(result.message || tClients('detailLoadFailed'));
         setIsLoading(false);
         return;
       }
@@ -60,7 +60,7 @@ export default function ClientDetailDrawer({
     };
 
     void loadClientDetail();
-  }, [open, client?.clientId, tClientsDetail]);
+  }, [open, client?.clientId, tClients]);
 
   const displayClient = detail ?? client;
 
@@ -72,15 +72,15 @@ export default function ClientDetailDrawer({
         className="flex max-w-[695px] flex-col gap-[26px] overflow-y-auto px-8 py-[23px] bg-neutral-99"
       >
         <DrawerHeader className="sr-only p-0">
-          <DrawerTitle>{tClientsDetail('drawerTitle')}</DrawerTitle>
+          <DrawerTitle>{tClients('detailDrawerTitle')}</DrawerTitle>
         </DrawerHeader>
         <DrawerClose asChild>
           <button
             type="button"
-            aria-label={tNotification('fold')}
+            aria-label={tNotification('commonFold')}
             className="flex h-6 w-6 items-center justify-center hover:cursor-pointer"
           >
-            <Image src="/icons/fold.svg" alt={tNotification('fold')} width={20} height={20} />
+            <Image src="/icons/fold.svg" alt={tNotification('commonFold')} width={20} height={20} />
           </button>
         </DrawerClose>
         <ClientDetailDrawerBody
@@ -100,12 +100,12 @@ function ClientDetailDrawerBody({
   displayClient,
   detail,
 }: ClientDetailDrawerBodyProps) {
-  const tClientsDetail = useTranslations('clients.detail');
+  const tClients = useTranslations('clients');
 
   if (isLoading) {
     return (
       <div className={DRAWER_BODY_CLASSNAME}>
-        <div className="body-14 text-label-alternative">{tClientsDetail('loading')}</div>
+        <div className="body-14 text-label-alternative">{tClients('detailLoading')}</div>
       </div>
     );
   }

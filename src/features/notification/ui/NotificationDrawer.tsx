@@ -20,8 +20,7 @@ interface NotificationDrawerProps {
 
 export default function NotificationDrawer({ open, onOpenChange }: NotificationDrawerProps) {
   const tNav = useTranslations('nav');
-  const tRisk = useTranslations('notification.risk');
-  const tNotification = useTranslations('notification.common');
+  const tNotification = useTranslations('notification');
   const [notifications, setNotifications] = useState<NotificationItemType[]>([]);
   const [viewMode, setViewMode] = useState<NotificationViewMode>('all');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +36,7 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
       if (!result.success || !result.data) {
         setNotifications([]);
         setViewMode('all');
-        setErrorMessage(result.message || tNotification('loadFailed'));
+        setErrorMessage(result.message || tNotification('commonLoadFailed'));
         setIsLoading(false);
         return;
       }
@@ -61,23 +60,23 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
         <DrawerClose asChild>
           <button
             type="button"
-            aria-label={tNotification('fold')}
+            aria-label={tNotification('commonFold')}
             className="flex h-6 w-6 items-center justify-center hover:cursor-pointer"
           >
-            <Image src="/icons/fold.svg" alt={tNotification('fold')} width={20} height={20} />
+            <Image src="/icons/fold.svg" alt={tNotification('commonFold')} width={20} height={20} />
           </button>
         </DrawerClose>
         <div className="flex h-full w-full flex-col items-start gap-4">
           <div className="w-full">
             <DrawerTitle>
-              {viewMode === 'risk' ? tRisk('title') : tNav('notifications')}
+              {viewMode === 'risk' ? tNotification('riskTitle') : tNav('notifications')}
             </DrawerTitle>
           </div>
 
           <div className="relative flex flex-col counselor-inquiry-scroll flex-1 w-full overflow-y-auto gap-4">
             {isLoading ? (
               <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="body-16 text-label-alternative">{tNotification('loading')}</p>
+                <p className="body-16 text-label-alternative">{tNotification('commonLoading')}</p>
               </div>
             ) : null}
             {!isLoading && errorMessage ? (
@@ -85,7 +84,7 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
             ) : null}
             {!isLoading && !errorMessage && notifications.length === 0 ? (
               <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="body-16 text-label-alternative">{tNotification('empty')}</p>
+                <p className="body-16 text-label-alternative">{tNotification('commonEmpty')}</p>
               </div>
             ) : null}
 

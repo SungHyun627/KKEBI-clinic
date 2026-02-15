@@ -24,9 +24,8 @@ const RequestResetPasswordDialog = ({
   setSentEmail,
   setIsEmailSentOpen,
 }: RequestResetPasswordDialogProps) => {
-  const tReset = useTranslations('auth.reset');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
-  const tLogin = useTranslations('auth.login');
   const emailForm = useForm<{ email: string }>({ defaultValues: { email: '' } });
   const watchedEmail = useWatch({ control: emailForm.control, name: 'email' });
 
@@ -34,13 +33,13 @@ const RequestResetPasswordDialog = ({
     <Dialog open={isOpen} onOpenChange={handleDialogOpen}>
       <DialogContent className="flex max-w-[480px] p-7 md:p-6 flex-col justify-center items-center gap-[26px] rounded-[24px] bg-white">
         <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
-          <VisuallyHidden>{tReset('title')}</VisuallyHidden>
+          <VisuallyHidden>{tAuth('resetTitle')}</VisuallyHidden>
         </DialogTitle>
         <div className="flex flex-col w-full flex-shrink-0 flex-grow-0 items-start gap-[26px]">
           <div className="flex flex-col w-full items-start gap-[23px]">
             <div className="flex flex-col w-full justify-center items-start gap-[6px] self-stretch">
               <div className="flex w-full justify-between items-center">
-                <span className="text-lg font-semibold">{tReset('title')}</span>
+                <span className="text-lg font-semibold">{tAuth('resetTitle')}</span>
                 <button
                   type="button"
                   aria-label={tCommon('close')}
@@ -58,9 +57,9 @@ const RequestResetPasswordDialog = ({
                   fontStyle: 'normal',
                 }}
               >
-                {tReset('description1')}
+                {tAuth('resetDescription1')}
                 <br />
-                {tReset('description2')}
+                {tAuth('resetDescription2')}
               </span>
             </div>
             <div className="w-full">
@@ -78,12 +77,12 @@ const RequestResetPasswordDialog = ({
                   render={({ field }) => (
                     <FormItem className="space-y-2">
                       <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                        {tLogin('emailLabel')}
+                        {tAuth('loginEmailLabel')}
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder={tLogin('emailPlaceholder')}
+                          placeholder={tAuth('loginEmailPlaceholder')}
                           {...field}
                           onClear={() => emailForm.setValue('email', '')}
                           icon={
@@ -139,7 +138,7 @@ const RequestResetPasswordDialog = ({
                 }
               }}
             >
-              {tReset('sendLink')}
+              {tAuth('resetSendLink')}
             </Button>
           </div>
         </div>

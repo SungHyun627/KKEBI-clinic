@@ -18,10 +18,7 @@ import { Select } from '@/shared/ui/select';
 type RiskFilter = 'all' | RiskType;
 
 export default function ClientsPage() {
-  const tClientsList = useTranslations('clients.list');
-  const tClientsFilter = useTranslations('clients.filter.risk');
-  const tClientsCheckin = useTranslations('clients.checkin');
-  const tClientsHistory = useTranslations('clients.history');
+  const tClients = useTranslations('clients');
   const router = useRouter();
   const pathname = usePathname();
   const targetClientId =
@@ -45,7 +42,7 @@ export default function ClientsPage() {
 
       if (!result.success || !result.data) {
         setClients([]);
-        setErrorMessage(result.message || tClientsList('loadFailed'));
+        setErrorMessage(result.message || tClients('listLoadFailed'));
         setIsLoading(false);
         return;
       }
@@ -98,7 +95,7 @@ export default function ClientsPage() {
         <div className="flex w-full min-w-0 flex-1 items-center gap-4">
           <div className="w-full min-w-0 max-w-[416px]">
             <Input
-              placeholder={tClientsList('searchPlaceholder')}
+              placeholder={tClients('listSearchPlaceholder')}
               className="min-w-0"
               value={searchKeyword}
               onChange={(event) => {
@@ -120,39 +117,39 @@ export default function ClientsPage() {
             />
           </div>
           <Select
-            placeholder={tClientsList('riskType')}
+            placeholder={tClients('listRiskType')}
             value={riskFilter}
-            triggerLabel={!isRiskFilterInteracted ? tClientsList('riskType') : undefined}
+            triggerLabel={!isRiskFilterInteracted ? tClients('listRiskType') : undefined}
             onValueChange={(value) => {
               setRiskFilter(value as RiskFilter);
               setIsRiskFilterInteracted(true);
               setPage(1);
             }}
             options={[
-              { label: tClientsList('all'), value: 'all' },
-              { label: tClientsFilter('stable'), value: '안정' },
-              { label: tClientsFilter('caution'), value: '주의' },
-              { label: tClientsFilter('high'), value: '위험' },
+              { label: tClients('listAll'), value: 'all' },
+              { label: tClients('filterRiskStable'), value: '안정' },
+              { label: tClients('filterRiskCaution'), value: '주의' },
+              { label: tClients('filterRiskHigh'), value: '위험' },
             ]}
             className="w-31"
           />
         </div>
         <div className="flex items-center gap-3">
-          <Button size="sm">{tClientsList('register')}</Button>
+          <Button size="sm">{tClients('listRegister')}</Button>
           <Button size="sm" variant="outline">
-            {tClientsList('closedSessions')}
+            {tClients('listClosedSessions')}
           </Button>
         </div>
       </div>
       <div className="flex w-full flex-col items-start gap-[23px]">
         <div className="flex w-full items-end justify-between">
           <div className="body-18 text-label-normal font-semibold">
-            {tClientsList('totalCount', { count: filteredClients.length })}
+            {tClients('listTotalCount', { count: filteredClients.length })}
           </div>
           <div className="flex items-center gap-[3px]">
             <button
               type="button"
-              aria-label={tClientsList('previous10')}
+              aria-label={tClients('listPrevious10')}
               className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
@@ -161,7 +158,7 @@ export default function ClientsPage() {
             </button>
             <button
               type="button"
-              aria-label={tClientsList('next10')}
+              aria-label={tClients('listNext10')}
               className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage >= totalPages}
@@ -173,24 +170,24 @@ export default function ClientsPage() {
 
         <div className="w-full mb-12">
           <div className="grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
-            <span className="body-14 font-semibold text-label-neutral">{tClientsList('time')}</span>
+            <span className="body-14 font-semibold text-label-neutral">{tClients('listTime')}</span>
             <span className="body-14 font-semibold text-label-neutral">
-              {tClientsList('clientName')}
+              {tClients('listClientName')}
             </span>
             <span className="body-14 text-center font-semibold text-label-neutral">
-              {tClientsList('riskType')}
+              {tClients('listRiskType')}
             </span>
             <span className="body-14 font-semibold text-label-neutral">
-              {tClientsList('moodStressEnergyScore')}
+              {tClients('listMoodStressEnergyScore')}
             </span>
             <span className="body-14  font-semibold text-label-neutral">
-              {tClientsHistory('presentingConcern')}
+              {tClients('historyPresentingConcern')}
             </span>
           </div>
 
           {isLoading ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-              {tClientsList('loading')}
+              {tClients('listLoading')}
             </div>
           ) : errorMessage ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-status-negative">
@@ -198,7 +195,7 @@ export default function ClientsPage() {
             </div>
           ) : filteredClients.length === 0 ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-              {tClientsList('empty')}
+              {tClients('listEmpty')}
             </div>
           ) : (
             <ul className="flex w-full flex-col">
@@ -228,9 +225,9 @@ export default function ClientsPage() {
                     <RiskTypeChip value={client.riskType} />
                   </span>
                   <span className="flex items-center gap-2">
-                    <MoodScoreChip label={tClientsCheckin('mood')} score={client.moodScore} />
-                    <MoodScoreChip label={tClientsCheckin('stress')} score={client.stressScore} />
-                    <MoodScoreChip label={tClientsCheckin('energy')} score={client.energyScore} />
+                    <MoodScoreChip label={tClients('checkinMood')} score={client.moodScore} />
+                    <MoodScoreChip label={tClients('checkinStress')} score={client.stressScore} />
+                    <MoodScoreChip label={tClients('checkinEnergy')} score={client.energyScore} />
                   </span>
                   <span className="flex flex-wrap gap-2">
                     {client.chiefConcern.map((concern) => (

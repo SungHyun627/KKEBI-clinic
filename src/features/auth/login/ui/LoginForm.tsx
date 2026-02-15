@@ -15,8 +15,7 @@ import { getInitialLoginInfo } from '../lib/getInitialLoginInfo';
 import { setAuthSession } from '../lib/authSession';
 
 const LoginForm = () => {
-  const tLogin = useTranslations('auth.login');
-  const tOtp = useTranslations('auth.otp');
+  const tAuth = useTranslations('auth');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
   const [saveLoginInfo, setSaveLoginInfo] = useState(getInitialLoginInfo().saveLoginInfo || false);
@@ -75,11 +74,11 @@ const LoginForm = () => {
   const onInvalid = () => {
     const { errors } = form.formState;
     if (errors.email) {
-      toast(tLogin('invalidEmail'));
+      toast(tAuth('loginInvalidEmail'));
       return;
     }
     if (errors.password) {
-      toast(tOtp('passwordMismatch'));
+      toast(tAuth('otpPasswordMismatch'));
     }
   };
 
@@ -93,7 +92,7 @@ const LoginForm = () => {
         >
           <div className="flex flex-col gap-8">
             <h2 className="text-center text-[20px] leading-[30px] font-semibold text-label-normal">
-              {tLogin('title')}
+              {tAuth('loginTitle')}
             </h2>
             <div className="flex flex-col gap-4">
               <FormField
@@ -109,12 +108,12 @@ const LoginForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      {tLogin('emailLabel')}
+                      {tAuth('loginEmailLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder={tLogin('emailPlaceholder')}
+                        placeholder={tAuth('loginEmailPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('email', '')}
                         icon={
@@ -152,12 +151,12 @@ const LoginForm = () => {
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      {tLogin('passwordLabel')}
+                      {tAuth('loginPasswordLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type={isPasswordVisible ? 'text' : 'password'}
-                        placeholder={tLogin('passwordPlaceholder')}
+                        placeholder={tAuth('loginPasswordPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('password', '')}
                         rightIcon={
@@ -219,10 +218,10 @@ const LoginForm = () => {
                 />
               </svg>
             </span>
-            {tLogin('keepSignedIn')}
+            {tAuth('loginKeepSignedIn')}
           </label>
           <Button type="submit" className="w-full">
-            {tLogin('title')}
+            {tAuth('loginTitle')}
           </Button>
         </form>
       </Form>

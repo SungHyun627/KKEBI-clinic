@@ -17,20 +17,20 @@ const EmailSentConfirmDialog = ({
   handleDialogOpen,
   sentEmail,
 }: EmailSentConfirmDialogProps) => {
-  const tReset = useTranslations('auth.reset');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
 
   return (
     <Dialog open={isOpen} onOpenChange={handleDialogOpen}>
       <DialogContent className="flex max-w-[480px] p-7 md:p-6 flex-col justify-center items-center gap-[26px] rounded-[24px] bg-white">
         <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
-          <VisuallyHidden>{tReset('emailSentTitle')}</VisuallyHidden>
+          <VisuallyHidden>{tAuth('resetEmailSentTitle')}</VisuallyHidden>
         </DialogTitle>
         <div className="flex flex-col w-full flex-shrink-0 flex-grow-0 items-center gap-[26px]">
           <div className="flex flex-col w-full items-center gap-[28px]">
             <div className="flex w-full justify-between items-center">
               <span className="font-pretendard text-[20px] font-semibold leading-[30px] text-center">
-                {tReset('emailSentTitle')}
+                {tAuth('resetEmailSentTitle')}
               </span>
               <button
                 type="button"
@@ -43,21 +43,26 @@ const EmailSentConfirmDialog = ({
               </button>
             </div>
             <div className="flex flex-col w-full items-center gap-[23px]">
-              <Image src="/images/checkmark.png" alt={tReset('sent')} width={120} height={120} />
+              <Image
+                src="/images/checkmark.png"
+                alt={tAuth('resetSent')}
+                width={120}
+                height={120}
+              />
               <div className="flex flex-col w-full items-center gap-[6px]">
                 <span className="font-pretendard text-[18px] font-semibold leading-[28.8px] text-center text-label-strong">
                   {sentEmail}
                 </span>
                 <span className="font-pretendard text-[14px] font-normal leading-[21px] text-center text-neutral-30">
-                  {tReset('sentToSuffix')}
+                  {tAuth('resetSentToSuffix')}
                   <br />
-                  {tReset('guide1')}
+                  {tAuth('resetGuide1')}
                 </span>
               </div>
             </div>
             <div className="flex flex-col w-full items-start justify-center px-3 py-4 gap-[6px] rounded-2xl bg-neutral-99">
-              <p className="body-14 text-neutral-50">{tReset('guide2')}</p>
-              <p className="body-14 text-neutral-50">{tReset('guide3')}</p>
+              <p className="body-14 text-neutral-50">{tAuth('resetGuide2')}</p>
+              <p className="body-14 text-neutral-50">{tAuth('resetGuide3')}</p>
             </div>
           </div>
 
