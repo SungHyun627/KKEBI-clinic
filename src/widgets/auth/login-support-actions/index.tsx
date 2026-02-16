@@ -24,18 +24,18 @@ const LoginSupportActions = () => {
 
   return (
     <>
-      <div className="flex items-center gap-3 text-[18px] leading-[28.8px] font-medium text-neutral-60">
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-4 text-[18px] leading-[28.8px] font-medium text-neutral-60">
         <button
           type="button"
-          className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer"
+          className="hover:text-label-normal justify-self-end text-inherit bg-transparent border-none p-0 cursor-pointer whitespace-nowrap"
           onClick={() => setIsPasswordResetOpen(true)}
         >
           {tAuth('loginForgotPassword')}
         </button>
-        <span className="h-5 w-px bg-neutral-80" />
+        <span className="justify-self-center h-5 w-px bg-neutral-80" />
         <button
           type="button"
-          className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer"
+          className="hover:text-label-normal justify-self-start text-inherit bg-transparent border-none p-0 cursor-pointer whitespace-nowrap"
           onClick={() => setIsCounselorInquiryOpen(true)}
         >
           {tAuth('loginCounselorInquiry')}
