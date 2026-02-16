@@ -2,7 +2,9 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
@@ -13,22 +15,26 @@ import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import { Input } from '@/shared/ui/input';
 import { Select } from '@/shared/ui/select';
+import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 type RiskFilter = 'all' | RiskType;
 
 export default function ClientsPage() {
+  const tClients = useTranslations('clients');
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const targetClientId =
-    typeof window === 'undefined'
-      ? null
-      : new URLSearchParams(window.location.search).get('clientId');
+  const searchParams = useSearchParams();
+  const targetClientId = searchParams.get('clientId');
+  const targetOpenAt = searchParams.get('openAt');
+  const targetQueryKey = targetClientId ? `${targetClientId}:${targetOpenAt ?? ''}` : null;
   const [searchKeyword, setSearchKeyword] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
   const [clients, setClients] = useState<ClientLookupItem[]>([]);
   const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [dismissedQueryKey, setDismissedQueryKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -40,19 +46,23 @@ export default function ClientsPage() {
 
       if (!result.success || !result.data) {
         setClients([]);
-        setErrorMessage(result.message || '내담자 목록을 불러오지 못했습니다.');
+        setErrorMessage(tClients('listLoadFailed'));
         setIsLoading(false);
         return;
       }
 
-      const uniqueClients = mapSchedulesToClients(result.data);
+      const uniqueClients = mapSchedulesToClients(result.data, locale, [
+        tClients('concernsDepression'),
+        tClients('concernsStress'),
+        tClients('concernsSleep'),
+      ]);
       setClients(uniqueClients);
       setErrorMessage(null);
       setIsLoading(false);
     };
 
     void loadClients();
-  }, []);
+  }, [locale, tClients]);
 
   useEffect(() => {
     if (!targetClientId || clients.length === 0) return;
@@ -68,13 +78,17 @@ export default function ClientsPage() {
   }, [clients, targetClientId]);
 
   const activeClient = selectedClientFromQuery ?? selectedClient;
-  const isQueryDrawerOpen = Boolean(targetClientId && selectedClientFromQuery);
+  const isQueryDrawerOpen = Boolean(
+    targetClientId && selectedClientFromQuery && targetQueryKey !== dismissedQueryKey,
+  );
 
   const filteredClients = useMemo(() => {
-    const normalizedKeyword = searchKeyword.trim();
+    const normalizedKeyword = searchKeyword.trim().toLowerCase();
     return clients.filter((client) => {
       const matchesRisk = riskFilter === 'all' ? true : client.riskType === riskFilter;
-      const matchesName = normalizedKeyword ? client.clientName.includes(normalizedKeyword) : true;
+      const matchesName = normalizedKeyword
+        ? client.clientName.toLowerCase().includes(normalizedKeyword)
+        : true;
       return matchesRisk && matchesName;
     });
   }, [clients, riskFilter, searchKeyword]);
@@ -93,7 +107,7 @@ export default function ClientsPage() {
         <div className="flex w-full min-w-0 flex-1 items-center gap-4">
           <div className="w-full min-w-0 max-w-[416px]">
             <Input
-              placeholder="내담자 성함을 검색해 보세요."
+              placeholder={tClients('listSearchPlaceholder')}
               className="min-w-0"
               value={searchKeyword}
               onChange={(event) => {
@@ -115,39 +129,39 @@ export default function ClientsPage() {
             />
           </div>
           <Select
-            placeholder="위험 유형"
+            placeholder={tClients('listRiskType')}
             value={riskFilter}
-            triggerLabel={!isRiskFilterInteracted ? '위험 유형' : undefined}
+            triggerLabel={!isRiskFilterInteracted ? tClients('listRiskType') : undefined}
             onValueChange={(value) => {
               setRiskFilter(value as RiskFilter);
               setIsRiskFilterInteracted(true);
               setPage(1);
             }}
             options={[
-              { label: '전체', value: 'all' },
-              { label: '안정', value: '안정' },
-              { label: '주의', value: '주의' },
-              { label: '위험', value: '위험' },
+              { label: tClients('listAll'), value: 'all' },
+              { label: tClients('filterRiskStable'), value: '안정' },
+              { label: tClients('filterRiskCaution'), value: '주의' },
+              { label: tClients('filterRiskHigh'), value: '위험' },
             ]}
-            className="w-31"
+            className={locale === 'en' ? 'w-40' : 'w-31'}
           />
         </div>
         <div className="flex items-center gap-3">
-          <Button size="sm">내담자 등록</Button>
+          <Button size="sm">{tClients('listRegister')}</Button>
           <Button size="sm" variant="outline">
-            종결 상담 확인
+            {tClients('listClosedSessions')}
           </Button>
         </div>
       </div>
       <div className="flex w-full flex-col items-start gap-[23px]">
         <div className="flex w-full items-end justify-between">
           <div className="body-18 text-label-normal font-semibold">
-            총 {filteredClients.length}명
+            {tClients('listTotalCount', { count: filteredClients.length })}
           </div>
           <div className="flex items-center gap-[3px]">
             <button
               type="button"
-              aria-label="이전 10개"
+              aria-label={tClients('listPrevious10')}
               className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
@@ -156,7 +170,7 @@ export default function ClientsPage() {
             </button>
             <button
               type="button"
-              aria-label="다음 10개"
+              aria-label={tClients('listNext10')}
               className="flex h-8 w-8 items-center justify-center bg-white text-label-normal hover:cursor-pointer disabled:cursor-not-allowed disabled:bg-neutral-99 disabled:opacity-40"
               onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage >= totalPages}
@@ -168,18 +182,24 @@ export default function ClientsPage() {
 
         <div className="w-full mb-12">
           <div className="grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
-            <span className="body-14 font-semibold text-label-neutral">시간</span>
-            <span className="body-14 font-semibold text-label-neutral">내담자명</span>
-            <span className="body-14 text-center font-semibold text-label-neutral">위험 유형</span>
+            <span className="body-14 font-semibold text-label-neutral">{tClients('listTime')}</span>
             <span className="body-14 font-semibold text-label-neutral">
-              기분/스트레스/에너지 점수
+              {tClients('listClientName')}
             </span>
-            <span className="body-14  font-semibold text-label-neutral">주 호소 문제</span>
+            <span className="body-14 text-center font-semibold text-label-neutral">
+              {tClients('listRiskType')}
+            </span>
+            <span className="body-14 font-semibold text-label-neutral">
+              {tClients('listMoodStressEnergyScore')}
+            </span>
+            <span className="body-14  font-semibold text-label-neutral">
+              {tClients('historyPresentingConcern')}
+            </span>
           </div>
 
           {isLoading ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-              내담자 목록을 불러오는 중입니다.
+              {tClients('listLoading')}
             </div>
           ) : errorMessage ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-status-negative">
@@ -187,7 +207,7 @@ export default function ClientsPage() {
             </div>
           ) : filteredClients.length === 0 ? (
             <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-              조건에 맞는 내담자가 없습니다.
+              {tClients('listEmpty')}
             </div>
           ) : (
             <ul className="flex w-full flex-col">
@@ -217,9 +237,9 @@ export default function ClientsPage() {
                     <RiskTypeChip value={client.riskType} />
                   </span>
                   <span className="flex items-center gap-2">
-                    <MoodScoreChip label="기분" score={client.moodScore} />
-                    <MoodScoreChip label="스트레스" score={client.stressScore} />
-                    <MoodScoreChip label="에너지" score={client.energyScore} />
+                    <MoodScoreChip label={tClients('checkinMood')} score={client.moodScore} />
+                    <MoodScoreChip label={tClients('checkinStress')} score={client.stressScore} />
+                    <MoodScoreChip label={tClients('checkinEnergy')} score={client.energyScore} />
                   </span>
                   <span className="flex flex-wrap gap-2">
                     {client.chiefConcern.map((concern) => (
@@ -236,7 +256,8 @@ export default function ClientsPage() {
       <ClientDetailDrawer
         open={isDrawerOpen || isQueryDrawerOpen}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen && targetClientId) {
+          if (!nextOpen && targetQueryKey) {
+            setDismissedQueryKey(targetQueryKey);
             router.replace(pathname, { scroll: false });
           }
           if (!nextOpen) {
@@ -250,15 +271,18 @@ export default function ClientsPage() {
   );
 }
 
-const mapSchedulesToClients = (schedules: TodayScheduleItem[]): ClientLookupItem[] => {
+const mapSchedulesToClients = (
+  schedules: TodayScheduleItem[],
+  locale: string,
+  concerns: string[],
+): ClientLookupItem[] => {
   const sortedByTime = [...schedules].sort((a, b) => a.time.localeCompare(b.time));
-  const concerns = ['우울', '스트레스', '수면'];
 
   return sortedByTime
     .map((schedule) => ({
       time: schedule.time,
       clientId: schedule.clientId,
-      clientName: schedule.clientName,
+      clientName: getClientNameByLocale(schedule.clientId, schedule.clientName, locale),
       streakDays: schedule.streakDays ?? 0,
       riskType: schedule.riskType,
       moodScore: schedule.moodScore ?? 0,

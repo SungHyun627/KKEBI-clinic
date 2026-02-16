@@ -1,9 +1,10 @@
 'use client';
+import { useLocale } from 'next-intl';
 
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Sidebar,
   SidebarContent,
@@ -20,20 +21,37 @@ import { toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
 
 const navItems = [
-  { label: '대시보드', href: '/', icon: '/icons/dashboard.svg' },
-  { label: '내담자 관리', href: '/clients', icon: '/icons/people.svg' },
-  { label: '상담 세션', href: '/sessions', icon: '/icons/video.svg' },
-  { label: '설정', href: '/settings', icon: '/icons/setting.svg' },
+  { key: 'dashboard', href: '/', icon: '/icons/dashboard.svg' },
+  { key: 'clients', href: '/clients', icon: '/icons/people.svg' },
+  { key: 'sessions', href: '/sessions', icon: '/icons/video.svg' },
+  { key: 'settings', href: '/settings', icon: '/icons/setting.svg' },
 ];
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const tNav = useTranslations('nav');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const switchLocale = () => {
+    if (typeof window === 'undefined') return;
+    const { pathname, search, hash } = window.location;
+    const currentLocaleFromPath = pathname.startsWith('/en')
+      ? 'en'
+      : pathname.startsWith('/ko')
+        ? 'ko'
+        : locale;
+    const nextLocale = currentLocaleFromPath === 'ko' ? 'en' : 'ko';
+    const normalizedPath = pathname.replace(/^\/(ko|en)(?=\/|$)/, '') || '/';
+    const nextPath = `/${nextLocale}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`;
+    window.location.replace(`${nextPath}${search}${hash}`);
+  };
+
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userName = useSyncExternalStore(
     () => () => {},
-    () => getAuthSession()?.userName || '홍길동',
-    () => '홍길동',
+    () => getAuthSession()?.userName || tCommon('defaultUserName'),
+    () => tCommon('defaultUserName'),
   );
   const isSessionDetailPage = pathname.startsWith('/sessions/');
 
@@ -49,7 +67,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       (item) =>
         (item.href === '/' && pathname === '/') ||
         (item.href !== '/' && pathname.startsWith(item.href)),
-    )?.label ?? '대시보드';
+    )?.key ?? 'dashboard';
 
   if (isSessionDetailPage) {
     return <main className="min-h-screen w-full bg-white p-5">{children}</main>;
@@ -63,7 +81,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <SidebarHeader>
               <Link
                 href="/"
-                aria-label="대시보드로 이동"
+                aria-label={tCommon('goToDashboardAria')}
                 className="inline-flex hover:cursor-pointer"
               >
                 <Image
@@ -111,7 +129,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                             }}
                             aria-hidden
                           />
-                          <span className="max-[800px]:hidden">{item.label}</span>
+                          <span className="max-[800px]:hidden whitespace-nowrap">
+                            {tNav(item.key)}
+                          </span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -127,24 +147,24 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 <Image src="/icons/profile.svg" alt="profile" width={24} height={24} />
                 <div className="body-14 flex items-center gap-[3px] font-medium max-[800px]:hidden">
                   <span>{userName}</span>
-                  <span>님</span>
+                  <span>{tCommon('profileSuffix')}</span>
                 </div>
               </div>
               <button
                 type="button"
-                aria-label="로그아웃"
+                aria-label={tCommon('logout')}
                 className="flex items-center justify-center hover:cursor-pointer"
                 onClick={async () => {
                   const result = await logout();
                   clearAuthSession();
                   localStorage.removeItem('kkebi-login-info');
                   if (!result.success) {
-                    toast(result.message || '로그아웃 처리 중 오류가 발생했습니다.');
+                    toast(tCommon('logoutFailed'));
                   }
                   router.push('/login');
                 }}
               >
-                <Image src="/icons/logout.svg" alt="로그아웃" width={20} height={20} />
+                <Image src="/icons/logout.svg" alt={tCommon('logout')} width={20} height={20} />
               </button>
             </div>
           </SidebarFooter>
@@ -153,15 +173,25 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <SidebarInset>
           <div className="flex w-full items-center justify-between bg-white p-5">
             <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
-              {currentTitle}
+              {tNav(currentTitle)}
             </p>
-            <button
-              className="hover:cursor-pointer"
-              type="button"
-              onClick={() => setIsNotificationOpen(true)}
-            >
-              <Image src="/icons/bell.svg" alt="알림" width={24} height={24} />
-            </button>
+            <div className="flex items-center gap-2">
+              <button className="hover:cursor-pointer" type="button" onClick={switchLocale}>
+                <Image
+                  src="/icons/global.svg"
+                  alt={tCommon('localeSwitch')}
+                  width={24}
+                  height={24}
+                />
+              </button>
+              <button
+                className="hover:cursor-pointer"
+                type="button"
+                onClick={() => setIsNotificationOpen(true)}
+              >
+                <Image src="/icons/bell.svg" alt={tNav('notifications')} width={24} height={24} />
+              </button>
+            </div>
           </div>
           <main className="flex flex-col pl-5">{children}</main>
         </SidebarInset>

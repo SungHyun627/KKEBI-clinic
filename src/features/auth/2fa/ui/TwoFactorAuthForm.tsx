@@ -8,15 +8,18 @@ import TwoFactorCode from './TwoFactorCode';
 import { resend2FA, verify2FA } from '../api/2fa';
 import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import TwoFactorAuthFailDialog from './TwoFactorAuthFailDialog';
 import { setAuthSessionAuthenticated } from '@/features/auth/login/lib/authSession';
+import { useTranslations } from 'next-intl';
 
 interface TwofactorAuthFormValues {
   code: string;
 }
 
 const TwoFactorAuthForm = () => {
+  const tAuth = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const form = useForm<TwofactorAuthFormValues>({
     defaultValues: { code: '' },
@@ -94,7 +97,7 @@ const TwoFactorAuthForm = () => {
                   className="flex items-center justify-center gap-3 min-w-0 shrink-0 basis-[35.3%] md:w-30 sm:w-full"
                   onClick={() => router.push('/login')}
                 >
-                  뒤로가기
+                  {tCommon('back')}
                 </Button>
                 <Button
                   type="submit"
@@ -103,25 +106,25 @@ const TwoFactorAuthForm = () => {
                   className="min-w-0 flex-1 basis-[64.7%]"
                   disabled={!(code && code.length === 6 && /^[0-9]{6}$/.test(code))}
                 >
-                  인증하기
+                  {tCommon('verify')}
                 </Button>
               </div>
               <div className="flex items-center justify-center gap-2 w-full text-center">
                 <span className="text-[16px] leading-[25.6px] font-normal font-pretendard text-label-alternative">
-                  코드를 받지 못하셨나요?
+                  {tAuth('otpNotReceived')}
                 </span>
                 <span
                   className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary cursor-pointer"
                   onClick={async () => {
                     const result = await resend2FA();
                     if (result.ok) {
-                      toast(result.message || '새 인증 코드가 발송되었습니다.');
+                      toast(tAuth('otpResent'));
                     } else {
-                      toast('인증 코드 발송에 실패했습니다.');
+                      toast(tAuth('otpResendFailed'));
                     }
                   }}
                 >
-                  새 코드받기
+                  {tCommon('resendCode')}
                 </span>
               </div>
             </div>

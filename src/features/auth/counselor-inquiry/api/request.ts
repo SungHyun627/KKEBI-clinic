@@ -10,6 +10,7 @@ export interface CounselorInquiryPayload {
 interface CounselorInquiryResult {
   success: boolean;
   message?: string;
+  errorCode?: 'REQUIRED_FIELDS' | 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
 }
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
@@ -24,7 +25,7 @@ const validatePayload = (payload: CounselorInquiryPayload) => {
   ) {
     return {
       success: false,
-      message: '필수 항목을 입력해주세요.',
+      errorCode: 'REQUIRED_FIELDS',
     } satisfies CounselorInquiryResult;
   }
   return null;
@@ -58,7 +59,7 @@ export async function requestCounselorInquiryServer(
   if (invalid) return invalid;
 
   if (!SERVER_API_BASE_URL) {
-    return { success: false, message: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
+    return { success: false, errorCode: 'CONFIG_ERROR' };
   }
 
   return postInquiry(`${SERVER_API_BASE_URL}/api/v1/auth/counselor-inquiry`, payload);

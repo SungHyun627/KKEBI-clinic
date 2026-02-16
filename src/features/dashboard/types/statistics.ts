@@ -1,7 +1,8 @@
 export interface RiskAlert {
   clientId: string;
   clientName: string;
-  reason: string;
+  reasonKey?: 'riskAlertsPhqIncreased' | 'riskAlertsNoAppActivity7Days';
+  reason?: string;
   detailPath: string;
 }
 

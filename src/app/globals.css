@@ -214,4 +214,12 @@
     border-radius: 999px;
     background: var(--Neutral-95, #dcdcdc);
   }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }

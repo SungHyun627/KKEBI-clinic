@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // 비밀번호 재설정 링크 요청
-export const requestResetPasswordHandler = async (request: NextRequest) => {
+async function requestResetPasswordHandler(request: NextRequest) {
   const { email } = await request.json();
 
   if (email) {
@@ -13,6 +13,8 @@ export const requestResetPasswordHandler = async (request: NextRequest) => {
   }
 
   return NextResponse.json({ success: false, message: '잘못된 요청입니다.' }, { status: 400 });
-};
+}
 
-export { requestResetPasswordHandler as POST };
+export async function POST(request: NextRequest) {
+  return requestResetPasswordHandler(request);
+}
