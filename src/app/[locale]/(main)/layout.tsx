@@ -50,8 +50,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const userName = useSyncExternalStore(
     () => () => {},
-    () => getAuthSession()?.userName || '홍길동',
-    () => '홍길동',
+    () => getAuthSession()?.userName || tCommon('defaultUserName'),
+    () => tCommon('defaultUserName'),
   );
   const isSessionDetailPage = pathname.startsWith('/sessions/');
 
@@ -159,7 +159,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                   clearAuthSession();
                   localStorage.removeItem('kkebi-login-info');
                   if (!result.success) {
-                    toast(result.message || '로그아웃 처리 중 오류가 발생했습니다.');
+                    toast(result.message || tCommon('logoutFailed'));
                   }
                   router.push('/login');
                 }}

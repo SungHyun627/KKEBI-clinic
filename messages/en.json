@@ -23,7 +23,9 @@
     "save": "Save",
     "localeSwitch": "Switch language",
     "all": "All",
-    "profileSuffix": ""
+    "profileSuffix": "",
+    "defaultUserName": "Demo",
+    "logoutFailed": "An error occurred while processing logout."
   },
   "nav": {
     "dashboard": "Dashboard",

@@ -23,7 +23,9 @@
     "save": "저장",
     "localeSwitch": "한, 영변환",
     "all": "전체",
-    "profileSuffix": "님"
+    "profileSuffix": "님",
+    "defaultUserName": "홍길동",
+    "logoutFailed": "로그아웃 처리 중 오류가 발생했습니다."
   },
   "nav": {
     "dashboard": "대시보드",
