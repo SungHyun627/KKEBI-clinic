@@ -129,7 +129,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                             }}
                             aria-hidden
                           />
-                          <span className="max-[800px]:hidden">{tNav(item.key)}</span>
+                          <span className="max-[800px]:hidden whitespace-nowrap">
+                            {tNav(item.key)}
+                          </span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
