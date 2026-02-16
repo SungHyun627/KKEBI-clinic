@@ -25,7 +25,14 @@
     "all": "전체",
     "profileSuffix": "님",
     "defaultUserName": "홍길동",
-    "logoutFailed": "로그아웃 처리 중 오류가 발생했습니다."
+    "logoutFailed": "로그아웃 처리 중 오류가 발생했습니다.",
+    "goToDashboardAria": "대시보드로 이동",
+    "underConstruction": "해당 화면은 현재 준비 중입니다.",
+    "backToDashboard": "대시보드로 돌아가기",
+    "sessionStartTitle": "상담 세션 시작",
+    "sessionStartDescription": "선택한 내담자의 상담 세션 시작 페이지입니다.",
+    "inputAssistiveButton": "입력 보조 버튼",
+    "inputClearContent": "입력 내용 초기화"
   },
   "nav": {
     "dashboard": "대시보드",

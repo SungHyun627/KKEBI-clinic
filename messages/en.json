@@ -25,7 +25,14 @@
     "all": "All",
     "profileSuffix": "",
     "defaultUserName": "Demo",
-    "logoutFailed": "An error occurred while processing logout."
+    "logoutFailed": "An error occurred while processing logout.",
+    "goToDashboardAria": "Go to dashboard",
+    "underConstruction": "This page is currently under construction.",
+    "backToDashboard": "Back to dashboard",
+    "sessionStartTitle": "Start Session",
+    "sessionStartDescription": "This is the session start page for the selected client.",
+    "inputAssistiveButton": "Input assistive button",
+    "inputClearContent": "Clear input content"
   },
   "nav": {
     "dashboard": "Dashboard",

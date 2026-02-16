@@ -81,7 +81,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <SidebarHeader>
               <Link
                 href="/"
-                aria-label={`${tNav('dashboard')}로 이동`}
+                aria-label={tCommon('goToDashboardAria')}
                 className="inline-flex hover:cursor-pointer"
               >
                 <Image
