@@ -33,6 +33,7 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<ClientLookupItem[]>([]);
   const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [dismissedQueryClientId, setDismissedQueryClientId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,7 +50,11 @@ export default function ClientsPage() {
         return;
       }
 
-      const uniqueClients = mapSchedulesToClients(result.data, locale);
+      const uniqueClients = mapSchedulesToClients(result.data, locale, [
+        tClients('concernsDepression'),
+        tClients('concernsStress'),
+        tClients('concernsSleep'),
+      ]);
       setClients(uniqueClients);
       setErrorMessage(null);
       setIsLoading(false);
@@ -72,13 +77,17 @@ export default function ClientsPage() {
   }, [clients, targetClientId]);
 
   const activeClient = selectedClientFromQuery ?? selectedClient;
-  const isQueryDrawerOpen = Boolean(targetClientId && selectedClientFromQuery);
+  const isQueryDrawerOpen = Boolean(
+    targetClientId && selectedClientFromQuery && targetClientId !== dismissedQueryClientId,
+  );
 
   const filteredClients = useMemo(() => {
-    const normalizedKeyword = searchKeyword.trim();
+    const normalizedKeyword = searchKeyword.trim().toLowerCase();
     return clients.filter((client) => {
       const matchesRisk = riskFilter === 'all' ? true : client.riskType === riskFilter;
-      const matchesName = normalizedKeyword ? client.clientName.includes(normalizedKeyword) : true;
+      const matchesName = normalizedKeyword
+        ? client.clientName.toLowerCase().includes(normalizedKeyword)
+        : true;
       return matchesRisk && matchesName;
     });
   }, [clients, riskFilter, searchKeyword]);
@@ -247,6 +256,7 @@ export default function ClientsPage() {
         open={isDrawerOpen || isQueryDrawerOpen}
         onOpenChange={(nextOpen) => {
           if (!nextOpen && targetClientId) {
+            setDismissedQueryClientId(targetClientId);
             router.replace(pathname, { scroll: false });
           }
           if (!nextOpen) {
@@ -263,9 +273,9 @@ export default function ClientsPage() {
 const mapSchedulesToClients = (
   schedules: TodayScheduleItem[],
   locale: string,
+  concerns: string[],
 ): ClientLookupItem[] => {
   const sortedByTime = [...schedules].sort((a, b) => a.time.localeCompare(b.time));
-  const concerns = ['우울', '스트레스', '수면'];
 
   return sortedByTime
     .map((schedule) => ({
