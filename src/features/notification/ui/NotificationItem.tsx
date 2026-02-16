@@ -13,14 +13,14 @@ export default function NotificationItem({ notification }: NotificationItemProps
   const localizedClientName =
     'name' in notification
       ? getClientNameByLocale(notification.clientId, notification.name, locale)
-      : undefined;
+      : getClientNameByLocale(notification.clientId, '', locale);
   const localizedCreatedAt = notification.createdAtKey
     ? tNotification(notification.createdAtKey, notification.createdAtParams ?? {})
     : (notification.createdAt ?? '');
   const localizedDescription = notification.descriptionKey
     ? tNotification(notification.descriptionKey, {
         ...(notification.descriptionParams ?? {}),
-        ...(localizedClientName ? { name: localizedClientName } : {}),
+        name: localizedClientName,
       })
     : (notification.description ?? '');
 
