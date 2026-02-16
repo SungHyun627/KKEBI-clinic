@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export const requestCounselorInquiryHandler = async (request: NextRequest) => {
+export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const { name, email, phone, organization, licenseNumber } = body as {
     name?: string;
@@ -21,6 +21,4 @@ export const requestCounselorInquiryHandler = async (request: NextRequest) => {
     success: true,
     message: '문의가 접수되었습니다.',
   });
-};
-
-export { requestCounselorInquiryHandler as POST };
+}

@@ -9,4 +9,6 @@ async function verify2faCodeHandler(request: Request) {
   return NextResponse.json({ ok: false, error: 'Invalid code' }, { status: 401 });
 }
 
-export { verify2faCodeHandler as POST };
+export async function POST(request: Request) {
+  return verify2faCodeHandler(request);
+}
