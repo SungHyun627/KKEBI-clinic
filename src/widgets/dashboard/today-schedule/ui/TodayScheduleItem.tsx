@@ -5,6 +5,7 @@ import RiskTypeChip from './RiskTypeChip';
 import SessionTypeChip from './SessionTypeChip';
 import StreakChip from './StreakChip';
 import TodayScheduleAction from './TodayScheduleAction';
+import { useTranslations } from 'next-intl';
 
 interface TodayScheduleItemProps {
   schedule: TodayScheduleItemType;
@@ -12,6 +13,7 @@ interface TodayScheduleItemProps {
 }
 
 export default function TodayScheduleItem({ schedule, className }: TodayScheduleItemProps) {
+  const tDashboard = useTranslations('dashboard');
   const streakDays = schedule.streakDays ?? 0;
 
   return (
@@ -33,8 +35,8 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         <RiskTypeChip value={schedule.riskType} />
       </span>
       <span className="flex items-center justify-start gap-2 pr-6">
-        <MoodStressToken label="기분" score={schedule.moodScore} />
-        <MoodStressToken label="스트레스" score={schedule.stressScore} />
+        <MoodStressToken label={tDashboard('todayScheduleMood')} score={schedule.moodScore} />
+        <MoodStressToken label={tDashboard('todayScheduleStress')} score={schedule.stressScore} />
       </span>
       <TodayScheduleAction clientId={schedule.clientId} clientName={schedule.clientName} />
     </li>

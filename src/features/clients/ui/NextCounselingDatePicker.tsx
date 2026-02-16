@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Calendar } from '@/shared/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { Button } from '@/shared/ui/button';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface NextCounselingDatePickerProps {
   label?: string;
@@ -12,9 +13,13 @@ interface NextCounselingDatePickerProps {
 }
 
 export default function NextCounselingDatePicker({
-  label = '다음 상담일',
+  label,
   initialValue,
 }: NextCounselingDatePickerProps) {
+  const tClients = useTranslations('clients');
+  const locale = useLocale();
+  const isKo = locale === 'ko';
+
   const [selectedDate, setSelectedDate] = useState(extractDatePart(initialValue));
   const [draftDate, setDraftDate] = useState(extractDatePart(initialValue));
   const [open, setOpen] = useState(false);
@@ -22,13 +27,18 @@ export default function NextCounselingDatePicker({
     parseDateFromIso(extractDatePart(initialValue)) ?? new Date(),
   );
 
-  const displayValue = useMemo(() => toKoreanDate(selectedDate), [selectedDate]);
+  const displayValue = useMemo(
+    () => formatDateByLocale(selectedDate, locale),
+    [selectedDate, locale],
+  );
 
   const selected = draftDate ? new Date(draftDate) : undefined;
 
   return (
     <div className="flex w-full flex-col items-start gap-[9px]">
-      <span className="body-14 w-[74px] text-neutral-60">{label}</span>
+      <span className="body-14 w-[74px] text-neutral-60">
+        {label ?? tClients('detailNextSession')}
+      </span>
       <Popover
         open={open}
         onOpenChange={(nextOpen) => {
@@ -42,7 +52,7 @@ export default function NextCounselingDatePicker({
         <PopoverTrigger asChild>
           <button
             type="button"
-            aria-label="다음 상담일 선택"
+            aria-label={isKo ? '다음 상담일 선택' : 'Select next session date'}
             className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
           >
             <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
@@ -84,7 +94,7 @@ export default function NextCounselingDatePicker({
                 setOpen(false);
               }}
             >
-              저장
+              {isKo ? '저장' : 'Save'}
             </Button>
           </div>
         </PopoverContent>
@@ -105,8 +115,15 @@ function parseDateFromIso(input: string) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function toKoreanDate(input: string) {
+function formatDateByLocale(input: string, locale: string) {
   const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
   if (Number.isNaN(parsed.getTime())) return input;
+  if (locale === 'en') {
+    return parsed.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
   return `${parsed.getFullYear()}년 ${parsed.getMonth() + 1}월 ${parsed.getDate()}일`;
 }
