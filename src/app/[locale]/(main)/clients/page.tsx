@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
@@ -14,11 +14,13 @@ import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import { Input } from '@/shared/ui/input';
 import { Select } from '@/shared/ui/select';
+import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 type RiskFilter = 'all' | RiskType;
 
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const targetClientId =
@@ -47,14 +49,14 @@ export default function ClientsPage() {
         return;
       }
 
-      const uniqueClients = mapSchedulesToClients(result.data);
+      const uniqueClients = mapSchedulesToClients(result.data, locale);
       setClients(uniqueClients);
       setErrorMessage(null);
       setIsLoading(false);
     };
 
     void loadClients();
-  }, []);
+  }, [locale, tClients]);
 
   useEffect(() => {
     if (!targetClientId || clients.length === 0) return;
@@ -258,7 +260,10 @@ export default function ClientsPage() {
   );
 }
 
-const mapSchedulesToClients = (schedules: TodayScheduleItem[]): ClientLookupItem[] => {
+const mapSchedulesToClients = (
+  schedules: TodayScheduleItem[],
+  locale: string,
+): ClientLookupItem[] => {
   const sortedByTime = [...schedules].sort((a, b) => a.time.localeCompare(b.time));
   const concerns = ['우울', '스트레스', '수면'];
 
@@ -266,7 +271,7 @@ const mapSchedulesToClients = (schedules: TodayScheduleItem[]): ClientLookupItem
     .map((schedule) => ({
       time: schedule.time,
       clientId: schedule.clientId,
-      clientName: schedule.clientName,
+      clientName: getClientNameByLocale(schedule.clientId, schedule.clientName, locale),
       streakDays: schedule.streakDays ?? 0,
       riskType: schedule.riskType,
       moodScore: schedule.moodScore ?? 0,

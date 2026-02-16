@@ -5,7 +5,8 @@ import RiskTypeChip from './RiskTypeChip';
 import SessionTypeChip from './SessionTypeChip';
 import StreakChip from './StreakChip';
 import TodayScheduleAction from './TodayScheduleAction';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 interface TodayScheduleItemProps {
   schedule: TodayScheduleItemType;
@@ -14,7 +15,9 @@ interface TodayScheduleItemProps {
 
 export default function TodayScheduleItem({ schedule, className }: TodayScheduleItemProps) {
   const tDashboard = useTranslations('dashboard');
+  const locale = useLocale();
   const streakDays = schedule.streakDays ?? 0;
+  const localizedClientName = getClientNameByLocale(schedule.clientId, schedule.clientName, locale);
 
   return (
     <li
@@ -25,7 +28,7 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
     >
       <span className="body-16 text-label-normal">{schedule.time}</span>
       <span className="flex min-w-0 items-center gap-3">
-        <span className="body-16 truncate text-label-normal">{schedule.clientName}</span>
+        <span className="body-16 truncate text-label-normal">{localizedClientName}</span>
         <StreakChip days={streakDays} />
       </span>
       <span className="justify-self-center">
@@ -38,7 +41,7 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         <MoodStressToken label={tDashboard('todayScheduleMood')} score={schedule.moodScore} />
         <MoodStressToken label={tDashboard('todayScheduleStress')} score={schedule.stressScore} />
       </span>
-      <TodayScheduleAction clientId={schedule.clientId} clientName={schedule.clientName} />
+      <TodayScheduleAction clientId={schedule.clientId} clientName={localizedClientName} />
     </li>
   );
 }
