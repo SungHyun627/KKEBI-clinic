@@ -73,7 +73,7 @@ export default function NotificationDrawer({ open, onOpenChange }: NotificationD
             </DrawerTitle>
           </div>
 
-          <div className="relative flex flex-col counselor-inquiry-scroll flex-1 w-full overflow-y-auto gap-4">
+          <div className="hide-scrollbar relative flex w-full flex-1 flex-col gap-4 overflow-y-auto pb-12">
             {isLoading ? (
               <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">
                 <p className="body-16 text-label-alternative">{tNotification('commonLoading')}</p>
