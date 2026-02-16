@@ -22,40 +22,46 @@ export default function AssessmentResultsSection({ detail }: AssessmentResultsSe
   const tClients = useTranslations('clients');
   const qaItems: QaItemProps[] = detail
     ? [
-        { question: tClients('scaleReasonForVisit'), answer: detail.intakeAnswers.reasonForVisit },
-        { question: tClients('scaleDesiredChange'), answer: detail.intakeAnswers.expectedChange },
-        { question: tClients('scaleSolutionsTried'), answer: detail.intakeAnswers.triedMethod },
         {
-          question: tClients('scaleEffectiveness'),
-          answer: detail.intakeAnswers.methodEffectiveness,
+          question: tClients('scaleReasonForVisit'),
+          answer: tClients('scaleAnswerReasonForVisit'),
         },
-        { question: tClients('scaleBiggestConcern'), answer: detail.intakeAnswers.biggestConcern },
+        { question: tClients('scaleDesiredChange'), answer: tClients('scaleAnswerDesiredChange') },
+        {
+          question: tClients('scaleSolutionsTried'),
+          answer: tClients('scaleAnswerSolutionsTried'),
+        },
+        { question: tClients('scaleEffectiveness'), answer: tClients('scaleAnswerEffectiveness') },
+        {
+          question: tClients('scaleBiggestConcern'),
+          answer: tClients('scaleAnswerBiggestConcern'),
+        },
         {
           question: tClients('scaleAverageSleepPattern'),
-          answer: detail.intakeAnswers.sleepPattern,
+          answer: tClients('scaleAnswerAverageSleepPattern'),
         },
-        { question: tClients('scaleSleepQuality'), answer: detail.intakeAnswers.sleepQuality },
+        { question: tClients('scaleSleepQuality'), answer: tClients('scaleAnswerSleepQuality') },
         {
           question: tClients('scaleExerciseFrequency'),
-          answer: detail.intakeAnswers.exerciseHabit,
+          answer: tClients('scaleAnswerExerciseFrequency'),
         },
-        { question: tClients('scaleMealsPerDay'), answer: detail.intakeAnswers.mealsPerDay },
+        { question: tClients('scaleMealsPerDay'), answer: tClients('scaleAnswerMealsPerDay') },
         {
           question: tClients('scaleMainSupportPerson'),
-          answer: detail.intakeAnswers.mostReliablePerson,
+          answer: tClients('scaleAnswerMainSupportPerson'),
         },
+        { question: tClients('scaleSupportReason'), answer: tClients('scaleAnswerSupportReason') },
         {
-          question: tClients('scaleSupportReason'),
-          answer: detail.intakeAnswers.reliabilityReason,
+          question: tClients('scaleFamilyCohesion'),
+          answer: tClients('scaleAnswerFamilyCohesion'),
         },
-        { question: tClients('scaleFamilyCohesion'), answer: detail.intakeAnswers.familyBond },
         {
           question: tClients('scaleFamilyCohesionReason'),
-          answer: detail.intakeAnswers.familyBondReason,
+          answer: tClients('scaleAnswerFamilyCohesionReason'),
         },
         {
           question: tClients('scaleSelfDescription'),
-          answer: detail.intakeAnswers.selfDescription,
+          answer: tClients('scaleAnswerSelfDescription'),
         },
       ]
     : [];
