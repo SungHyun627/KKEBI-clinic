@@ -267,5 +267,10 @@
     "title": "Page not found.",
     "description": "The page you requested does not exist or the URL is invalid.",
     "goDashboard": "Go to dashboard"
+  },
+  "error": {
+    "title": "Something went wrong.",
+    "description": "Please try again shortly.",
+    "retry": "Try again"
   }
 }
