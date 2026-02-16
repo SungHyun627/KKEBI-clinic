@@ -35,7 +35,7 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
           aria-label={tDashboard('todayScheduleSendNotification', { name: client.clientName })}
           className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
         >
-          <Image src="/icons/sent.svg" alt="send-notification" width={24} height={24} aria-hidden />
+          <Image src="/icons/sent.svg" alt="" width={24} height={24} aria-hidden />
         </Button>
         <Button
           type="button"

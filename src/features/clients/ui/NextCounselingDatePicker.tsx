@@ -59,7 +59,7 @@ export default function NextCounselingDatePicker({
               {displayValue}
             </span>
             <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-              <Image src="/icons/calendar.svg" alt="calendar" width={20} height={20} aria-hidden />
+              <Image src="/icons/calendar.svg" alt="" width={20} height={20} aria-hidden />
             </span>
           </button>
         </PopoverTrigger>
