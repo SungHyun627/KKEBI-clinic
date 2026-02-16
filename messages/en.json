@@ -83,7 +83,16 @@
     "otpFailedTitle": "Verification failed",
     "otpFailedBody": "Please check the verification code and try again.",
     "otpResent": "A new verification code has been sent.",
-    "otpPasswordMismatch": "Please double-check your password."
+    "otpPasswordMismatch": "Please double-check your password.",
+    "errorInvalidEmail": "Please check your email again.",
+    "errorResetLinkSendFailed": "Failed to send password reset link.",
+    "errorNetwork": "A network error occurred.",
+    "errorPasswordMismatch": "Passwords do not match.",
+    "errorNewPasswordRequired": "Please enter a new password.",
+    "errorNewPasswordMinLength": "Please enter at least 1 character.",
+    "errorNewPasswordMaxLength": "Please enter no more than 14 characters.",
+    "errorNewPasswordPattern": "Must be within 14 characters and include letters and numbers.",
+    "errorConfirmPasswordRequired": "Please enter password confirmation."
   },
   "dashboard": {
     "weeklyStatsTitle": "Weekly stats",

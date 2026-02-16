@@ -68,10 +68,10 @@ const RequestResetPasswordDialog = ({
                   control={emailForm.control}
                   name="email"
                   rules={{
-                    required: '아이디를 다시 한번 확인해주세요.',
+                    required: tAuth('errorInvalidEmail'),
                     pattern: {
                       value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: '아이디를 다시 한번 확인해주세요.',
+                      message: tAuth('errorInvalidEmail'),
                     },
                   }}
                   render={({ field }) => (
@@ -131,10 +131,10 @@ const RequestResetPasswordDialog = ({
                     setIsEmailSentOpen(true);
                     emailForm.reset({ email: '' });
                   } else {
-                    toast(res.message || '비밀번호 재설정 링크 발송에 실패했습니다.');
+                    toast(res.message || tAuth('errorResetLinkSendFailed'));
                   }
                 } catch {
-                  toast('네트워크 오류가 발생했습니다.');
+                  toast(tAuth('errorNetwork'));
                 }
               }}
             >

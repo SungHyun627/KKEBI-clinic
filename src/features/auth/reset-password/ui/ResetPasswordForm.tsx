@@ -25,7 +25,7 @@ const ResetPasswordForm = () => {
 
   const onSubmit = async (values: ResetPasswordFields) => {
     if (values.newPassword !== values.confirmPassword) {
-      toast('비밀번호가 일치하지 않습니다.');
+      toast(tAuth('errorPasswordMismatch'));
       return;
     }
     // TODO: 실제 비밀번호 재설정 API 연동
@@ -35,11 +35,11 @@ const ResetPasswordForm = () => {
   const onInvalid = () => {
     const { errors } = form.formState;
     if (errors.newPassword) {
-      toast(errors.newPassword.message || '새 비밀번호를 입력해주세요.');
+      toast(errors.newPassword.message || tAuth('errorNewPasswordRequired'));
       return;
     }
     if (errors.confirmPassword) {
-      toast(errors.confirmPassword.message || '비밀번호 확인을 입력해주세요.');
+      toast(errors.confirmPassword.message || tAuth('errorConfirmPasswordRequired'));
     }
   };
 
@@ -60,18 +60,18 @@ const ResetPasswordForm = () => {
                 control={form.control}
                 name="newPassword"
                 rules={{
-                  required: '새 비밀번호를 입력해주세요.',
+                  required: tAuth('errorNewPasswordRequired'),
                   minLength: {
                     value: 1,
-                    message: '1자 이상 입력해주세요.',
+                    message: tAuth('errorNewPasswordMinLength'),
                   },
                   maxLength: {
                     value: 14,
-                    message: '14자 이하로 입력해주세요.',
+                    message: tAuth('errorNewPasswordMaxLength'),
                   },
                   pattern: {
                     value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{1,14}$/,
-                    message: '영문+숫자가 포함된 14자리 이내여야 합니다.',
+                    message: tAuth('errorNewPasswordPattern'),
                   },
                 }}
                 render={({ field }) => (
@@ -120,9 +120,9 @@ const ResetPasswordForm = () => {
                 control={form.control}
                 name="confirmPassword"
                 rules={{
-                  required: '비밀번호 확인을 입력해주세요.',
+                  required: tAuth('errorConfirmPasswordRequired'),
                   validate: (value) =>
-                    value === form.getValues('newPassword') || '비밀번호가 일치하지 않습니다.',
+                    value === form.getValues('newPassword') || tAuth('errorPasswordMismatch'),
                 }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
