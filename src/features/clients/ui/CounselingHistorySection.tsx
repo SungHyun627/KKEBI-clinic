@@ -55,6 +55,19 @@ const formatCounselingDateTime = (raw: string, locale: string) => {
   if (!matched) return raw;
 
   const [, year, month, day, hour = '00', minute = '00'] = matched;
+  if (locale === 'en') {
+    const fallbackDate = new Date(
+      `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute}`,
+    );
+    if (!Number.isNaN(fallbackDate.getTime())) {
+      const formattedDate = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      }).format(fallbackDate);
+      return `${formattedDate} ${hour.padStart(2, '0')}:${minute}`;
+    }
+  }
   return `${year}년 ${Number(month)}월 ${Number(day)}일 ${hour.padStart(2, '0')}:${minute}`;
 };
 

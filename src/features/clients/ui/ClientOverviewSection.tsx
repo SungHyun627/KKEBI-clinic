@@ -1,12 +1,12 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import ClientInfoField from './ClientInfoField';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
 import type { ClientDetailData } from '../types/client';
-import { toKoreanDate } from '../lib/format';
+import { formatDateByLocale } from '../lib/format';
 
 interface ClientOverviewSectionProps {
   detail: ClientDetailData;
@@ -19,6 +19,8 @@ const SECTION_TITLE_CLASSNAME = 'body-18 font-semibold';
 export default function ClientOverviewSection({ detail }: ClientOverviewSectionProps) {
   const tCommon = useTranslations('common');
   const tClients = useTranslations('clients');
+  const locale = useLocale();
+  const isKo = locale === 'ko';
 
   return (
     <section className="flex items-stretch justify-between">
@@ -49,15 +51,23 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
         <div className="flex flex-col w-full items-start gap-[18px]">
           <ClientInfoField
             label={tClients('detailAgeGender')}
-            value={`${detail.age}세 ${detail.gender}`}
+            value={
+              isKo
+                ? `${detail.age}세 ${detail.gender}`
+                : `${detail.gender === '남성' ? 'Male' : 'Female'}, ${detail.age}`
+            }
           />
           <ClientInfoField
             label={tClients('detailStartDate')}
-            value={toKoreanDate(detail.counselingStartDate)}
+            value={formatDateByLocale(detail.counselingStartDate, locale)}
           />
           <ClientInfoField
             label={tClients('detailSessions')}
-            value={`${detail.currentSession}회/${detail.totalSession}회`}
+            value={
+              isKo
+                ? `${detail.currentSession}회/${detail.totalSession}회`
+                : `${detail.currentSession}/${detail.totalSession}`
+            }
           />
           <ClientInfoField label={tClients('detailVisitReason')} value={detail.visitPurpose} />
           <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
@@ -78,7 +88,9 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
                   .filter(Boolean)
                   .join(' ')}
               >
-                <span className="body-14 text-label-neutral">{toKoreanDate(risk.date)}</span>
+                <span className="body-14 text-label-neutral">
+                  {formatDateByLocale(risk.date, locale)}
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {risk.reasons.map((reason) => (
                     <RiskReasonChip
