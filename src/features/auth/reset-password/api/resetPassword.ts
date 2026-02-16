@@ -3,6 +3,7 @@ const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/,
 type ResetPasswordResult = {
   success: boolean;
   message?: string;
+  errorCode?: 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
 };
 
 const postJson = async <T>(url: string, body: unknown): Promise<T> => {
@@ -30,7 +31,7 @@ export async function resetPasswordDemo({
 
 export async function requestResetPasswordServer(email: string): Promise<ResetPasswordResult> {
   if (!SERVER_API_BASE_URL) {
-    return { success: false, message: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
+    return { success: false, errorCode: 'CONFIG_ERROR' };
   }
   return postJson<ResetPasswordResult>(
     `${SERVER_API_BASE_URL}/api/v1/auth/reset-password/request`,
@@ -48,7 +49,7 @@ export async function resetPasswordServer({
   newPassword: string;
 }): Promise<ResetPasswordResult> {
   if (!SERVER_API_BASE_URL) {
-    return { success: false, message: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
+    return { success: false, errorCode: 'CONFIG_ERROR' };
   }
   return postJson<ResetPasswordResult>(`${SERVER_API_BASE_URL}/api/v1/auth/reset-password`, {
     email,

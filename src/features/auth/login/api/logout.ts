@@ -1,6 +1,7 @@
 interface LogoutResponse {
   success: boolean;
   message?: string;
+  errorCode?: 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
 }
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
@@ -24,12 +25,13 @@ const requestLogout = async (url: string): Promise<LogoutResponse> => {
 
     return {
       success: res.ok,
-      message: res.ok ? '로그아웃되었습니다.' : '로그아웃에 실패했습니다.',
+      errorCode: res.ok ? undefined : 'UNKNOWN_ERROR',
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message: error instanceof Error ? error.message : undefined,
+      errorCode: 'NETWORK_ERROR',
     };
   }
 };
@@ -40,7 +42,7 @@ export const logoutServer = () => {
   if (!SERVER_API_BASE_URL) {
     return Promise.resolve({
       success: false,
-      message: 'NEXT_PUBLIC_API_BASE_URL is not configured',
+      errorCode: 'CONFIG_ERROR',
     });
   }
   return requestLogout(`${SERVER_API_BASE_URL}/api/v1/auth/logout`);
