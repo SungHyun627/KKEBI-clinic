@@ -120,6 +120,7 @@
     "weeklyStatsLoadFailed": "Failed to load weekly stats.",
     "riskAlertsTitle": "Risk alerts",
     "riskAlertsPhqIncreased": "The latest PHQ-9 score increased to 21.",
+    "riskAlertsNoAppActivity7Days": "No app activity detected for 7+ days.",
     "todayScheduleTitle": "Today’s schedule",
     "todayScheduleTime": "Time",
     "todayScheduleClientName": "Client name",

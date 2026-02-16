@@ -120,6 +120,7 @@
     "weeklyStatsLoadFailed": "주간 통계를 불러오지 못했습니다.",
     "riskAlertsTitle": "위험 알림",
     "riskAlertsPhqIncreased": "최근 PHQ-9 점수가 21점으로 상승했습니다.",
+    "riskAlertsNoAppActivity7Days": "7일 이상 앱 미사용 상태가 감지되었습니다.",
     "todayScheduleTitle": "오늘의 일정",
     "todayScheduleTime": "시간",
     "todayScheduleClientName": "내담자명",
