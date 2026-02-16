@@ -16,9 +16,9 @@ export default function NextCounselingDatePicker({
   label,
   initialValue,
 }: NextCounselingDatePickerProps) {
+  const tCommon = useTranslations('common');
   const tClients = useTranslations('clients');
   const locale = useLocale();
-  const isKo = locale === 'ko';
 
   const [selectedDate, setSelectedDate] = useState(extractDatePart(initialValue));
   const [draftDate, setDraftDate] = useState(extractDatePart(initialValue));
@@ -36,7 +36,7 @@ export default function NextCounselingDatePicker({
 
   return (
     <div className="flex w-full flex-col items-start gap-[9px]">
-      <span className="body-14 w-[74px] text-neutral-60">
+      <span className="body-14 w-[74px] whitespace-nowrap text-neutral-60">
         {label ?? tClients('detailNextSession')}
       </span>
       <Popover
@@ -52,7 +52,7 @@ export default function NextCounselingDatePicker({
         <PopoverTrigger asChild>
           <button
             type="button"
-            aria-label={isKo ? '다음 상담일 선택' : 'Select next session date'}
+            aria-label={tClients('detailNextSessionAria')}
             className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
           >
             <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
@@ -94,7 +94,7 @@ export default function NextCounselingDatePicker({
                 setOpen(false);
               }}
             >
-              {isKo ? '저장' : 'Save'}
+              {tCommon('save')}
             </Button>
           </div>
         </PopoverContent>

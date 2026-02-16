@@ -21,6 +21,19 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
   const tClients = useTranslations('clients');
   const locale = useLocale();
   const isKo = locale === 'ko';
+  const localizedVisitPurpose = (() => {
+    if (!detail.visitPurpose.endsWith('관련 정서 조절')) return detail.visitPurpose;
+
+    const concernLabel = detail.visitPurpose.startsWith('우울')
+      ? tClients('concernsDepression')
+      : detail.visitPurpose.startsWith('스트레스')
+        ? tClients('concernsStress')
+        : detail.visitPurpose.startsWith('수면')
+          ? tClients('concernsSleep')
+          : detail.visitPurpose.replace(' 관련 정서 조절', '');
+
+    return tClients('visitPurposeEmotionRegulation', { concern: concernLabel });
+  })();
 
   return (
     <section className="flex items-stretch justify-between">
@@ -69,7 +82,7 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
                 : `${detail.currentSession}/${detail.totalSession}`
             }
           />
-          <ClientInfoField label={tClients('detailVisitReason')} value={detail.visitPurpose} />
+          <ClientInfoField label={tClients('detailVisitReason')} value={localizedVisitPurpose} />
           <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
         </div>
       </div>

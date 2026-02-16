@@ -166,6 +166,7 @@ interface CounselingHistoryCardProps {
 function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) {
   const tCommon = useTranslations('common');
   const tClients = useTranslations('clients');
+  const labelWidthClassName = locale === 'en' ? 'w-[120px]' : 'w-[78px]';
 
   const concernLabel =
     history.chiefConcern === '직장'
@@ -199,6 +200,16 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
       : history.taskStatus === '진행중'
         ? tClients('historyTaskStatusInProgress')
         : tClients('historyTaskStatusCompleted');
+  const taskNameLabel =
+    history.taskName === '감정 기록 3회 작성'
+      ? tClients('historyTaskEmotionLog3')
+      : history.taskName === '수면 루틴 체크'
+        ? tClients('historyTaskSleepRoutineCheck')
+        : history.taskName === '주간 운동 계획 실천'
+          ? tClients('historyTaskWeeklyExercisePlan')
+          : history.taskName === '스트레스 기록지 작성'
+            ? tClients('historyTaskStressLog')
+            : history.taskName;
 
   return (
     <li className="flex w-full">
@@ -213,6 +224,7 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
         <div className="grid w-full grid-cols-2 items-start gap-x-10">
           <div className="flex min-w-0 flex-col items-start gap-2">
             <CounselingField
+              labelWidthClassName={labelWidthClassName}
               label={tClients('historyPresentingConcern')}
               value={
                 <span className="flex items-center justify-center gap-[3px] font-semibold rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 leading-none text-label-normal">
@@ -221,6 +233,7 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
               }
             />
             <CounselingField
+              labelWidthClassName={labelWidthClassName}
               label={tClients('historyPaymentStatusLabel')}
               value={
                 <span
@@ -233,10 +246,12 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
           </div>
           <div className="flex min-w-0 flex-col items-start gap-2">
             <CounselingField
+              labelWidthClassName={labelWidthClassName}
               label={tClients('historyAssignment')}
-              value={<span className="body-16 text-label-neutral">{history.taskName}</span>}
+              value={<span className="body-16 text-label-neutral">{taskNameLabel}</span>}
             />
             <CounselingField
+              labelWidthClassName={labelWidthClassName}
               label={tClients('historyAssignmentStatus')}
               value={
                 <span className={`body-16 ${getTaskStatusClassName(history.taskStatus)}`}>
@@ -254,13 +269,18 @@ function CounselingHistoryCard({ history, locale }: CounselingHistoryCardProps) 
 interface CounselingFieldProps {
   label: string;
   value: ReactNode;
+  labelWidthClassName: string;
 }
 
-function CounselingField({ label, value }: CounselingFieldProps) {
+function CounselingField({ label, value, labelWidthClassName }: CounselingFieldProps) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="body-16 w-[78px] text-label-alternative">{label}</span>
-      {value}
+    <div className="flex items-start gap-3">
+      <span
+        className={`body-16 inline-block shrink-0 text-label-alternative ${labelWidthClassName}`}
+      >
+        {label}
+      </span>
+      <div className="min-w-0 break-words">{value}</div>
     </div>
   );
 }
