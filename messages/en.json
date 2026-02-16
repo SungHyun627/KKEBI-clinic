@@ -21,6 +21,7 @@
     "resendCode": "Resend code",
     "change": "Change",
     "save": "Save",
+    "localeSwitch": "Switch language",
     "all": "All",
     "profileSuffix": ","
   },
@@ -259,5 +260,10 @@
     "riskNoAppActivity7Days": "No app activity detected for 7+ days.",
     "riskSelfHarmKeywordDetected": "Self-harm keyword detected.",
     "riskSuicideKeywordDetected": "Suicide keyword detected."
+  },
+  "notFound": {
+    "title": "Page not found.",
+    "description": "The page you requested does not exist or the URL is invalid.",
+    "goDashboard": "Go to dashboard"
   }
 }

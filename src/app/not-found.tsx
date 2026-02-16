@@ -1,22 +1,24 @@
 import Link from 'next/link';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { LocaleSwitchButton } from '@/shared/ui/locale-switch-button';
 
-export default function NotFound() {
+export default async function NotFound() {
+  const locale = await getLocale();
+  const tNotFound = await getTranslations('notFound');
+
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center bg-white px-6">
       <LocaleSwitchButton className="absolute right-6 top-6 z-10" />
       <div className="flex w-full max-w-[520px] flex-col items-center gap-4 rounded-2xl border border-neutral-95 bg-neutral-99 p-8 text-center">
         <h1 className="text-[24px] font-semibold leading-[32px] text-label-normal">
-          페이지를 찾을 수 없습니다.
+          {tNotFound('title')}
         </h1>
-        <p className="body-14 text-label-alternative">
-          요청하신 페이지가 없거나 주소가 잘못되었습니다.
-        </p>
+        <p className="body-14 text-label-alternative">{tNotFound('description')}</p>
         <Link
-          href="/"
+          href={`/${locale}`}
           className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-white"
         >
-          대시보드로 이동
+          {tNotFound('goDashboard')}
         </Link>
       </div>
     </div>

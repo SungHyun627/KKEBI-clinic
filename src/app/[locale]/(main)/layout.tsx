@@ -177,7 +177,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             </p>
             <div className="flex items-center gap-2">
               <button className="hover:cursor-pointer" type="button" onClick={switchLocale}>
-                <Image src="/icons/global.svg" alt={'한, 영변환'} width={24} height={24} />
+                <Image
+                  src="/icons/global.svg"
+                  alt={tCommon('localeSwitch')}
+                  width={24}
+                  height={24}
+                />
               </button>
               <button
                 className="hover:cursor-pointer"

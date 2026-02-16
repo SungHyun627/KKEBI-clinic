@@ -1,10 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 export function LocaleSwitchButton({ className = '' }: { className?: string }) {
   const locale = useLocale();
+  const tCommon = useTranslations('common');
 
   const switchLocale = () => {
     if (typeof window === 'undefined') return;
@@ -26,9 +27,9 @@ export function LocaleSwitchButton({ className = '' }: { className?: string }) {
       className={`hover:cursor-pointer ${className}`.trim()}
       type="button"
       onClick={switchLocale}
-      aria-label="한, 영변환"
+      aria-label={tCommon('localeSwitch')}
     >
-      <Image src="/icons/global.svg" alt="한, 영변환" width={24} height={24} />
+      <Image src="/icons/global.svg" alt={tCommon('localeSwitch')} width={24} height={24} />
     </button>
   );
 }
