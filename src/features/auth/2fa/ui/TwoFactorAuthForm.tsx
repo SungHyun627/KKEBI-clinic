@@ -118,9 +118,9 @@ const TwoFactorAuthForm = () => {
                   onClick={async () => {
                     const result = await resend2FA();
                     if (result.ok) {
-                      toast(result.message || '새 인증 코드가 발송되었습니다.');
+                      toast(result.message || tAuth('otpResent'));
                     } else {
-                      toast('인증 코드 발송에 실패했습니다.');
+                      toast(tAuth('otpResendFailed'));
                     }
                   }}
                 >

@@ -49,7 +49,7 @@ const LoginForm = () => {
         email: values.email,
         password: values.password,
         userId: result.data?.userId,
-        userName: values.email.split('@')[0] || '상담사',
+        userName: values.email.split('@')[0] || 'Counselor',
         authenticated: false,
       });
 
@@ -99,10 +99,10 @@ const LoginForm = () => {
                 control={form.control}
                 name="email"
                 rules={{
-                  required: '아이디를 다시 한번 확인해주세요.',
+                  required: tAuth('loginInvalidEmail'),
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: '아이디를 다시 한번 확인해주세요.',
+                    message: tAuth('loginInvalidEmail'),
                   },
                 }}
                 render={({ field }) => (
@@ -138,14 +138,14 @@ const LoginForm = () => {
                 control={form.control}
                 name="password"
                 rules={{
-                  required: '비밀번호를 다시 한번 확인해주세요.',
+                  required: tAuth('loginInvalidPassword'),
                   maxLength: {
                     value: 14,
-                    message: '비밀번호를 다시 한번 확인해주세요.',
+                    message: tAuth('loginInvalidPassword'),
                   },
                   pattern: {
                     value: /^(?=.*[A-Za-z])(?=.*\d).+$/,
-                    message: '비밀번호를 다시 한번 확인해주세요.',
+                    message: tAuth('loginInvalidPassword'),
                   },
                 }}
                 render={({ field }) => (
