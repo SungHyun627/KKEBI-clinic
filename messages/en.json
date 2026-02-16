@@ -23,7 +23,7 @@
     "save": "Save",
     "localeSwitch": "Switch language",
     "all": "All",
-    "profileSuffix": ","
+    "profileSuffix": ""
   },
   "nav": {
     "dashboard": "Dashboard",
