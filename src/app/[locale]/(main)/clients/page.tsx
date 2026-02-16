@@ -142,7 +142,7 @@ export default function ClientsPage() {
               { label: tClients('filterRiskCaution'), value: '주의' },
               { label: tClients('filterRiskHigh'), value: '위험' },
             ]}
-            className="w-31"
+            className={locale === 'en' ? 'w-40' : 'w-31'}
           />
         </div>
         <div className="flex items-center gap-3">

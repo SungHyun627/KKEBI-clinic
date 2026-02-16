@@ -127,7 +127,7 @@ export default function CounselingHistorySection({ records }: CounselingHistoryS
       <div className="flex w-full items-center justify-between">
         <span className="body-18 font-semibold text-neutral-20">{tClients('historyTitle')}</span>
         <Select
-          className="w-[138px]"
+          className={locale === 'en' ? 'w-[200px]' : 'w-[138px]'}
           triggerClassName="bg-white"
           value={filterValue}
           triggerLabel={
