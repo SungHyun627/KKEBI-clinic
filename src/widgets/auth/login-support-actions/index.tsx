@@ -7,8 +7,10 @@ import {
   CounselorInquiryCompleteDialog,
   RequestCounselorInquiryDialog,
 } from '@/features/auth/counselor-inquiry';
+import { useTranslations } from 'next-intl';
 
 const LoginSupportActions = () => {
+  const tAuth = useTranslations('auth');
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
   const [isEmailSentOpen, setIsEmailSentOpen] = useState(false);
   const [isCounselorInquiryOpen, setIsCounselorInquiryOpen] = useState(false);
@@ -28,7 +30,7 @@ const LoginSupportActions = () => {
           className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer"
           onClick={() => setIsPasswordResetOpen(true)}
         >
-          비밀번호 찾기
+          {tAuth('loginForgotPassword')}
         </button>
         <span className="h-5 w-px bg-neutral-80" />
         <button
@@ -36,7 +38,7 @@ const LoginSupportActions = () => {
           className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer"
           onClick={() => setIsCounselorInquiryOpen(true)}
         >
-          상담사 등록 문의
+          {tAuth('loginCounselorInquiry')}
         </button>
       </div>
       <RequestResetPasswordDialog
