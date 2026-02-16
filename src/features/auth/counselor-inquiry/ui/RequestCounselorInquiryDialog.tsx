@@ -10,6 +10,7 @@ import { Textarea } from '@/shared/ui/textarea';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { toast } from '@/shared/ui/toast';
 import { requestCounselorInquiry } from '../api/request';
+import { useTranslations } from 'next-intl';
 
 interface RequestCounselorInquiryDialogProps {
   isOpen: boolean;
@@ -34,6 +35,9 @@ const RequestCounselorInquiryDialog = ({
   onOpenChange,
   onSubmitSuccess,
 }: RequestCounselorInquiryDialogProps) => {
+  const tAuth = useTranslations('auth');
+  const tCommon = useTranslations('common');
+
   const createIcon = (iconPath: string) => (
     <div
       className="h-6 w-6 bg-current"
@@ -82,7 +86,7 @@ const RequestCounselorInquiryDialog = ({
     <Dialog open={isOpen} onOpenChange={handleDialogOpen}>
       <DialogContent className="flex h-[min(600px,calc(100vh-2rem))] max-h-[600px] max-w-[480px] flex-col overflow-hidden rounded-[24px] bg-white p-7 md:p-6">
         <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
-          <VisuallyHidden>상담사 등록 문의</VisuallyHidden>
+          <VisuallyHidden>{tAuth('inquiryTitle')}</VisuallyHidden>
         </DialogTitle>
         <div className="flex h-full min-h-0 w-full flex-col">
           <Form {...form}>
@@ -96,7 +100,7 @@ const RequestCounselorInquiryDialog = ({
                   onOpenChange(false);
                   onSubmitSuccess(submittedValues);
                 } else {
-                  toast(result.message || '문의 제출에 실패했습니다.');
+                  toast(result.message || tAuth('inquiryErrorSubmitFailed'));
                 }
               })}
             >
@@ -104,23 +108,23 @@ const RequestCounselorInquiryDialog = ({
                 <div className="flex w-full flex-col gap-[6px]">
                   <div className="flex w-full justify-between items-center">
                     <span className="text-[20px] leading-[30px] font-semibold text-label-normal">
-                      상담사 등록 문의
+                      {tAuth('inquiryTitle')}
                     </span>
                     <button
                       type="button"
-                      aria-label="닫기"
+                      aria-label={tCommon('close')}
                       className="p-1 ml-2 hover:opacity-80 cursor-pointer shrink-0"
                       onClick={() => handleDialogOpen(false)}
                       style={{ display: 'flex', alignItems: 'center' }}
                     >
-                      <Image src="/icons/close.svg" alt="닫기" width={28} height={28} />
+                      <Image src="/icons/close.svg" alt={tCommon('close')} width={28} height={28} />
                     </button>
                   </div>
 
                   <span className="text-[14px] leading-[21px] font-normal text-neutral-30">
-                    상담사 계정 등록을 위해 아래 정보를 입력해 주세요.
+                    {tAuth('inquiryDescription1')}
                     <br />
-                    검토 후 연락드리겠습니다.
+                    {tAuth('inquiryDescription2')}
                   </span>
                 </div>
               </div>
@@ -130,19 +134,19 @@ const RequestCounselorInquiryDialog = ({
                   <FormField
                     control={form.control}
                     name="name"
-                    rules={{ required: '이름을 입력해주세요.' }}
+                    rules={{ required: tAuth('inquiryErrorNameRequired') }}
                     render={({ field }) => (
                       <FormItem className="flex flex-col gap-2">
                         <FormLabel
                           required
                           className="text-label-neutral text-[14px] leading-[22.4px] font-semibold"
                         >
-                          이름
+                          {tAuth('inquiryName')}
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder="홍길동"
+                            placeholder={tAuth('inquiryPlaceholderName')}
                             icon={createIcon('/icons/user.svg')}
                             {...field}
                             onClear={() => form.setValue('name', '')}
@@ -156,10 +160,10 @@ const RequestCounselorInquiryDialog = ({
                     control={form.control}
                     name="email"
                     rules={{
-                      required: '이메일을 입력해주세요.',
+                      required: tAuth('inquiryErrorEmailRequired'),
                       pattern: {
                         value: EMAIL_PATTERN,
-                        message: '이메일 형식을 확인해주세요.',
+                        message: tAuth('inquiryErrorEmailPattern'),
                       },
                     }}
                     render={({ field }) => (
@@ -168,12 +172,12 @@ const RequestCounselorInquiryDialog = ({
                           required
                           className="text-label-neutral text-[14px] leading-[22.4px] font-semibold"
                         >
-                          이메일
+                          {tAuth('inquiryEmail')}
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="email"
-                            placeholder="id@example.com"
+                            placeholder={tAuth('inquiryPlaceholderEmail')}
                             icon={createIcon('/icons/mail.svg')}
                             {...field}
                             onClear={() => form.setValue('email', '')}
@@ -187,10 +191,10 @@ const RequestCounselorInquiryDialog = ({
                     control={form.control}
                     name="phone"
                     rules={{
-                      required: '연락처를 입력해주세요.',
+                      required: tAuth('inquiryErrorPhoneRequired'),
                       pattern: {
                         value: PHONE_PATTERN,
-                        message: '연락처 형식을 확인해주세요.',
+                        message: tAuth('inquiryErrorPhonePattern'),
                       },
                     }}
                     render={({ field }) => (
@@ -199,12 +203,12 @@ const RequestCounselorInquiryDialog = ({
                           required
                           className="text-label-neutral text-[14px] leading-[22.4px] font-semibold"
                         >
-                          연락처
+                          {tAuth('inquiryPhone')}
                         </FormLabel>
                         <FormControl>
                           <Input
                             type="tel"
-                            placeholder="010-1234-5678"
+                            placeholder={tAuth('inquiryPlaceholderPhone')}
                             icon={createIcon('/icons/call.svg')}
                             {...field}
                             onClear={() => form.setValue('phone', '')}
@@ -218,19 +222,19 @@ const RequestCounselorInquiryDialog = ({
                     <FormField
                       control={form.control}
                       name="organization"
-                      rules={{ required: '소속기관을 입력해주세요.' }}
+                      rules={{ required: tAuth('inquiryErrorOrganizationRequired') }}
                       render={({ field }) => (
                         <FormItem className="flex min-w-0 w-full flex-col gap-2">
                           <FormLabel
                             required
                             className="text-label-neutral text-[14px] leading-[22.4px] font-semibold"
                           >
-                            소속 기관
+                            {tAuth('inquiryOrganization')}
                           </FormLabel>
                           <FormControl>
                             <Input
                               type="text"
-                              placeholder="OO 상담센터"
+                              placeholder={tAuth('inquiryPlaceholderOrganization')}
                               icon={createIcon('/icons/building.svg')}
                               {...field}
                               onClear={() => form.setValue('organization', '')}
@@ -243,19 +247,19 @@ const RequestCounselorInquiryDialog = ({
                     <FormField
                       control={form.control}
                       name="licenseNumber"
-                      rules={{ required: '자격증 번호를 입력해주세요.' }}
+                      rules={{ required: tAuth('inquiryErrorLicenseNumberRequired') }}
                       render={({ field }) => (
                         <FormItem className="flex min-w-0 w-full flex-col gap-2">
                           <FormLabel
                             required
                             className="text-label-neutral text-[14px] leading-[22.4px] font-semibold"
                           >
-                            자격증 번호
+                            {tAuth('inquiryLicenseNumber')}
                           </FormLabel>
                           <FormControl>
                             <Input
                               type="text"
-                              placeholder="0000000"
+                              placeholder={tAuth('inquiryPlaceholderLicenseNumber')}
                               icon={createIcon('/icons/document.svg')}
                               {...field}
                               onClear={() => form.setValue('licenseNumber', '')}
@@ -272,11 +276,11 @@ const RequestCounselorInquiryDialog = ({
                     render={({ field }) => (
                       <FormItem className="flex flex-col gap-2">
                         <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                          추가 문의사항
+                          {tAuth('inquiryAdditionalNotes')}
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="추가 문의사항"
+                            placeholder={tAuth('inquiryPlaceholderAdditionalNotes')}
                             maxLength={300}
                             className="min-h-[87px] h-[87px]"
                             {...field}
@@ -287,16 +291,16 @@ const RequestCounselorInquiryDialog = ({
                   />
                 </div>
                 <div className="mt-6 flex w-full flex-col rounded-2xl bg-neutral-99 px-3 py-4 justify-center items-start gap-[3px]">
-                  <div className="flex items-center text-neutral-50 body-14">
-                    <span className="flex items-center justify-center w-[21px]">•</span>
-                    <span>
-                      <span className="text-primary font-semibold text-[14px]">*</span> 표시 항목은
-                      필수입력입니다.
+                  <div className="flex items-start text-neutral-50 body-14">
+                    <span className="flex w-[21px] shrink-0 items-center justify-center">•</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="text-primary font-semibold text-[14px]">*</span>{' '}
+                      {tAuth('inquiryRequiredNotice').replace('* ', '')}
                     </span>
                   </div>
-                  <div className="flex items-center text-neutral-50 body-14">
-                    <span className="flex items-center justify-center w-[21px]">•</span>
-                    <span>자격 검증 후 영업일 기준 2-3일 내 연락드립니다.</span>
+                  <div className="flex items-start text-neutral-50 body-14">
+                    <span className="flex w-[21px] shrink-0 items-center justify-center">•</span>
+                    <span className="min-w-0 flex-1">{tAuth('inquiryReviewNotice')}</span>
                   </div>
                 </div>
               </div>
@@ -310,7 +314,7 @@ const RequestCounselorInquiryDialog = ({
                     className="flex items-center justify-center gap-3 min-w-0 shrink-0 basis-[35.3%] md:w-30 sm:w-full"
                     onClick={() => handleDialogOpen(false)}
                   >
-                    취소
+                    {tCommon('cancel')}
                   </Button>
                   <Button
                     type="submit"
@@ -319,7 +323,7 @@ const RequestCounselorInquiryDialog = ({
                     className="min-w-0 flex-1 basis-[64.7%]"
                     disabled={!canSubmit}
                   >
-                    문의 제출
+                    {tCommon('submit')}
                   </Button>
                 </div>
               </div>
