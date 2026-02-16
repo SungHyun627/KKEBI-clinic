@@ -32,7 +32,11 @@ const RiskAlert = ({ alert }: RiskAlertProps) => {
           type="button"
           size="sm"
           className="shrink-0"
-          onClick={() => router.push(`/clients?clientId=${encodeURIComponent(alert.clientId)}`)}
+          onClick={() =>
+            router.push(
+              `/clients?clientId=${encodeURIComponent(alert.clientId)}&openAt=${Date.now()}`,
+            )
+          }
         >
           {tCommon('view')}
         </Button>

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
@@ -23,17 +24,17 @@ export default function ClientsPage() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const targetClientId =
-    typeof window === 'undefined'
-      ? null
-      : new URLSearchParams(window.location.search).get('clientId');
+  const searchParams = useSearchParams();
+  const targetClientId = searchParams.get('clientId');
+  const targetOpenAt = searchParams.get('openAt');
+  const targetQueryKey = targetClientId ? `${targetClientId}:${targetOpenAt ?? ''}` : null;
   const [searchKeyword, setSearchKeyword] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
   const [clients, setClients] = useState<ClientLookupItem[]>([]);
   const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [dismissedQueryClientId, setDismissedQueryClientId] = useState<string | null>(null);
+  const [dismissedQueryKey, setDismissedQueryKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -78,7 +79,7 @@ export default function ClientsPage() {
 
   const activeClient = selectedClientFromQuery ?? selectedClient;
   const isQueryDrawerOpen = Boolean(
-    targetClientId && selectedClientFromQuery && targetClientId !== dismissedQueryClientId,
+    targetClientId && selectedClientFromQuery && targetQueryKey !== dismissedQueryKey,
   );
 
   const filteredClients = useMemo(() => {
@@ -255,8 +256,8 @@ export default function ClientsPage() {
       <ClientDetailDrawer
         open={isDrawerOpen || isQueryDrawerOpen}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen && targetClientId) {
-            setDismissedQueryClientId(targetClientId);
+          if (!nextOpen && targetQueryKey) {
+            setDismissedQueryKey(targetQueryKey);
             router.replace(pathname, { scroll: false });
           }
           if (!nextOpen) {

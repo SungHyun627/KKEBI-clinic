@@ -43,7 +43,9 @@ export default function RiskNotificationItem({
         size="md"
         onClick={() => {
           onImmediateCheck?.();
-          router.push(`/clients?clientId=${encodeURIComponent(notification.clientId)}`);
+          router.push(
+            `/clients?clientId=${encodeURIComponent(notification.clientId)}&openAt=${Date.now()}`,
+          );
         }}
       >
         {tCommon('checkNow')}
