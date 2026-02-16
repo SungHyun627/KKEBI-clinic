@@ -11,13 +11,13 @@ export async function GET() {
         {
           clientId: 'client_1001',
           clientName: '김하늘',
-          reason: '최근 PHQ-9 점수가 21점으로 상승했습니다.',
+          reasonKey: 'riskAlertsPhqIncreased',
           detailPath: '/clients/client_1001',
         },
         {
           clientId: 'client_1007',
           clientName: '박준서',
-          reason: '7일 이상 앱 미사용 상태가 감지되었습니다.',
+          reasonKey: 'riskAlertsNoAppActivity7Days',
           detailPath: '/clients/client_1007',
         },
       ],

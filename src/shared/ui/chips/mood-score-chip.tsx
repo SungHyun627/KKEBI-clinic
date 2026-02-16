@@ -1,5 +1,5 @@
 interface MoodScoreChipProps {
-  label: '기분' | '스트레스' | '에너지';
+  label: string;
   score: number | null;
 }
 

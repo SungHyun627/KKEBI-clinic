@@ -1,11 +1,14 @@
 export type NotificationType = 'risk' | 'schedule_change';
 export type NotificationViewMode = 'risk' | 'all';
 export type NotificationMockSet = 'all' | 'risk' | 'empty';
+type NotificationParams = Record<string, string | number>;
 
 interface NotificationBase {
   id: string;
   type: NotificationType;
-  createdAt: string;
+  createdAt?: string;
+  createdAtKey?: string;
+  createdAtParams?: NotificationParams;
   clientId: string;
 }
 
@@ -13,13 +16,19 @@ export interface RiskNotification extends NotificationBase {
   type: 'risk';
   clientId: string;
   name: string;
-  description: string;
+  description?: string;
+  descriptionKey?: string;
+  descriptionParams?: NotificationParams;
 }
 
 export interface ScheduleChangeNotification extends NotificationBase {
   type: 'schedule_change';
-  title: string;
-  description: string;
+  title?: string;
+  titleKey?: string;
+  titleParams?: NotificationParams;
+  description?: string;
+  descriptionKey?: string;
+  descriptionParams?: NotificationParams;
 }
 
 export type NotificationItem = RiskNotification | ScheduleChangeNotification;

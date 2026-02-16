@@ -16,4 +16,6 @@ async function loginHandler(request: Request) {
   return NextResponse.json({ ok: true, message: '로그인 성공' });
 }
 
-export { loginHandler as POST };
+export async function POST(request: Request) {
+  return loginHandler(request);
+}

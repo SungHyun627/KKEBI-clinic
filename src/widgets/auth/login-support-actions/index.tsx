@@ -7,8 +7,10 @@ import {
   CounselorInquiryCompleteDialog,
   RequestCounselorInquiryDialog,
 } from '@/features/auth/counselor-inquiry';
+import { useTranslations } from 'next-intl';
 
 const LoginSupportActions = () => {
+  const tAuth = useTranslations('auth');
   const [isPasswordResetOpen, setIsPasswordResetOpen] = useState(false);
   const [isEmailSentOpen, setIsEmailSentOpen] = useState(false);
   const [isCounselorInquiryOpen, setIsCounselorInquiryOpen] = useState(false);
@@ -22,22 +24,24 @@ const LoginSupportActions = () => {
 
   return (
     <>
-      <div className="flex items-center gap-3 text-[18px] leading-[28.8px] font-medium text-neutral-60">
-        <button
-          type="button"
-          className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer"
-          onClick={() => setIsPasswordResetOpen(true)}
-        >
-          비밀번호 찾기
-        </button>
-        <span className="h-5 w-px bg-neutral-80" />
-        <button
-          type="button"
-          className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer"
-          onClick={() => setIsCounselorInquiryOpen(true)}
-        >
-          상담사 등록 문의
-        </button>
+      <div className="flex w-full justify-center">
+        <div className="inline-flex items-center gap-x-4 text-[18px] leading-[28.8px] font-medium text-neutral-60">
+          <button
+            type="button"
+            className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer whitespace-nowrap"
+            onClick={() => setIsPasswordResetOpen(true)}
+          >
+            {tAuth('loginForgotPassword')}
+          </button>
+          <span className="h-5 w-px bg-neutral-80" />
+          <button
+            type="button"
+            className="hover:text-label-normal text-inherit bg-transparent border-none p-0 cursor-pointer whitespace-nowrap"
+            onClick={() => setIsCounselorInquiryOpen(true)}
+          >
+            {tAuth('loginCounselorInquiry')}
+          </button>
+        </div>
       </div>
       <RequestResetPasswordDialog
         isOpen={isPasswordResetOpen}

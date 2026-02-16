@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';
 
 export interface InputProps extends React.ComponentProps<'input'> {
@@ -12,6 +13,8 @@ export interface InputProps extends React.ComponentProps<'input'> {
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, icon, onClear, status, rightIcon, onRightIconClick, ...props }, ref) => {
+    const tCommon = useTranslations('common');
+
     return (
       <div
         className={cn(
@@ -59,7 +62,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type="button"
               onClick={onRightIconClick}
               className="flex items-center justify-center text-label-assistive hover:text-label-strong transition-colors cursor-pointer opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
-              aria-label="입력 보조 버튼"
+              aria-label={tCommon('inputAssistiveButton')}
               tabIndex={-1}
             >
               {rightIcon}
@@ -70,7 +73,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               type="button"
               onClick={onClear}
               className="flex items-center justify-center text-label-assistive hover:text-label-strong transition-colors cursor-pointer opacity-0 pointer-events-none group-focus-within:opacity-100 group-focus-within:pointer-events-auto"
-              aria-label="입력 내용 초기화"
+              aria-label={tCommon('inputClearContent')}
               tabIndex={-1}
             >
               <div

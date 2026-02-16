@@ -1,10 +1,12 @@
 import type { NotificationType } from '@/features/notification/types/notification';
+import { useTranslations } from 'next-intl';
 
 interface NotificationTypeChipProps {
   type: NotificationType;
 }
 
 export default function NotificationTypeChip({ type }: NotificationTypeChipProps) {
+  const tNotification = useTranslations('notification');
   const isRisk = type === 'risk';
 
   return (
@@ -15,7 +17,7 @@ export default function NotificationTypeChip({ type }: NotificationTypeChipProps
           : 'border-[rgba(66,158,0,0.50)] bg-[rgba(66,158,0,0.10)] text-[#429E00]'
       }`}
     >
-      {isRisk ? '위험 알림' : '일정 변경 요청'}
+      {isRisk ? tNotification('typeRisk') : tNotification('typeScheduleChange')}
     </span>
   );
 }

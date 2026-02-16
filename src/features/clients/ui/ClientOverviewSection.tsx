@@ -1,11 +1,12 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import ClientInfoField from './ClientInfoField';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
 import type { ClientDetailData } from '../types/client';
-import { toKoreanDate } from '../lib/format';
+import { formatDateByLocale } from '../lib/format';
 
 interface ClientOverviewSectionProps {
   detail: ClientDetailData;
@@ -16,11 +17,31 @@ const CARD_CLASSNAME =
 const SECTION_TITLE_CLASSNAME = 'body-18 font-semibold';
 
 export default function ClientOverviewSection({ detail }: ClientOverviewSectionProps) {
+  const tCommon = useTranslations('common');
+  const tClients = useTranslations('clients');
+  const locale = useLocale();
+  const isKo = locale === 'ko';
+  const localizedVisitPurpose = (() => {
+    if (!detail.visitPurpose.endsWith('관련 정서 조절')) return detail.visitPurpose;
+
+    const concernLabel = detail.visitPurpose.startsWith('우울')
+      ? tClients('concernsDepression')
+      : detail.visitPurpose.startsWith('스트레스')
+        ? tClients('concernsStress')
+        : detail.visitPurpose.startsWith('수면')
+          ? tClients('concernsSleep')
+          : detail.visitPurpose.replace(' 관련 정서 조절', '');
+
+    return tClients('visitPurposeEmotionRegulation', { concern: concernLabel });
+  })();
+
   return (
     <section className="flex items-stretch justify-between">
       <div className={CARD_CLASSNAME}>
         <div className="flex w-full items-center justify-between">
-          <span className={`${SECTION_TITLE_CLASSNAME} text-neutral-20`}>내담자 정보</span>
+          <span className={`${SECTION_TITLE_CLASSNAME} text-neutral-20`}>
+            {tClients('detailTitle')}
+          </span>
           <div className="flex items-center gap-[6px]">
             <Button
               type="button"
@@ -28,7 +49,7 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
               size="sm"
               className="text-label-neutral rounded-lg"
             >
-              수정하기
+              {tCommon('edit')}
             </Button>
             <Button
               type="button"
@@ -36,24 +57,38 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
               size="sm"
               className="text-primary bg-[rgba(250,84,84,0.10)] rounded-lg"
             >
-              종결하기
+              {tCommon('closeCase')}
             </Button>
           </div>
         </div>
         <div className="flex flex-col w-full items-start gap-[18px]">
-          <ClientInfoField label="나이 및 성별" value={`${detail.age}세 ${detail.gender}`} />
-          <ClientInfoField label="시작일" value={toKoreanDate(detail.counselingStartDate)} />
           <ClientInfoField
-            label="상담 횟수"
-            value={`${detail.currentSession}회/${detail.totalSession}회`}
+            label={tClients('detailAgeGender')}
+            value={
+              isKo
+                ? `${detail.age}세 ${detail.gender}`
+                : `${detail.gender === '남성' ? 'Male' : 'Female'}, ${detail.age}`
+            }
           />
-          <ClientInfoField label="방문 목적" value={detail.visitPurpose} />
+          <ClientInfoField
+            label={tClients('detailStartDate')}
+            value={formatDateByLocale(detail.counselingStartDate, locale)}
+          />
+          <ClientInfoField
+            label={tClients('detailSessions')}
+            value={
+              isKo
+                ? `${detail.currentSession}회/${detail.totalSession}회`
+                : `${detail.currentSession}/${detail.totalSession}`
+            }
+          />
+          <ClientInfoField label={tClients('detailVisitReason')} value={localizedVisitPurpose} />
           <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
         </div>
       </div>
 
       <div className={CARD_CLASSNAME}>
-        <span className={`${SECTION_TITLE_CLASSNAME} text-primary`}>최근 위험</span>
+        <span className={`${SECTION_TITLE_CLASSNAME} text-primary`}>{tClients('riskTitle')}</span>
         <div className="flex w-full flex-col gap-[23px]">
           {detail.recentRisks.length > 0 ? (
             detail.recentRisks.map((risk, index) => (
@@ -66,7 +101,9 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
                   .filter(Boolean)
                   .join(' ')}
               >
-                <span className="body-14 text-label-neutral">{toKoreanDate(risk.date)}</span>
+                <span className="body-14 text-label-neutral">
+                  {formatDateByLocale(risk.date, locale)}
+                </span>
                 <div className="flex flex-wrap gap-2">
                   {risk.reasons.map((reason) => (
                     <RiskReasonChip
@@ -78,9 +115,7 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
               </div>
             ))
           ) : (
-            <span className="body-14 text-label-alternative">
-              1달 간 감지된 위험 요소가 없습니다.
-            </span>
+            <span className="body-14 text-label-alternative">{tClients('riskEmptyLastMonth')}</span>
           )}
         </div>
       </div>

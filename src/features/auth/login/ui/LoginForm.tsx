@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { LoginFailDialog } from './LoginFailDialog';
 import { useForm } from 'react-hook-form';
 import { login } from '../api/login';
@@ -14,6 +15,7 @@ import { getInitialLoginInfo } from '../lib/getInitialLoginInfo';
 import { setAuthSession } from '../lib/authSession';
 
 const LoginForm = () => {
+  const tAuth = useTranslations('auth');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isLoginFailed, setIsLoginFailed] = useState(false);
   const [saveLoginInfo, setSaveLoginInfo] = useState(getInitialLoginInfo().saveLoginInfo || false);
@@ -47,7 +49,7 @@ const LoginForm = () => {
         email: values.email,
         password: values.password,
         userId: result.data?.userId,
-        userName: values.email.split('@')[0] || '상담사',
+        userName: values.email.split('@')[0] || 'Counselor',
         authenticated: false,
       });
 
@@ -72,11 +74,11 @@ const LoginForm = () => {
   const onInvalid = () => {
     const { errors } = form.formState;
     if (errors.email) {
-      toast('아이디를 다시 한번 확인해주세요.');
+      toast(tAuth('loginInvalidEmail'));
       return;
     }
     if (errors.password) {
-      toast('비밀번호를 다시 한번 확인해주세요.');
+      toast(tAuth('otpPasswordMismatch'));
     }
   };
 
@@ -90,28 +92,28 @@ const LoginForm = () => {
         >
           <div className="flex flex-col gap-8">
             <h2 className="text-center text-[20px] leading-[30px] font-semibold text-label-normal">
-              로그인
+              {tAuth('loginTitle')}
             </h2>
             <div className="flex flex-col gap-4">
               <FormField
                 control={form.control}
                 name="email"
                 rules={{
-                  required: '아이디를 다시 한번 확인해주세요.',
+                  required: tAuth('loginInvalidEmail'),
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: '아이디를 다시 한번 확인해주세요.',
+                    message: tAuth('loginInvalidEmail'),
                   },
                 }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      이메일
+                      {tAuth('loginEmailLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="example@kkebi.com"
+                        placeholder={tAuth('loginEmailPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('email', '')}
                         icon={
@@ -136,25 +138,25 @@ const LoginForm = () => {
                 control={form.control}
                 name="password"
                 rules={{
-                  required: '비밀번호를 다시 한번 확인해주세요.',
+                  required: tAuth('loginInvalidPassword'),
                   maxLength: {
                     value: 14,
-                    message: '비밀번호를 다시 한번 확인해주세요.',
+                    message: tAuth('loginInvalidPassword'),
                   },
                   pattern: {
                     value: /^(?=.*[A-Za-z])(?=.*\d).+$/,
-                    message: '비밀번호를 다시 한번 확인해주세요.',
+                    message: tAuth('loginInvalidPassword'),
                   },
                 }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
                     <FormLabel className="text-label-neutral text-[14px] leading-[22.4px] font-semibold">
-                      비밀번호
+                      {tAuth('loginPasswordLabel')}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type={isPasswordVisible ? 'text' : 'password'}
-                        placeholder="비밀번호를 입력해주세요"
+                        placeholder={tAuth('loginPasswordPlaceholder')}
                         {...field}
                         onClear={() => form.setValue('password', '')}
                         rightIcon={
@@ -216,10 +218,10 @@ const LoginForm = () => {
                 />
               </svg>
             </span>
-            로그인 상태 유지
+            {tAuth('loginKeepSignedIn')}
           </label>
           <Button type="submit" className="w-full">
-            로그인
+            {tAuth('loginTitle')}
           </Button>
         </form>
       </Form>

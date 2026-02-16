@@ -1,6 +1,6 @@
 interface Resend2FAResult {
   ok: boolean;
-  message?: string;
+  errorCode?: 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
   error?: string;
 }
 
@@ -43,16 +43,16 @@ export async function resend2FADemo(): Promise<Resend2FAResult> {
   });
 
   if (!response) {
-    return { ok: false, error: data.error };
+    return { ok: false, error: data.error, errorCode: 'NETWORK_ERROR' };
   }
 
-  return { ok: response.ok, message: data.message };
+  return { ok: response.ok, errorCode: response.ok ? undefined : 'UNKNOWN_ERROR' };
 }
 
 export async function resend2FAServer(): Promise<Resend2FAResult> {
   const url = buildServerUrl('/api/v1/auth/2fa/resend');
   if (!url) {
-    return { ok: false, error: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
+    return { ok: false, errorCode: 'CONFIG_ERROR' };
   }
 
   const { response, data } = await requestJson(url, {
@@ -61,10 +61,10 @@ export async function resend2FAServer(): Promise<Resend2FAResult> {
   });
 
   if (!response) {
-    return { ok: false, error: data.error };
+    return { ok: false, error: data.error, errorCode: 'NETWORK_ERROR' };
   }
 
-  return { ok: response.ok, message: data.message };
+  return { ok: response.ok, errorCode: response.ok ? undefined : 'UNKNOWN_ERROR' };
 }
 
 export async function verify2FADemo({ code }: Verify2FAParams): Promise<Verify2FAResult> {

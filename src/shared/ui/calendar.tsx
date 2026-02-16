@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { DayPicker, getDefaultClassNames } from 'react-day-picker';
 import Image from 'next/image';
+import { useLocale } from 'next-intl';
 
 import { cn } from '@/shared/lib/utils';
 import { buttonVariants } from '@/shared/ui/button';
@@ -13,6 +14,7 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: React.ComponentProps<typeof DayPicker>) {
+  const locale = useLocale();
   const defaultClassNames = getDefaultClassNames();
   const mergedClassNames = {
     ...defaultClassNames,
@@ -57,8 +59,13 @@ function Calendar({
       classNames={mergedClassNames}
       formatters={{
         formatWeekdayName: (date) =>
-          new Intl.DateTimeFormat('ko-KR', { weekday: 'short' }).format(date),
-        formatCaption: (date) => `${date.getFullYear()}년 ${date.getMonth() + 1}월`,
+          new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
+            weekday: 'short',
+          }).format(date),
+        formatCaption: (date) =>
+          locale === 'en'
+            ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(date)
+            : `${date.getFullYear()}년 ${date.getMonth() + 1}월`,
       }}
       components={{
         Chevron: ({ orientation, className: chevronClassName, ...chevronProps }) =>
