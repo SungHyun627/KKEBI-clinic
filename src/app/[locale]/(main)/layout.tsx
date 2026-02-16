@@ -159,7 +159,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                   clearAuthSession();
                   localStorage.removeItem('kkebi-login-info');
                   if (!result.success) {
-                    toast(result.message || tCommon('logoutFailed'));
+                    toast(tCommon('logoutFailed'));
                   }
                   router.push('/login');
                 }}

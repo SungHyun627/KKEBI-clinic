@@ -6,6 +6,7 @@ import { Calendar } from '@/shared/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { Button } from '@/shared/ui/button';
 import { useLocale, useTranslations } from 'next-intl';
+import { formatDateByLocale } from '../lib/format';
 
 interface NextCounselingDatePickerProps {
   label?: string;
@@ -113,17 +114,4 @@ function parseDateFromIso(input: string) {
   if (!input) return null;
   const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function formatDateByLocale(input: string, locale: string) {
-  const parsed = new Date(input.includes(' ') ? input.replace(' ', 'T') : input);
-  if (Number.isNaN(parsed.getTime())) return input;
-  if (locale === 'en') {
-    return parsed.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-  return `${parsed.getFullYear()}년 ${parsed.getMonth() + 1}월 ${parsed.getDate()}일`;
 }

@@ -45,7 +45,7 @@ export default function ClientsPage() {
 
       if (!result.success || !result.data) {
         setClients([]);
-        setErrorMessage(result.message || tClients('listLoadFailed'));
+        setErrorMessage(tClients('listLoadFailed'));
         setIsLoading(false);
         return;
       }

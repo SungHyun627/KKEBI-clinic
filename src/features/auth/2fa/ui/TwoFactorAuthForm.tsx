@@ -118,7 +118,7 @@ const TwoFactorAuthForm = () => {
                   onClick={async () => {
                     const result = await resend2FA();
                     if (result.ok) {
-                      toast(result.message || tAuth('otpResent'));
+                      toast(tAuth('otpResent'));
                     } else {
                       toast(tAuth('otpResendFailed'));
                     }

@@ -131,7 +131,7 @@ const RequestResetPasswordDialog = ({
                     setIsEmailSentOpen(true);
                     emailForm.reset({ email: '' });
                   } else {
-                    toast(res.message || tAuth('errorResetLinkSendFailed'));
+                    toast(tAuth('errorResetLinkSendFailed'));
                   }
                 } catch {
                   toast(tAuth('errorNetwork'));

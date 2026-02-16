@@ -100,7 +100,7 @@ const RequestCounselorInquiryDialog = ({
                   onOpenChange(false);
                   onSubmitSuccess(submittedValues);
                 } else {
-                  toast(result.message || tAuth('inquiryErrorSubmitFailed'));
+                  toast(tAuth('inquiryErrorSubmitFailed'));
                 }
               })}
             >
