@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Title } from '@/shared/ui/title';
 import { getWeeklyStatistics } from '@/features/dashboard';
 import type { WeeklyStatistics } from '@/features/dashboard';
@@ -10,6 +10,7 @@ import RiskAlert from './ui/RiskAlert';
 
 const WeeklyStatisticsSection = () => {
   const tDashboard = useTranslations('dashboard');
+  const locale = useLocale();
   const [statistics, setStatistics] = useState<WeeklyStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -79,7 +80,9 @@ const WeeklyStatisticsSection = () => {
           </div>
         </div>
         {riskAlert ? (
-          <div className="min-w-0 flex-1 basis-[320px]">
+          <div
+            className={`min-w-0 ${locale === 'en' ? 'w-[280px] shrink-0' : 'w-[320px] shrink-0'}`}
+          >
             <RiskAlert alert={riskAlert} />
           </div>
         ) : null}
