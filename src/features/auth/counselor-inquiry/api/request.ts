@@ -72,6 +72,20 @@ export async function requestCounselorInquiry(
           : undefined,
     };
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        const fallback = (await httpClient.post('/api/v1/auth/counselor-inquiry', requestBody, {
+          skipAuth: true,
+          skipRefresh: true,
+        })) as { success?: boolean; message?: string };
+        if (fallback?.success) {
+          return { success: true, message: fallback.message };
+        }
+      } catch {
+        // fall through to the original error handling
+      }
+    }
+
     if (error instanceof ApiError) {
       if (error.status === 409) {
         return { success: false, errorCode: 'DUPLICATE_PENDING', message: error.message };
