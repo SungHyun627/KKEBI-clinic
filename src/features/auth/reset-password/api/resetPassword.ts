@@ -16,6 +16,18 @@ export async function requestResetPassword(email: string): Promise<ResetPassword
     await httpClient.post('/api/v1/counselor/auth/password-reset', body, { skipAuth: true });
     return { success: true };
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        const fallback = (await httpClient.post('/api/v1/auth/reset-password/request', body, {
+          skipAuth: true,
+          skipRefresh: true,
+        })) as { success?: boolean; message?: string };
+        if (fallback?.success) return { success: true, message: fallback.message };
+      } catch {
+        // fall through to the original error handling
+      }
+    }
+
     if (error instanceof ApiError) {
       if (error.status === 401) {
         return { success: false, errorCode: 'UNAUTHORIZED', message: error.message };

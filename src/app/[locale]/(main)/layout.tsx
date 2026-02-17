@@ -40,17 +40,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const logoutMutation = useLogoutMutation();
   const locale = useLocale();
   const switchLocale = () => {
-    if (typeof window === 'undefined') return;
-    const { pathname, search, hash } = window.location;
-    const currentLocaleFromPath = pathname.startsWith('/en')
-      ? 'en'
-      : pathname.startsWith('/ko')
-        ? 'ko'
-        : locale;
-    const nextLocale = currentLocaleFromPath === 'ko' ? 'en' : 'ko';
-    const normalizedPath = pathname.replace(/^\/(ko|en)(?=\/|$)/, '') || '/';
-    const nextPath = `/${nextLocale}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`;
-    window.location.replace(`${nextPath}${search}${hash}`);
+    const nextLocale = locale === 'ko' ? 'en' : 'ko';
+    router.replace(pathname, { locale: nextLocale });
+    router.refresh();
   };
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -59,7 +51,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const isSessionDetailPage = pathname.startsWith('/sessions/');
 
   useEffect(() => {
-    if (!authSession?.authenticated) {
+    const latestSession = getAuthSession();
+    if (!latestSession?.authenticated) {
       router.replace('/login');
     }
   }, [authSession, router]);
