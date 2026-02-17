@@ -51,7 +51,11 @@ const WeeklyStatisticsSection = () => {
 
   return (
     <section
-      className={riskAlert ? 'grid w-full grid-cols-[3fr_2fr] items-start gap-4' : 'flex w-full'}
+      className={
+        riskAlert
+          ? 'grid w-full grid-cols-[3fr_2fr] items-start gap-4 max-[1200px]:grid-cols-1'
+          : 'flex w-full'
+      }
     >
       <div className="flex min-w-0 flex-col justify-between gap-3">
         <Title title={tDashboard('weeklyStatsTitle')} />
