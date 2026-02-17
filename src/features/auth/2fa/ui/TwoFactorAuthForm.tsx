@@ -1,17 +1,21 @@
 'use client';
 
 import { useForm, useWatch } from 'react-hook-form';
-import { useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Button } from '@/shared/ui/button';
 import { Form } from '@/shared/ui/form';
 import TwoFactorCode from './TwoFactorCode';
-import { resend2FA, verify2FA } from '../api/2fa';
 import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
 import { useRouter } from '@/i18n/navigation';
 import TwoFactorAuthFailDialog from './TwoFactorAuthFailDialog';
-import { setAuthSessionAuthenticated } from '@/features/auth/login/lib/authSession';
+import {
+  getAuthSession,
+  setAuthSessionAuthenticated,
+  subscribeAuthSession,
+} from '@/features/auth/login/lib/authSession';
 import { useTranslations } from 'next-intl';
+import { useResend2FAMutation, useVerify2FAMutation } from '../hooks/useTwoFactorMutation';
 
 interface TwofactorAuthFormValues {
   code: string;
@@ -21,6 +25,9 @@ const TwoFactorAuthForm = () => {
   const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
   const router = useRouter();
+  const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
+  const verifyMutation = useVerify2FAMutation();
+  const resendMutation = useResend2FAMutation();
   const form = useForm<TwofactorAuthFormValues>({
     defaultValues: { code: '' },
   });
@@ -28,9 +35,24 @@ const TwoFactorAuthForm = () => {
   const codeArr = (code ?? '').split('');
 
   const [isVerifyFailed, setIsVerifyFailed] = useState(false);
+
+  useEffect(() => {
+    if (!authSession) {
+      router.replace('/login');
+      return;
+    }
+    if (authSession.authenticated) {
+      router.replace('/');
+      return;
+    }
+    if (!authSession.challengeId) {
+      router.replace('/login');
+    }
+  }, [authSession, router]);
+
   const handleVerify = async () => {
     if (!(code && code.length === 6 && /^[0-9]{6}$/.test(code))) return;
-    const result = await verify2FA({ code });
+    const result = await verifyMutation.mutateAsync({ code });
     if (result.ok) {
       setAuthSessionAuthenticated(true);
       router.push('/');
@@ -116,7 +138,7 @@ const TwoFactorAuthForm = () => {
                 <span
                   className="text-[16px] leading-[25.6px] font-semibold font-pretendard text-primary cursor-pointer"
                   onClick={async () => {
-                    const result = await resend2FA();
+                    const result = await resendMutation.mutateAsync();
                     if (result.ok) {
                       toast(tAuth('otpResent'));
                     } else {

@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "generate:types": "curl -s 'http://ec2-52-79-154-149.ap-northeast-2.compute.amazonaws.com/api-docs/%EC%A0%84%EC%B2%B4' -o openapi.json && openapi-typescript openapi.json -o src/shared/api/generated-types.ts",
     "i18n:sync": "node scripts/sync-i18n-from-csv.mjs /tmp/i18n_sheet.csv",
     "format": "prettier --write .",
     "prepare": "husky"
@@ -23,6 +24,8 @@
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
+    "@tanstack/react-query": "^5.90.21",
+    "@tanstack/react-query-devtools": "^5.91.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",
@@ -48,6 +51,7 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"

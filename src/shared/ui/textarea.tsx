@@ -17,7 +17,7 @@ export const Textarea = React.forwardRef<
   return (
     <div
       className={cn(
-        'flex flex-col min-h-[87px] justify-between items-end self-stretch border border-label-normal bg-white rounded-2xl p-4 h-[87px]',
+        'group flex h-[87px] min-h-[87px] flex-col justify-between self-stretch rounded-2xl border border-neutral-95 bg-white p-4 focus-within:border-label-normal',
         className,
       )}
     >
@@ -32,7 +32,9 @@ export const Textarea = React.forwardRef<
         {...props}
       />
       <div className="flex justify-end items-start gap-[1.5px] body-14">
-        <span className="text-label-alternative">{String(val).length}</span>
+        <span className="text-label-assistive group-focus-within:text-label-alternative">
+          {String(val).length}
+        </span>
         <span className="text-label-assistive">/</span>
         <span className="text-label-assistive">{maxLength}</span>
       </div>

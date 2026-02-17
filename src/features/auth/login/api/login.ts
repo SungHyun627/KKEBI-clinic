@@ -1,4 +1,6 @@
 import type { LoginForm } from '../types/login';
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import type { CounselorAuthLoginRequest } from '@/shared/api/type';
 
 interface LoginResponse {
   success: boolean;
@@ -7,49 +9,49 @@ interface LoginResponse {
   data?: {
     userId?: string;
     needOtp?: boolean;
+    challengeId?: string;
   };
 }
 
-const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+interface ApiEnvelope<TData = unknown> {
+  code?: string;
+  message?: string;
+  data?: TData;
+}
 
-const toLoginResponse = (response: Response, data: unknown): LoginResponse => {
-  if (typeof data === 'object' && data !== null && 'ok' in data) {
-    const result = data as {
-      ok: boolean;
-      message?: string;
-      errorCode?: LoginResponse['errorCode'];
-      data?: LoginResponse['data'];
-    };
-    return {
-      success: result.ok,
-      message: result.message,
-      errorCode: result.ok ? undefined : (result.errorCode ?? 'AUTH_FAILED'),
-      data: result.data,
-    };
-  }
-
-  if (typeof data === 'object' && data !== null && 'success' in data) {
-    return data as LoginResponse;
-  }
-
-  if (!response.ok) {
-    return { success: false, errorCode: 'NETWORK_ERROR' };
-  }
-
-  return { success: true };
-};
-
-const requestLogin = async (url: string, payload: LoginForm): Promise<LoginResponse> => {
+const requestLogin = async (payload: LoginForm): Promise<LoginResponse> => {
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json().catch(() => null);
-    return toLoginResponse(res, data);
+    const body: CounselorAuthLoginRequest = {
+      email: payload.email,
+      password: payload.password,
+    };
+    const response = await httpClient.post<ApiEnvelope<Record<string, unknown>>>(
+      '/api/v1/counselor/auth/login',
+      body,
+      { skipAuth: true },
+    );
+    const data = response?.data ?? {};
+    return {
+      success: true,
+      message: response?.message,
+      data: {
+        userId:
+          typeof data.userId === 'string'
+            ? data.userId
+            : typeof data.userId === 'number'
+              ? String(data.userId)
+              : undefined,
+        needOtp: true,
+        challengeId: typeof data.challengeId === 'string' ? data.challengeId : undefined,
+      },
+    };
   } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 401 || error.status === 403) {
+        return { success: false, errorCode: 'AUTH_FAILED', message: error.message };
+      }
+      return { success: false, errorCode: 'UNKNOWN_ERROR', message: error.message };
+    }
     return {
       success: false,
       message: error instanceof Error ? error.message : undefined,
@@ -58,17 +60,4 @@ const requestLogin = async (url: string, payload: LoginForm): Promise<LoginRespo
   }
 };
 
-export const loginDemo = (payload: LoginForm) => requestLogin('/api/v1/auth/login', payload);
-
-export const loginServer = (payload: LoginForm) => {
-  if (!SERVER_API_BASE_URL) {
-    return Promise.resolve({
-      success: false,
-      errorCode: 'CONFIG_ERROR',
-    });
-  }
-  return requestLogin(`${SERVER_API_BASE_URL}/api/v1/auth/login`, payload);
-};
-
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const login = loginDemo;
+export const login = requestLogin;

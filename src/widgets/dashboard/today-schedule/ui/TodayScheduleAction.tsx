@@ -16,11 +16,12 @@ export default function TodayScheduleAction({ clientId, clientName }: TodaySched
   const router = useRouter();
 
   return (
-    <div className="flex w-full items-center justify-end gap-3 pl-6">
+    <div className="flex min-w-0 w-full items-center justify-end gap-2 pl-2">
       <Button
         type="button"
         variant="icon"
         size="icon"
+        disabled
         aria-label={tDashboard('todayScheduleSendNotification', { name: clientName })}
         className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
       >
