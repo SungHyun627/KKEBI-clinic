@@ -1,4 +1,5 @@
 import { clearAccessToken, getAccessToken, setAccessToken } from './token-store';
+import { emitAuthRequired } from '@/shared/lib/auth-events';
 
 export interface ApiErrorShape {
   status: number;
@@ -57,6 +58,7 @@ async function requestTokenRefresh(): Promise<boolean> {
       });
       if (!response.ok) {
         clearAccessToken();
+        emitAuthRequired();
         return false;
       }
 
@@ -68,9 +70,11 @@ async function requestTokenRefresh(): Promise<boolean> {
       }
 
       clearAccessToken();
+      emitAuthRequired();
       return false;
     } catch {
       clearAccessToken();
+      emitAuthRequired();
       return false;
     } finally {
       refreshPromise = null;

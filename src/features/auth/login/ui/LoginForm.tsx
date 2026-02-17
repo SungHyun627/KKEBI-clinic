@@ -5,7 +5,6 @@ import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { LoginFailDialog } from './LoginFailDialog';
 import { useForm } from 'react-hook-form';
-import { login } from '../api/login';
 import { Button } from '@/shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
@@ -13,6 +12,7 @@ import { toast } from '@/shared/ui/toast';
 import { LoginForm as LoginFromFields } from '../types/login';
 import { getInitialLoginInfo } from '../lib/getInitialLoginInfo';
 import { setAuthSession } from '../lib/authSession';
+import { useLoginMutation } from '../hooks/useLoginMutation';
 
 const LoginForm = () => {
   const tAuth = useTranslations('auth');
@@ -21,6 +21,7 @@ const LoginForm = () => {
   const [saveLoginInfo, setSaveLoginInfo] = useState(getInitialLoginInfo().saveLoginInfo || false);
   const checkboxRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const loginMutation = useLoginMutation();
   const form = useForm<LoginFromFields>({
     defaultValues: {
       email: '',
@@ -43,7 +44,10 @@ const LoginForm = () => {
   }, [form]);
 
   const onSubmit = async (values: LoginFromFields) => {
-    const result = await login({ email: values.email, password: values.password });
+    const result = await loginMutation.mutateAsync({
+      email: values.email,
+      password: values.password,
+    });
     if (result.success) {
       setAuthSession({
         email: values.email,

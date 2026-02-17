@@ -15,10 +15,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/shared/ui/sidebar';
-import { logout } from '@/features/auth/login/api/logout';
-import { clearAuthSession, getAuthSession } from '@/features/auth/login/lib/authSession';
+import {
+  clearAuthSession,
+  getAuthSession,
+  subscribeAuthSession,
+} from '@/features/auth/login/lib/authSession';
+import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation';
 import { toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
+import { subscribeAuthRequired } from '@/shared/lib/auth-events';
 
 const navItems = [
   { key: 'dashboard', href: '/', icon: '/icons/dashboard.svg' },
@@ -32,6 +37,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
+  const logoutMutation = useLogoutMutation();
   const locale = useLocale();
   const switchLocale = () => {
     if (typeof window === 'undefined') return;
@@ -48,18 +54,22 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   };
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const userName = useSyncExternalStore(
-    () => () => {},
-    () => getAuthSession()?.userName || tCommon('defaultUserName'),
-    () => tCommon('defaultUserName'),
-  );
+  const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
+  const userName = authSession?.userName || tCommon('defaultUserName');
   const isSessionDetailPage = pathname.startsWith('/sessions/');
 
   useEffect(() => {
-    const session = getAuthSession();
-    if (!session?.authenticated) {
+    if (!authSession?.authenticated) {
       router.replace('/login');
     }
+  }, [authSession, router]);
+
+  useEffect(() => {
+    return subscribeAuthRequired(() => {
+      clearAuthSession();
+      localStorage.removeItem('kkebi-login-info');
+      router.replace('/login');
+    });
   }, [router]);
 
   const currentTitle =
@@ -155,7 +165,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 aria-label={tCommon('logout')}
                 className="flex items-center justify-center hover:cursor-pointer"
                 onClick={async () => {
-                  const result = await logout();
+                  const result = await logoutMutation.mutateAsync();
                   clearAuthSession();
                   localStorage.removeItem('kkebi-login-info');
                   if (!result.success) {

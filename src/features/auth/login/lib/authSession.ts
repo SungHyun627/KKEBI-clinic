@@ -1,4 +1,5 @@
 export const AUTH_SESSION_KEY = 'kkebi-auth-session';
+const AUTH_SESSION_CHANGED_EVENT = 'kkebi-auth-session-changed';
 
 export interface AuthSession {
   email: string;
@@ -10,6 +11,10 @@ export interface AuthSession {
 }
 
 const isClient = () => typeof window !== 'undefined';
+const emitAuthSessionChanged = () => {
+  if (!isClient()) return;
+  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+};
 
 export const getAuthSession = (): AuthSession | null => {
   if (!isClient()) return null;
@@ -36,6 +41,7 @@ export const getAuthSession = (): AuthSession | null => {
 export const setAuthSession = (session: AuthSession) => {
   if (!isClient()) return;
   localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+  emitAuthSessionChanged();
 };
 
 export const setAuthSessionAuthenticated = (authenticated: boolean) => {
@@ -47,4 +53,13 @@ export const setAuthSessionAuthenticated = (authenticated: boolean) => {
 export const clearAuthSession = () => {
   if (!isClient()) return;
   localStorage.removeItem(AUTH_SESSION_KEY);
+  emitAuthSessionChanged();
+};
+
+export const subscribeAuthSession = (listener: () => void) => {
+  if (!isClient()) return () => {};
+  window.addEventListener(AUTH_SESSION_CHANGED_EVENT, listener);
+  return () => {
+    window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, listener);
+  };
 };
