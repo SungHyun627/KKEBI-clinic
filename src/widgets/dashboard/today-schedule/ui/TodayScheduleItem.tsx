@@ -18,8 +18,8 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
   const locale = useLocale();
   const streakDays = schedule.streakDays ?? 0;
   const localizedClientName = getClientNameByLocale(schedule.clientId, schedule.clientName, locale);
-  const sessionTypeChipWidthClass = locale === 'en' ? 'w-[92px]' : 'w-[64px]';
-  const riskTypeChipWidthClass = locale === 'en' ? 'w-[104px]' : 'w-[64px]';
+  const sessionTypeChipWidthClass = locale === 'en' ? 'w-[92px]' : 'w-[49px]';
+  const riskTypeChipWidthClass = locale === 'en' ? 'w-[104px]' : 'w-[49px]';
 
   return (
     <li
