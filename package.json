@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "generate:types": "curl -s 'http://ec2-52-79-154-149.ap-northeast-2.compute.amazonaws.com/api-docs/%EC%A0%84%EC%B2%B4' -o openapi.json && openapi-typescript openapi.json -o src/shared/api/generated-types.ts",
     "i18n:sync": "node scripts/sync-i18n-from-csv.mjs /tmp/i18n_sheet.csv",
     "format": "prettier --write .",
     "prepare": "husky"
@@ -48,6 +49,7 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
