@@ -18,6 +18,8 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
   const locale = useLocale();
   const streakDays = schedule.streakDays ?? 0;
   const localizedClientName = getClientNameByLocale(schedule.clientId, schedule.clientName, locale);
+  const sessionTypeChipWidthClass = locale === 'en' ? 'w-[92px]' : 'w-[64px]';
+  const riskTypeChipWidthClass = locale === 'en' ? 'w-[104px]' : 'w-[64px]';
 
   return (
     <li
@@ -32,10 +34,10 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         <StreakChip days={streakDays} />
       </span>
       <span className="justify-self-center">
-        <SessionTypeChip value={schedule.sessionType} />
+        <SessionTypeChip value={schedule.sessionType} className={sessionTypeChipWidthClass} />
       </span>
       <span className="justify-self-center">
-        <RiskTypeChip value={schedule.riskType} />
+        <RiskTypeChip value={schedule.riskType} className={riskTypeChipWidthClass} />
       </span>
       <span className="flex items-center justify-start gap-2 pr-6">
         <MoodStressToken label={tDashboard('todayScheduleMood')} score={schedule.moodScore} />

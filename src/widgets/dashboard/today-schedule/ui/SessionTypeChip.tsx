@@ -1,11 +1,13 @@
 import type { SessionType } from '@/features/dashboard/types/schedule';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/shared/lib/utils';
 
 interface SessionTypeChipProps {
   value: SessionType;
+  className?: string;
 }
 
-export default function SessionTypeChip({ value }: SessionTypeChipProps) {
+export default function SessionTypeChip({ value, className }: SessionTypeChipProps) {
   const tClients = useTranslations('clients');
   const styleByValue: Record<SessionType, string> = {
     초기: 'border-neutral-95 bg-transparent text-label-normal',
@@ -20,7 +22,11 @@ export default function SessionTypeChip({ value }: SessionTypeChipProps) {
 
   return (
     <span
-      className={`flex items-center justify-center gap-[3px] rounded-[100px] border px-3 py-[3px] body-14 leading-none font-semibold ${styleByValue[value]}`}
+      className={cn(
+        'flex items-center justify-center gap-[3px] whitespace-nowrap rounded-[100px] border px-3 py-[3px] body-14 leading-none font-semibold',
+        styleByValue[value],
+        className,
+      )}
     >
       {labelByValue[value]}
     </span>

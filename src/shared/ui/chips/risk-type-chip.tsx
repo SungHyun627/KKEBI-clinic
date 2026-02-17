@@ -1,11 +1,13 @@
 import type { RiskType } from '@/features/dashboard/types/schedule';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/shared/lib/utils';
 
 interface RiskTypeChipProps {
   value: RiskType;
+  className?: string;
 }
 
-export default function RiskTypeChip({ value }: RiskTypeChipProps) {
+export default function RiskTypeChip({ value, className }: RiskTypeChipProps) {
   const tClients = useTranslations('clients');
   const styleByValue: Record<RiskType, string> = {
     안정: 'border-[rgba(66,158,0,0.50)] bg-[rgba(66,158,0,0.10)] text-[#429E00]',
@@ -20,7 +22,11 @@ export default function RiskTypeChip({ value }: RiskTypeChipProps) {
 
   return (
     <span
-      className={`flex items-center justify-center gap-[3px] rounded-[100px] border px-3 py-[3px] body-14 leading-none font-semibold ${styleByValue[value]}`}
+      className={cn(
+        'flex items-center justify-center gap-[3px] whitespace-nowrap rounded-[100px] border px-3 py-[3px] body-14 leading-none font-semibold',
+        styleByValue[value],
+        className,
+      )}
     >
       {labelByValue[value]}
     </span>
