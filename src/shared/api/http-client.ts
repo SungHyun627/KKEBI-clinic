@@ -1,4 +1,4 @@
-import { getAccessToken } from './token-store';
+import { clearAccessToken, getAccessToken, setAccessToken } from './token-store';
 
 export interface ApiErrorShape {
   status: number;
@@ -28,14 +28,56 @@ interface RequestOptions extends Omit<RequestInit, 'body' | 'headers'> {
   body?: unknown;
   headers?: HeadersInit;
   skipAuth?: boolean;
+  skipRefresh?: boolean;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ?? '';
+let refreshPromise: Promise<boolean> | null = null;
 
 function buildUrl(path: string) {
   if (/^https?:\/\//.test(path)) return path;
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   return `${API_BASE_URL}${normalizedPath}`;
+}
+
+interface ApiEnvelope<TData = unknown> {
+  code?: string;
+  message?: string;
+  data?: TData;
+}
+
+async function requestTokenRefresh(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch(buildUrl('/api/v1/counselor/auth/refresh'), {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        clearAccessToken();
+        return false;
+      }
+
+      const payload = (await parseResponse<ApiEnvelope<Record<string, unknown>>>(response)) ?? {};
+      const token = payload?.data?.accessToken;
+      if (typeof token === 'string' && token) {
+        setAccessToken(token);
+        return true;
+      }
+
+      clearAccessToken();
+      return false;
+    } catch {
+      clearAccessToken();
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -64,7 +106,7 @@ function toApiError(status: number, payload: unknown) {
 }
 
 export async function request<T = unknown>(path: string, options: RequestOptions = {}) {
-  const { body, headers, skipAuth, ...rest } = options;
+  const { body, headers, skipAuth, skipRefresh, ...rest } = options;
 
   const requestHeaders = new Headers(headers);
   const hasBody = typeof body !== 'undefined';
@@ -83,6 +125,16 @@ export async function request<T = unknown>(path: string, options: RequestOptions
     headers: requestHeaders,
     body: hasBody ? JSON.stringify(body) : undefined,
   });
+
+  if (response.status === 401 && !skipAuth && !skipRefresh) {
+    const refreshed = await requestTokenRefresh();
+    if (refreshed) {
+      return request<T>(path, {
+        ...options,
+        skipRefresh: true,
+      });
+    }
+  }
 
   const parsed = await parseResponse<unknown>(response);
   if (!response.ok) {
