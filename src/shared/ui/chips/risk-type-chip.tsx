@@ -23,7 +23,7 @@ export default function RiskTypeChip({ value, className }: RiskTypeChipProps) {
   return (
     <span
       className={cn(
-        'flex min-h-8 items-center justify-center rounded-[100px] border px-2 py-[3px] body-14 font-semibold',
+        'flex min-h-8 max-w-[80px] items-center justify-center rounded-[100px] border px-2 py-[3px] body-14 font-semibold',
         styleByValue[value],
         className,
       )}
