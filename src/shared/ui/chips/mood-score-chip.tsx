@@ -16,7 +16,7 @@ export default function MoodScoreChip({
       <div className="body-18 shrink-0">{'☹️'}</div>
       <div className="flex min-w-0 flex-end gap-[3px]">
         {responsiveCompact ? (
-          <span className="truncate text-label-neutral max-[1100px]:hidden">{label}</span>
+          <span className="truncate text-label-neutral max-[1200px]:hidden">{label}</span>
         ) : (
           <span className="truncate text-label-neutral">{label}</span>
         )}
