@@ -12,7 +12,7 @@ export default function MoodScoreChip({
   const normalizedScore = score ?? 0;
 
   return (
-    <span className="flex max-w-full items-center gap-[7px] rounded-[100px] border border-neutral-95 bg-white px-3 py-1 body-14">
+    <span className="flex max-w-[120px] items-center gap-[7px] rounded-[100px] border border-neutral-95 bg-white px-3 py-1 body-14">
       <div className="body-18 shrink-0">{'☹️'}</div>
       <div className="flex min-w-0 flex-end gap-[3px]">
         {responsiveCompact ? (
