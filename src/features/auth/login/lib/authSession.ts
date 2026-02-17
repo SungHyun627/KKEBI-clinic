@@ -1,5 +1,7 @@
 export const AUTH_SESSION_KEY = 'kkebi-auth-session';
 const AUTH_SESSION_CHANGED_EVENT = 'kkebi-auth-session-changed';
+let cachedRawSession: string | null = null;
+let cachedParsedSession: AuthSession | null = null;
 
 export interface AuthSession {
   email: string;
@@ -20,12 +22,17 @@ export const getAuthSession = (): AuthSession | null => {
   if (!isClient()) return null;
   const raw = localStorage.getItem(AUTH_SESSION_KEY);
   if (!raw) return null;
+  if (raw === cachedRawSession) return cachedParsedSession;
 
   try {
     const parsed = JSON.parse(raw) as Partial<AuthSession>;
-    if (!parsed.email || !parsed.password || !parsed.userName) return null;
+    if (!parsed.email || !parsed.password || !parsed.userName) {
+      cachedRawSession = raw;
+      cachedParsedSession = null;
+      return null;
+    }
 
-    return {
+    const nextSession: AuthSession = {
       email: parsed.email,
       password: parsed.password,
       userId: parsed.userId,
@@ -33,7 +40,12 @@ export const getAuthSession = (): AuthSession | null => {
       challengeId: parsed.challengeId,
       authenticated: Boolean(parsed.authenticated),
     };
+    cachedRawSession = raw;
+    cachedParsedSession = nextSession;
+    return nextSession;
   } catch {
+    cachedRawSession = raw;
+    cachedParsedSession = null;
     return null;
   }
 };
@@ -53,6 +65,8 @@ export const setAuthSessionAuthenticated = (authenticated: boolean) => {
 export const clearAuthSession = () => {
   if (!isClient()) return;
   localStorage.removeItem(AUTH_SESSION_KEY);
+  cachedRawSession = null;
+  cachedParsedSession = null;
   emitAuthSessionChanged();
 };
 
