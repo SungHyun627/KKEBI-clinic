@@ -8,7 +8,7 @@ const TwoFactorAuthCard = () => {
   return (
     <>
       <div className="flex flex-col items-center gap-3 pt-0">
-        <Image src="/images/logo.png" alt="KKEBI" width={88} height={88} />
+        <Image src="/icons/logo.svg" alt="KKEBI" width={88} height={88} />
         <h1 className="text-center text-[24px] leading-[30px] font-semibold text-label-normal">
           KKEBI for Counselor
         </h1>
