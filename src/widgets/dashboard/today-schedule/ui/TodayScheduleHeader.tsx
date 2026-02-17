@@ -6,7 +6,7 @@ export default function TodayScheduleHeader() {
   const mergedTimeNameHeader = `${tDashboard('todayScheduleTime')} · ${tDashboard('todayScheduleClientName')}`;
 
   return (
-    <div className="grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_4fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3 max-[1200px]:gap-2 max-[1000px]:grid-cols-[4fr_2fr_2fr_5fr_4fr] max-[900px]:gap-1 max-[900px]:px-3">
+    <div className="grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_4fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3 max-[1200px]:gap-2 max-[1000px]:grid-cols-[3fr_3fr_3fr_5fr_4fr] max-[900px]:gap-1 max-[900px]:px-3">
       <TodayScheduleHeaderCell
         label={tDashboard('todayScheduleTime')}
         className="max-[1000px]:hidden"
