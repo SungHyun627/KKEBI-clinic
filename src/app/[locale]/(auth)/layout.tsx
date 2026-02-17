@@ -2,12 +2,26 @@
 
 import Image from 'next/image';
 import type { ReactNode } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Toast } from '@/shared/ui/toast';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { getAuthSession, subscribeAuthSession } from '@/features/auth/login/lib/authSession';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const locale = useLocale();
   const tCommon = useTranslations('common');
+  const pathname = usePathname();
+  const router = useRouter();
+  const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
+
+  useEffect(() => {
+    if (!authSession?.authenticated) return;
+    if (pathname === '/login' || pathname.startsWith('/login/2fa')) {
+      router.replace('/');
+    }
+  }, [authSession, pathname, router]);
+
   const switchLocale = () => {
     if (typeof window === 'undefined') return;
     const { pathname, search, hash } = window.location;
