@@ -86,7 +86,7 @@ const WeeklyStatisticsSection = () => {
 
       {riskAlert ? (
         <div className="flex min-w-0 flex-col justify-between gap-3">
-          <Title title={'위험알림'} />
+          <Title title={tDashboard('riskAlertsTitle')} />
           <div className="min-w-0">
             <RiskAlert alert={riskAlert} />
           </div>
