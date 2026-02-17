@@ -54,7 +54,7 @@ const CounselorInquiryCompleteDialog = ({
             </div>
             <div className="flex flex-col w-full items-center gap-[23px]">
               <Image
-                src="/images/checkmark.png"
+                src="/icons/checkmark.svg"
                 alt={tAuth('inquiryReceivedStatus')}
                 width={120}
                 height={120}
