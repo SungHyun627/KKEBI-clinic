@@ -1,3 +1,11 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import { getAuthSession } from '@/features/auth/login/lib/authSession';
+import { setAccessToken } from '@/shared/api/token-store';
+import type {
+  CounselorAuthResendOtpRequest,
+  CounselorAuthVerifyOtpRequest,
+} from '@/shared/api/type';
+
 interface Resend2FAResult {
   ok: boolean;
   errorCode?: 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
@@ -14,92 +22,74 @@ interface Verify2FAResult {
   error?: string;
 }
 
-const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+interface ApiEnvelope<TData = unknown> {
+  code?: string;
+  message?: string;
+  data?: TData;
+}
 
-const requestJson = async (url: string, init: RequestInit) => {
-  try {
-    const response = await fetch(url, init);
-    const data = await response.json().catch(() => ({}));
-    return { response, data };
-  } catch (error) {
+const getChallengeId = () => getAuthSession()?.challengeId;
+
+const mapApiError = (error: unknown) => {
+  if (error instanceof ApiError) {
     return {
-      response: null,
-      data: {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
+      errorCode: (error.status === 400 ? 'UNKNOWN_ERROR' : 'NETWORK_ERROR') as
+        | 'NETWORK_ERROR'
+        | 'UNKNOWN_ERROR',
+      error: error.message,
     };
   }
+  return {
+    errorCode: 'NETWORK_ERROR' as const,
+    error: error instanceof Error ? error.message : 'Unknown error',
+  };
 };
 
-const buildServerUrl = (path: string) => {
-  if (!SERVER_API_BASE_URL) return null;
-  return `${SERVER_API_BASE_URL}${path}`;
+const postVerify2FA = async ({ code }: Verify2FAParams): Promise<Verify2FAResult> => {
+  const challengeId = getChallengeId();
+  if (!challengeId) {
+    return { ok: false, error: 'Missing challengeId. Please login again.' };
+  }
+
+  const body: CounselorAuthVerifyOtpRequest = {
+    challengeId,
+    otpCode: code,
+  };
+
+  try {
+    const result = await httpClient.post<ApiEnvelope<Record<string, unknown>>>(
+      '/api/v1/counselor/auth/2fa/verify',
+      body,
+      { skipAuth: true },
+    );
+    const token = result?.data?.accessToken;
+    if (typeof token === 'string' && token) {
+      setAccessToken(token);
+    }
+    return { ok: true, data: result };
+  } catch (error) {
+    const mapped = mapApiError(error);
+    return { ok: false, error: mapped.error };
+  }
 };
 
-export async function resend2FADemo(): Promise<Resend2FAResult> {
-  const { response, data } = await requestJson('/api/v1/auth/2fa/resend', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!response) {
-    return { ok: false, error: data.error, errorCode: 'NETWORK_ERROR' };
+const postResend2FA = async (): Promise<Resend2FAResult> => {
+  const challengeId = getChallengeId();
+  if (!challengeId) {
+    return { ok: false, errorCode: 'CONFIG_ERROR', error: 'Missing challengeId' };
   }
 
-  return { ok: response.ok, errorCode: response.ok ? undefined : 'UNKNOWN_ERROR' };
-}
-
-export async function resend2FAServer(): Promise<Resend2FAResult> {
-  const url = buildServerUrl('/api/v1/auth/2fa/resend');
-  if (!url) {
-    return { ok: false, errorCode: 'CONFIG_ERROR' };
+  const body: CounselorAuthResendOtpRequest = {
+    challengeId,
+  };
+  try {
+    await httpClient.post('/api/v1/counselor/auth/2fa/resend', body, { skipAuth: true });
+    return { ok: true };
+  } catch (error) {
+    const mapped = mapApiError(error);
+    return { ok: false, ...mapped };
   }
+};
 
-  const { response, data } = await requestJson(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!response) {
-    return { ok: false, error: data.error, errorCode: 'NETWORK_ERROR' };
-  }
-
-  return { ok: response.ok, errorCode: response.ok ? undefined : 'UNKNOWN_ERROR' };
-}
-
-export async function verify2FADemo({ code }: Verify2FAParams): Promise<Verify2FAResult> {
-  const { response, data } = await requestJson('/api/v1/auth/2fa/verify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  });
-
-  if (!response) {
-    return { ok: false, error: data.error };
-  }
-
-  return { ok: response.ok, data };
-}
-
-export async function verify2FAServer({ code }: Verify2FAParams): Promise<Verify2FAResult> {
-  const url = buildServerUrl('/api/v1/auth/2fa/verify');
-  if (!url) {
-    return { ok: false, error: 'NEXT_PUBLIC_API_BASE_URL is not configured' };
-  }
-
-  const { response, data } = await requestJson(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  });
-
-  if (!response) {
-    return { ok: false, error: data.error };
-  }
-
-  return { ok: response.ok, data };
-}
-
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const resend2FA = resend2FADemo;
-export const verify2FA = verify2FADemo;
+export const resend2FA = postResend2FA;
+export const verify2FA = postVerify2FA;

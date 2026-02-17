@@ -50,6 +50,7 @@ const LoginForm = () => {
         password: values.password,
         userId: result.data?.userId,
         userName: values.email.split('@')[0] || 'Counselor',
+        challengeId: result.data?.challengeId,
         authenticated: false,
       });
 

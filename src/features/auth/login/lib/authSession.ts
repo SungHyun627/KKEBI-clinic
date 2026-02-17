@@ -5,6 +5,7 @@ export interface AuthSession {
   password: string;
   userId?: string;
   userName: string;
+  challengeId?: string;
   authenticated: boolean;
 }
 
@@ -24,6 +25,7 @@ export const getAuthSession = (): AuthSession | null => {
       password: parsed.password,
       userId: parsed.userId,
       userName: parsed.userName,
+      challengeId: parsed.challengeId,
       authenticated: Boolean(parsed.authenticated),
     };
   } catch {
@@ -39,7 +41,7 @@ export const setAuthSession = (session: AuthSession) => {
 export const setAuthSessionAuthenticated = (authenticated: boolean) => {
   const session = getAuthSession();
   if (!session) return;
-  setAuthSession({ ...session, authenticated });
+  setAuthSession({ ...session, challengeId: undefined, authenticated });
 };
 
 export const clearAuthSession = () => {
