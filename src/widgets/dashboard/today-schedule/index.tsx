@@ -50,7 +50,7 @@ export default function TodayScheduleSection() {
   return (
     <section className="flex w-full flex-col items-start gap-4">
       <Title title={tDashboard('todayScheduleTitle')} />
-      <div className="w-full mb-3">
+      <div className="w-full mb-[21px]">
         <TodayScheduleHeader />
         {schedules.length === 0 ? (
           <div className="body-14 flex w-full items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
