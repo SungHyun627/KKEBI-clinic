@@ -24,14 +24,18 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
   return (
     <li
       className={cn(
-        'grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_4fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 max-[1200px]:gap-2 max-[900px]:gap-1 max-[900px]:px-3',
+        'grid w-full grid-cols-[1fr_3fr_2fr_2fr_5fr_4fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 max-[1200px]:gap-2 max-[1000px]:grid-cols-[4fr_2fr_2fr_5fr_4fr] max-[900px]:gap-1 max-[900px]:px-3',
         className,
       )}
     >
-      <span className="body-16 min-w-0 text-label-normal">{schedule.time}</span>
+      <span className="body-16 min-w-0 text-label-normal max-[1000px]:hidden">{schedule.time}</span>
       <span className="flex min-w-0 max-w-full items-center gap-3 overflow-hidden">
-        <span className="body-16 min-w-0 flex-1 truncate text-label-normal">
+        <span className="body-16 min-w-0 flex-1 truncate text-label-normal max-[1000px]:hidden">
           {localizedClientName}
+        </span>
+        <span className="hidden min-w-0 flex-1 flex-col text-label-normal max-[1000px]:flex">
+          <span className="body-14">{schedule.time}</span>
+          <span className="body-16 truncate">{localizedClientName}</span>
         </span>
         <span className="shrink-0 max-[1100px]:hidden">
           <StreakChip days={streakDays} responsiveCompact />
