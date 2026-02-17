@@ -1,3 +1,9 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import type {
+  CounselorInquirySubmitRequest,
+  CounselorInquirySubmitSuccessResponse,
+} from '@/shared/api/type';
+
 export interface CounselorInquiryPayload {
   name: string;
   email: string;
@@ -10,10 +16,13 @@ export interface CounselorInquiryPayload {
 interface CounselorInquiryResult {
   success: boolean;
   message?: string;
-  errorCode?: 'REQUIRED_FIELDS' | 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
+  errorCode?:
+    | 'REQUIRED_FIELDS'
+    | 'DUPLICATE_PENDING'
+    | 'NETWORK_ERROR'
+    | 'CONFIG_ERROR'
+    | 'UNKNOWN_ERROR';
 }
-
-const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
 const validatePayload = (payload: CounselorInquiryPayload) => {
   if (
@@ -31,39 +40,48 @@ const validatePayload = (payload: CounselorInquiryPayload) => {
   return null;
 };
 
-const postInquiry = async (url: string, payload: CounselorInquiryPayload) => {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  return response.json() as Promise<CounselorInquiryResult>;
-};
-
-export async function requestCounselorInquiryDemo(
+export async function requestCounselorInquiry(
   payload: CounselorInquiryPayload,
 ): Promise<CounselorInquiryResult> {
   const invalid = validatePayload(payload);
   if (invalid) return invalid;
 
-  return postInquiry('/api/v1/auth/counselor-inquiry', payload);
-}
+  const requestBody: CounselorInquirySubmitRequest = {
+    name: payload.name,
+    email: payload.email,
+    phone: payload.phone,
+    organization: payload.organization,
+    licenseNumber: payload.licenseNumber,
+    message: payload.additionalInquiry,
+  };
 
-export async function requestCounselorInquiryServer(
-  payload: CounselorInquiryPayload,
-): Promise<CounselorInquiryResult> {
-  const invalid = validatePayload(payload);
-  if (invalid) return invalid;
-
-  if (!SERVER_API_BASE_URL) {
-    return { success: false, errorCode: 'CONFIG_ERROR' };
+  try {
+    const response = await httpClient.post<CounselorInquirySubmitSuccessResponse>(
+      '/api/v1/counselors/inquiries',
+      requestBody,
+      { skipAuth: true },
+    );
+    return {
+      success: true,
+      message:
+        typeof response === 'object' &&
+        response !== null &&
+        'expectedResponseMessage' in response &&
+        typeof response.expectedResponseMessage === 'string'
+          ? response.expectedResponseMessage
+          : undefined,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 409) {
+        return { success: false, errorCode: 'DUPLICATE_PENDING', message: error.message };
+      }
+      return { success: false, errorCode: 'UNKNOWN_ERROR', message: error.message };
+    }
+    return {
+      success: false,
+      errorCode: 'NETWORK_ERROR',
+      message: error instanceof Error ? error.message : undefined,
+    };
   }
-
-  return postInquiry(`${SERVER_API_BASE_URL}/api/v1/auth/counselor-inquiry`, payload);
 }
-
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const requestCounselorInquiry = requestCounselorInquiryDemo;

@@ -1,52 +1,32 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import { clearAccessToken } from '@/shared/api/token-store';
+
 interface LogoutResponse {
   success: boolean;
   message?: string;
   errorCode?: 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
 }
 
-const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
-
-const requestLogout = async (url: string): Promise<LogoutResponse> => {
+const requestLogout = async (): Promise<LogoutResponse> => {
   try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    const data = await res.json().catch(() => null);
-    if (typeof data === 'object' && data !== null && 'success' in data) {
-      return data as LogoutResponse;
-    }
-
-    if (typeof data === 'object' && data !== null && 'ok' in data) {
-      const result = data as { ok: boolean; message?: string };
-      return { success: result.ok, message: result.message };
-    }
-
-    return {
-      success: res.ok,
-      errorCode: res.ok ? undefined : 'UNKNOWN_ERROR',
-    };
+    await httpClient.post('/api/v1/counselor/auth/logout', undefined, { skipAuth: true });
+    return { success: true };
   } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        errorCode: 'UNKNOWN_ERROR',
+      };
+    }
     return {
       success: false,
       message: error instanceof Error ? error.message : undefined,
       errorCode: 'NETWORK_ERROR',
     };
+  } finally {
+    clearAccessToken();
   }
 };
 
-export const logoutDemo = () => requestLogout('/api/v1/auth/logout');
-
-export const logoutServer = () => {
-  if (!SERVER_API_BASE_URL) {
-    return Promise.resolve({
-      success: false,
-      errorCode: 'CONFIG_ERROR',
-    });
-  }
-  return requestLogout(`${SERVER_API_BASE_URL}/api/v1/auth/logout`);
-};
-
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const logout = logoutDemo;
+export const logout = requestLogout;

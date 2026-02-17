@@ -1,65 +1,68 @@
-const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import type {
+  CounselorPasswordResetConfirmRequest,
+  CounselorPasswordResetRequest,
+} from '@/shared/api/type';
 
 type ResetPasswordResult = {
   success: boolean;
   message?: string;
-  errorCode?: 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR';
+  errorCode?: 'NETWORK_ERROR' | 'CONFIG_ERROR' | 'UNKNOWN_ERROR' | 'INVALID_TOKEN' | 'UNAUTHORIZED';
 };
 
-const postJson = async <T>(url: string, body: unknown): Promise<T> => {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  return response.json();
-};
-
-export async function requestResetPasswordDemo(email: string): Promise<ResetPasswordResult> {
-  return postJson<ResetPasswordResult>('/api/v1/auth/reset-password/request', { email });
-}
-
-export async function resetPasswordDemo({
-  email,
-  newPassword,
-}: {
-  email: string;
-  newPassword: string;
-}): Promise<ResetPasswordResult> {
-  return postJson<ResetPasswordResult>('/api/v1/auth/reset-password', { email, newPassword });
-}
-
-export async function requestResetPasswordServer(email: string): Promise<ResetPasswordResult> {
-  if (!SERVER_API_BASE_URL) {
-    return { success: false, errorCode: 'CONFIG_ERROR' };
+export async function requestResetPassword(email: string): Promise<ResetPasswordResult> {
+  const body: CounselorPasswordResetRequest = { email };
+  try {
+    await httpClient.post('/api/v1/counselor/auth/password-reset', body, { skipAuth: true });
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 401) {
+        return { success: false, errorCode: 'UNAUTHORIZED', message: error.message };
+      }
+      return { success: false, errorCode: 'UNKNOWN_ERROR', message: error.message };
+    }
+    return {
+      success: false,
+      errorCode: 'NETWORK_ERROR',
+      message: error instanceof Error ? error.message : undefined,
+    };
   }
-  return postJson<ResetPasswordResult>(
-    `${SERVER_API_BASE_URL}/api/v1/auth/reset-password/request`,
-    {
-      email,
-    },
-  );
 }
 
-export async function resetPasswordServer({
-  email,
+export async function resetPassword({
+  token,
   newPassword,
+  confirmPassword,
 }: {
-  email: string;
+  token: string;
   newPassword: string;
+  confirmPassword: string;
 }): Promise<ResetPasswordResult> {
-  if (!SERVER_API_BASE_URL) {
-    return { success: false, errorCode: 'CONFIG_ERROR' };
-  }
-  return postJson<ResetPasswordResult>(`${SERVER_API_BASE_URL}/api/v1/auth/reset-password`, {
-    email,
+  const body: CounselorPasswordResetConfirmRequest = {
+    token,
     newPassword,
-  });
+    confirmPassword,
+  };
+  try {
+    await httpClient.post('/api/v1/counselor/auth/password-reset/confirm', body, {
+      skipAuth: true,
+    });
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 400) {
+        return { success: false, errorCode: 'INVALID_TOKEN', message: error.message };
+      }
+      return { success: false, errorCode: 'UNKNOWN_ERROR', message: error.message };
+    }
+    return {
+      success: false,
+      errorCode: 'NETWORK_ERROR',
+      message: error instanceof Error ? error.message : undefined,
+    };
+  }
 }
-
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const requestResetPassword = requestResetPasswordDemo;
-export const resetPassword = resetPasswordDemo;
 
 // 하위 호환: 기존 mock 호출 지점에서 그대로 사용 가능
-export const mockResetPassword = requestResetPasswordDemo;
+export const mockResetPassword = requestResetPassword;

@@ -43,12 +43,7 @@ const EmailSentConfirmDialog = ({
               </button>
             </div>
             <div className="flex flex-col w-full items-center gap-[23px]">
-              <Image
-                src="/images/checkmark.png"
-                alt={tAuth('resetSent')}
-                width={120}
-                height={120}
-              />
+              <Image src="/icons/checkmark.svg" alt={tAuth('resetSent')} width={120} height={120} />
               <div className="flex flex-col w-full items-center gap-[6px]">
                 <span className="font-pretendard text-[18px] font-semibold leading-[28.8px] text-center text-label-strong">
                   {sentEmail}

@@ -9,7 +9,7 @@ const Sidebar = React.forwardRef<HTMLElement, React.ComponentProps<'aside'>>(
       <aside
         ref={ref}
         className={cn(
-          'relative flex min-h-full w-full max-w-[258px] self-stretch flex-col border-r border-neutral-95 bg-neutral-99 max-[800px]:max-w-[88px]',
+          'relative flex min-h-full w-full min-w-[88px] max-w-[258px] self-stretch flex-col border-r border-neutral-95 bg-neutral-99 max-[1200px]:w-[88px] max-[1200px]:max-w-[88px]',
           className,
         )}
         {...props}
@@ -61,7 +61,7 @@ SidebarInset.displayName = 'SidebarInset';
 
 const SidebarMenu = React.forwardRef<HTMLUListElement, React.ComponentProps<'ul'>>(
   ({ className, ...props }, ref) => {
-    return <ul ref={ref} className={cn('flex flex-col gap-3', className)} {...props} />;
+    return <ul ref={ref} className={cn('flex w-full flex-col gap-3', className)} {...props} />;
   },
 );
 SidebarMenu.displayName = 'SidebarMenu';
@@ -74,7 +74,7 @@ const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentProps<'li
 SidebarMenuItem.displayName = 'SidebarMenuItem';
 
 const sidebarMenuButtonVariants = cva(
-  'flex w-full items-center px-5 py-2 body-16 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+  'flex w-full items-center px-5 py-2 body-16 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 max-[1200px]:mx-auto max-[1200px]:w-[70px]',
   {
     variants: {
       active: {

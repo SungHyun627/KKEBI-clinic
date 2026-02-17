@@ -16,6 +16,7 @@ const LoginSupportActions = () => {
   const [isCounselorInquiryOpen, setIsCounselorInquiryOpen] = useState(false);
   const [isCounselorInquiryCompleteOpen, setIsCounselorInquiryCompleteOpen] = useState(false);
   const [submittedEmail, setSubmittedEmail] = useState('');
+  const [submittedName, setSubmittedName] = useState('');
   const [submittedOrganization, setSubmittedOrganization] = useState('');
   const [submittedPhone, setSubmittedPhone] = useState('');
   const [submittedLicenseNumber, setSubmittedLicenseNumber] = useState('');
@@ -59,6 +60,7 @@ const LoginSupportActions = () => {
         onOpenChange={setIsCounselorInquiryOpen}
         onSubmitSuccess={(values) => {
           setSubmittedEmail(values.email);
+          setSubmittedName(values.name);
           setSubmittedOrganization(values.organization);
           setSubmittedPhone(values.phone);
           setSubmittedLicenseNumber(values.licenseNumber);
@@ -70,6 +72,7 @@ const LoginSupportActions = () => {
         isOpen={isCounselorInquiryCompleteOpen}
         handleDialogOpen={setIsCounselorInquiryCompleteOpen}
         submittedEmail={submittedEmail}
+        submittedName={submittedName}
         submittedOrganization={submittedOrganization}
         submittedPhone={submittedPhone}
         submittedLicenseNumber={submittedLicenseNumber}

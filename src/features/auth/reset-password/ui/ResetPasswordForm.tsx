@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { toast } from '@/shared/ui/toast';
 import { ResetPasswordFields } from '../types/resetPassword';
+import { resetPassword } from '../api/resetPassword';
 
 const ResetPasswordForm = () => {
   const tAuth = useTranslations('auth');
@@ -16,6 +18,8 @@ const ResetPasswordForm = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token') ?? '';
   const form = useForm<ResetPasswordFields>({
     defaultValues: {
       newPassword: '',
@@ -28,7 +32,19 @@ const ResetPasswordForm = () => {
       toast(tAuth('errorPasswordMismatch'));
       return;
     }
-    // TODO: 실제 비밀번호 재설정 API 연동
+    if (!token) {
+      toast(tAuth('errorNetwork'));
+      return;
+    }
+    const result = await resetPassword({
+      token,
+      newPassword: values.newPassword,
+      confirmPassword: values.confirmPassword,
+    });
+    if (!result.success) {
+      toast(tAuth('errorNetwork'));
+      return;
+    }
     router.push('/login');
   };
 
