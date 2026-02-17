@@ -95,7 +95,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 className="inline-flex hover:cursor-pointer"
               >
                 <Image
-                  src="/images/kkebi-logo.png"
+                  src="/icons/kkebi-logo.svg"
                   alt="Kkebi Clinic"
                   width={104}
                   height={37}
