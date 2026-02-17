@@ -13,6 +13,7 @@ export function Toast(props: ComponentProps<typeof SonnerToaster>) {
             'rounded-[100px]',
             'flex',
             'h-12',
+            'border-0',
             'py-[9px]',
             'px-5',
             'justify-center',
@@ -35,6 +36,7 @@ export function Toast(props: ComponentProps<typeof SonnerToaster>) {
           lineHeight: '160%',
           textAlign: 'center',
           borderRadius: '100px',
+          border: 'none',
         },
       }}
       {...props}

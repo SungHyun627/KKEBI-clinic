@@ -23,17 +23,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   const switchLocale = () => {
-    if (typeof window === 'undefined') return;
-    const { pathname, search, hash } = window.location;
-    const currentLocaleFromPath = pathname.startsWith('/en')
-      ? 'en'
-      : pathname.startsWith('/ko')
-        ? 'ko'
-        : locale;
-    const nextLocale = currentLocaleFromPath === 'ko' ? 'en' : 'ko';
-    const normalizedPath = pathname.replace(/^\/(ko|en)(?=\/|$)/, '') || '/';
-    const nextPath = `/${nextLocale}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`;
-    window.location.replace(`${nextPath}${search}${hash}`);
+    const nextLocale = locale === 'ko' ? 'en' : 'ko';
+    router.replace(pathname, { locale: nextLocale });
+    router.refresh();
   };
 
   return (
