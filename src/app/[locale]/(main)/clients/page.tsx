@@ -22,6 +22,8 @@ type RiskFilter = 'all' | RiskType;
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
   const locale = useLocale();
+  const riskTypeChipWidthClass =
+    locale === 'en' ? 'w-[104px] max-[1200px]:w-[92px] max-[1000px]:w-[84px]' : 'w-[49px]';
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -181,18 +183,23 @@ export default function ClientsPage() {
         </div>
 
         <div className="w-full mb-12">
-          <div className="grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
-            <span className="body-14 font-semibold text-label-neutral">{tClients('listTime')}</span>
-            <span className="body-14 font-semibold text-label-neutral">
+          <div className="grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3 max-[1200px]:gap-2 max-[1000px]:grid-cols-[4fr_2fr_6fr_5fr] max-[900px]:gap-1 max-[900px]:px-3">
+            <span className="body-14 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-label-neutral max-[1000px]:hidden">
+              {tClients('listTime')}
+            </span>
+            <span className="body-14 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-label-neutral max-[1000px]:hidden">
               {tClients('listClientName')}
             </span>
-            <span className="body-14 text-center font-semibold text-label-neutral">
+            <span className="body-14 hidden min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-label-neutral max-[1000px]:block">
+              {tClients('listTime')} · {tClients('listClientName')}
+            </span>
+            <span className="body-14 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-center font-semibold text-label-neutral">
               {tClients('listRiskType')}
             </span>
-            <span className="body-14 font-semibold text-label-neutral">
+            <span className="body-14 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-label-neutral">
               {tClients('listMoodStressEnergyScore')}
             </span>
-            <span className="body-14  font-semibold text-label-neutral">
+            <span className="body-14 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-label-neutral">
               {tClients('historyPresentingConcern')}
             </span>
           </div>
@@ -215,7 +222,7 @@ export default function ClientsPage() {
                 <li
                   key={client.clientId}
                   className={[
-                    'grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 hover:cursor-pointer hover:bg-neutral-99',
+                    'grid w-full grid-cols-[1fr_3fr_2fr_6fr_5fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 hover:cursor-pointer hover:bg-neutral-99 max-[1200px]:gap-2 max-[1000px]:grid-cols-[4fr_2fr_6fr_5fr] max-[900px]:gap-1 max-[900px]:px-3',
                     index === 0 ? 'pt-4' : '',
                     index === pagedClients.length - 1
                       ? 'rounded-bl-[8px] rounded-br-[8px] pb-4'
@@ -228,20 +235,42 @@ export default function ClientsPage() {
                     setIsDrawerOpen(true);
                   }}
                 >
-                  <span className="body-16 text-label-normal">{client.time}</span>
-                  <span className="flex min-w-0 items-center gap-3">
-                    <span className="body-16 truncate text-label-normal">{client.clientName}</span>
-                    <StreakChip days={client.streakDays} />
+                  <span className="body-16 min-w-0 text-label-normal max-[1000px]:hidden">
+                    {client.time}
                   </span>
-                  <span className="justify-self-center">
-                    <RiskTypeChip value={client.riskType} />
+                  <span className="flex max-w-full items-center gap-3 overflow-hidden">
+                    <span className="body-16 min-w-0 flex-1 truncate text-label-normal max-[1000px]:hidden">
+                      {client.clientName}
+                    </span>
+                    <span className="hidden min-w-0 flex-1 flex-col text-label-normal max-[1000px]:flex">
+                      <span className="body-14">{client.time}</span>
+                      <span className="body-16 truncate">{client.clientName}</span>
+                    </span>
+                    <span className="shrink-0 max-[1100px]:hidden">
+                      <StreakChip days={client.streakDays} responsiveCompact />
+                    </span>
                   </span>
-                  <span className="flex items-center gap-2">
-                    <MoodScoreChip label={tClients('checkinMood')} score={client.moodScore} />
-                    <MoodScoreChip label={tClients('checkinStress')} score={client.stressScore} />
-                    <MoodScoreChip label={tClients('checkinEnergy')} score={client.energyScore} />
+                  <span className="min-w-0 justify-self-center overflow-hidden">
+                    <RiskTypeChip value={client.riskType} className={riskTypeChipWidthClass} />
                   </span>
-                  <span className="flex flex-wrap gap-2">
+                  <span className="flex w-full min-w-0 flex-wrap content-start items-start gap-2 max-[1200px]:max-w-[180px] max-[1200px]:justify-self-start [&>*]:shrink-0">
+                    <MoodScoreChip
+                      label={tClients('checkinMood')}
+                      score={client.moodScore}
+                      responsiveCompact
+                    />
+                    <MoodScoreChip
+                      label={tClients('checkinStress')}
+                      score={client.stressScore}
+                      responsiveCompact
+                    />
+                    <MoodScoreChip
+                      label={tClients('checkinEnergy')}
+                      score={client.energyScore}
+                      responsiveCompact
+                    />
+                  </span>
+                  <span className="flex min-w-0 flex-wrap gap-2 overflow-hidden">
                     {client.chiefConcern.map((concern) => (
                       <ChiefConcernChip key={`${client.clientId}-${concern}`} value={concern} />
                     ))}
