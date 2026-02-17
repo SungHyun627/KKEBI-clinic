@@ -183,7 +183,7 @@ export default function ClientsPage() {
         </div>
 
         <div className="w-full mb-12">
-          <div className="grid w-full grid-cols-[1fr_3fr_2fr_7fr_4fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3 max-[1200px]:gap-2 max-[1000px]:grid-cols-[4fr_2fr_6fr_5fr] max-[900px]:gap-1 max-[900px]:px-3">
+          <div className="grid w-full grid-cols-[1fr_3fr_2fr_7fr_4fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3 max-[1200px]:gap-2 max-[1000px]:grid-cols-[3fr_3fr_6fr_5fr] max-[900px]:gap-1 max-[900px]:px-3">
             <span className="body-14 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-label-neutral max-[1000px]:hidden">
               {tClients('listTime')}
             </span>
@@ -222,7 +222,7 @@ export default function ClientsPage() {
                 <li
                   key={client.clientId}
                   className={[
-                    'grid w-full grid-cols-[1fr_3fr_2fr_7fr_4fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 hover:cursor-pointer hover:bg-neutral-99 max-[1200px]:gap-2 max-[1000px]:grid-cols-[4fr_2fr_6fr_5fr] max-[900px]:gap-1 max-[900px]:px-3',
+                    'grid w-full grid-cols-[1fr_3fr_2fr_7fr_4fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 hover:cursor-pointer hover:bg-neutral-99 max-[1200px]:gap-2 max-[1000px]:grid-cols-[3fr_3fr_6fr_5fr] max-[900px]:gap-1 max-[900px]:px-3',
                     index === 0 ? 'pt-4' : '',
                     index === pagedClients.length - 1
                       ? 'rounded-bl-[8px] rounded-br-[8px] pb-4'
@@ -253,7 +253,7 @@ export default function ClientsPage() {
                   <span className="min-w-0 justify-self-center overflow-hidden">
                     <RiskTypeChip value={client.riskType} className={riskTypeChipWidthClass} />
                   </span>
-                  <span className="flex w-full min-w-0 flex-wrap content-start items-start gap-2 max-[1200px]:max-w-[180px] max-[1200px]:justify-self-start [&>*]:shrink-0">
+                  <span className="flex w-full min-w-0 flex-wrap items-start gap-2">
                     <MoodScoreChip
                       label={tClients('checkinMood')}
                       score={client.moodScore}
