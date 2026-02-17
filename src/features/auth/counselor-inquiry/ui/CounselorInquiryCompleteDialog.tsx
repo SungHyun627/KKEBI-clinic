@@ -11,6 +11,7 @@ interface CounselorInquiryCompleteDialogProps {
   isOpen: boolean;
   handleDialogOpen: (open: boolean) => void;
   submittedEmail: string;
+  submittedName: string;
   submittedOrganization: string;
   submittedPhone: string;
   submittedLicenseNumber: string;
@@ -21,6 +22,7 @@ const CounselorInquiryCompleteDialog = ({
   isOpen,
   handleDialogOpen,
   submittedEmail,
+  submittedName,
   submittedOrganization,
   submittedPhone,
   submittedLicenseNumber,
@@ -75,6 +77,10 @@ const CounselorInquiryCompleteDialog = ({
             <div className="flex flex-col w-full items-start p-4 border borer-1 border-neutral-95 gap-3 rounded-2xl">
               <p className="body-16 text-neutral-20">{tAuth('inquirySubmittedInfo')}</p>
               <div className="flex flex-col items-start gap-2">
+                <div className="flex items-center gap-2 body-14">
+                  <span className="text-neutral-60">{tAuth('inquiryName')}</span>
+                  <span className="text-neutral-30">{submittedName}</span>
+                </div>
                 <div className="flex items-center gap-2 body-14">
                   <span className="text-neutral-60">{tAuth('inquiryAffiliation')}</span>
                   <span className="text-neutral-30">{submittedOrganization}</span>
