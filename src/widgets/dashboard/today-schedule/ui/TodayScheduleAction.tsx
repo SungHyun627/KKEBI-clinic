@@ -21,6 +21,7 @@ export default function TodayScheduleAction({ clientId, clientName }: TodaySched
         type="button"
         variant="icon"
         size="icon"
+        disabled
         aria-label={tDashboard('todayScheduleSendNotification', { name: clientName })}
         className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
       >
