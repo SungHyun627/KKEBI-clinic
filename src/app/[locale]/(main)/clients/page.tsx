@@ -105,7 +105,7 @@ export default function ClientsPage() {
 
   return (
     <section className="flex w-full flex-col items-start gap-7">
-      <div className="flex w-full items-center justify-between">
+      <div className="flex w-full items-center justify-between max-[1100px]:flex-col max-[1100px]:items-start max-[1100px]:gap-3">
         <div className="flex w-full min-w-0 flex-1 items-center gap-4">
           <div className="w-full min-w-0 max-w-[416px]">
             <Input
@@ -148,7 +148,7 @@ export default function ClientsPage() {
             className={locale === 'en' ? 'w-40' : 'w-31'}
           />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 max-[1100px]:w-full max-[1100px]:justify-start">
           <Button size="sm">{tClients('listRegister')}</Button>
           <Button size="sm" variant="outline">
             {tClients('listClosedSessions')}
