@@ -38,6 +38,7 @@ let refreshPromise: Promise<boolean> | null = null;
 function buildUrl(path: string) {
   if (/^https?:\/\//.test(path)) return path;
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  if (normalizedPath.startsWith('/api/')) return normalizedPath;
   return `${API_BASE_URL}${normalizedPath}`;
 }
 
