@@ -37,7 +37,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-white">
+    <div className="relative h-screen w-full overflow-hidden bg-white">
       <button
         type="button"
         onClick={switchLocale}
@@ -46,7 +46,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       >
         <Image src="/icons/global.svg" alt={tCommon('localeSwitch')} width={24} height={24} />
       </button>
-      <div className="mx-auto flex min-h-screen w-full items-center justify-center px-6 py-16">
+      <div className="mx-auto flex h-full w-full items-center justify-center px-6 py-8">
         <div className="w-full max-w-[480px] shrink-0 flex flex-col items-center gap-[45px] bg-white">
           {children}
         </div>
