@@ -252,6 +252,10 @@
     "scaleAnswerSelfDescription": "A responsible person who gets tense easily.",
     "scaleEmpty": "There are no scale results yet."
   },
+  "sessionList": {
+    "tabScheduled": "Scheduled",
+    "tabCompleted": "Completed"
+  },
   "notification": {
     "commonFold": "Collapse",
     "commonLoading": "Loading notifications.",

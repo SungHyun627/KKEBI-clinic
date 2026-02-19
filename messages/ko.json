@@ -252,6 +252,10 @@
     "scaleAnswerSelfDescription": "책임감이 높지만 쉽게 긴장하는 사람",
     "scaleEmpty": "아직 평가 척도 결과가 없습니다."
   },
+  "sessionList": {
+    "tabScheduled": "예정된 상담",
+    "tabCompleted": "완료된 상담"
+  },
   "notification": {
     "commonFold": "접기",
     "commonLoading": "알림을 불러오는 중입니다.",
