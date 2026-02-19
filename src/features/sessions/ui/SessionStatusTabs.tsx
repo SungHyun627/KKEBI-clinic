@@ -7,19 +7,19 @@ export type SessionStatusTab = 'scheduled' | 'completed';
 interface SessionStatusTabsProps {
   scheduledLabel: string;
   completedLabel: string;
-  defaultValue?: SessionStatusTab;
+  value?: SessionStatusTab;
   onChange?: (value: SessionStatusTab) => void;
 }
 
 export default function SessionStatusTabs({
   scheduledLabel,
   completedLabel,
-  defaultValue = 'scheduled',
+  value,
   onChange,
 }: SessionStatusTabsProps) {
   return (
     <Tabs
-      defaultValue={defaultValue}
+      value={value ?? 'scheduled'}
       onValueChange={(value) => onChange?.(value as SessionStatusTab)}
       className="w-fit"
     >
