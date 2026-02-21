@@ -130,7 +130,6 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
               group={group}
               dateText={formatDate(group.date)}
               minutesUnit={tSessions('minutesUnit')}
-              formatDate={formatDate}
             />
           ))}
     </div>

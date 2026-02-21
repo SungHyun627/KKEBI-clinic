@@ -259,7 +259,11 @@
     "loadFailed": "Failed to load session list.",
     "emptyScheduled": "There are no scheduled sessions.",
     "emptyCompleted": "There are no completed sessions.",
-    "minutesUnit": " min"
+    "viewDetails": "View details",
+    "minutesUnit": " min",
+    "recordCompleteChip": "Recorded",
+    "completedScheduleLabel": "Date",
+    "completedTypeLabel": "Duration"
   },
   "notification": {
     "commonFold": "Collapse",

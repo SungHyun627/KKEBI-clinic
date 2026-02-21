@@ -2,40 +2,30 @@
 
 import Divider from '@/shared/ui/divider';
 import type { CompletedSessionGroup } from '../types/session-list';
+import CompletedSessionItemCard from './CompletedSessionItemCard';
 
 interface CompletedSessionDateSectionProps {
   group: CompletedSessionGroup;
   dateText: string;
   minutesUnit: string;
-  formatDate: (value: string) => string;
 }
 
 export default function CompletedSessionDateSection({
   group,
   dateText,
   minutesUnit,
-  formatDate,
 }: CompletedSessionDateSectionProps) {
   return (
-    <section className="flex w-full flex-col gap-3">
+    <section className="flex w-full flex-col gap-[23px]">
       <div className="flex w-full flex-col items-start gap-[10px]">
-        <p className="body-16 font-medium text-label-normal">{dateText}</p>
-        <Divider className="w-full" />
-        <Divider className="w-full" />
+        <p className="body-18 font-medium text-label-normal">{dateText}</p>
+        <Divider />
       </div>
 
-      <ul className="flex w-full flex-col rounded-2xl border border-neutral-95 bg-white">
+      <ul className="flex w-full flex-col items-start bg-white gap-4">
         {group.items.map((item) => (
-          <li
-            key={item.id}
-            className="grid grid-cols-[2fr_1fr_1fr] items-center gap-3 border-b border-neutral-95 px-4 py-3 last:border-b-0"
-          >
-            <span className="body-16 min-w-0 truncate text-label-normal">{item.clientName}</span>
-            <span className="body-16 text-label-normal">{formatDate(item.counselingDate)}</span>
-            <span className="body-16 text-label-normal">
-              {item.counselingDurationMinutes}
-              {minutesUnit}
-            </span>
+          <li key={item.id} className="flex w-full">
+            <CompletedSessionItemCard item={item} minutesUnit={minutesUnit} />
           </li>
         ))}
       </ul>
