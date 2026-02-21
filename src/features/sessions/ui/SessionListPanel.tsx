@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { getSessionList } from '../api/getSessionList';
 import type {
   CompletedSessionGroup,
@@ -31,6 +31,7 @@ const formatDate = (value: string) => {
 
 export default function SessionListPanel({ initialStatus = 'scheduled' }: SessionListPanelProps) {
   const searchParams = useSearchParams();
+  const locale = useLocale();
   const tClients = useTranslations('clients');
   const tSessions = useTranslations('sessionList');
 
@@ -49,7 +50,10 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
-      const result = await getSessionList(selectedStatus, { empty: shouldUseEmptyData });
+      const result = await getSessionList(selectedStatus, {
+        empty: shouldUseEmptyData,
+        locale,
+      });
 
       if (!result.success || !result.data) {
         setErrorMessage(tSessions('loadFailed'));
@@ -72,7 +76,7 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
     };
 
     void load();
-  }, [selectedStatus, shouldUseEmptyData, tSessions]);
+  }, [locale, selectedStatus, shouldUseEmptyData, tSessions]);
 
   const hasNoData = useMemo(() => {
     return selectedStatus === 'scheduled'

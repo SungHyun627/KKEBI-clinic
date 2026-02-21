@@ -31,12 +31,16 @@ const requestSessionList = async (url: string): Promise<SessionListResponse> => 
 
 interface GetSessionListOptions {
   empty?: boolean;
+  locale?: string;
 }
 
 const toQueryString = (status: SessionStatus, options?: GetSessionListOptions) => {
   const params = new URLSearchParams({ status });
   if (options?.empty) {
     params.set('empty', '1');
+  }
+  if (options?.locale) {
+    params.set('locale', options.locale);
   }
   return params.toString();
 };

@@ -7,6 +7,7 @@ import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import Divider from '@/shared/ui/divider';
 import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeChip';
+import { useTranslations } from 'next-intl';
 import type { ScheduledSessionItem } from '../types/session-list';
 
 interface ScheduledSessionItemCardProps {
@@ -22,11 +23,16 @@ export default function ScheduledSessionItemCard({
   stressLabel,
   onStart,
 }: ScheduledSessionItemCardProps) {
+  const tCommon = useTranslations('common');
+
   return (
     <div className="flex flex-col w-full items-start p-[26px] gap-[18px] justify-center rounded-3xl bg-neutral-99">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="body-20 font-semibold">{item.clientName} 님</span>
+          <span className="body-20 font-semibold">
+            {item.clientName}
+            {tCommon('profileSuffix')}
+          </span>
           <StreakChip days={item.streakDays} responsiveCompact />
         </div>
         <div className="flex w-full max-w-[235px] items-center gap-3">
@@ -46,7 +52,7 @@ export default function ScheduledSessionItemCard({
             className="w-full w-max-[181px]"
             onClick={() => onStart(item.clientId)}
           >
-            시작하기
+            {tCommon('start')}
           </Button>
         </div>
       </div>
@@ -62,7 +68,7 @@ export default function ScheduledSessionItemCard({
                 onClick={() => {}}
                 className="flex items-center justify-center rounded-[8px] bg-[rgba(250,84,84,0.10)] px-3 py-[6px] text-primary hover:cursor-pointer"
               >
-                일정 변경
+                {tCommon('change')}
               </button>
             </div>
           </div>
