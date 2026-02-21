@@ -259,6 +259,8 @@
     "loadFailed": "Failed to load session list.",
     "emptyScheduled": "There are no scheduled sessions.",
     "emptyCompleted": "There are no completed sessions.",
+    "viewCalendar": "Calendar",
+    "viewList": "List",
     "viewDetails": "View details",
     "minutesUnit": " min",
     "recordCompleteChip": "Recorded",
