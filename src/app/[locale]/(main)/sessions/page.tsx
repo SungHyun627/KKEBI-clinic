@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import SessionStatusTabsWithQuery from '@/features/sessions/ui/SessionStatusTabsWithQuery';
 import type { SessionStatusTab } from '@/features/sessions/ui/SessionStatusTabs';
-import SessionListPanel from '@/features/sessions/ui/SessionListPanel';
+import SessionsPageContent from '@/features/sessions/ui/SessionsPageContent';
 
 interface SessionsPageProps {
   params: Promise<{ locale: string }>;
@@ -15,13 +14,10 @@ export default async function SessionsPage({ params, searchParams }: SessionsPag
   const initialStatus: SessionStatusTab = status === 'completed' ? 'completed' : 'scheduled';
 
   return (
-    <section className="flex w-full flex-col items-start gap-7">
-      <SessionStatusTabsWithQuery
-        scheduledLabel={tSessions('tabScheduled')}
-        completedLabel={tSessions('tabCompleted')}
-        initialStatus={initialStatus}
-      />
-      <SessionListPanel initialStatus={initialStatus} />
-    </section>
+    <SessionsPageContent
+      initialStatus={initialStatus}
+      scheduledLabel={tSessions('tabScheduled')}
+      completedLabel={tSessions('tabCompleted')}
+    />
   );
 }
