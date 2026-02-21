@@ -40,6 +40,8 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
   const [completedGroups, setCompletedGroups] = useState<CompletedSessionGroup[]>([]);
 
   const statusParam = searchParams.get('status');
+  const emptyParam = searchParams.get('empty');
+  const shouldUseEmptyData = emptyParam === '1';
   const selectedStatus: SessionStatus = isSessionStatusTab(statusParam)
     ? statusParam
     : initialStatus;
@@ -47,7 +49,7 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
-      const result = await getSessionList(selectedStatus);
+      const result = await getSessionList(selectedStatus, { empty: shouldUseEmptyData });
 
       if (!result.success || !result.data) {
         setErrorMessage(tSessions('loadFailed'));
@@ -70,7 +72,7 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
     };
 
     void load();
-  }, [selectedStatus, tSessions]);
+  }, [selectedStatus, shouldUseEmptyData, tSessions]);
 
   const hasNoData = useMemo(() => {
     return selectedStatus === 'scheduled'
@@ -80,7 +82,7 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
 
   if (isLoading) {
     return (
-      <div className="body-14 flex h-[180px] w-full items-center justify-center rounded-2xl border border-neutral-95 bg-white text-label-alternative">
+      <div className="flex min-h-[500px] w-full items-center justify-center text-label-alternative">
         {tSessions('loading')}
       </div>
     );
@@ -88,7 +90,7 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
 
   if (errorMessage) {
     return (
-      <div className="body-14 flex h-[180px] w-full items-center justify-center rounded-2xl border border-neutral-95 bg-white text-status-negative">
+      <div className="flex min-h-[500px] w-full items-center justify-center text-label-alternative">
         {errorMessage}
       </div>
     );
@@ -96,14 +98,18 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
 
   if (hasNoData) {
     return (
-      <div className="body-14 flex h-[180px] w-full items-center justify-center rounded-2xl border border-neutral-95 bg-white text-label-alternative">
-        {selectedStatus === 'scheduled' ? tSessions('emptyScheduled') : tSessions('emptyCompleted')}
+      <div className="flex min-h-[500px] w-full items-center justify-center text-label-alternative">
+        <p className="body-18 font-medium">
+          {selectedStatus === 'scheduled'
+            ? tSessions('emptyScheduled')
+            : tSessions('emptyCompleted')}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex w-full flex-col gap-13">
+    <div className="flex w-full flex-col gap-13 mb-[46px]">
       {selectedStatus === 'scheduled'
         ? scheduledGroups.map((group) => (
             <ScheduledSessionDateSection

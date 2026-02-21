@@ -29,10 +29,27 @@ const requestSessionList = async (url: string): Promise<SessionListResponse> => 
   }
 };
 
-export const getSessionListMock = (status: SessionStatus = 'scheduled') =>
-  requestSessionList(`/api/v1/sessions?status=${status}`);
+interface GetSessionListOptions {
+  empty?: boolean;
+}
 
-export const getSessionListServer = (status: SessionStatus = 'scheduled') => {
+const toQueryString = (status: SessionStatus, options?: GetSessionListOptions) => {
+  const params = new URLSearchParams({ status });
+  if (options?.empty) {
+    params.set('empty', '1');
+  }
+  return params.toString();
+};
+
+export const getSessionListMock = (
+  status: SessionStatus = 'scheduled',
+  options?: GetSessionListOptions,
+) => requestSessionList(`/api/v1/sessions?${toQueryString(status, options)}`);
+
+export const getSessionListServer = (
+  status: SessionStatus = 'scheduled',
+  options?: GetSessionListOptions,
+) => {
   if (!SERVER_API_BASE_URL) {
     return Promise.resolve({
       success: false,
@@ -41,7 +58,9 @@ export const getSessionListServer = (status: SessionStatus = 'scheduled') => {
     } satisfies SessionListResponse);
   }
 
-  return requestSessionList(`${SERVER_API_BASE_URL}/api/v1/sessions?status=${status}`);
+  return requestSessionList(
+    `${SERVER_API_BASE_URL}/api/v1/sessions?${toQueryString(status, options)}`,
+  );
 };
 
 // 현재 화면은 데모 API를 기본으로 사용합니다.
