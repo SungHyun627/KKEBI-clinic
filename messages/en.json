@@ -254,7 +254,12 @@
   },
   "sessionList": {
     "tabScheduled": "Scheduled",
-    "tabCompleted": "Completed"
+    "tabCompleted": "Completed",
+    "loading": "Loading session list.",
+    "loadFailed": "Failed to load session list.",
+    "emptyScheduled": "There are no scheduled sessions.",
+    "emptyCompleted": "There are no completed sessions.",
+    "minutesUnit": " min"
   },
   "notification": {
     "commonFold": "Collapse",

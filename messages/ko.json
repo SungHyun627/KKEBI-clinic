@@ -254,7 +254,12 @@
   },
   "sessionList": {
     "tabScheduled": "예정된 상담",
-    "tabCompleted": "완료된 상담"
+    "tabCompleted": "완료된 상담",
+    "loading": "상담 세션 목록을 불러오는 중입니다.",
+    "loadFailed": "상담 세션 목록을 불러오지 못했습니다.",
+    "emptyScheduled": "예정된 상담이 없습니다.",
+    "emptyCompleted": "완료된 상담이 없습니다.",
+    "minutesUnit": "분"
   },
   "notification": {
     "commonFold": "접기",

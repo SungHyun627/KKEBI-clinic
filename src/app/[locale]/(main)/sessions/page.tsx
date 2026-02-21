@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import SessionStatusTabsWithQuery from '@/features/sessions/ui/SessionStatusTabsWithQuery';
 import type { SessionStatusTab } from '@/features/sessions/ui/SessionStatusTabs';
+import SessionListPanel from '@/features/sessions/ui/SessionListPanel';
 
 interface SessionsPageProps {
   params: Promise<{ locale: string }>;
@@ -20,6 +21,7 @@ export default async function SessionsPage({ params, searchParams }: SessionsPag
         completedLabel={tSessions('tabCompleted')}
         initialStatus={initialStatus}
       />
+      <SessionListPanel initialStatus={initialStatus} />
     </section>
   );
 }
