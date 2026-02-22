@@ -9,12 +9,14 @@ import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeCh
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
+import type { SessionPageData } from '../types/session-page';
 
 interface SessionHeaderProps {
   sessionId: string;
+  sessionData?: Pick<SessionPageData, 'clientName' | 'sessionType' | 'riskType'>;
 }
 
-export default function SessionHeader({ sessionId }: SessionHeaderProps) {
+export default function SessionHeader({ sessionId, sessionData }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
   const [context, setContext] = useState<SessionStartContextValue | null>(null);
 
@@ -22,9 +24,9 @@ export default function SessionHeader({ sessionId }: SessionHeaderProps) {
     setContext(getSessionStartContext(sessionId));
   }, [sessionId]);
 
-  const clientName = context?.name?.trim() || tCommon('defaultUserName');
-  const sessionType = context?.sessionType;
-  const riskType = context?.riskType;
+  const clientName = sessionData?.clientName ?? context?.name?.trim() ?? tCommon('defaultUserName');
+  const sessionType = sessionData?.sessionType ?? context?.sessionType;
+  const riskType = sessionData?.riskType ?? context?.riskType;
 
   return (
     <div className="flex w-full justify-between p-5">
