@@ -98,7 +98,7 @@ function TimeWheelPicker({ label, value, onValueChange }: TimeWheelPickerProps) 
               step(event.deltaY > 0 ? 1 : -1);
             }}
           >
-            <div className="pointer-events-none absolute inset-x-0 top-1/2 h-9 -translate-y-1/2 rounded-lg bg-white/80" />
+            <div className="pointer-events-none absolute inset-x-0 top-1/2 h-9 -translate-y-1/2 rounded-lg" />
             <div className="flex h-full w-full flex-col items-center justify-center gap-[10px]">
               {[-1, 0, 1].map((offset) => {
                 const optionIndex = getWrappedIndex(activeIndex + offset, TIME_OPTIONS.length);
