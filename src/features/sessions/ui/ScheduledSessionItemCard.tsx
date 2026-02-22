@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
@@ -9,9 +10,11 @@ import Divider from '@/shared/ui/divider';
 import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeChip';
 import { useTranslations } from 'next-intl';
 import type { ScheduledSessionItem } from '../types/session-list';
+import RescheduleSessionDialog from './RescheduleSessionDialog';
 
 interface ScheduledSessionItemCardProps {
   item: ScheduledSessionItem;
+  scheduledDate: string;
   moodLabel: string;
   stressLabel: string;
   onStart: (clientId: string) => void;
@@ -19,11 +22,13 @@ interface ScheduledSessionItemCardProps {
 
 export default function ScheduledSessionItemCard({
   item,
+  scheduledDate,
   moodLabel,
   stressLabel,
   onStart,
 }: ScheduledSessionItemCardProps) {
   const tCommon = useTranslations('common');
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
 
   return (
     <div className="flex flex-col w-full items-start p-[26px] gap-[18px] justify-center rounded-3xl bg-neutral-99">
@@ -65,8 +70,8 @@ export default function ScheduledSessionItemCard({
             <div className="flex items-center gap-2">
               <span className="body-18 font-semibold text-neutral-30">{item.scheduledTime}</span>
               <button
-                onClick={() => {}}
                 className="flex items-center justify-center rounded-[8px] bg-[rgba(250,84,84,0.10)] px-3 py-[6px] text-primary hover:cursor-pointer"
+                onClick={() => setIsRescheduleOpen(true)}
               >
                 {tCommon('change')}
               </button>
@@ -86,6 +91,13 @@ export default function ScheduledSessionItemCard({
           <MoodScoreChip label={stressLabel} score={item.stressScore} />
         </div>
       </div>
+
+      <RescheduleSessionDialog
+        open={isRescheduleOpen}
+        onOpenChange={setIsRescheduleOpen}
+        currentDate={scheduledDate}
+        initialStartTime={item.scheduledTime}
+      />
     </div>
   );
 }

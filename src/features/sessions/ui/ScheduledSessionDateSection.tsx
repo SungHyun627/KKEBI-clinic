@@ -30,6 +30,7 @@ export default function ScheduledSessionDateSection({
           <li key={item.id} className="flex w-full">
             <ScheduledSessionItemCard
               item={item}
+              scheduledDate={group.date}
               moodLabel={moodLabel}
               stressLabel={stressLabel}
               onStart={(clientId) => router.push(`/sessions/${clientId}`)}
