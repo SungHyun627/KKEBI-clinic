@@ -242,6 +242,7 @@ export default function RescheduleSessionDialog({
                 {isDatePickerOpen && (
                   <div className="mt-3 flex w-full flex-col gap-3 rounded-[16px] border border-neutral-95 px-1 py-4.5 shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)]">
                     <Calendar
+                      className="mx-auto"
                       mode="single"
                       month={visibleMonth}
                       onMonthChange={setVisibleMonth}
