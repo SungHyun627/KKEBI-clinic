@@ -6,10 +6,13 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Calendar } from '@/shared/ui/calendar';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
+import { toast } from '@/shared/ui/toast';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
+import { rescheduleSession } from '@/features/sessions/api/rescheduleSession';
 import Divider from '@/shared/ui/divider';
 
 interface RescheduleSessionDialogProps {
+  sessionId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentDate: string;
@@ -163,6 +166,7 @@ function TimeWheelPicker({
 }
 
 export default function RescheduleSessionDialog({
+  sessionId,
   open,
   onOpenChange,
   currentDate,
@@ -170,6 +174,7 @@ export default function RescheduleSessionDialog({
 }: RescheduleSessionDialogProps) {
   const locale = useLocale();
   const tCommon = useTranslations('common');
+  const tSessions = useTranslations('sessionList');
 
   const [selectedDate, setSelectedDate] = useState<Date>(parseDateFromIso(currentDate));
   const [draftDate, setDraftDate] = useState<Date>(parseDateFromIso(currentDate));
@@ -178,6 +183,7 @@ export default function RescheduleSessionDialog({
   const [startTime, setStartTime] = useState(initialStartTime);
   const [endTime, setEndTime] = useState(getNextTime(initialStartTime));
   const [openTimePicker, setOpenTimePicker] = useState<'start' | 'end' | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentDateLabel = useMemo(() => {
     return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
@@ -321,10 +327,29 @@ export default function RescheduleSessionDialog({
             <Button
               type="button"
               size="lg"
-              disabled={!hasRescheduleChanges}
-              onClick={() => {
-                void toDateKey(selectedDate);
-                onOpenChange(false);
+              disabled={!hasRescheduleChanges || isSubmitting}
+              onClick={async () => {
+                try {
+                  setIsSubmitting(true);
+                  const response = await rescheduleSession(sessionId, {
+                    sessionDate: toDateKey(selectedDate),
+                    startTime,
+                    endTime,
+                  });
+
+                  if (!response.success) {
+                    throw new Error(response.message || tSessions('loadFailed'));
+                  }
+
+                  toast(response.message || '상담 일정이 변경되었습니다.');
+                  onOpenChange(false);
+                } catch (error) {
+                  const message =
+                    error instanceof Error ? error.message : '상담 일정 변경에 실패했습니다.';
+                  toast(message);
+                } finally {
+                  setIsSubmitting(false);
+                }
               }}
               className="w-full max-w-66"
             >

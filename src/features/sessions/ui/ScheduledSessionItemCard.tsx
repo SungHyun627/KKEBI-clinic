@@ -93,6 +93,7 @@ export default function ScheduledSessionItemCard({
       </div>
 
       <RescheduleSessionDialog
+        sessionId={item.id}
         open={isRescheduleOpen}
         onOpenChange={setIsRescheduleOpen}
         currentDate={scheduledDate}
