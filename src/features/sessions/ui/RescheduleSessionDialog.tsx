@@ -54,10 +54,18 @@ interface TimeWheelPickerProps {
   value: string;
   onValueChange: (value: string) => void;
   align?: 'start' | 'center' | 'end';
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-function TimeWheelPicker({ label, value, onValueChange, align = 'center' }: TimeWheelPickerProps) {
-  const [open, setOpen] = useState(false);
+function TimeWheelPicker({
+  label,
+  value,
+  onValueChange,
+  align = 'center',
+  open,
+  onOpenChange,
+}: TimeWheelPickerProps) {
   const normalizedValue = TIME_OPTIONS.includes(value) ? value : '09:00';
   const [draftValue, setDraftValue] = useState(normalizedValue);
   const activeIndex = TIME_OPTIONS.indexOf(draftValue);
@@ -70,7 +78,11 @@ function TimeWheelPicker({ label, value, onValueChange, align = 'center' }: Time
   };
 
   const panelAlignClass =
-    align === 'end' ? '-ml-[calc(100%+45px)]' : align === 'center' ? '-ml-[calc(50%+22.5px)]' : '';
+    align === 'end'
+      ? '-ml-[calc(100%+45px)] translate-x-[5px]'
+      : align === 'center'
+        ? '-ml-[calc(50%+22.5px)]'
+        : '';
 
   return (
     <div className="flex w-full flex-col gap-[10px]">
@@ -81,7 +93,7 @@ function TimeWheelPicker({ label, value, onValueChange, align = 'center' }: Time
         onClick={() => {
           const nextOpen = !open;
           if (nextOpen) setDraftValue(normalizedValue);
-          setOpen(nextOpen);
+          onOpenChange(nextOpen);
         }}
         className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
       >
@@ -139,7 +151,7 @@ function TimeWheelPicker({ label, value, onValueChange, align = 'center' }: Time
             disabled={isUnchanged}
             onClick={() => {
               onValueChange(draftValue);
-              setOpen(false);
+              onOpenChange(false);
             }}
           >
             저장
@@ -165,6 +177,7 @@ export default function RescheduleSessionDialog({
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [startTime, setStartTime] = useState(initialStartTime);
   const [endTime, setEndTime] = useState(getNextTime(initialStartTime));
+  const [openTimePicker, setOpenTimePicker] = useState<'start' | 'end' | null>(null);
 
   const currentDateLabel = useMemo(() => {
     return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
@@ -213,6 +226,7 @@ export default function RescheduleSessionDialog({
                     if (nextOpen) {
                       setDraftDate(selectedDate);
                       setVisibleMonth(selectedDate);
+                      setOpenTimePicker(null);
                     }
                     setIsDatePickerOpen(nextOpen);
                   }}
@@ -260,6 +274,11 @@ export default function RescheduleSessionDialog({
                   value={startTime}
                   onValueChange={setStartTime}
                   align="start"
+                  open={openTimePicker === 'start'}
+                  onOpenChange={(nextOpen) => {
+                    setIsDatePickerOpen(false);
+                    setOpenTimePicker(nextOpen ? 'start' : null);
+                  }}
                 />
                 <div className="flex h-full w-full justify-center items-start pt-16">
                   <Divider className="h-[2.5px] bg-[#303030]" />
@@ -269,6 +288,11 @@ export default function RescheduleSessionDialog({
                   value={endTime}
                   onValueChange={setEndTime}
                   align="end"
+                  open={openTimePicker === 'end'}
+                  onOpenChange={(nextOpen) => {
+                    setIsDatePickerOpen(false);
+                    setOpenTimePicker(nextOpen ? 'end' : null);
+                  }}
                 />
               </div>
             </div>
