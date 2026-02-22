@@ -196,6 +196,12 @@ export default function RescheduleSessionDialog({
   }, [selectedDate, locale]);
 
   const isDateUnchanged = toDateKey(draftDate) === toDateKey(selectedDate);
+  const initialDateKey = toDateKey(parseDateFromIso(currentDate));
+  const initialEndTime = getNextTime(initialStartTime);
+  const hasRescheduleChanges =
+    toDateKey(selectedDate) !== initialDateKey ||
+    startTime !== initialStartTime ||
+    endTime !== initialEndTime;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -302,17 +308,25 @@ export default function RescheduleSessionDialog({
             </div>
           </div>
 
-          <div className="mt-1 flex items-center justify-end gap-2">
-            <Button type="button" variant="outline" size="md" onClick={() => onOpenChange(false)}>
+          <div className="flex justify-center items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              onClick={() => onOpenChange(false)}
+              className="w-full max-w-36"
+            >
               취소
             </Button>
             <Button
               type="button"
-              size="md"
+              size="lg"
+              disabled={!hasRescheduleChanges}
               onClick={() => {
                 void toDateKey(selectedDate);
                 onOpenChange(false);
               }}
+              className="w-full max-w-66"
             >
               변경하기
             </Button>
