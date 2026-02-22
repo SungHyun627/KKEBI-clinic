@@ -1,16 +1,21 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import Divider from '@/shared/ui/divider';
-import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
 import type { SessionAutoRecordData } from '../types/session-page';
 import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
+import { toast } from '@/shared/ui/toast';
+import SessionTranscriptCard from './SessionTranscriptCard';
+import SessionLiveSummaryCard from './SessionLiveSummaryCard';
+import SessionCounselorMemoCard from './SessionCounselorMemoCard';
+import SessionAudioControlBar from './SessionAudioControlBar';
 
 interface SessionAutoRecordPanelProps {
   sessionId: string;
   autoRecord: SessionAutoRecordData;
 }
+
+type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
 
 function formatTimestampToHms(value: string): string {
   const parts = value.split(':');
@@ -19,17 +24,80 @@ function formatTimestampToHms(value: string): string {
   return value;
 }
 
+function formatElapsed(seconds: number): string {
+  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const ss = String(seconds % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}
+
+function formatElapsedToTimestamp(seconds: number): string {
+  const hh = String(Math.floor(seconds / 3600)).padStart(2, '0');
+  const mm = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+  const ss = String(seconds % 60).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
+
+function renderHighlightedText(text: string, locale: string) {
+  const riskKeywords =
+    locale === 'en'
+      ? ['self-harm', 'suicide', 'give up', 'hard']
+      : ['자해', '자살', '죽고 싶다', '힘들어', '포기'];
+
+  const escaped = riskKeywords.map((keyword) => keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = new RegExp(`(${escaped.join('|')})`, 'gi');
+  const parts = text.split(pattern);
+
+  return parts.map((part, index) => {
+    const matched = riskKeywords.some((keyword) => keyword.toLowerCase() === part.toLowerCase());
+    if (!matched) return <span key={`${part}-${index}`}>{part}</span>;
+
+    return (
+      <span key={`${part}-${index}`} className="rounded-[4px] bg-[#FFE2E2] px-1 text-[#DB2C2C]">
+        {part}
+      </span>
+    );
+  });
+}
+
 export default function SessionAutoRecordPanel({
   sessionId,
   autoRecord,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
+  const [transcriptItems, setTranscriptItems] = useState(() => autoRecord.transcripts);
   const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(
     () => new Set(autoRecord.transcripts.filter((item) => item.bookmarked).map((item) => item.id)),
   );
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [micPermission, setMicPermission] = useState<MicPermissionState>('idle');
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [demoIndex, setDemoIndex] = useState(0);
+  const visibleAudioLevel = isRecording && !isPaused ? audioLevel : 0;
 
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
+
+  useEffect(() => {
+    if (!isRecording || isPaused) return;
+
+    const timer = window.setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [isPaused, isRecording]);
+
+  useEffect(() => {
+    if (!isRecording || isPaused) return;
+
+    const levelTimer = window.setInterval(() => {
+      setAudioLevel(Math.floor(Math.random() * 100));
+    }, 250);
+
+    return () => window.clearInterval(levelTimer);
+  }, [isPaused, isRecording]);
 
   const toggleBookmark = async (transcriptId: string) => {
     if (pendingMap.has(transcriptId)) return;
@@ -69,93 +137,119 @@ export default function SessionAutoRecordPanel({
     });
   };
 
+  const handleStartRecording = async () => {
+    if (isRecording) return;
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      toast(
+        locale === 'en'
+          ? 'Microphone is not supported in this browser.'
+          : '브라우저에서 마이크를 지원하지 않습니다.',
+      );
+      return;
+    }
+
+    setMicPermission('requesting');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      setMicPermission('granted');
+      setIsRecording(true);
+      setIsPaused(false);
+      toast(locale === 'en' ? 'Recording started.' : '녹음을 시작했습니다.');
+    } catch {
+      setMicPermission('denied');
+      toast(
+        locale === 'en'
+          ? 'Microphone permission denied. Please allow microphone access.'
+          : '마이크 권한이 거부되었습니다. 브라우저 권한을 허용해 주세요.',
+      );
+    }
+  };
+
+  const handlePauseResume = () => {
+    if (!isRecording) return;
+    setIsPaused((prev) => !prev);
+  };
+
+  const handleAddDemoDialogue = () => {
+    const demoTextsKo = [
+      '최근 너무 힘들어서 포기하고 싶은 마음이 들어요.',
+      '상담 중에는 그래도 숨을 고르면 조금 괜찮아져요.',
+      '가끔 자해 생각이 떠올라서 걱정돼요.',
+    ];
+    const demoTextsEn = [
+      'Lately I feel like giving up because things are too hard.',
+      'During the session, breathing slowly helps me calm down.',
+      'Sometimes I get self-harm thoughts and it scares me.',
+    ];
+    const list = locale === 'en' ? demoTextsEn : demoTextsKo;
+    const text = list[demoIndex % list.length];
+    const nextIndex = demoIndex + 1;
+    setDemoIndex(nextIndex);
+
+    const transcriptId = `${sessionId}-demo-${Date.now()}`;
+    const newItem = {
+      id: transcriptId,
+      speaker: 'client' as const,
+      text,
+      timestamp: formatElapsedToTimestamp(elapsedSeconds),
+      bookmarked: false,
+    };
+
+    setTranscriptItems((prev) => [...prev, newItem]);
+
+    const hasRiskSignal =
+      locale === 'en'
+        ? /self-harm|suicide|give up|hard/i.test(text)
+        : /자해|자살|죽고 싶다|힘들어|포기/.test(text);
+
+    if (hasRiskSignal) {
+      setBookmarkIds((prev) => new Set(prev).add(transcriptId));
+      toast(
+        locale === 'en'
+          ? 'Risk signal detected in transcript.'
+          : '전사에서 위험 신호가 감지되었습니다.',
+      );
+    }
+  };
+
   return (
     <section className="flex min-h-full flex-col gap-[25px] px-8 py-[26px] bg-neutral-99">
       <div className="text-[24px] font-semibold">
         {locale === 'en' ? 'Session record' : '상담 기록'}
       </div>
       <div className="flex w-full flex-col items-start gap-4">
-        <div className="flex flex-col w-full justify-center p-[26px] rounded-[24px] bg-white">
-          <div className="flex w-full flex-col divide-y divide-neutral-95">
-            {autoRecord.transcripts.map((item) => (
-              <div key={item.id} className="flex w-full flex-col">
-                <div className="flex w-full py-4 items-center gap-3">
-                  <span
-                    className={`flex px-3 py-[3px] justify-center items-center gap-3 border border-neutral-95 rounded-[10px] body-14 font-semibold text-center ${
-                      locale === 'en' ? 'w-[90px] whitespace-nowrap' : ''
-                    } ${item.speaker === 'counselor' ? 'text-label-neutral' : 'text-[#FF6363]'}`}
-                  >
-                    {item.speaker === 'counselor'
-                      ? locale === 'en'
-                        ? 'Counselor'
-                        : '상담사'
-                      : locale === 'en'
-                        ? 'Client'
-                        : '내담자'}
-                  </span>
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <div className="body-14 min-w-0 flex-1 text-label-normal">{item.text}</div>
-                    <div className="flex items-center gap-[6px]">
-                      <span className="body-14 text-label-alternative">
-                        {formatTimestampToHms(item.timestamp)}
-                      </span>
-                      <button
-                        type="button"
-                        disabled={pendingIds.has(item.id)}
-                        onClick={() => {
-                          void toggleBookmark(item.id);
-                        }}
-                        className={`inline-flex h-6 w-6 items-center justify-center rounded-[6px] hover:cursor-pointer ${
-                          bookmarkIds.has(item.id) ? 'text-label-normal' : 'text-label-assistive'
-                        }`}
-                        aria-label={locale === 'en' ? 'Bookmark' : '북마크'}
-                      >
-                        <span
-                          className="h-6 w-6 bg-current"
-                          style={{
-                            maskImage: bookmarkIds.has(item.id)
-                              ? 'url(/icons/bookmark-filled.svg)'
-                              : 'url(/icons/bookmark.svg)',
-                            WebkitMaskImage: bookmarkIds.has(item.id)
-                              ? 'url(/icons/bookmark-filled.svg)'
-                              : 'url(/icons/bookmark.svg)',
-                            maskSize: 'contain',
-                            maskRepeat: 'no-repeat',
-                            maskPosition: 'center',
-                          }}
-                          aria-hidden
-                        />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col w-full justify-center p-[26px] rounded-[24px] bg-white gap-[23px]">
-          <div className="flex flex-col gap-3">
-            <span className="body-18 font-medium text-neutral-40">
-              {locale === 'en' ? 'Live summary' : '실시간 요약'}
-            </span>
-            <div className="w-full body-18 font-semibold">{autoRecord.liveSummaryTitle}</div>
-          </div>
-          <Divider />
-          <div className="flex items-start gap-3">
-            <Image src="/icons/speaker.svg" alt="speaker" width={20} height={20} />
-            <div className="body-14 text-label-alternative">{autoRecord.liveSummaryBody}</div>
-          </div>
-        </div>
-        <div className="flex flex-col w-full justify-center p-[26px] rounded-[24px] bg-white gap-[18px]">
-          <span className="body-18 font-medium text-neutral-40">
-            {locale === 'en' ? 'Counselor memo' : '상담사 메모'}
-          </span>
-          <textarea
-            defaultValue={autoRecord.counselorMemo}
-            className="body-14 min-h-[120px] w-full resize-none rounded-[12px] border border-neutral-95 bg-white p-3 text-label-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
-          />
-        </div>
+        <SessionTranscriptCard
+          locale={locale}
+          transcriptItems={transcriptItems}
+          pendingIds={pendingIds}
+          bookmarkIds={bookmarkIds}
+          onToggleBookmark={(transcriptId) => {
+            void toggleBookmark(transcriptId);
+          }}
+          formatTimestampToHms={formatTimestampToHms}
+          renderHighlightedText={renderHighlightedText}
+        />
+        <SessionLiveSummaryCard
+          locale={locale}
+          title={autoRecord.liveSummaryTitle}
+          body={autoRecord.liveSummaryBody}
+        />
+        <SessionCounselorMemoCard locale={locale} defaultValue={autoRecord.counselorMemo} />
+        <SessionAudioControlBar
+          locale={locale}
+          isRecording={isRecording}
+          isPaused={isPaused}
+          elapsed={formatElapsed(elapsedSeconds)}
+          visibleAudioLevel={visibleAudioLevel}
+          isStartDisabled={isRecording || micPermission === 'requesting'}
+          isPauseDisabled={!isRecording}
+          onStart={() => {
+            void handleStartRecording();
+          }}
+          onPauseResume={handlePauseResume}
+          onAddDemoDialogue={handleAddDemoDialogue}
+        />
       </div>
     </section>
   );
