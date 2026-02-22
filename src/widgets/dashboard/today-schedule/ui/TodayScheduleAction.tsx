@@ -7,17 +7,23 @@ import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/shared/ui/button';
 import { startSession } from '@/features/sessions/api/startSession';
 import { toast } from '@/shared/ui/toast';
+import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
+import { setSessionStartContext } from '@/shared/lib/session-start-context';
 
 interface TodayScheduleActionProps {
   clientId: string;
   scheduleId?: string;
   clientName: string;
+  sessionType: SessionType;
+  riskType: RiskType;
 }
 
 export default function TodayScheduleAction({
   clientId,
   scheduleId,
   clientName,
+  sessionType,
+  riskType,
 }: TodayScheduleActionProps) {
   const tDashboard = useTranslations('dashboard');
   const tCommon = useTranslations('common');
@@ -34,6 +40,11 @@ export default function TodayScheduleAction({
       return;
     }
 
+    setSessionStartContext(result.sessionId, {
+      name: clientName,
+      sessionType: sessionType,
+      riskType: riskType,
+    });
     router.push(`/session/${result.sessionId}`);
   };
 

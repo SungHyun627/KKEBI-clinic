@@ -14,6 +14,7 @@ import RescheduleSessionDialog from './RescheduleSessionDialog';
 import { useRouter } from '@/i18n/navigation';
 import { startSession } from '../api/startSession';
 import { toast } from '@/shared/ui/toast';
+import { setSessionStartContext } from '@/shared/lib/session-start-context';
 
 interface ScheduledSessionItemCardProps {
   item: ScheduledSessionItem;
@@ -48,6 +49,11 @@ export default function ScheduledSessionItemCard({
       return;
     }
 
+    setSessionStartContext(result.sessionId, {
+      name: item.clientName,
+      sessionType: item.sessionType,
+      riskType: item.riskType,
+    });
     router.push(`/session/${result.sessionId}`);
   };
 

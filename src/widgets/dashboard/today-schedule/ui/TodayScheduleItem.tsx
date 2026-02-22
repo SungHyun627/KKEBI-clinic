@@ -61,6 +61,8 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         clientId={schedule.clientId}
         scheduleId={schedule.id}
         clientName={localizedClientName}
+        sessionType={schedule.sessionType}
+        riskType={schedule.riskType}
       />
     </li>
   );

@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 import { startSession } from '@/features/sessions/api/startSession';
 import { toast } from '@/shared/ui/toast';
+import { setSessionStartContext } from '@/shared/lib/session-start-context';
 
 interface ClientDetailHeaderProps {
   client: ClientLookupItem;
@@ -35,6 +36,10 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
       return;
     }
 
+    setSessionStartContext(result.sessionId, {
+      name: localizedClientName,
+      riskType: client.riskType,
+    });
     router.push(`/session/${result.sessionId}`);
   };
 
