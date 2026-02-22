@@ -16,7 +16,6 @@ interface SessionHeaderProps {
 
 export default function SessionHeader({ sessionId }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
-  const tSessions = useTranslations('sessionList');
   const [context, setContext] = useState<SessionStartContextValue | null>(null);
 
   useEffect(() => {
