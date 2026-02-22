@@ -18,8 +18,6 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
   const locale = useLocale();
   const streakDays = schedule.streakDays ?? 0;
   const localizedClientName = getClientNameByLocale(schedule.clientId, schedule.clientName, locale);
-  const sessionTypeChipWidthClass = locale === 'en' ? 'w-[92px] max-[1200px]:w-[84px]' : 'w-[49px]';
-  const riskTypeChipWidthClass = locale === 'en' ? 'w-[104px] max-[1200px]:w-[92px]' : 'w-[49px]';
 
   return (
     <li
@@ -29,8 +27,8 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
       )}
     >
       <span className="body-16 min-w-0 text-label-normal max-[1000px]:hidden">{schedule.time}</span>
-      <span className="flex min-w-0 max-w-full items-center gap-3 overflow-hidden">
-        <span className="body-16 min-w-0 flex-1 truncate text-label-normal max-[1000px]:hidden">
+      <span className="flex min-w-0 max-w-full items-center gap-2 overflow-hidden">
+        <span className="body-16  truncate text-label-normal max-[1000px]:hidden">
           {localizedClientName}
         </span>
         <span className="hidden min-w-0 flex-1 flex-col text-label-normal max-[1000px]:flex">
@@ -42,10 +40,10 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         </span>
       </span>
       <span className="min-w-0 justify-self-center overflow-hidden">
-        <SessionTypeChip value={schedule.sessionType} className={sessionTypeChipWidthClass} />
+        <SessionTypeChip value={schedule.sessionType} />
       </span>
       <span className="min-w-0 justify-self-center overflow-hidden">
-        <RiskTypeChip value={schedule.riskType} className={riskTypeChipWidthClass} />
+        <RiskTypeChip value={schedule.riskType} />
       </span>
       <span className="flex min-w-0 items-center justify-start gap-2 overflow-hidden pr-2 max-[1200px]:w-fit max-[1200px]:justify-self-start">
         <MoodStressToken

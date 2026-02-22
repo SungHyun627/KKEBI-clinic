@@ -126,7 +126,7 @@
     "weeklyStatsCompletedSessions": "Completed sessions",
     "weeklyStatsAverageSessionLength": "Average session length",
     "weeklyStatsClientImprovementRate": "Client improvement rate",
-    "weeklyStatsMinuteUnit": "min",
+    "weeklyStatsMinuteUnit": "Min",
     "weeklyStatsLoading": "Loading weekly stats.",
     "weeklyStatsLoadFailed": "Failed to load weekly stats.",
     "riskAlertsTitle": "Risk alerts",

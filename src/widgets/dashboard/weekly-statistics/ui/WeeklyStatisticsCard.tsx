@@ -14,7 +14,7 @@ const WeeklyStatisticsCard = ({ label, value, unit, icon }: WeeklyStatisticsCard
         <div className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
           <Image src={icon} alt="" width={20} height={20} aria-hidden />
         </div>
-        <span className="body-18 min-w-0 line-clamp-2 font-medium !leading-[120%] text-neutral-40">
+        <span className="body-18 min-w-0 line-clamp-2 font-medium text-neutral-40 truncate">
           {label}
         </span>
       </div>
