@@ -30,6 +30,7 @@ export interface SessionTranscriptItem {
   speaker: 'counselor' | 'client';
   text: string;
   timestamp: string;
+  bookmarked?: boolean;
 }
 
 export interface SessionAutoRecordData {

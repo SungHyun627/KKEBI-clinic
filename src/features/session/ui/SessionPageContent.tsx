@@ -61,7 +61,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ) : (
         <div className="grid w-full flex-1 grid-cols-[1fr_1.5fr] gap-[34px]">
           <SessionInsightsPanel insights={data.insights} />
-          <SessionAutoRecordPanel autoRecord={data.autoRecord} />
+          <SessionAutoRecordPanel sessionId={sessionId} autoRecord={data.autoRecord} />
         </div>
       )}
     </section>

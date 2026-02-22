@@ -50,6 +50,7 @@ export const getSessionPageMock = (sessionId: string, locale: string): SessionPa
     speaker: i % 2 === 0 ? 'client' : 'counselor',
     text,
     timestamp: `00:${String(12 + i * 6).padStart(2, '0')}`,
+    bookmarked: i === 1,
   }));
 
   return {

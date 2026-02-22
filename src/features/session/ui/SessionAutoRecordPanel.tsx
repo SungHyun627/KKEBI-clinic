@@ -1,16 +1,73 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import Divider from '@/shared/ui/divider';
 import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import type { SessionAutoRecordData } from '../types/session-page';
+import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
 
 interface SessionAutoRecordPanelProps {
+  sessionId: string;
   autoRecord: SessionAutoRecordData;
 }
 
-export default function SessionAutoRecordPanel({ autoRecord }: SessionAutoRecordPanelProps) {
+function formatTimestampToHms(value: string): string {
+  const parts = value.split(':');
+  if (parts.length === 3) return value;
+  if (parts.length === 2) return `${value}:00`;
+  return value;
+}
+
+export default function SessionAutoRecordPanel({
+  sessionId,
+  autoRecord,
+}: SessionAutoRecordPanelProps) {
   const locale = useLocale();
+  const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(
+    () => new Set(autoRecord.transcripts.filter((item) => item.bookmarked).map((item) => item.id)),
+  );
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+
+  const pendingMap = useMemo(() => pendingIds, [pendingIds]);
+
+  const toggleBookmark = async (transcriptId: string) => {
+    if (pendingMap.has(transcriptId)) return;
+    const isBookmarked = bookmarkIds.has(transcriptId);
+
+    setPendingIds((prev) => new Set(prev).add(transcriptId));
+    setBookmarkIds((prev) => {
+      const next = new Set(prev);
+      if (isBookmarked) {
+        next.delete(transcriptId);
+      } else {
+        next.add(transcriptId);
+      }
+      return next;
+    });
+
+    const result = isBookmarked
+      ? await removeTranscriptBookmark(sessionId, transcriptId)
+      : await addTranscriptBookmark(sessionId, transcriptId);
+
+    if (!result.success) {
+      setBookmarkIds((prev) => {
+        const next = new Set(prev);
+        if (isBookmarked) {
+          next.add(transcriptId);
+        } else {
+          next.delete(transcriptId);
+        }
+        return next;
+      });
+    }
+
+    setPendingIds((prev) => {
+      const next = new Set(prev);
+      next.delete(transcriptId);
+      return next;
+    });
+  };
 
   return (
     <section className="flex min-h-full flex-col gap-[25px] px-8 py-[26px] bg-neutral-99">
@@ -39,17 +96,33 @@ export default function SessionAutoRecordPanel({ autoRecord }: SessionAutoRecord
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <div className="body-14 min-w-0 flex-1 text-label-normal">{item.text}</div>
                     <div className="flex items-center gap-[6px]">
-                      <span className="body-14 text-label-alternative">{item.timestamp}</span>
+                      <span className="body-14 text-label-alternative">
+                        {formatTimestampToHms(item.timestamp)}
+                      </span>
                       <button
                         type="button"
-                        className="inline-flex h-5 w-5 items-center justify-center hover:cursor-pointer"
+                        disabled={pendingIds.has(item.id)}
+                        onClick={() => {
+                          void toggleBookmark(item.id);
+                        }}
+                        className={`inline-flex h-6 w-6 items-center justify-center rounded-[6px] hover:cursor-pointer ${
+                          bookmarkIds.has(item.id) ? 'text-label-normal' : 'text-label-assistive'
+                        }`}
                         aria-label={locale === 'en' ? 'Bookmark' : '북마크'}
                       >
-                        <Image
-                          src="/icons/bookmark.svg"
-                          alt=""
-                          width={24}
-                          height={24}
+                        <span
+                          className="h-6 w-6 bg-current"
+                          style={{
+                            maskImage: bookmarkIds.has(item.id)
+                              ? 'url(/icons/bookmark-filled.svg)'
+                              : 'url(/icons/bookmark.svg)',
+                            WebkitMaskImage: bookmarkIds.has(item.id)
+                              ? 'url(/icons/bookmark-filled.svg)'
+                              : 'url(/icons/bookmark.svg)',
+                            maskSize: 'contain',
+                            maskRepeat: 'no-repeat',
+                            maskPosition: 'center',
+                          }}
                           aria-hidden
                         />
                       </button>
