@@ -54,9 +54,10 @@ interface TimeWheelPickerProps {
   label: string;
   value: string;
   onValueChange: (value: string) => void;
+  align?: 'start' | 'center' | 'end';
 }
 
-function TimeWheelPicker({ label, value, onValueChange }: TimeWheelPickerProps) {
+function TimeWheelPicker({ label, value, onValueChange, align = 'center' }: TimeWheelPickerProps) {
   const [open, setOpen] = useState(false);
   const normalizedValue = TIME_OPTIONS.includes(value) ? value : '09:00';
   const [draftValue, setDraftValue] = useState(normalizedValue);
@@ -95,10 +96,10 @@ function TimeWheelPicker({ label, value, onValueChange }: TimeWheelPickerProps) 
         </PopoverTrigger>
         <PopoverContent
           side="bottom"
-          align="center"
+          align={align}
           sideOffset={12}
           avoidCollisions={false}
-          className="flex w-[var(--radix-popover-trigger-width)] self-stretch flex-col items-center gap-[26px] rounded-[16px] bg-white px-6 py-[18px] shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)]"
+          className="flex w-[calc(var(--radix-popover-trigger-width)*2+45px)] self-stretch flex-col items-center gap-[26px] rounded-[16px] bg-white px-6 py-[18px] shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)]"
         >
           <div
             className="relative h-21 w-full overflow-hidden rounded-xl bg-white"
@@ -274,11 +275,21 @@ export default function RescheduleSessionDialog({
                 </Popover>
               </div>
               <div className="flex w-full gap-[15px] items-start justify-center">
-                <TimeWheelPicker label="시작 시간" value={startTime} onValueChange={setStartTime} />
+                <TimeWheelPicker
+                  label="시작 시간"
+                  value={startTime}
+                  onValueChange={setStartTime}
+                  align="start"
+                />
                 <div className="flex w-[15px] self-end pb-[29px]">
                   <Divider className="h-[2.5px] bg-[#303030]" />
                 </div>
-                <TimeWheelPicker label="종료 시간" value={endTime} onValueChange={setEndTime} />
+                <TimeWheelPicker
+                  label="종료 시간"
+                  value={endTime}
+                  onValueChange={setEndTime}
+                  align="end"
+                />
               </div>
             </div>
           </div>
