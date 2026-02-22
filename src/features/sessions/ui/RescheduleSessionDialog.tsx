@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Calendar } from '@/shared/ui/calendar';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import Divider from '@/shared/ui/divider';
 
@@ -70,36 +69,32 @@ function TimeWheelPicker({ label, value, onValueChange, align = 'center' }: Time
     setDraftValue(TIME_OPTIONS[nextIndex]);
   };
 
+  const panelAlignClass =
+    align === 'end' ? '-ml-[calc(100%+45px)]' : align === 'center' ? '-ml-[calc(50%+22.5px)]' : '';
+
   return (
     <div className="flex w-full flex-col gap-[10px]">
       <span className="body-16 font-semibold text-label-neutral">{label}</span>
-      <Popover
-        open={open}
-        onOpenChange={(nextOpen) => {
+      <button
+        type="button"
+        aria-label={`${label} 선택`}
+        onClick={() => {
+          const nextOpen = !open;
           if (nextOpen) setDraftValue(normalizedValue);
           setOpen(nextOpen);
         }}
+        className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
       >
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            aria-label={`${label} 선택`}
-            className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
-          >
-            <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
-              {value}
-            </span>
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-              <Image src="/icons/clock.svg" alt="" width={24} height={24} aria-hidden />
-            </span>
-          </button>
-        </PopoverTrigger>
-        <PopoverContent
-          side="bottom"
-          align={align}
-          sideOffset={12}
-          avoidCollisions={false}
-          className="flex w-[calc(var(--radix-popover-trigger-width)*2+45px)] self-stretch flex-col items-center gap-[26px] rounded-[16px] bg-white px-6 py-[18px] shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)]"
+        <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
+          {value}
+        </span>
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+          <Image src="/icons/clock.svg" alt="" width={24} height={24} aria-hidden />
+        </span>
+      </button>
+      {open && (
+        <div
+          className={`mt-3 flex w-[calc(200%+45px)] self-stretch flex-col items-center gap-[26px] rounded-[16px] border border-neutral-95 bg-white px-6 py-[18px] shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)] ${panelAlignClass}`}
         >
           <div
             className="relative h-21 w-full overflow-hidden rounded-xl bg-white"
@@ -149,8 +144,8 @@ function TimeWheelPicker({ label, value, onValueChange, align = 'center' }: Time
           >
             저장
           </Button>
-        </PopoverContent>
-      </Popover>
+        </div>
+      )}
     </div>
   );
 }
@@ -210,43 +205,28 @@ export default function RescheduleSessionDialog({
             <div className="flex w-full gap-[45px]">
               <div className="flex w-full max-w-[270px] flex-col items-start gap-[10px]">
                 <span className="body-16 font-semibold text-label-neutral">날짜</span>
-                <Popover
-                  open={isDatePickerOpen}
-                  onOpenChange={(nextOpen) => {
+                <button
+                  type="button"
+                  aria-label="변경 날짜 선택"
+                  onClick={() => {
+                    const nextOpen = !isDatePickerOpen;
                     if (nextOpen) {
                       setDraftDate(selectedDate);
                       setVisibleMonth(selectedDate);
                     }
                     setIsDatePickerOpen(nextOpen);
                   }}
+                  className="group relative flex h-14.5 w-full items-center gap-[10px] rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
                 >
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label="변경 날짜 선택"
-                      className="group relative flex h-14.5 w-full items-center gap-[10px] rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
-                    >
-                      <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
-                        {selectedDateLabel}
-                      </span>
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                        <Image
-                          src="/icons/calendar.svg"
-                          alt=""
-                          width={20}
-                          height={20}
-                          aria-hidden
-                        />
-                      </span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    side="bottom"
-                    align="start"
-                    sideOffset={12}
-                    avoidCollisions={false}
-                    className="flex w-[var(--radix-popover-trigger-width)] flex-col gap-3 rounded-[16px] px-1 py-4.5 shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)]"
-                  >
+                  <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
+                    {selectedDateLabel}
+                  </span>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+                    <Image src="/icons/calendar.svg" alt="" width={20} height={20} aria-hidden />
+                  </span>
+                </button>
+                {isDatePickerOpen && (
+                  <div className="mt-3 flex w-full flex-col gap-3 rounded-[16px] border border-neutral-95 px-1 py-4.5 shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)]">
                     <Calendar
                       mode="single"
                       month={visibleMonth}
@@ -271,17 +251,17 @@ export default function RescheduleSessionDialog({
                         저장
                       </Button>
                     </div>
-                  </PopoverContent>
-                </Popover>
+                  </div>
+                )}
               </div>
-              <div className="flex w-full gap-[15px] items-start justify-center">
+              <div className="grid w-full grid-cols-[minmax(0,1fr)_10px_minmax(0,1fr)] items-start gap-[15px]">
                 <TimeWheelPicker
                   label="시작 시간"
                   value={startTime}
                   onValueChange={setStartTime}
                   align="start"
                 />
-                <div className="flex w-[15px] self-end pb-[29px]">
+                <div className="flex h-full w-full justify-center items-start pt-16">
                   <Divider className="h-[2.5px] bg-[#303030]" />
                 </div>
                 <TimeWheelPicker
