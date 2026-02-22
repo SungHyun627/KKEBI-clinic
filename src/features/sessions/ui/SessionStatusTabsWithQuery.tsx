@@ -58,6 +58,7 @@ export default function SessionStatusTabsWithQuery({
   const nextView: SessionViewFilter = isListView ? 'calendar' : 'list';
   const viewLabel = isListView ? tSessions('viewList') : tSessions('viewCalendar');
   const viewIcon = isListView ? '/icons/menu.svg' : '/icons/calendar-2.svg';
+  const isViewToggleDisabled = true;
 
   return (
     <div className="flex w-full items-center justify-between">
@@ -79,7 +80,9 @@ export default function SessionStatusTabsWithQuery({
         <button
           type="button"
           onClick={() => handleViewChange(nextView)}
-          className="flex items-center hover:cursor-pointer border-none hover:bg-white p-0"
+          disabled={isViewToggleDisabled}
+          aria-disabled={isViewToggleDisabled}
+          className="flex items-center border-none p-0 hover:bg-white enabled:hover:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={viewLabel}
         >
           <Image src="/icons/sort.svg" alt={viewLabel} width={28} height={28} />
