@@ -69,6 +69,7 @@ function TimeWheelPicker({
   open,
   onOpenChange,
 }: TimeWheelPickerProps) {
+  const tCommon = useTranslations('common');
   const normalizedValue = TIME_OPTIONS.includes(value) ? value : '09:00';
   const [draftValue, setDraftValue] = useState(normalizedValue);
   const activeIndex = TIME_OPTIONS.indexOf(draftValue);
@@ -92,7 +93,7 @@ function TimeWheelPicker({
       <span className="body-16 font-semibold text-label-neutral">{label}</span>
       <button
         type="button"
-        aria-label={`${label} 선택`}
+        aria-label={label}
         onClick={() => {
           const nextOpen = !open;
           if (nextOpen) setDraftValue(normalizedValue);
@@ -157,7 +158,7 @@ function TimeWheelPicker({
               onOpenChange(false);
             }}
           >
-            저장
+            {tCommon('save')}
           </Button>
         </div>
       )}
@@ -185,14 +186,6 @@ export default function RescheduleSessionDialog({
   const [openTimePicker, setOpenTimePicker] = useState<'start' | 'end' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentDateLabel = useMemo(() => {
-    return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(parseDateFromIso(currentDate));
-  }, [currentDate, locale]);
-
   const selectedDateLabel = useMemo(() => {
     return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
       year: 'numeric',
@@ -213,12 +206,12 @@ export default function RescheduleSessionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col max-w-[784px] w-full items-center px-8 py-7 gap-[26px] rounded-[24px] p-7">
         <DialogTitle className="absolute w-0 h-0 p-0 m-0 overflow-hidden">
-          <VisuallyHidden>{'상담 일정 변경'}</VisuallyHidden>
+          <VisuallyHidden>{tSessions('rescheduleTitle')}</VisuallyHidden>
         </DialogTitle>
         <div className="flex flex-col w-full gap-[26px]">
           <div className="flex flex-col w-full gap-[23px]">
             <div className="flex w-full justify-between items-center">
-              <span className="text-lg font-semibold">{'상담 일정 변경'}</span>
+              <span className="text-lg font-semibold">{tSessions('rescheduleTitle')}</span>
               <button
                 type="button"
                 aria-label={tCommon('close')}
@@ -231,10 +224,12 @@ export default function RescheduleSessionDialog({
             </div>
             <div className="flex w-full gap-[45px]">
               <div className="flex w-full max-w-[270px] flex-col items-start gap-[10px]">
-                <span className="body-16 font-semibold text-label-neutral">날짜</span>
+                <span className="body-16 font-semibold text-label-neutral">
+                  {tSessions('rescheduleDateLabel')}
+                </span>
                 <button
                   type="button"
-                  aria-label="변경 날짜 선택"
+                  aria-label={tSessions('reschedulePickDateAria')}
                   onClick={() => {
                     const nextOpen = !isDatePickerOpen;
                     if (nextOpen) {
@@ -278,7 +273,7 @@ export default function RescheduleSessionDialog({
                           setIsDatePickerOpen(false);
                         }}
                       >
-                        저장
+                        {tCommon('save')}
                       </Button>
                     </div>
                   </div>
@@ -286,7 +281,7 @@ export default function RescheduleSessionDialog({
               </div>
               <div className="grid w-full grid-cols-[minmax(0,1fr)_10px_minmax(0,1fr)] items-start gap-[15px]">
                 <TimeWheelPicker
-                  label="시작 시간"
+                  label={tSessions('rescheduleStartTimeLabel')}
                   value={startTime}
                   onValueChange={setStartTime}
                   align="start"
@@ -300,7 +295,7 @@ export default function RescheduleSessionDialog({
                   <Divider className="h-[2.5px] bg-[#303030]" />
                 </div>
                 <TimeWheelPicker
-                  label="종료 시간"
+                  label={tSessions('rescheduleEndTimeLabel')}
                   value={endTime}
                   onValueChange={setEndTime}
                   align="end"
@@ -322,7 +317,7 @@ export default function RescheduleSessionDialog({
               onClick={() => onOpenChange(false)}
               className="w-full max-w-36"
             >
-              취소
+              {tCommon('cancel')}
             </Button>
             <Button
               type="button"
@@ -336,10 +331,10 @@ export default function RescheduleSessionDialog({
                     startTime,
                     endTime,
                   });
-                  toast('일정 변경이 완료되었습니다.');
+                  toast(tSessions('rescheduleSuccessToast'));
                   onOpenChange(false);
                 } catch {
-                  toast('일정 변경이 완료되었습니다.');
+                  toast(tSessions('rescheduleSuccessToast'));
                   onOpenChange(false);
                 } finally {
                   setIsSubmitting(false);
@@ -347,7 +342,7 @@ export default function RescheduleSessionDialog({
               }}
               className="w-full max-w-66"
             >
-              변경하기
+              {tCommon('change')}
             </Button>
           </div>
         </div>

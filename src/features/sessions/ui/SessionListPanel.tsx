@@ -20,13 +20,14 @@ interface SessionListPanelProps {
   initialStatus?: SessionStatus;
 }
 
-const formatDate = (value: string) => {
+const formatDate = (value: string, locale: string) => {
   const date = new Date(`${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${year}년 ${month}월 ${day}일`;
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(date);
 };
 
 export default function SessionListPanel({ initialStatus = 'scheduled' }: SessionListPanelProps) {
@@ -119,7 +120,7 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
             <ScheduledSessionDateSection
               key={`scheduled-${group.date}`}
               group={group}
-              dateText={formatDate(group.date)}
+              dateText={formatDate(group.date, locale)}
               moodLabel={tClients('checkinMood')}
               stressLabel={tClients('checkinStress')}
             />
@@ -128,7 +129,7 @@ export default function SessionListPanel({ initialStatus = 'scheduled' }: Sessio
             <CompletedSessionDateSection
               key={`completed-${group.date}`}
               group={group}
-              dateText={formatDate(group.date)}
+              dateText={formatDate(group.date, locale)}
               minutesUnit={tSessions('minutesUnit')}
             />
           ))}
