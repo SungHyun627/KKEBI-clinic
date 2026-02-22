@@ -151,7 +151,10 @@ export default function SessionAutoRecordPanel({
           <span className="body-18 font-medium text-neutral-40">
             {locale === 'en' ? 'Counselor memo' : '상담사 메모'}
           </span>
-          <div className="body-14 text-label-normal">{autoRecord.counselorMemo}</div>
+          <textarea
+            defaultValue={autoRecord.counselorMemo}
+            className="body-14 min-h-[120px] w-full resize-none rounded-[12px] border border-neutral-95 bg-white p-3 text-label-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+          />
         </div>
       </div>
     </section>
