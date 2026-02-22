@@ -21,7 +21,7 @@ import {
   subscribeAuthSession,
 } from '@/features/auth/login/lib/authSession';
 import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation';
-import { toast } from '@/shared/ui/toast';
+import { Toast, toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
 
@@ -201,6 +201,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       </div>
 
       <NotificationDrawer open={isNotificationOpen} onOpenChange={setIsNotificationOpen} />
+      <Toast />
     </div>
   );
 }
