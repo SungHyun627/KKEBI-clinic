@@ -2,6 +2,7 @@ import type {
   CompletedSessionGroup,
   ScheduledSessionGroup,
 } from '@/features/sessions/types/session-list';
+import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 import { TODAY_SCHEDULES_MOCK } from './today-schedules';
 
 const SCHEDULED_DATES = ['2026-02-20', '2026-02-21'];
@@ -15,31 +16,8 @@ const getDurationMinutes = (index: number) => {
 const scheduledSource = TODAY_SCHEDULES_MOCK.slice(0, 10);
 const completedSource = TODAY_SCHEDULES_MOCK.slice(10, 20);
 
-const CLIENT_NAME_EN_MAP: Record<string, string> = {
-  client_1001: 'Haneul Kim',
-  client_1007: 'Junseo Park',
-  client_1013: 'Minsu Choi',
-  client_1014: 'Subin Lee',
-  client_1015: 'Doyoon Jung',
-  client_1016: 'Jiwoo Han',
-  client_1017: 'Minho Seo',
-  client_1018: 'Jian Kim',
-  client_1019: 'Yujin Park',
-  client_1020: 'Sion Jung',
-  client_1021: 'Harin Oh',
-  client_1022: 'Taehyun Yoon',
-  client_1023: 'Gaeun Moon',
-  client_1024: 'Dohyeon Choi',
-  client_1025: 'Juwon Kim',
-  client_1026: 'Haneul Lee',
-  client_1027: 'Jimin Choi',
-  client_1028: 'Sehun Oh',
-  client_1029: 'Sua Ryu',
-  client_1030: 'Jihoo Bae',
-};
-
 const getLocalizedClientName = (clientId: string, fallbackName: string, locale: string) =>
-  locale === 'en' ? (CLIENT_NAME_EN_MAP[clientId] ?? fallbackName) : fallbackName;
+  getClientNameByLocale(clientId, fallbackName, locale);
 
 export const SCHEDULED_SESSIONS_MOCK: ScheduledSessionGroup[] = SCHEDULED_DATES.map(
   (date, dateIndex) => ({

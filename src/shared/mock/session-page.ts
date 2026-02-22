@@ -37,12 +37,32 @@ const hashString = (value: string) => {
   return hash;
 };
 
+const findScheduleSourceFromSessionId = (sessionId: string) => {
+  const matchedByScheduleId = TODAY_SCHEDULES_MOCK.find((item) => {
+    return (
+      sessionId.includes(item.id) ||
+      sessionId.includes(`scheduled-${item.id}`) ||
+      sessionId.includes(`completed-${item.id}`)
+    );
+  });
+
+  if (matchedByScheduleId) return matchedByScheduleId;
+
+  const matchedByClientId = TODAY_SCHEDULES_MOCK.find((item) => sessionId.includes(item.clientId));
+  if (matchedByClientId) return matchedByClientId;
+
+  return null;
+};
+
 export const getSessionPageMock = (sessionId: string, locale: string): SessionPageData => {
-  const index = hashString(sessionId) % TODAY_SCHEDULES_MOCK.length;
-  const source = TODAY_SCHEDULES_MOCK[index];
+  const resolvedSource = findScheduleSourceFromSessionId(sessionId);
+  const source =
+    resolvedSource ?? TODAY_SCHEDULES_MOCK[hashString(sessionId) % TODAY_SCHEDULES_MOCK.length];
+  const index = TODAY_SCHEDULES_MOCK.findIndex((item) => item.id === source.id);
+  const normalizedIndex = index >= 0 ? index : hashString(sessionId) % TODAY_SCHEDULES_MOCK.length;
   const clientName = getClientNameByLocale(source.clientId, source.clientName, locale);
-  const emotion = EMOTIONS[index % EMOTIONS.length];
-  const distortionType = DISTORTIONS[index % DISTORTIONS.length];
+  const emotion = EMOTIONS[normalizedIndex % EMOTIONS.length];
+  const distortionType = DISTORTIONS[normalizedIndex % DISTORTIONS.length];
   const transcriptSource = locale === 'en' ? EN_TRANSCRIPTS : KO_TRANSCRIPTS;
 
   const transcripts: SessionTranscriptItem[] = transcriptSource.map((text, i) => ({
@@ -61,12 +81,12 @@ export const getSessionPageMock = (sessionId: string, locale: string): SessionPa
     riskType: source.riskType,
     insights: {
       currentEmotion: emotion,
-      confidence: 78 + (index % 18),
+      confidence: 78 + (normalizedIndex % 18),
       emotionHistory: [0, 3, 7].map((minutesAgo, offset) => ({
         minutesAgo,
-        emotion: EMOTIONS[(index + offset) % EMOTIONS.length],
+        emotion: EMOTIONS[(normalizedIndex + offset) % EMOTIONS.length],
       })),
-      phq9Score: 12 + (index % 10),
+      phq9Score: 12 + (normalizedIndex % 10),
       riskType: source.riskType,
       recentEmotionPattern:
         locale === 'en' ? 'Anxiety rises in late evening' : '늦은 저녁 시간대 불안 상승',

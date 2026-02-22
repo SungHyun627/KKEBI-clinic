@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import { LocaleSwitchButton } from '@/shared/ui/locale-switch-button';
 import { getSessionStartContext } from '@/shared/lib/session-start-context';
 import type { SessionStartContextValue } from '@/shared/lib/session-start-context';
@@ -18,6 +19,7 @@ interface SessionHeaderProps {
 
 export default function SessionHeader({ sessionId, sessionData }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
+  const router = useRouter();
   const [context, setContext] = useState<SessionStartContextValue | null>(null);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function SessionHeader({ sessionId, sessionData }: SessionHeaderP
           </Button>
           <Button
             variant="icon"
-            onClick={() => {}}
+            onClick={() => router.back()}
             className="p-0 border-none hover:bg-white h-6 w-6"
           >
             <Image src="/icons/backward.svg" alt="" width={24} height={24} />

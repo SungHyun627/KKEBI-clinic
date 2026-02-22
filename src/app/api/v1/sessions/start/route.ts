@@ -18,7 +18,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const sessionId = `session_${crypto.randomUUID()}`;
+  const normalizedScheduleId =
+    typeof body.scheduleId === 'string' && body.scheduleId.length > 0
+      ? body.scheduleId.replace(/^scheduled-/, '').replace(/^completed-/, '')
+      : null;
+
+  const sessionRef = normalizedScheduleId ?? `client-${body.clientId}`;
+  const sessionId = `session_${sessionRef}_${body.clientId}_${Date.now()}`;
 
   return NextResponse.json({
     success: true,
