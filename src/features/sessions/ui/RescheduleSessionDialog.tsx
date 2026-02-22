@@ -59,17 +59,26 @@ interface TimeWheelPickerProps {
 function TimeWheelPicker({ label, value, onValueChange }: TimeWheelPickerProps) {
   const [open, setOpen] = useState(false);
   const normalizedValue = TIME_OPTIONS.includes(value) ? value : '09:00';
-  const activeIndex = TIME_OPTIONS.indexOf(normalizedValue);
+  const [draftValue, setDraftValue] = useState(normalizedValue);
+  const activeIndex = TIME_OPTIONS.indexOf(draftValue);
+
+  const isUnchanged = draftValue === normalizedValue;
 
   const step = (delta: number) => {
     const nextIndex = getWrappedIndex(activeIndex + delta, TIME_OPTIONS.length);
-    onValueChange(TIME_OPTIONS[nextIndex]);
+    setDraftValue(TIME_OPTIONS[nextIndex]);
   };
 
   return (
     <div className="flex w-full flex-col gap-[10px]">
       <span className="body-16 font-semibold text-label-neutral">{label}</span>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          if (nextOpen) setDraftValue(normalizedValue);
+          setOpen(nextOpen);
+        }}
+      >
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -103,26 +112,40 @@ function TimeWheelPicker({ label, value, onValueChange }: TimeWheelPickerProps) 
               {[-1, 0, 1].map((offset) => {
                 const optionIndex = getWrappedIndex(activeIndex + offset, TIME_OPTIONS.length);
                 const option = TIME_OPTIONS[optionIndex];
+                const [hour, minute] = option.split(':');
                 const distance = Math.abs(offset);
 
                 return (
                   <button
                     key={`${option}-${offset}`}
                     type="button"
-                    onClick={() => onValueChange(option)}
+                    onClick={() => setDraftValue(option)}
                     className={`flex h-[22px] w-full items-center justify-center text-center leading-[22px] transition-colors hover:cursor-pointer ${
                       distance === 0
                         ? 'body-14 font-semibold text-primary'
                         : 'body-14 text-label-alternative'
                     }`}
                   >
-                    {option}
+                    <span className="flex items-center gap-2 self-stretch">
+                      <span>{hour}</span>
+                      <span>:</span>
+                      <span>{minute}</span>
+                    </span>
                   </button>
                 );
               })}
             </div>
           </div>
-          <Button type="button" size="md" className="w-full" onClick={() => setOpen(false)}>
+          <Button
+            type="button"
+            size="md"
+            className="w-full"
+            disabled={isUnchanged}
+            onClick={() => {
+              onValueChange(draftValue);
+              setOpen(false);
+            }}
+          >
             저장
           </Button>
         </PopoverContent>
