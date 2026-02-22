@@ -195,6 +195,8 @@ export default function RescheduleSessionDialog({
     }).format(selectedDate);
   }, [selectedDate, locale]);
 
+  const isDateUnchanged = toDateKey(draftDate) === toDateKey(selectedDate);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col max-w-[784px] w-full items-center px-8 py-7 gap-[26px] rounded-[24px] p-7">
@@ -258,6 +260,7 @@ export default function RescheduleSessionDialog({
                         type="button"
                         size="md"
                         className="w-full"
+                        disabled={isDateUnchanged}
                         onClick={() => {
                           setSelectedDate(draftDate);
                           setIsDatePickerOpen(false);
