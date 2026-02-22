@@ -57,7 +57,11 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
           responsiveCompact
         />
       </span>
-      <TodayScheduleAction clientId={schedule.clientId} clientName={localizedClientName} />
+      <TodayScheduleAction
+        clientId={schedule.clientId}
+        scheduleId={schedule.id}
+        clientName={localizedClientName}
+      />
     </li>
   );
 }

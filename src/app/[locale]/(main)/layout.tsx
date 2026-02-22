@@ -48,7 +48,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
   const userName = authSession?.userName || tCommon('defaultUserName');
-  const isSessionDetailPage = pathname.startsWith('/sessions/');
+  const isSessionDetailPage = pathname.startsWith('/session/');
 
   useEffect(() => {
     const latestSession = getAuthSession();

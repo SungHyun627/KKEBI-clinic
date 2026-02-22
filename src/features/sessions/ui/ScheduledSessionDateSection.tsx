@@ -2,7 +2,6 @@
 
 import type { ScheduledSessionGroup } from '../types/session-list';
 import Divider from '@/shared/ui/divider';
-import { useRouter } from '@/i18n/navigation';
 import ScheduledSessionItemCard from './ScheduledSessionItemCard';
 
 interface ScheduledSessionDateSectionProps {
@@ -18,7 +17,6 @@ export default function ScheduledSessionDateSection({
   moodLabel,
   stressLabel,
 }: ScheduledSessionDateSectionProps) {
-  const router = useRouter();
   return (
     <section className="flex w-full flex-col gap-[23px]">
       <div className="flex flex-col gap-[10px] w-full">
@@ -33,7 +31,6 @@ export default function ScheduledSessionDateSection({
               scheduledDate={group.date}
               moodLabel={moodLabel}
               stressLabel={stressLabel}
-              onStart={(clientId) => router.push(`/sessions/${clientId}`)}
             />
           </li>
         ))}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/shared/ui/button';
@@ -9,6 +10,8 @@ import { DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import type { ClientLookupItem } from '../types/client';
 import { useLocale, useTranslations } from 'next-intl';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
+import { startSession } from '@/features/sessions/api/startSession';
+import { toast } from '@/shared/ui/toast';
 
 interface ClientDetailHeaderProps {
   client: ClientLookupItem;
@@ -20,6 +23,20 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
   const tCommon = useTranslations('common');
   const tDashboard = useTranslations('dashboard');
   const localizedClientName = getClientNameByLocale(client.clientId, client.clientName, locale);
+  const [isStarting, setIsStarting] = useState(false);
+
+  const handleStart = async () => {
+    setIsStarting(true);
+    const result = await startSession({ clientId: client.clientId, source: 'client-detail' });
+    setIsStarting(false);
+
+    if (!result.success || !result.sessionId) {
+      toast(result.message || tCommon('underConstruction'));
+      return;
+    }
+
+    router.push(`/session/${result.sessionId}`);
+  };
 
   return (
     <DrawerHeader className="flex w-full items-center justify-between p-0">
@@ -45,7 +62,8 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
           type="button"
           size="md"
           className="w-full"
-          onClick={() => router.push(`/sessions/${client.clientId}`)}
+          disabled={isStarting}
+          onClick={handleStart}
         >
           {tCommon('start')}
         </Button>

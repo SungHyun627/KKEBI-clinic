@@ -11,13 +11,15 @@ import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeCh
 import { useTranslations } from 'next-intl';
 import type { ScheduledSessionItem } from '../types/session-list';
 import RescheduleSessionDialog from './RescheduleSessionDialog';
+import { useRouter } from '@/i18n/navigation';
+import { startSession } from '../api/startSession';
+import { toast } from '@/shared/ui/toast';
 
 interface ScheduledSessionItemCardProps {
   item: ScheduledSessionItem;
   scheduledDate: string;
   moodLabel: string;
   stressLabel: string;
-  onStart: (clientId: string) => void;
 }
 
 export default function ScheduledSessionItemCard({
@@ -25,11 +27,29 @@ export default function ScheduledSessionItemCard({
   scheduledDate,
   moodLabel,
   stressLabel,
-  onStart,
 }: ScheduledSessionItemCardProps) {
+  const router = useRouter();
   const tCommon = useTranslations('common');
   const tSessions = useTranslations('sessionList');
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+
+  const handleStart = async () => {
+    setIsStarting(true);
+    const result = await startSession({
+      clientId: item.clientId,
+      scheduleId: item.id,
+      source: 'sessions',
+    });
+    setIsStarting(false);
+
+    if (!result.success || !result.sessionId) {
+      toast(result.message || tSessions('loadFailed'));
+      return;
+    }
+
+    router.push(`/session/${result.sessionId}`);
+  };
 
   return (
     <div className="flex flex-col w-full items-start p-[26px] gap-[18px] justify-center rounded-3xl bg-neutral-99">
@@ -56,7 +76,8 @@ export default function ScheduledSessionItemCard({
             type="button"
             size="md"
             className="w-full w-max-[181px]"
-            onClick={() => onStart(item.clientId)}
+            disabled={isStarting}
+            onClick={handleStart}
           >
             {tCommon('start')}
           </Button>
