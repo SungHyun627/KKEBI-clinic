@@ -48,7 +48,6 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
   const userName = authSession?.userName || tCommon('defaultUserName');
-  const isSessionDetailPage = pathname.startsWith('/session/');
 
   useEffect(() => {
     const latestSession = getAuthSession();
@@ -71,10 +70,6 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         (item.href === '/' && pathname === '/') ||
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.key ?? 'dashboard';
-
-  if (isSessionDetailPage) {
-    return <main className="min-h-screen w-full bg-white p-5">{children}</main>;
-  }
 
   return (
     <div className="min-h-screen w-full bg-white">

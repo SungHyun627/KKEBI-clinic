@@ -28,7 +28,7 @@ export default function SessionHeader({ sessionId }: SessionHeaderProps) {
   const riskType = context?.riskType;
 
   return (
-    <div className="flex w-full justify-between px-3">
+    <div className="flex w-full justify-between p-5">
       <div className="flex items-center gap-4">
         <span className="body-18 font-semibold text-label-normal">
           {clientName}
