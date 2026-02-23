@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
-import type { SessionAutoRecordData } from '../types/session-page';
+import type { SessionAutoRecordData, SessionInsightsData } from '../types/session-page';
 import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
 import { toast } from '@/shared/ui/toast';
 import SessionTranscriptCard from './SessionTranscriptCard';
@@ -13,6 +13,7 @@ import SessionAudioControls from './SessionAudioControls';
 interface SessionAutoRecordPanelProps {
   sessionId: string;
   autoRecord: SessionAutoRecordData;
+  baseInsights: SessionInsightsData;
   onRecorderStateChange?: (state: {
     isRecording: boolean;
     isPaused: boolean;
@@ -20,6 +21,7 @@ interface SessionAutoRecordPanelProps {
     visibleAudioLevel: number;
   }) => void;
   onRiskSignalDetected?: (payload: { text: string; timestamp: string }) => void;
+  onAnalysisChange?: (insights: SessionInsightsData | null) => void;
 }
 
 type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
@@ -60,11 +62,116 @@ function renderHighlightedText(text: string, locale: string) {
   });
 }
 
+function detectEmotionFromText(text: string): SessionInsightsData['currentEmotion'] {
+  const lower = text.toLowerCase();
+  const rules: Array<{ emotion: SessionInsightsData['currentEmotion']; keywords: string[] }> = [
+    { emotion: 'anxious', keywords: ['불안', '초조', 'anxious', 'anxiety', 'nervous'] },
+    { emotion: 'sad', keywords: ['슬프', '우울', 'sad', 'depressed'] },
+    { emotion: 'angry', keywords: ['화나', '분노', 'angry', 'furious', 'irritated'] },
+    { emotion: 'fearful', keywords: ['무섭', '두렵', 'fear', 'afraid', 'scared'] },
+    { emotion: 'happy', keywords: ['기뻐', '좋아', 'happy', 'glad', 'relieved'] },
+  ];
+
+  const matched = rules.find((rule) => rule.keywords.some((keyword) => lower.includes(keyword)));
+  return matched?.emotion ?? 'calm';
+}
+
+function detectDistortionType(texts: string[]): SessionInsightsData['distortionType'] {
+  const joined = texts.join(' ').toLowerCase();
+  if (/항상|절대|완전히|전혀|always|never|completely/.test(joined)) return 'black_and_white';
+  if (/매번|언제나|모든 사람|아무도|every time|everyone|no one/.test(joined))
+    return 'overgeneralization';
+  if (/최악|끔찍|망했|재앙|worst|disaster|ruined/.test(joined)) return 'catastrophizing';
+  return 'should_statement';
+}
+
+function buildLiveInsights(
+  base: SessionInsightsData,
+  transcripts: SessionAutoRecordData['transcripts'],
+  locale: string,
+): SessionInsightsData | null {
+  if (transcripts.length === 0) return null;
+
+  const clientLines = transcripts.filter((line) => line.speaker === 'client');
+  const sourceLines = clientLines.length > 0 ? clientLines : transcripts;
+  const latestText = sourceLines[sourceLines.length - 1]?.text ?? '';
+  const texts = sourceLines.map((line) => line.text);
+  const fullText = texts.join(' ').toLowerCase();
+
+  const currentEmotion = detectEmotionFromText(latestText);
+  const confidence = Math.max(62, Math.min(96, 68 + Math.min(texts.length, 6) * 4));
+
+  const riskHits = (
+    fullText.match(/자해|자살|죽고 싶|포기|self-harm|suicide|give up|want to die/g) ?? []
+  ).length;
+  const riskType = riskHits >= 2 ? '위험' : riskHits >= 1 ? '주의' : '안정';
+  const phq9Score = riskType === '위험' ? 19 : riskType === '주의' ? 13 : 7;
+
+  const recentClientLines = sourceLines.slice(-3);
+  const emotionHistory = recentClientLines.map((line, idx) => ({
+    emotion: detectEmotionFromText(line.text),
+    minutesAgo: (recentClientLines.length - 1 - idx) * 3,
+  }));
+
+  const distortionType = detectDistortionType(texts);
+  const distortionExample =
+    texts
+      .slice()
+      .reverse()
+      .find((line) => {
+        const lower = line.toLowerCase();
+        return (
+          /항상|절대|완전히|전혀|always|never|completely/.test(lower) ||
+          /매번|언제나|모든 사람|아무도|every time|everyone|no one/.test(lower) ||
+          /최악|끔찍|망했|재앙|worst|disaster|ruined/.test(lower) ||
+          /해야 해|하면 안 돼|should|must|have to/.test(lower)
+        );
+      }) ?? base.distortionExample;
+
+  const concernsPool: Array<{ key: string; ko: string; en: string; test: RegExp }> = [
+    {
+      key: 'work',
+      ko: '업무 스트레스',
+      en: 'Work stress',
+      test: /회사|업무|상사|work|boss|report/,
+    },
+    { key: 'sleep', ko: '수면 저하', en: 'Sleep decline', test: /잠|수면|sleep|insomnia/ },
+    {
+      key: 'safety',
+      ko: '안전 위험',
+      en: 'Safety risk',
+      test: /자해|자살|죽고 싶|self-harm|suicide/,
+    },
+    { key: 'self', ko: '자기비난', en: 'Self-criticism', test: /실패|망했|failure|worthless/ },
+  ];
+  const keyConcerns = concernsPool
+    .filter((item) => item.test.test(fullText))
+    .map((item) => (locale === 'en' ? item.en : item.ko));
+
+  return {
+    ...base,
+    currentEmotion,
+    confidence,
+    emotionHistory: emotionHistory.length > 0 ? emotionHistory : base.emotionHistory,
+    phq9Score,
+    riskType,
+    recentEmotionPattern:
+      locale === 'en'
+        ? `Latest trend: ${currentEmotion} response is dominant`
+        : `최근 패턴: ${currentEmotion === 'anxious' ? '불안' : currentEmotion === 'sad' ? '슬픔' : currentEmotion === 'angry' ? '분노' : currentEmotion === 'fearful' ? '두려움' : currentEmotion === 'happy' ? '기쁨' : '평온'} 반응이 우세`,
+    keyConcerns: keyConcerns.length > 0 ? keyConcerns : base.keyConcerns,
+    distortionType,
+    distortionExample,
+  };
+}
+
 export default function SessionAutoRecordPanel({
   sessionId,
   autoRecord,
+  baseInsights,
   onRecorderStateChange,
   onRiskSignalDetected,
+  onAnalysisChange,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const [transcriptItems, setTranscriptItems] = useState(() => []);
@@ -98,6 +205,11 @@ export default function SessionAutoRecordPanel({
       visibleAudioLevel,
     });
   }, [elapsedSeconds, isPaused, isRecording, onRecorderStateChange, visibleAudioLevel]);
+
+  useEffect(() => {
+    if (!onAnalysisChange) return;
+    onAnalysisChange(buildLiveInsights(baseInsights, transcriptItems, locale));
+  }, [baseInsights, locale, onAnalysisChange, transcriptItems]);
 
   useEffect(() => {
     if (!isRecording || isPaused) return;

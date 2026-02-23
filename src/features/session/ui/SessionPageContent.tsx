@@ -24,6 +24,9 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     visibleAudioLevel: 0,
   });
   const [riskBanner, setRiskBanner] = useState<{ text: string; timestamp: string } | null>(null);
+  const [analysisInsights, setAnalysisInsights] = useState<SessionPageData['insights'] | null>(
+    null,
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -92,12 +95,17 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
         </div>
       ) : (
         <div className="grid w-full flex-1 grid-cols-[1fr_1.5fr] gap-[34px]">
-          <SessionInsightsPanel insights={data.insights} isRecording={recorderState.isRecording} />
+          <SessionInsightsPanel
+            insights={analysisInsights ?? data.insights}
+            isRecording={Boolean(analysisInsights)}
+          />
           <SessionAutoRecordPanel
             sessionId={sessionId}
             autoRecord={data.autoRecord}
+            baseInsights={data.insights}
             onRecorderStateChange={setRecorderState}
             onRiskSignalDetected={(payload) => setRiskBanner(payload)}
+            onAnalysisChange={setAnalysisInsights}
           />
         </div>
       )}
