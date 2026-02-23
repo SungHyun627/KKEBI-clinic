@@ -171,6 +171,12 @@ export function useSessionAutoRecordRuntime({
     setIsPaused((prev) => !prev);
   };
 
+  const handlePrepareEndSession = useCallback(() => {
+    if (!isRecording) return;
+    setIsPaused(true);
+    setAudioLevel(0);
+  }, [isRecording]);
+
   const handleAddDemoDialogue = () => {
     const list = getDemoConversation(locale);
     const dialogue = list[demoIndex % list.length];
@@ -211,6 +217,7 @@ export function useSessionAutoRecordRuntime({
     toggleBookmark,
     handleStartRecording,
     handlePauseResume,
+    handlePrepareEndSession,
     handleAddDemoDialogue,
   };
 }

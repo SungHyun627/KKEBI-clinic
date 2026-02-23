@@ -33,6 +33,7 @@ interface SessionHeaderProps {
     keyConcernHistory: string[];
     distortionExampleHistory: string[];
   };
+  onBeforeOpenEndDialog?: () => Promise<void> | void;
 }
 
 function formatElapsed(seconds: number): string {
@@ -46,6 +47,7 @@ export default function SessionHeader({
   sessionData,
   recorderState,
   summarySnapshot,
+  onBeforeOpenEndDialog,
 }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -147,7 +149,10 @@ export default function SessionHeader({
       <div className="flex gap-3">
         <div className="flex items-center gap-[19px] max-w-[135px] w-full">
           <Button
-            onClick={() => setIsEndDialogOpen(true)}
+            onClick={async () => {
+              await onBeforeOpenEndDialog?.();
+              setIsEndDialogOpen(true);
+            }}
             className="h-[38px] w-[92px] rounded-[8px]"
           >
             상담 종료

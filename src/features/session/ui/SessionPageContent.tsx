@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import SessionHeader from './SessionHeader';
 import SessionInsightsPanel from './SessionInsightsPanel';
@@ -30,6 +30,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
   const [recentEmotionHistory, setRecentEmotionHistory] = useState<SessionEmotionType[]>([]);
   const [keyConcernHistory, setKeyConcernHistory] = useState<string[]>([]);
   const [distortionExampleHistory, setDistortionExampleHistory] = useState<string[]>([]);
+  const prepareEndSessionRef = useRef<(() => void) | null>(null);
 
   const handleRiskSignalDetected = useCallback((payload: { text: string; timestamp: string }) => {
     setRiskBanner(payload);
@@ -57,6 +58,15 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ];
       return next.slice(0, 6);
     });
+  }, []);
+
+  const handleRegisterPrepareEndSession = useCallback((handler: () => void) => {
+    prepareEndSessionRef.current = handler;
+  }, []);
+
+  const handleBeforeOpenEndDialog = useCallback(async () => {
+    prepareEndSessionRef.current?.();
+    await new Promise((resolve) => setTimeout(resolve, 0));
   }, []);
 
   useEffect(() => {
@@ -101,6 +111,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
               }
             : undefined
         }
+        onBeforeOpenEndDialog={handleBeforeOpenEndDialog}
       />
       {riskBanner ? (
         <div className="flex items-center justify-between gap-4 rounded-[14px] bg-[#FFE5E5] px-4 py-3">
@@ -150,6 +161,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             onRecorderStateChange={setRecorderState}
             onRiskSignalDetected={handleRiskSignalDetected}
             onAnalysisChange={handleAnalysisChange}
+            onRegisterPrepareEndSession={handleRegisterPrepareEndSession}
           />
         </div>
       )}

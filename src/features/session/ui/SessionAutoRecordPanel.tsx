@@ -24,6 +24,7 @@ interface SessionAutoRecordPanelProps {
   }) => void;
   onRiskSignalDetected?: (payload: { text: string; timestamp: string }) => void;
   onAnalysisChange?: (insights: SessionInsightsData | null) => void;
+  onRegisterPrepareEndSession?: (handler: () => void) => void;
 }
 
 export default function SessionAutoRecordPanel({
@@ -33,6 +34,7 @@ export default function SessionAutoRecordPanel({
   onRecorderStateChange,
   onRiskSignalDetected,
   onAnalysisChange,
+  onRegisterPrepareEndSession,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const tSession = useTranslations('sessionList');
@@ -48,6 +50,7 @@ export default function SessionAutoRecordPanel({
     toggleBookmark,
     handleStartRecording,
     handlePauseResume,
+    handlePrepareEndSession,
     handleAddDemoDialogue,
   } = useSessionAutoRecordRuntime({
     sessionId,
@@ -71,6 +74,10 @@ export default function SessionAutoRecordPanel({
       visibleAudioLevel,
     });
   }, [elapsedSeconds, isPaused, isRecording, onRecorderStateChange, visibleAudioLevel]);
+
+  useEffect(() => {
+    onRegisterPrepareEndSession?.(handlePrepareEndSession);
+  }, [handlePrepareEndSession, onRegisterPrepareEndSession]);
 
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
