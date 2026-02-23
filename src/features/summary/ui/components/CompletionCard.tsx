@@ -19,35 +19,35 @@ export default function CompletionCard({
   onTogglePlay,
 }: CompletionCardProps) {
   return (
-    <div className="rounded-[20px] bg-[rgba(66,158,0,0.10)] p-6">
-      <div className="flex items-center gap-3">
-        <Image src="/icons/checkmark.svg" alt="" width={20} height={20} />
-        <span className="body-18 font-semibold text-[#2D7A00]">
+    <div className="flex flex-col w-full items-center gap-[33px] px-[18px] py-[26px] rounded-[24px] bg-neutral-99">
+      <div className="flex flex-col items-center gap-[23px]">
+        <Image src="/icons/checkmark.svg" alt={'상담 완료'} width={96} height={96} />
+        <span className="text-[24px] font-semibold text-label-normal">
           {locale === 'en' ? 'Session completed' : '상담이 완료되었습니다'}
         </span>
+        <div className="flex w-fit flex-col items-start gap-2 self-center">
+          <div className="flex w-full items-center gap-3">
+            <span className="body-16 text-neutral-60 min-w-[70px]">상담 날짜</span>
+            <span className="body-16 font-medium text-neutral-30">{endedAt}</span>
+          </div>
+          <div className="flex w-full items-center gap-3">
+            <span className="body-16 text-neutral-60 min-w-[70px]">상담 시간</span>
+            <span className="body-16 font-medium text-neutral-30">{duration}</span>
+          </div>
+        </div>
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-3 body-14 text-label-normal">
-        <span>{duration}</span>
-        <span>•</span>
-        <span>{endedAt}</span>
-      </div>
+
       <Button
         type="button"
-        variant="outline"
-        className="mt-4 h-10 rounded-[10px] border-neutral-95 bg-white"
+        className={`w-full max-w-[416px] ${isPlaying ? 'bg-white text-primary hover:bg-white' : ''}`}
+        size="lg"
         disabled={!hasRecording}
         onClick={onTogglePlay}
       >
-        <Image
-          src={isPlaying ? '/icons/pause.svg' : '/icons/play.svg'}
-          alt=""
-          width={18}
-          height={18}
-        />
         {isPlaying
           ? locale === 'en'
             ? 'Pause'
-            : '일시정지'
+            : '녹음 일시정지'
           : locale === 'en'
             ? 'Play recording'
             : '녹음 재생'}

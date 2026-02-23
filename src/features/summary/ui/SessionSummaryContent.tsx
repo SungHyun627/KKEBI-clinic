@@ -39,6 +39,16 @@ function formatElapsed(seconds: number) {
   return `${mm}:${ss}`;
 }
 
+function formatSummaryDate(iso?: string) {
+  if (!iso) return '-';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '-';
+  const yyyy = String(date.getFullYear());
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}. ${mm}. ${dd}`;
+}
+
 function getDistortionLabel(locale: string, distortionType?: string) {
   if (distortionType === 'black_and_white') return locale === 'en' ? 'Black-and-white' : '흑백논리';
   if (distortionType === 'overgeneralization')
@@ -100,12 +110,12 @@ export default function SessionSummaryContent({
   }, [locale, sessionId]);
 
   const transcriptItems = payload?.runtime?.transcriptItems ?? [];
-  const duration = formatElapsed(payload?.recorderState?.elapsedSeconds ?? 0);
-  const endedAt = payload?.endedAt ? new Date(payload.endedAt).toLocaleString(locale) : '-';
+  const durationMinutesText = `${Math.floor((payload?.recorderState?.elapsedSeconds ?? 0) / 60)}분`;
+  const endedAt = formatSummaryDate(payload?.endedAt);
   const clientName = payload?.sessionData?.clientName ?? tCommon('defaultUserName');
   const sessionType = payload?.sessionData?.sessionType;
   const riskType = payload?.sessionData?.riskType;
-  const hasRecording = transcriptItems.length > 0;
+  const hasRecording = false;
 
   const derivedRiskEvaluation: RiskEvaluation = (() => {
     const risk = payload?.summarySnapshot?.insights?.riskType;
@@ -199,7 +209,7 @@ export default function SessionSummaryContent({
   }
 
   return (
-    <section className="flex w-full flex-col">
+    <section className="flex w-full flex-col gap-[62px]">
       <SummaryTopBar
         locale={locale}
         backLabel={backLabel}
@@ -214,58 +224,59 @@ export default function SessionSummaryContent({
         onBack={() => router.push(`/${locale}`)}
       />
 
-      <div className="grid w-full grid-cols-1 gap-4 pb-8 lg:grid-cols-2">
+      <div className="flex flex-col gap-[53px] items-start w-full px-15">
         <CompletionCard
           locale={locale}
-          duration={duration}
+          duration={durationMinutesText}
           endedAt={endedAt}
           hasRecording={hasRecording}
           isPlaying={isPlaying}
           onTogglePlay={() => setIsPlaying((prev) => !prev)}
         />
+        <div className="flex flex-col gap-[70px] items-start w-full">
+          <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
 
-        <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
+          <TopicsPatternsCard
+            locale={locale}
+            emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
+            distortionLabel={distortionLabel}
+            bookmarkedMoments={bookmarkedMoments}
+          />
 
-        <TopicsPatternsCard
-          locale={locale}
-          emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
-          distortionLabel={distortionLabel}
-          bookmarkedMoments={bookmarkedMoments}
-        />
+          <CounselorEvaluationCard
+            locale={locale}
+            riskEvaluation={riskEvaluation}
+            nextSessionRecommendation={nextSessionRecommendation}
+            evaluationMemo={evaluationMemo}
+            onRiskChange={handleRiskEvaluationChange}
+            onNextSessionChange={setNextSessionRecommendation}
+            onMemoChange={setEvaluationMemo}
+          />
 
-        <CounselorEvaluationCard
-          locale={locale}
-          riskEvaluation={riskEvaluation}
-          nextSessionRecommendation={nextSessionRecommendation}
-          evaluationMemo={evaluationMemo}
-          onRiskChange={handleRiskEvaluationChange}
-          onNextSessionChange={setNextSessionRecommendation}
-          onMemoChange={setEvaluationMemo}
-        />
+          <RecommendedMissionsCard
+            locale={locale}
+            missions={missions}
+            selectedMissions={selectedMissions}
+            onToggleMission={(id, checked) => {
+              setSelectedMissions((prev) =>
+                checked ? [...prev, id] : prev.filter((missionId) => missionId !== id),
+              );
+            }}
+          />
 
-        <RecommendedMissionsCard
-          locale={locale}
-          missions={missions}
-          selectedMissions={selectedMissions}
-          onToggleMission={(id, checked) => {
-            setSelectedMissions((prev) =>
-              checked ? [...prev, id] : prev.filter((missionId) => missionId !== id),
-            );
-          }}
-        />
+          <NextSessionBookingCard
+            locale={locale}
+            coordinationLater={coordinationLater}
+            nextDate={nextDate}
+            nextTime={nextTime}
+            onCoordinationLaterChange={setCoordinationLater}
+            onNextDateChange={setNextDate}
+            onNextTimeChange={setNextTime}
+          />
+        </div>
 
-        <NextSessionBookingCard
-          locale={locale}
-          coordinationLater={coordinationLater}
-          nextDate={nextDate}
-          nextTime={nextTime}
-          onCoordinationLaterChange={setCoordinationLater}
-          onNextDateChange={setNextDate}
-          onNextTimeChange={setNextTime}
-        />
+        <TasksTabCard locale={locale} assignedTasks={assignedTasks} missions={missions} />
       </div>
-
-      <TasksTabCard locale={locale} assignedTasks={assignedTasks} missions={missions} />
 
       <div className="mt-4 pb-8">
         <Button type="button" className="h-12 w-full rounded-[12px]">
