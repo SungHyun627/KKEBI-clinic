@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from 'next-intl';
-import type { SessionAutoRecordData, SessionInsightsData } from '../types/session-page';
+import type {
+  SessionAutoRecordData,
+  SessionEmotionType,
+  SessionInsightsData,
+} from '../types/session-page';
 import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
 import { toast } from '@/shared/ui/toast';
 import SessionTranscriptCard from './SessionTranscriptCard';
@@ -233,7 +237,7 @@ function buildLiveInsights(
   const texts = sourceLines.map((line) => line.text);
   const fullText = texts.join(' ').toLowerCase();
 
-  const resolvedEmotions = sourceLines.map((line, index) => {
+  const resolvedEmotions: SessionEmotionType[] = sourceLines.map((line, index) => {
     const detected = detectEmotionFromText(line.text);
     if (detected !== 'calm') return detected;
     const previousDetected = sourceLines
@@ -243,7 +247,7 @@ function buildLiveInsights(
       .find((emotion) => emotion !== 'calm');
     return previousDetected ?? 'calm';
   });
-  let currentEmotion = resolvedEmotions[resolvedEmotions.length - 1] ?? 'calm';
+  let currentEmotion: SessionEmotionType = resolvedEmotions[resolvedEmotions.length - 1] ?? 'calm';
   const confidence = Math.max(62, Math.min(96, 68 + Math.min(texts.length, 6) * 4));
 
   const riskHits = (
@@ -260,7 +264,7 @@ function buildLiveInsights(
   const riskType = riskHits >= 2 ? '위험' : riskHits >= 1 ? '주의' : '안정';
   const phq9Score = riskType === '위험' ? 19 : riskType === '주의' ? 13 : 7;
 
-  const rawEmotionHistory = resolvedEmotions.slice(-3);
+  const rawEmotionHistory: SessionEmotionType[] = resolvedEmotions.slice(-3);
   const dedupedEmotionHistory = rawEmotionHistory.filter(
     (emotion, idx, arr) => idx === 0 || emotion !== arr[idx - 1],
   );
@@ -341,7 +345,7 @@ export default function SessionAutoRecordPanel({
   onAnalysisChange,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
-  const [transcriptItems, setTranscriptItems] = useState(() => []);
+  const [transcriptItems, setTranscriptItems] = useState<SessionAutoRecordData['transcripts']>([]);
   const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(() => new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [micPermission, setMicPermission] = useState<MicPermissionState>('idle');
