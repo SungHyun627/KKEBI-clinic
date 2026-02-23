@@ -20,6 +20,7 @@ export type SummaryPayload = {
     recentEmotionHistory?: string[];
     recentCognitiveDistortions?: string[];
     distortionExampleHistory?: string[];
+    additionalMemo?: string;
   } | null;
   runtime?: {
     transcriptItems?: SummaryTranscriptItem[];
@@ -35,7 +36,7 @@ export interface SummaryTranscriptItem {
 }
 
 export type RiskEvaluation = 'stable' | 'caution' | 'risk' | 'urgent';
-export type NextSessionRecommendation = '1w' | '2w' | '1m' | 'as-needed';
+export type FollowUpSessionTiming = '1w' | '2w' | '1m' | 'as-needed';
 
 export type MissionItem = {
   id: string;

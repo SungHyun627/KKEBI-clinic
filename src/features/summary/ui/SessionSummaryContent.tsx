@@ -10,12 +10,7 @@ import {
   downloadSessionTranscriptTxt,
   printSessionSummaryPdf,
 } from '@/features/summary/lib/downloads';
-import type {
-  MissionItem,
-  NextSessionRecommendation,
-  RiskEvaluation,
-  SummaryPayload,
-} from '@/features/summary/types/summary';
+import type { MissionItem, SummaryPayload } from '@/features/summary/types/summary';
 import {
   AiSummaryCard,
   CompletionCard,
@@ -33,12 +28,6 @@ interface SessionSummaryContentProps {
   locale: string;
   sessionId: string;
   backLabel: string;
-}
-
-function formatElapsed(seconds: number) {
-  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const ss = String(seconds % 60).padStart(2, '0');
-  return `${mm}:${ss}`;
 }
 
 function formatSummaryDate(iso?: string) {
@@ -64,10 +53,6 @@ export default function SessionSummaryContent({
   const [error, setError] = useState<string | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [riskEvaluationOverride, setRiskEvaluationOverride] = useState<RiskEvaluation | null>(null);
-  const [nextSessionRecommendation, setNextSessionRecommendation] =
-    useState<NextSessionRecommendation>('2w');
-  const [evaluationMemo, setEvaluationMemo] = useState('');
   const [summaryTextOverride, setSummaryTextOverride] = useState('');
   const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
   const [coordinationLater, setCoordinationLater] = useState(false);
@@ -109,15 +94,6 @@ export default function SessionSummaryContent({
   const riskType = payload?.sessionData?.riskType;
   const hasRecording = false;
 
-  const derivedRiskEvaluation: RiskEvaluation = (() => {
-    const risk = payload?.summarySnapshot?.insights?.riskType;
-    if (risk === '안정') return 'stable';
-    if (risk === '위험') return 'risk';
-    return 'caution';
-  })();
-
-  const riskEvaluation = riskEvaluationOverride ?? derivedRiskEvaluation;
-
   const derivedSummaryText = useMemo(() => {
     const clientTurns = transcriptItems.filter((item) => item.speaker === 'client');
     const latestClientText = clientTurns.at(-1)?.text ?? '';
@@ -156,10 +132,6 @@ export default function SessionSummaryContent({
     const trimmed = value.trim();
     const defaultTrimmed = derivedSummaryText.trim();
     setSummaryTextOverride(trimmed === defaultTrimmed ? '' : value);
-  };
-
-  const handleRiskEvaluationChange = (value: RiskEvaluation) => {
-    setRiskEvaluationOverride(value === derivedRiskEvaluation ? null : value);
   };
 
   const handleDownloadTxt = () => {
@@ -235,12 +207,7 @@ export default function SessionSummaryContent({
 
           <CounselorEvaluationCard
             locale={locale}
-            riskEvaluation={riskEvaluation}
-            nextSessionRecommendation={nextSessionRecommendation}
-            evaluationMemo={evaluationMemo}
-            onRiskChange={handleRiskEvaluationChange}
-            onNextSessionChange={setNextSessionRecommendation}
-            onMemoChange={setEvaluationMemo}
+            additionalMemo={payload?.summarySnapshot?.additionalMemo}
           />
 
           <RecommendedMissionsCard

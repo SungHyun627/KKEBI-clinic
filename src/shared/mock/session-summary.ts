@@ -93,6 +93,7 @@ export function getSessionSummaryMock(sessionId: string, locale: string): Summar
         distortionLabelByLocale(sessionPage.insights.distortionType, locale),
       ],
       distortionExampleHistory: [sessionPage.insights.distortionExample],
+      additionalMemo: sessionPage.autoRecord.counselorMemo,
     },
     runtime: {
       transcriptItems,
