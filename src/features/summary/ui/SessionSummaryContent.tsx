@@ -18,7 +18,6 @@ import {
   NextSessionBookingCard,
   RecommendedMissionsCard,
   SummaryTopBar,
-  TasksTabCard,
   EmotionPatternsCard,
   DetectedCognitiveDistortionCard,
   BookmarkedMomentsCard,
@@ -51,13 +50,12 @@ export default function SessionSummaryContent({
   const [payload, setPayload] = useState<SummaryPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [summaryTextOverride, setSummaryTextOverride] = useState('');
   const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
-  const [coordinationLater, setCoordinationLater] = useState(false);
   const [nextDate, setNextDate] = useState('');
-  const [nextTime, setNextTime] = useState('');
+  const [nextStartTime, setNextStartTime] = useState('09:00');
+  const [nextEndTime, setNextEndTime] = useState('10:00');
 
   useEffect(() => {
     let cancelled = false;
@@ -253,16 +251,14 @@ export default function SessionSummaryContent({
 
           <NextSessionBookingCard
             locale={locale}
-            coordinationLater={coordinationLater}
             nextDate={nextDate}
-            nextTime={nextTime}
-            onCoordinationLaterChange={setCoordinationLater}
+            nextStartTime={nextStartTime}
+            nextEndTime={nextEndTime}
             onNextDateChange={setNextDate}
-            onNextTimeChange={setNextTime}
+            onNextStartTimeChange={setNextStartTime}
+            onNextEndTimeChange={setNextEndTime}
           />
         </div>
-
-        <TasksTabCard locale={locale} assignedTasks={assignedTasks} missions={missions} />
       </div>
 
       <div className="mt-4 pb-8">
