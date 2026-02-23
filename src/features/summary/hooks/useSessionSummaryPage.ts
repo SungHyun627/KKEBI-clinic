@@ -99,9 +99,12 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
   const durationMinutesText = `${Math.floor((payload?.recorderState?.elapsedSeconds ?? 0) / 60)}분`;
   const endedAt = formatSummaryDate(payload?.endedAt);
   const clientName = payload?.sessionData?.clientName ?? tCommon('defaultUserName');
+  const profileSuffix = tCommon('profileSuffix');
   const sessionType = payload?.sessionData?.sessionType;
   const riskType = payload?.sessionData?.riskType;
   const hasRecording = false;
+  const emotions = payload?.summarySnapshot?.recentEmotionHistory ?? [];
+  const distortions = payload?.summarySnapshot?.recentCognitiveDistortions ?? [];
 
   const derivedSummaryText = useMemo(() => {
     const clientTurns = transcriptItems.filter((item) => item.speaker === 'client');
@@ -250,9 +253,12 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
     durationMinutesText,
     endedAt,
     clientName,
+    profileSuffix,
     sessionType,
     riskType,
     hasRecording,
+    emotions,
+    distortions,
     bookmarkedMoments,
     missions,
     riskEvaluation,

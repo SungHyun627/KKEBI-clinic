@@ -38,9 +38,12 @@ export default function SessionSummaryContent({
     durationMinutesText,
     endedAt,
     clientName,
+    profileSuffix,
     sessionType,
     riskType,
     hasRecording,
+    emotions,
+    distortions,
     bookmarkedMoments,
     missions,
     riskEvaluation,
@@ -85,7 +88,7 @@ export default function SessionSummaryContent({
         locale={locale}
         backLabel={backLabel}
         clientName={clientName}
-        profileSuffix={tCommon('profileSuffix')}
+        profileSuffix={profileSuffix}
         sessionType={sessionType}
         riskType={riskType}
         hasRecording={hasRecording}
@@ -108,14 +111,8 @@ export default function SessionSummaryContent({
           <div className="flex flex-col gap-[70px] items-start w-full">
             <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
 
-            <EmotionPatternsCard
-              locale={locale}
-              emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
-            />
-            <DetectedCognitiveDistortionCard
-              locale={locale}
-              distortions={payload?.summarySnapshot?.recentCognitiveDistortions ?? []}
-            />
+            <EmotionPatternsCard locale={locale} emotions={emotions} />
+            <DetectedCognitiveDistortionCard locale={locale} distortions={distortions} />
             <BookmarkedMomentsCard locale={locale} moments={bookmarkedMoments} />
 
             <CounselorEvaluationCard
