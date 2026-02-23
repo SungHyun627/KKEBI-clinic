@@ -26,6 +26,7 @@ interface UseSessionSummaryPageProps {
 interface SummarySubmitFormValues {
   riskEvaluation: RiskEvaluation | '';
   followUpSessionTiming: FollowUpSessionTiming | '';
+  additionalMemo: string;
   selectedMissionIds: string[];
   nextDate: string;
   nextStartTime: string;
@@ -58,6 +59,7 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
     defaultValues: {
       riskEvaluation: '',
       followUpSessionTiming: '',
+      additionalMemo: '',
       selectedMissionIds: [],
       nextDate: '',
       nextStartTime: '',
@@ -122,6 +124,7 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
   const summaryText = summaryTextOverride || derivedSummaryText;
   const riskEvaluation = useWatch({ control, name: 'riskEvaluation' });
   const followUpSessionTiming = useWatch({ control, name: 'followUpSessionTiming' });
+  const additionalMemo = useWatch({ control, name: 'additionalMemo' });
   const selectedMissionIds = useWatch({ control, name: 'selectedMissionIds' });
   const nextDate = useWatch({ control, name: 'nextDate' });
   const nextStartTime = useWatch({ control, name: 'nextStartTime' });
@@ -263,6 +266,7 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
     missions,
     riskEvaluation,
     followUpSessionTiming,
+    additionalMemo,
     selectedMissionIds,
     nextDate,
     nextStartTime,
@@ -272,6 +276,8 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
       setValue('riskEvaluation', value, { shouldDirty: true, shouldValidate: true }),
     setFollowUpSessionTiming: (value: FollowUpSessionTiming) =>
       setValue('followUpSessionTiming', value, { shouldDirty: true, shouldValidate: true }),
+    setAdditionalMemo: (value: string) =>
+      setValue('additionalMemo', value, { shouldDirty: true, shouldValidate: true }),
     setNextDate: (value: string) =>
       setValue('nextDate', value, { shouldDirty: true, shouldValidate: true }),
     setNextStartTime: (value: string) =>

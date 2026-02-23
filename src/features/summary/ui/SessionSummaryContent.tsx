@@ -48,6 +48,7 @@ export default function SessionSummaryContent({
     missions,
     riskEvaluation,
     followUpSessionTiming,
+    additionalMemo,
     selectedMissionIds,
     nextDate,
     nextStartTime,
@@ -55,6 +56,7 @@ export default function SessionSummaryContent({
     isSubmitEnabled,
     setRiskEvaluation,
     setFollowUpSessionTiming,
+    setAdditionalMemo,
     setNextDate,
     setNextStartTime,
     setNextEndTime,
@@ -119,8 +121,10 @@ export default function SessionSummaryContent({
               locale={locale}
               riskEvaluation={riskEvaluation}
               followUpSessionTiming={followUpSessionTiming}
+              additionalMemo={additionalMemo}
               onRiskEvaluationChange={setRiskEvaluation}
               onFollowUpSessionTimingChange={setFollowUpSessionTiming}
+              onAdditionalMemoChange={setAdditionalMemo}
             />
 
             <RecommendedMissionsCard

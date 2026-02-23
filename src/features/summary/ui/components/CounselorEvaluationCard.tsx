@@ -7,16 +7,20 @@ interface CounselorEvaluationCardProps {
   locale: string;
   riskEvaluation: RiskEvaluation | '';
   followUpSessionTiming: FollowUpSessionTiming | '';
+  additionalMemo: string;
   onRiskEvaluationChange: (value: RiskEvaluation) => void;
   onFollowUpSessionTimingChange: (value: FollowUpSessionTiming) => void;
+  onAdditionalMemoChange: (value: string) => void;
 }
 
 export default function CounselorEvaluationCard({
   locale,
   riskEvaluation,
   followUpSessionTiming,
+  additionalMemo,
   onRiskEvaluationChange,
   onFollowUpSessionTimingChange,
+  onAdditionalMemoChange,
 }: CounselorEvaluationCardProps) {
   return (
     <div className="flex w-full flex-col items-start gap-7">
@@ -113,6 +117,8 @@ export default function CounselorEvaluationCard({
           <span className="body-16 font-medium text-label-neutral">추가 메모</span>
           <Textarea
             className="w-full min-h-[120px] px-[26px] py-[23px]"
+            value={additionalMemo}
+            onChange={(event) => onAdditionalMemoChange(event.target.value)}
             placeholder={
               locale === 'en'
                 ? 'Write additional memo (optional).'
