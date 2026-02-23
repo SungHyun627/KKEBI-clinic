@@ -73,7 +73,7 @@ const SummaryTopBar = ({
               size="sm"
               className="h-[30px] w-[30px] border-none hover:bg-white p-0 disabled:cursor-not-allowed disabled:bg-white"
               onClick={onDownloadAudio}
-              disabled
+              disabled={!hasRecording}
             >
               <Image src="/icons/download.svg" alt="audio download" width={30} height={30} />
             </Button>

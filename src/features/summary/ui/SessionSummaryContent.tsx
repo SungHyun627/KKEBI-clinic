@@ -24,7 +24,7 @@ import {
   RecommendedMissionsCard,
   SummaryTopBar,
   TasksTabCard,
-  TopicsPatternsCard,
+  EmotionPatternsCard,
 } from './components';
 
 interface SessionSummaryContentProps {
@@ -236,7 +236,7 @@ export default function SessionSummaryContent({
         <div className="flex flex-col gap-[70px] items-start w-full">
           <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
 
-          <TopicsPatternsCard
+          <EmotionPatternsCard
             locale={locale}
             emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
             distortionLabel={distortionLabel}
