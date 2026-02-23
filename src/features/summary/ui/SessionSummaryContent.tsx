@@ -1,0 +1,276 @@
+'use client';
+
+import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Button } from '@/shared/ui/button';
+import { getSessionSummaryStorageKey } from '@/features/session/lib/session-storage';
+import type {
+  MissionItem,
+  NextSessionRecommendation,
+  RiskEvaluation,
+  SummaryPayload,
+} from '@/features/summary/types/summary';
+import {
+  AiSummaryCard,
+  CompletionCard,
+  CounselorEvaluationCard,
+  NextSessionBookingCard,
+  RecommendedMissionsCard,
+  SummaryTopBar,
+  TasksTabCard,
+  TopicsPatternsCard,
+} from './components';
+
+interface SessionSummaryContentProps {
+  locale: string;
+  sessionId: string;
+  backLabel: string;
+}
+
+function formatElapsed(seconds: number) {
+  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const ss = String(seconds % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}
+
+function triggerDownload(filename: string, content: string, type = 'text/plain') {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function getDistortionLabel(locale: string, distortionType?: string) {
+  if (distortionType === 'black_and_white') return locale === 'en' ? 'Black-and-white' : '흑백논리';
+  if (distortionType === 'overgeneralization')
+    return locale === 'en' ? 'Overgeneralization' : '과잉일반화';
+  if (distortionType === 'catastrophizing') return locale === 'en' ? 'Catastrophizing' : '파국화';
+  if (distortionType === 'should_statement')
+    return locale === 'en' ? 'Should statement' : '당위적 사고';
+  return locale === 'en' ? 'Not detected' : '미감지';
+}
+
+export default function SessionSummaryContent({
+  locale,
+  sessionId,
+  backLabel,
+}: SessionSummaryContentProps) {
+  const router = useRouter();
+  const tCommon = useTranslations('common');
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [riskEvaluationOverride, setRiskEvaluationOverride] = useState<RiskEvaluation | null>(null);
+  const [nextSessionRecommendation, setNextSessionRecommendation] =
+    useState<NextSessionRecommendation>('2w');
+  const [evaluationMemo, setEvaluationMemo] = useState('');
+  const [summaryTextOverride, setSummaryTextOverride] = useState('');
+  const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
+  const [coordinationLater, setCoordinationLater] = useState(false);
+  const [nextDate, setNextDate] = useState('');
+  const [nextTime, setNextTime] = useState('');
+  const summaryStorageKey = getSessionSummaryStorageKey(sessionId);
+  const snapshotCacheRef = useRef<{ raw: string | null; parsed: SummaryPayload | null }>({
+    raw: null,
+    parsed: null,
+  });
+
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const onStorage = (event: StorageEvent) => {
+        if (event.key === summaryStorageKey) onStoreChange();
+      };
+      window.addEventListener('storage', onStorage);
+      return () => window.removeEventListener('storage', onStorage);
+    },
+    [summaryStorageKey],
+  );
+
+  const getSnapshot = useCallback(() => {
+    const raw = window.sessionStorage.getItem(summaryStorageKey);
+    if (raw === snapshotCacheRef.current.raw) {
+      return snapshotCacheRef.current.parsed;
+    }
+
+    let parsed: SummaryPayload | null = null;
+    if (raw) {
+      try {
+        parsed = JSON.parse(raw) as SummaryPayload;
+      } catch {
+        parsed = null;
+      }
+    }
+
+    snapshotCacheRef.current = { raw, parsed };
+    return parsed;
+  }, [summaryStorageKey]);
+
+  const payload = useSyncExternalStore<SummaryPayload | null>(subscribe, getSnapshot, () => null);
+
+  const transcriptItems = payload?.runtime?.transcriptItems ?? [];
+  const duration = formatElapsed(payload?.recorderState?.elapsedSeconds ?? 0);
+  const endedAt = payload?.endedAt ? new Date(payload.endedAt).toLocaleString(locale) : '-';
+  const clientName = payload?.sessionData?.clientName ?? tCommon('defaultUserName');
+  const sessionType = payload?.sessionData?.sessionType;
+  const riskType = payload?.sessionData?.riskType;
+  const hasRecording = transcriptItems.length > 0;
+
+  const derivedRiskEvaluation: RiskEvaluation = (() => {
+    const risk = payload?.summarySnapshot?.insights?.riskType;
+    if (risk === '안정') return 'stable';
+    if (risk === '위험') return 'risk';
+    return 'caution';
+  })();
+
+  const riskEvaluation = riskEvaluationOverride ?? derivedRiskEvaluation;
+
+  const derivedSummaryText = useMemo(() => {
+    const clientTurns = transcriptItems.filter((item) => item.speaker === 'client');
+    const latestClientText = clientTurns.at(-1)?.text ?? '';
+
+    return locale === 'en'
+      ? `Client reported ${clientTurns.length} key statements. Main topics include ${
+          (payload?.summarySnapshot?.insights?.keyConcerns ?? []).join(', ') || 'daily stress'
+        }. Latest concern: ${latestClientText || 'N/A'}.`
+      : `내담자 발화 ${clientTurns.length}건을 기반으로, 주요 주제는 ${
+          (payload?.summarySnapshot?.insights?.keyConcerns ?? []).join(', ') || '일상 스트레스'
+        }입니다. 최근 진술: ${latestClientText || '없음'}.`;
+  }, [locale, payload?.summarySnapshot?.insights?.keyConcerns, transcriptItems]);
+
+  const summaryText = summaryTextOverride || derivedSummaryText;
+
+  const bookmarkedMoments = useMemo(() => {
+    const bookmarkedIds = new Set(payload?.runtime?.bookmarkIds ?? []);
+    return transcriptItems.filter((item) => item.id && bookmarkedIds.has(item.id));
+  }, [payload?.runtime?.bookmarkIds, transcriptItems]);
+
+  const distortionLabel = getDistortionLabel(
+    locale,
+    payload?.summarySnapshot?.insights?.distortionType,
+  );
+
+  const missions: MissionItem[] = [
+    { id: 'breathing', name: locale === 'en' ? 'Breathing log' : '호흡 훈련 일지', eta: '10m' },
+    { id: 'sleep', name: locale === 'en' ? 'Sleep routine check' : '수면 루틴 체크', eta: '15m' },
+    { id: 'walk', name: locale === 'en' ? 'Morning walk' : '아침 산책', eta: '20m' },
+    { id: 'thought', name: locale === 'en' ? 'Thought record' : '사고기록지 작성', eta: '15m' },
+    { id: 'gratitude', name: locale === 'en' ? 'Gratitude note' : '감사일기', eta: '10m' },
+    { id: 'stretch', name: locale === 'en' ? 'Night stretching' : '취침 전 스트레칭', eta: '8m' },
+  ];
+
+  const assignedTasks = [
+    locale === 'en' ? 'Emotion log (3x)' : '감정 기록 3회 작성',
+    locale === 'en' ? 'Sleep routine check' : '수면 루틴 체크',
+  ];
+
+  const handleSummaryChange = (value: string) => {
+    const trimmed = value.trim();
+    const defaultTrimmed = derivedSummaryText.trim();
+    setSummaryTextOverride(trimmed === defaultTrimmed ? '' : value);
+  };
+
+  const handleRiskEvaluationChange = (value: RiskEvaluation) => {
+    setRiskEvaluationOverride(value === derivedRiskEvaluation ? null : value);
+  };
+
+  const handleDownloadTxt = () => {
+    const rows = transcriptItems.map(
+      (item) => `[${item.timestamp ?? '--:--:--'}] ${item.speaker}: ${item.text ?? ''}`,
+    );
+    triggerDownload(
+      `${sessionId}-transcript.txt`,
+      rows.join('\n') || (locale === 'en' ? 'No transcript.' : '전사 내용이 없습니다.'),
+    );
+  };
+
+  const handleDownloadAudio = () => {
+    const content = transcriptItems
+      .map((item) => `${item.timestamp ?? '--:--:--'} ${item.speaker}: ${item.text ?? ''}`)
+      .join('\n');
+    triggerDownload(
+      `${sessionId}-recording.webm`,
+      content || (locale === 'en' ? 'No recording data.' : '녹음 데이터가 없습니다.'),
+      'audio/webm',
+    );
+  };
+
+  return (
+    <section className="flex w-full flex-col">
+      <SummaryTopBar
+        locale={locale}
+        backLabel={backLabel}
+        clientName={clientName}
+        profileSuffix={tCommon('profileSuffix')}
+        sessionType={sessionType}
+        riskType={riskType}
+        hasRecording={hasRecording}
+        onDownloadTxt={handleDownloadTxt}
+        onDownloadAudio={handleDownloadAudio}
+        onPrintPdf={() => window.print()}
+        onBack={() => router.push(`/${locale}`)}
+      />
+
+      <div className="grid w-full grid-cols-1 gap-4 pb-8 lg:grid-cols-2">
+        <CompletionCard
+          locale={locale}
+          duration={duration}
+          endedAt={endedAt}
+          hasRecording={hasRecording}
+          isPlaying={isPlaying}
+          onTogglePlay={() => setIsPlaying((prev) => !prev)}
+        />
+
+        <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
+
+        <TopicsPatternsCard
+          locale={locale}
+          emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
+          distortionLabel={distortionLabel}
+          bookmarkedMoments={bookmarkedMoments}
+        />
+
+        <CounselorEvaluationCard
+          locale={locale}
+          riskEvaluation={riskEvaluation}
+          nextSessionRecommendation={nextSessionRecommendation}
+          evaluationMemo={evaluationMemo}
+          onRiskChange={handleRiskEvaluationChange}
+          onNextSessionChange={setNextSessionRecommendation}
+          onMemoChange={setEvaluationMemo}
+        />
+
+        <RecommendedMissionsCard
+          locale={locale}
+          missions={missions}
+          selectedMissions={selectedMissions}
+          onToggleMission={(id, checked) => {
+            setSelectedMissions((prev) =>
+              checked ? [...prev, id] : prev.filter((missionId) => missionId !== id),
+            );
+          }}
+        />
+
+        <NextSessionBookingCard
+          locale={locale}
+          coordinationLater={coordinationLater}
+          nextDate={nextDate}
+          nextTime={nextTime}
+          onCoordinationLaterChange={setCoordinationLater}
+          onNextDateChange={setNextDate}
+          onNextTimeChange={setNextTime}
+        />
+      </div>
+
+      <TasksTabCard locale={locale} assignedTasks={assignedTasks} missions={missions} />
+
+      <div className="mt-4 pb-8">
+        <Button type="button" className="h-12 w-full rounded-[12px]">
+          {locale === 'en' ? 'Save record and complete' : '기록 저장 및 완료'}
+        </Button>
+      </div>
+    </section>
+  );
+}
