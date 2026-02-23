@@ -1,10 +1,10 @@
 'use client';
 
-import { useCallback, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
-import { getSessionSummaryStorageKey } from '@/features/session/lib/session-storage';
+import { getSessionSummaryData } from '@/features/summary/api/getSessionSummaryData';
 import type {
   MissionItem,
   NextSessionRecommendation,
@@ -62,6 +62,10 @@ export default function SessionSummaryContent({
   const router = useRouter();
   const tCommon = useTranslations('common');
 
+  const [payload, setPayload] = useState<SummaryPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [riskEvaluationOverride, setRiskEvaluationOverride] = useState<RiskEvaluation | null>(null);
   const [nextSessionRecommendation, setNextSessionRecommendation] =
@@ -72,43 +76,33 @@ export default function SessionSummaryContent({
   const [coordinationLater, setCoordinationLater] = useState(false);
   const [nextDate, setNextDate] = useState('');
   const [nextTime, setNextTime] = useState('');
-  const summaryStorageKey = getSessionSummaryStorageKey(sessionId);
-  const snapshotCacheRef = useRef<{ raw: string | null; parsed: SummaryPayload | null }>({
-    raw: null,
-    parsed: null,
-  });
 
-  const subscribe = useCallback(
-    (onStoreChange: () => void) => {
-      const onStorage = (event: StorageEvent) => {
-        if (event.key === summaryStorageKey) onStoreChange();
-      };
-      window.addEventListener('storage', onStorage);
-      return () => window.removeEventListener('storage', onStorage);
-    },
-    [summaryStorageKey],
-  );
+  useEffect(() => {
+    let cancelled = false;
 
-  const getSnapshot = useCallback(() => {
-    const raw = window.sessionStorage.getItem(summaryStorageKey);
-    if (raw === snapshotCacheRef.current.raw) {
-      return snapshotCacheRef.current.parsed;
-    }
+    const load = async () => {
+      setLoading(true);
+      const result = await getSessionSummaryData(sessionId, locale);
+      if (cancelled) return;
 
-    let parsed: SummaryPayload | null = null;
-    if (raw) {
-      try {
-        parsed = JSON.parse(raw) as SummaryPayload;
-      } catch {
-        parsed = null;
+      if (!result.success || !result.data) {
+        setPayload(null);
+        setError(result.message || 'Failed to load session summary data.');
+        setLoading(false);
+        return;
       }
-    }
 
-    snapshotCacheRef.current = { raw, parsed };
-    return parsed;
-  }, [summaryStorageKey]);
+      setPayload(result.data);
+      setError(null);
+      setLoading(false);
+    };
 
-  const payload = useSyncExternalStore<SummaryPayload | null>(subscribe, getSnapshot, () => null);
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locale, sessionId]);
 
   const transcriptItems = payload?.runtime?.transcriptItems ?? [];
   const duration = formatElapsed(payload?.recorderState?.elapsedSeconds ?? 0);
@@ -196,6 +190,23 @@ export default function SessionSummaryContent({
       'audio/webm',
     );
   };
+
+  if (loading) {
+    return (
+      <section className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
+        {locale === 'en' ? 'Loading summary data...' : '요약 데이터를 불러오는 중입니다...'}
+      </section>
+    );
+  }
+
+  if (error || !payload) {
+    return (
+      <section className="flex min-h-[320px] items-center justify-center body-14 text-status-negative">
+        {error ??
+          (locale === 'en' ? 'Failed to load summary data.' : '요약 데이터를 불러오지 못했습니다.')}
+      </section>
+    );
+  }
 
   return (
     <section className="flex w-full flex-col">
