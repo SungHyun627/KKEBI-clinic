@@ -1,24 +1,26 @@
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 interface EmotionPatternsCardProps {
-  locale: string;
   emotions: string[];
 }
 
-export default function EmotionPatternsCard({ locale, emotions }: EmotionPatternsCardProps) {
+export default function EmotionPatternsCard({ emotions }: EmotionPatternsCardProps) {
+  const tSummary = useTranslations('summary');
+
   return (
     <div className="flex flex-col w-full items-start gap-7">
       <div className="flex items-center gap-2">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
           <Image
             src="/icons/wave.svg"
-            alt={locale === 'en' ? 'Emotion Patterns' : '감정 패턴'}
+            alt={tSummary('emotionsIconAlt')}
             width={20}
             height={20}
             aria-hidden
           />
         </div>
         <div className="text-[24px] font-semibold text-label-normal">
-          {locale === 'en' ? 'Emotion Patterns' : '감정 패턴'}
+          {tSummary('emotionsTitle')}
         </div>
       </div>
       <div className="flex min-h-[80px] w-full flex-wrap items-center gap-2 rounded-[16px] border border-neutral-95 px-[26px] py-[23px]">
@@ -32,9 +34,7 @@ export default function EmotionPatternsCard({ locale, emotions }: EmotionPattern
             </span>
           ))
         ) : (
-          <span className="body-14 text-label-alternative">
-            {locale === 'en' ? 'No emotion data yet.' : '감정 데이터가 없습니다.'}
-          </span>
+          <span className="body-14 text-label-alternative">{tSummary('emotionsEmpty')}</span>
         )}
       </div>
     </div>

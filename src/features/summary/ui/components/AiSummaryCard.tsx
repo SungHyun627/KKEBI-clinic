@@ -1,27 +1,29 @@
 import { Textarea } from '@/shared/ui/textarea';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface AiSummaryCardProps {
-  locale: string;
   value: string;
   onChange: (value: string) => void;
 }
 
-export default function AiSummaryCard({ locale, value, onChange }: AiSummaryCardProps) {
+export default function AiSummaryCard({ value, onChange }: AiSummaryCardProps) {
+  const tSummary = useTranslations('summary');
+
   return (
     <div className="flex flex-col w-full items-start gap-7">
       <div className="flex items-center gap-2">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
           <Image
             src="/icons/clipboard.svg"
-            alt={locale === 'en' ? 'AI summary' : 'AI summary'}
+            alt={tSummary('aiSummaryIconAlt')}
             width={20}
             height={20}
             aria-hidden
           />
         </div>
         <div className="text-[24px] font-semibold text-label-normal">
-          {locale === 'en' ? 'AI Session Summary' : 'AI 상담 요약'}
+          {tSummary('aiSummaryTitle')}
         </div>
       </div>
 
@@ -29,12 +31,14 @@ export default function AiSummaryCard({ locale, value, onChange }: AiSummaryCard
         {value}
       </div>
       <div className="flex flex-col items-start gap-[10px] w-full">
-        <span className="body-16 font-medium text-label-neutral">직접 수정</span>
+        <span className="body-16 font-medium text-label-neutral">
+          {tSummary('aiSummaryEditLabel')}
+        </span>
         <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="w-full px-[26px] py-[23px]  min-h-[74px]"
-          placeholder="상담 내용을 직접 수정해 보세요."
+          placeholder={tSummary('aiSummaryEditPlaceholder')}
         />
       </div>
     </div>

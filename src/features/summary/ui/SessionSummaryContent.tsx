@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { printSessionSummaryPdf } from '@/features/summary/lib/downloads';
 import {
@@ -28,6 +29,7 @@ export default function SessionSummaryContent({
   backLabel,
 }: SessionSummaryContentProps) {
   const router = useRouter();
+  const tSummary = useTranslations('summary');
   const {
     loading,
     error,
@@ -70,7 +72,7 @@ export default function SessionSummaryContent({
   if (loading) {
     return (
       <section className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
-        {locale === 'en' ? 'Loading summary data...' : '요약 데이터를 불러오는 중입니다...'}
+        {tSummary('loading')}
       </section>
     );
   }
@@ -78,8 +80,7 @@ export default function SessionSummaryContent({
   if (error || !payloadExists) {
     return (
       <section className="flex min-h-[320px] items-center justify-center body-14 text-status-negative">
-        {error ??
-          (locale === 'en' ? 'Failed to load summary data.' : '요약 데이터를 불러오지 못했습니다.')}
+        {error ?? tSummary('loadFailed')}
       </section>
     );
   }
@@ -102,7 +103,6 @@ export default function SessionSummaryContent({
 
       <div className="flex flex-col gap-[53px] items-start w-full px-15">
         <CompletionCard
-          locale={locale}
           duration={durationMinutesText}
           endedAt={endedAt}
           hasRecording={hasRecording}
@@ -111,14 +111,13 @@ export default function SessionSummaryContent({
         />
         <div className="flex flex-col gap-[100px] items-start w-full">
           <div className="flex flex-col gap-[70px] items-start w-full">
-            <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
+            <AiSummaryCard value={summaryText} onChange={handleSummaryChange} />
 
-            <EmotionPatternsCard locale={locale} emotions={emotions} />
-            <DetectedCognitiveDistortionCard locale={locale} distortions={distortions} />
+            <EmotionPatternsCard emotions={emotions} />
+            <DetectedCognitiveDistortionCard distortions={distortions} />
             <BookmarkedMomentsCard locale={locale} moments={bookmarkedMoments} />
 
             <CounselorEvaluationCard
-              locale={locale}
               riskEvaluation={riskEvaluation}
               followUpSessionTiming={followUpSessionTiming}
               additionalMemo={additionalMemo}
@@ -128,7 +127,6 @@ export default function SessionSummaryContent({
             />
 
             <RecommendedMissionsCard
-              locale={locale}
               missions={missions}
               selectedMissions={selectedMissionIds}
               onToggleMission={handleToggleMission}
@@ -151,7 +149,7 @@ export default function SessionSummaryContent({
               disabled={!isSubmitEnabled}
               onClick={handleSubmitSummary}
             >
-              {locale === 'en' ? 'Save record and complete' : '기록 저장 및 완료'}
+              {tSummary('submitButton')}
             </Button>
           </div>
         </div>

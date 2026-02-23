@@ -1,33 +1,34 @@
 import type { MissionItem } from '@/features/summary/types/summary';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface RecommendedMissionsCardProps {
-  locale: string;
   missions: MissionItem[];
   selectedMissions: string[];
   onToggleMission: (id: string, checked: boolean) => void;
 }
 
 export default function RecommendedMissionsCard({
-  locale,
   missions,
   selectedMissions,
   onToggleMission,
 }: RecommendedMissionsCardProps) {
+  const tSummary = useTranslations('summary');
+
   return (
     <div className="flex w-full flex-col items-start gap-7">
       <div className="flex items-center gap-2">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
           <Image
             src="/icons/checkmark-seal.svg"
-            alt={locale === 'en' ? 'Recommended missions' : '권장 미션'}
+            alt={tSummary('missionsIconAlt')}
             width={20}
             height={20}
             aria-hidden
           />
         </div>
         <div className="text-[24px] font-semibold text-label-normal">
-          {locale === 'en' ? 'Recommended missions' : '권장 미션'}
+          {tSummary('missionsTitle')}
         </div>
       </div>
       <div className="flex w-full gap-10 flex-wrap">
@@ -73,7 +74,7 @@ export default function RecommendedMissionsCard({
               <div className="flex flex-col items-start gap-[6px] w-full">
                 <div className="flex w-full items-center">
                   <span className="body-16 text-neutral-60 min-w-[74px] w-full">
-                    {locale === 'en' ? 'Category' : '카테고리'}
+                    {tSummary('missionsCategoryLabel')}
                   </span>
                   <span className="body-16 font-medium text-neutral-30 w-full">
                     {mission.category}
@@ -81,7 +82,7 @@ export default function RecommendedMissionsCard({
                 </div>
                 <div className="flex w-full items-center">
                   <span className="body-16 text-neutral-60 min-w-[74px] w-full">
-                    {locale === 'en' ? 'Duration' : '소요 시간'}
+                    {tSummary('missionsDurationLabel')}
                   </span>
                   <span className="body-16 font-medium text-neutral-30 w-full">
                     {mission.duration}

@@ -28,6 +28,7 @@ interface UseSessionSummaryPageProps {
 export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPageProps) {
   const router = useRouter();
   const tCommon = useTranslations('common');
+  const tSummary = useTranslations('summary');
 
   const [payload, setPayload] = useState<SummaryPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,7 +81,9 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
     () => payload?.runtime?.transcriptItems ?? [],
     [payload?.runtime?.transcriptItems],
   );
-  const durationMinutesText = `${Math.floor((payload?.recorderState?.elapsedSeconds ?? 0) / 60)}분`;
+  const durationMinutesText = `${Math.floor((payload?.recorderState?.elapsedSeconds ?? 0) / 60)}${tSummary(
+    'durationMinuteUnit',
+  )}`;
   const endedAt = formatSummaryDate(payload?.endedAt);
   const clientName = payload?.sessionData?.clientName ?? tCommon('defaultUserName');
   const profileSuffix = tCommon('profileSuffix');
@@ -179,9 +182,7 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
     });
 
     if (!result.success) {
-      toast(
-        result.message || (locale === 'en' ? 'Failed to submit summary.' : '제출에 실패했습니다.'),
-      );
+      toast(result.message || tSummary('submitFailed'));
       setIsSubmitting(false);
       return;
     }

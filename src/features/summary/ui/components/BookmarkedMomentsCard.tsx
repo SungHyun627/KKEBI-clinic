@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import type { SummaryTranscriptItem } from '@/features/summary/types/summary';
 
 interface BookmarkedMomentsCardProps {
@@ -14,20 +15,22 @@ function formatTimestampToHms(value?: string) {
 }
 
 export default function BookmarkedMomentsCard({ locale, moments }: BookmarkedMomentsCardProps) {
+  const tSummary = useTranslations('summary');
+
   return (
     <div className="flex w-full flex-col items-start gap-7">
       <div className="flex items-center gap-2">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
           <Image
             src="/icons/bookmark-2.svg"
-            alt={locale === 'en' ? 'Bookmarked moments' : '북마크된 순간'}
+            alt={tSummary('bookmarkedIconAlt')}
             width={20}
             height={20}
             aria-hidden
           />
         </div>
         <div className="text-[24px] font-semibold text-label-normal">
-          {locale === 'en' ? 'Bookmarked Moments' : '북마크된 순간'}
+          {tSummary('bookmarkedTitle')}
         </div>
       </div>
 
@@ -42,12 +45,8 @@ export default function BookmarkedMomentsCard({ locale, moments }: BookmarkedMom
                   } ${item.speaker === 'counselor' ? 'text-label-neutral' : 'text-[#FF6363]'}`}
                 >
                   {item.speaker === 'counselor'
-                    ? locale === 'en'
-                      ? 'Counselor'
-                      : '상담사'
-                    : locale === 'en'
-                      ? 'Client'
-                      : '내담자'}
+                    ? tSummary('bookmarkedSpeakerCounselor')
+                    : tSummary('bookmarkedSpeakerClient')}
                 </span>
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div className="body-14 min-w-0 flex-1 text-label-normal">{item.text ?? ''}</div>
@@ -62,9 +61,7 @@ export default function BookmarkedMomentsCard({ locale, moments }: BookmarkedMom
           ))
         ) : (
           <div className="flex h-full w-full items-center justify-center py-8">
-            <span className="body-14 text-label-alternative">
-              {locale === 'en' ? 'No bookmarked moments.' : '북마크된 순간이 없습니다.'}
-            </span>
+            <span className="body-14 text-label-alternative">{tSummary('bookmarkedEmpty')}</span>
           </div>
         )}
       </div>

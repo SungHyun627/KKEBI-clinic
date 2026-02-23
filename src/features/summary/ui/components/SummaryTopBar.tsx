@@ -1,9 +1,7 @@
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { LocaleSwitchButton } from '@/shared/ui/locale-switch-button';
 import { Button } from '@/shared/ui/button';
-import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeChip';
-import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
-import { isRiskType, isSessionType } from '@/features/summary/types/summary';
 
 interface SummaryTopBarProps {
   locale: string;
@@ -20,18 +18,17 @@ interface SummaryTopBarProps {
 }
 
 const SummaryTopBar = ({
-  locale,
   backLabel,
   clientName,
   profileSuffix,
-  sessionType,
-  riskType,
   hasRecording,
   onDownloadTxt,
   onDownloadAudio,
   onPrintPdf,
   onBack,
 }: SummaryTopBarProps) => {
+  const tSummary = useTranslations('summary');
+
   return (
     <div className="flex w-full justify-between p-5">
       <div className="flex items-center gap-13">
@@ -50,7 +47,12 @@ const SummaryTopBar = ({
               className="h-[30px] w-[30px] border-none hover:bg-white p-0"
               onClick={onDownloadTxt}
             >
-              <Image src="/icons/download.svg" alt="txt download" width={30} height={30} />
+              <Image
+                src="/icons/download.svg"
+                alt={tSummary('topBarTxtDownloadAlt')}
+                width={30}
+                height={30}
+              />
             </Button>
             <span className="body-16 font-medium text-label-normal">TXT</span>
           </div>
@@ -62,7 +64,12 @@ const SummaryTopBar = ({
               className="h-[30px] w-[30px] border-none hover:bg-white p-0"
               onClick={onPrintPdf}
             >
-              <Image src="/icons/download.svg" alt="pdf download" width={30} height={30} />
+              <Image
+                src="/icons/download.svg"
+                alt={tSummary('topBarPdfDownloadAlt')}
+                width={30}
+                height={30}
+              />
             </Button>
             <span className="body-16 font-medium text-label-normal">PDF</span>
           </div>
@@ -75,10 +82,15 @@ const SummaryTopBar = ({
               onClick={onDownloadAudio}
               disabled={!hasRecording}
             >
-              <Image src="/icons/download.svg" alt="audio download" width={30} height={30} />
+              <Image
+                src="/icons/download.svg"
+                alt={tSummary('topBarAudioDownloadAlt')}
+                width={30}
+                height={30}
+              />
             </Button>
             <span className="body-16 font-medium text-label-normal">
-              {locale === 'en' ? 'Audio' : '녹음'}
+              {tSummary('topBarAudioLabel')}
             </span>
           </div>
         </div>

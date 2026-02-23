@@ -1,10 +1,10 @@
 import type { FollowUpSessionTiming, RiskEvaluation } from '@/features/summary/types/summary';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';
 import { Textarea } from '@/shared/ui/textarea';
 
 interface CounselorEvaluationCardProps {
-  locale: string;
   riskEvaluation: RiskEvaluation | '';
   followUpSessionTiming: FollowUpSessionTiming | '';
   additionalMemo: string;
@@ -14,7 +14,6 @@ interface CounselorEvaluationCardProps {
 }
 
 export default function CounselorEvaluationCard({
-  locale,
   riskEvaluation,
   followUpSessionTiming,
   additionalMemo,
@@ -22,38 +21,49 @@ export default function CounselorEvaluationCard({
   onFollowUpSessionTimingChange,
   onAdditionalMemoChange,
 }: CounselorEvaluationCardProps) {
+  const tSummary = useTranslations('summary');
+  const riskOptions: Array<{ key: RiskEvaluation; label: string }> = [
+    { key: 'stable', label: tSummary('evaluationRiskStable') },
+    { key: 'caution', label: tSummary('evaluationRiskCaution') },
+    { key: 'risk', label: tSummary('evaluationRiskRisk') },
+    { key: 'urgent', label: tSummary('evaluationRiskUrgent') },
+  ];
+  const followUpOptions: Array<{ key: FollowUpSessionTiming; label: string }> = [
+    { key: '1w', label: tSummary('evaluationFollowUp1w') },
+    { key: '2w', label: tSummary('evaluationFollowUp2w') },
+    { key: '1m', label: tSummary('evaluationFollowUp1m') },
+    { key: 'as-needed', label: tSummary('evaluationFollowUpAsNeeded') },
+  ];
+
   return (
     <div className="flex w-full flex-col items-start gap-7">
       <div className="flex items-center gap-2">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
           <Image
             src="/icons/badge-checkmark.svg"
-            alt={locale === 'en' ? 'Counselor evaluation' : '상담사 평가'}
+            alt={tSummary('evaluationIconAlt')}
             width={20}
             height={20}
             aria-hidden
           />
         </div>
         <div className="text-[24px] font-semibold text-label-normal">
-          {locale === 'en' ? 'Counselor evaluation' : '상담사 평가'}
+          {tSummary('evaluationTitle')}
         </div>
       </div>
       <div className="flex w-full flex-col items-start gap-[26px]">
         <div className="flex w-full flex-col items-start gap-4">
-          <span className="body-16 font-medium text-label-neutral">위험 수준 선택</span>
+          <span className="body-16 font-medium text-label-neutral">
+            {tSummary('evaluationRiskLevelLabel')}
+          </span>
           <div className="flex w-full justify-between gap-10">
-            {[
-              { key: 'stable', label: locale === 'en' ? 'Stable' : '안정' },
-              { key: 'caution', label: locale === 'en' ? 'Caution' : '주의' },
-              { key: 'risk', label: locale === 'en' ? 'Risk' : '위험' },
-              { key: 'urgent', label: locale === 'en' ? 'Urgent' : '긴급' },
-            ].map((option, idx) => {
+            {riskOptions.map((option, idx) => {
               const isSelected = riskEvaluation === option.key;
               return (
                 <button
                   type="button"
                   key={option.key}
-                  onClick={() => onRiskEvaluationChange(option.key as RiskEvaluation)}
+                  onClick={() => onRiskEvaluationChange(option.key)}
                   className={cn(
                     'flex h-24 w-full flex-col items-center justify-center gap-[6px] rounded-[16px] border p-5 hover:cursor-pointer hover:bg-neutral-95',
                     isSelected ? 'border-primary bg-fill-pressed' : 'border-neutral-95',
@@ -65,7 +75,7 @@ export default function CounselorEvaluationCard({
                       isSelected ? 'text-primary-light' : 'text-label-alternative',
                     )}
                   >
-                    {idx + 1}단계
+                    {tSummary('evaluationRiskStage', { count: idx + 1 })}
                   </span>
                   <span
                     className={cn(
@@ -81,20 +91,17 @@ export default function CounselorEvaluationCard({
           </div>
         </div>
         <div className="flex w-full flex-col items-start gap-4">
-          <span className="body-16 font-medium text-label-neutral">다음 상담 시기</span>
+          <span className="body-16 font-medium text-label-neutral">
+            {tSummary('evaluationFollowUpLabel')}
+          </span>
           <div className="flex w-full justify-between gap-10">
-            {[
-              { key: '1w', label: locale === 'en' ? 'Within 1 week' : '1주 이내' },
-              { key: '2w', label: locale === 'en' ? 'Within 2 weeks' : '2주 이내' },
-              { key: '1m', label: locale === 'en' ? 'Within 1 month' : '1개월 이내' },
-              { key: 'as-needed', label: locale === 'en' ? 'As needed' : '필요시' },
-            ].map((option) => {
+            {followUpOptions.map((option) => {
               const isSelected = followUpSessionTiming === option.key;
               return (
                 <button
                   type="button"
                   key={option.key}
-                  onClick={() => onFollowUpSessionTimingChange(option.key as FollowUpSessionTiming)}
+                  onClick={() => onFollowUpSessionTimingChange(option.key)}
                   className={cn(
                     'flex h-24 w-full flex-col items-center justify-center gap-[6px] rounded-[16px] border p-5 hover:cursor-pointer hover:bg-neutral-95',
                     isSelected ? 'border-primary bg-fill-pressed' : 'border-neutral-95',
@@ -114,16 +121,14 @@ export default function CounselorEvaluationCard({
           </div>
         </div>
         <div className="flex w-full flex-col items-start gap-4">
-          <span className="body-16 font-medium text-label-neutral">추가 메모</span>
+          <span className="body-16 font-medium text-label-neutral">
+            {tSummary('evaluationAdditionalMemoLabel')}
+          </span>
           <Textarea
             className="w-full min-h-[120px] px-[26px] py-[23px]"
             value={additionalMemo}
             onChange={(event) => onAdditionalMemoChange(event.target.value)}
-            placeholder={
-              locale === 'en'
-                ? 'Write additional memo (optional).'
-                : '추가 메모를 입력하세요. (선택)'
-            }
+            placeholder={tSummary('evaluationAdditionalMemoPlaceholder')}
           />
         </div>
       </div>

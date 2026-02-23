@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Calendar } from '@/shared/ui/calendar';
 import Divider from '@/shared/ui/divider';
@@ -38,7 +39,6 @@ const toDateKey = (date: Date) => {
 };
 
 interface TimeWheelPickerProps {
-  locale: string;
   label: string;
   value: string;
   onValueChange: (value: string) => void;
@@ -48,7 +48,6 @@ interface TimeWheelPickerProps {
 }
 
 function TimeWheelPicker({
-  locale,
   label,
   value,
   onValueChange,
@@ -56,6 +55,7 @@ function TimeWheelPicker({
   open,
   onOpenChange,
 }: TimeWheelPickerProps) {
+  const tSummary = useTranslations('summary');
   const hasSelectedValue = TIME_OPTIONS.includes(value);
   const normalizedValue = hasSelectedValue ? value : '09:00';
   const [draftValue, setDraftValue] = useState(normalizedValue);
@@ -81,7 +81,7 @@ function TimeWheelPicker({
         className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
       >
         <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
-          {value || (locale === 'en' ? 'Select time' : '시간 선택')}
+          {value || tSummary('nextSessionSelectTime')}
         </span>
         <span className="flex h-6 w-6 shrink-0 items-center justify-center">
           <Image src="/icons/clock.svg" alt="" width={24} height={24} aria-hidden />
@@ -136,7 +136,7 @@ function TimeWheelPicker({
               onOpenChange(false);
             }}
           >
-            {locale === 'en' ? 'Save' : '저장'}
+            {tSummary('nextSessionSave')}
           </Button>
         </div>
       )}
@@ -153,6 +153,7 @@ export default function NextSessionBookingCard({
   onNextStartTimeChange,
   onNextEndTimeChange,
 }: NextSessionBookingCardProps) {
+  const tSummary = useTranslations('summary');
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [openTimePicker, setOpenTimePicker] = useState<'start' | 'end' | null>(null);
   const dateAreaRef = useRef<HTMLDivElement | null>(null);
@@ -195,25 +196,25 @@ export default function NextSessionBookingCard({
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
           <Image
             src="/icons/add-reservation.svg"
-            alt={locale === 'en' ? 'Next session booking' : '다음 상담 예약'}
+            alt={tSummary('nextSessionIconAlt')}
             width={20}
             height={20}
             aria-hidden
           />
         </div>
         <div className="text-[24px] font-semibold text-label-normal">
-          {locale === 'en' ? 'Next session booking' : '다음 상담 예약'}
+          {tSummary('nextSessionTitle')}
         </div>
       </div>
 
       <div className="grid w-full items-start gap-[52px] md:grid-cols-[270px_minmax(0,1fr)]">
         <div ref={dateAreaRef} className="flex w-[270px] flex-col items-start gap-[10px]">
           <span className="body-16 font-semibold text-label-neutral">
-            {locale === 'en' ? 'Date' : '날짜'}
+            {tSummary('nextSessionDateLabel')}
           </span>
           <button
             type="button"
-            aria-label={locale === 'en' ? 'Pick date' : '날짜 선택'}
+            aria-label={tSummary('nextSessionPickDateAria')}
             onClick={() => {
               const nextOpen = !isDatePickerOpen;
               if (nextOpen) {
@@ -257,7 +258,7 @@ export default function NextSessionBookingCard({
                     setIsDatePickerOpen(false);
                   }}
                 >
-                  {locale === 'en' ? 'Save' : '저장'}
+                  {tSummary('nextSessionSave')}
                 </Button>
               </div>
             </div>
@@ -269,8 +270,7 @@ export default function NextSessionBookingCard({
           className="grid w-full max-w-[405px] grid-cols-[minmax(0,1fr)_15px_minmax(0,1fr)] items-start gap-[15px]"
         >
           <TimeWheelPicker
-            locale={locale}
-            label={locale === 'en' ? 'Start time' : '시작 시간'}
+            label={tSummary('nextSessionStartTime')}
             value={nextStartTime}
             onValueChange={onNextStartTimeChange}
             align="start"
@@ -283,8 +283,7 @@ export default function NextSessionBookingCard({
             <Divider className="h-[2.5px] bg-[#303030]" />
           </div>
           <TimeWheelPicker
-            locale={locale}
-            label={locale === 'en' ? 'End time' : '종료 시간'}
+            label={tSummary('nextSessionEndTime')}
             value={nextEndTime}
             onValueChange={onNextEndTimeChange}
             align="end"
