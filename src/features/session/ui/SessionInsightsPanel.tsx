@@ -168,15 +168,8 @@ export default function SessionInsightsPanel({
                 {locale === 'en' ? 'Recent pattern' : '최근 감정'}
               </span>
               {recentEmotionHistory.length > 0 ? (
-                <div className="flex w-full flex-wrap items-center gap-2 body-14">
-                  {recentEmotionHistory.map((item, index) => (
-                    <span
-                      key={`${item}-${index}`}
-                      className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] text-label-normal"
-                    >
-                      {emotionLabel(item, locale)}
-                    </span>
-                  ))}
+                <div className="w-full body-14 text-label-normal">
+                  {recentEmotionHistory.map((item) => emotionLabel(item, locale)).join(', ')}
                 </div>
               ) : (
                 <div className="flex w-full body-14 text-label-disable">
@@ -189,15 +182,8 @@ export default function SessionInsightsPanel({
                 {locale === 'en' ? 'Key concerns' : '주요 고민'}
               </span>
               {keyConcernHistory.length > 0 ? (
-                <div className="flex w-full flex-wrap items-center gap-2 body-14">
-                  {keyConcernHistory.map((item, index) => (
-                    <span
-                      key={`${item}-${index}`}
-                      className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] text-label-normal"
-                    >
-                      {item}
-                    </span>
-                  ))}
+                <div className="w-full body-14 text-label-normal">
+                  {keyConcernHistory.join(', ')}
                 </div>
               ) : (
                 <div className="flex w-full body-14 text-label-disable">
@@ -224,7 +210,7 @@ export default function SessionInsightsPanel({
           }
         >
           <div className="flex w-full flex-col items-start gap-[18px]">
-            <div className="flex w-full items-center gap-2">
+            <div className="flex w-full items-start gap-2">
               <span className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 text-label-alternative whitespace-nowrap">
                 {locale === 'en' ? 'Example' : '사례'}
               </span>
