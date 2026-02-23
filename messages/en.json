@@ -302,8 +302,8 @@
       "catastrophizing": "catastrophizing",
       "should_statement": "should statements"
     },
-    "toastMicUnsupported": "Microphone is not supported in this browser.",
-    "toastMicPermissionDenied": "Microphone permission denied. Please allow microphone access.",
+    "toastMicUnsupported": "This browser does not support microphone input.",
+    "toastMicPermissionDenied": "Microphone permission is required. Please allow access.",
     "toastRecordingStarted": "Recording started.",
     "toastRiskDetected": "Risk signal detected in transcript."
   },

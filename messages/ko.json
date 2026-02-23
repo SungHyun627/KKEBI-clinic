@@ -302,8 +302,8 @@
       "catastrophizing": "파국화",
       "should_statement": "당위적 사고"
     },
-    "toastMicUnsupported": "브라우저에서 마이크를 지원하지 않습니다.",
-    "toastMicPermissionDenied": "마이크 권한이 거부되었습니다. 브라우저 권한을 허용해 주세요.",
+    "toastMicUnsupported": "마이크를 지원하지 않는 브라우저입니다.",
+    "toastMicPermissionDenied": "마이크 권한이 필요합니다. 권한을 허용해 주세요.",
     "toastRecordingStarted": "녹음을 시작했습니다.",
     "toastRiskDetected": "전사에서 위험 신호가 감지되었습니다."
   },
