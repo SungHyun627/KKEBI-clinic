@@ -40,6 +40,10 @@ interface SessionSummaryContentProps {
 interface SummarySubmitFormValues {
   riskEvaluation: RiskEvaluation | '';
   followUpSessionTiming: FollowUpSessionTiming | '';
+  selectedMissionIds: string[];
+  nextDate: string;
+  nextStartTime: string;
+  nextEndTime: string;
 }
 
 function formatSummaryDate(iso?: string) {
@@ -65,16 +69,16 @@ export default function SessionSummaryContent({
   const [error, setError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [summaryTextOverride, setSummaryTextOverride] = useState('');
-  const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
-  const [nextDate, setNextDate] = useState('');
-  const [nextStartTime, setNextStartTime] = useState('');
-  const [nextEndTime, setNextEndTime] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setValue, watch } = useForm<SummarySubmitFormValues>({
     mode: 'onChange',
     defaultValues: {
       riskEvaluation: '',
       followUpSessionTiming: '',
+      selectedMissionIds: [],
+      nextDate: '',
+      nextStartTime: '',
+      nextEndTime: '',
     },
   });
 
@@ -129,6 +133,10 @@ export default function SessionSummaryContent({
   const summaryText = summaryTextOverride || derivedSummaryText;
   const riskEvaluation = watch('riskEvaluation');
   const followUpSessionTiming = watch('followUpSessionTiming');
+  const selectedMissionIds = watch('selectedMissionIds');
+  const nextDate = watch('nextDate');
+  const nextStartTime = watch('nextStartTime');
+  const nextEndTime = watch('nextEndTime');
   const isNextSessionAllSelected =
     Boolean(nextDate) && Boolean(nextStartTime) && Boolean(nextEndTime);
   const isNextSessionAllEmpty = !nextDate && !nextStartTime && !nextEndTime;
@@ -136,7 +144,7 @@ export default function SessionSummaryContent({
   const isSubmitEnabled =
     Boolean(riskEvaluation) &&
     Boolean(followUpSessionTiming) &&
-    selectedMissions.length > 0 &&
+    selectedMissionIds.length > 0 &&
     isNextSessionSelectionValid &&
     !isSubmitting;
 
@@ -214,7 +222,7 @@ export default function SessionSummaryContent({
       summaryText,
       riskEvaluation,
       followUpSessionTiming,
-      selectedMissionIds: selectedMissions,
+      selectedMissionIds,
       nextSession:
         nextDate && nextStartTime && nextEndTime
           ? {
@@ -311,11 +319,12 @@ export default function SessionSummaryContent({
             <RecommendedMissionsCard
               locale={locale}
               missions={missions}
-              selectedMissions={selectedMissions}
+              selectedMissions={selectedMissionIds}
               onToggleMission={(id, checked) => {
-                setSelectedMissions((prev) =>
-                  checked ? [...prev, id] : prev.filter((missionId) => missionId !== id),
-                );
+                const next = checked
+                  ? [...selectedMissionIds, id]
+                  : selectedMissionIds.filter((missionId) => missionId !== id);
+                setValue('selectedMissionIds', next, { shouldDirty: true, shouldValidate: true });
               }}
             />
 
@@ -324,9 +333,15 @@ export default function SessionSummaryContent({
               nextDate={nextDate}
               nextStartTime={nextStartTime}
               nextEndTime={nextEndTime}
-              onNextDateChange={setNextDate}
-              onNextStartTimeChange={setNextStartTime}
-              onNextEndTimeChange={setNextEndTime}
+              onNextDateChange={(value) =>
+                setValue('nextDate', value, { shouldDirty: true, shouldValidate: true })
+              }
+              onNextStartTimeChange={(value) =>
+                setValue('nextStartTime', value, { shouldDirty: true, shouldValidate: true })
+              }
+              onNextEndTimeChange={(value) =>
+                setValue('nextEndTime', value, { shouldDirty: true, shouldValidate: true })
+              }
             />
           </div>
           <div className="flex justify-center items-center w-full">
