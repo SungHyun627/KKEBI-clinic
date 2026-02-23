@@ -22,8 +22,6 @@ type RiskFilter = 'all' | RiskType;
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
   const locale = useLocale();
-  const riskTypeChipWidthClass =
-    locale === 'en' ? 'w-[104px] max-[1200px]:w-[92px] max-[1000px]:w-[84px]' : 'w-[49px]';
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -251,7 +249,7 @@ export default function ClientsPage() {
                     </span>
                   </span>
                   <span className="min-w-0 justify-self-center overflow-hidden">
-                    <RiskTypeChip value={client.riskType} className={riskTypeChipWidthClass} />
+                    <RiskTypeChip value={client.riskType} />
                   </span>
                   <span className="flex w-full min-w-0 flex-wrap items-start gap-2">
                     <MoodScoreChip

@@ -23,12 +23,12 @@ export default function SessionTypeChip({ value, className }: SessionTypeChipPro
   return (
     <span
       className={cn(
-        'flex min-h-8 items-center justify-center rounded-[100px] border px-2 py-[3px] body-14 font-semibold',
+        'flex min-h-7 w-[75px] items-center justify-center rounded-[100px] border px-3 py-[3px] body-14 font-semibold',
         styleByValue[value],
         className,
       )}
     >
-      <span className="line-clamp-2 break-words text-center leading-[120%]">
+      <span className="min-w-0 truncate whitespace-nowrap text-center leading-[120%]">
         {labelByValue[value]}
       </span>
     </span>

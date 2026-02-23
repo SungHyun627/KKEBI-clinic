@@ -18,14 +18,14 @@ function Calendar({
   const defaultClassNames = getDefaultClassNames();
   const mergedClassNames = {
     ...defaultClassNames,
-    root: cn('w-fit'),
+    root: cn('relative w-fit'),
     months: cn('flex flex-col'),
     month: cn('space-y-7'),
-    caption: cn('relative flex items-center justify-center pt-1'),
+    month_caption: cn('relative flex items-center justify-center pt-1'),
     caption_label: cn(
-      'body-14 text-netural-30 absolute left-1/2 -translate-x-1/2 font-medium text-center',
+      'body-14 text-netural-30 absolute left-1/2 -translate-x-1/2 font-medium text-center pt-3',
     ),
-    nav: cn('absolute inset-x-0 top-4.5 flex h-[21.334px] items-center justify-between'),
+    nav: cn('absolute inset-x-0  flex h-[21.334px] items-center justify-between px-1'),
     button_previous: cn(
       buttonVariants({ variant: 'outline', size: 'icon' }),
       'h-6 w-6 border-0 p-0 hover:bg-white',
@@ -39,7 +39,6 @@ function Calendar({
     weekday: cn(
       'body-14 flex h-[47.6px] w-[33.3px] items-center justify-center px-0 pt-1 pb-[3px] font-normal text-neutral-50',
     ),
-    weeks: cn('grid gap-y-2'),
     week: cn('grid w-full grid-cols-7 gap-x-[3px]'),
     day: cn(
       buttonVariants({ variant: 'outline', size: 'icon' }),
@@ -75,7 +74,7 @@ function Calendar({
               alt=""
               width={24}
               height={24}
-              className={cn('h-full w-full object-contain ml-4', chevronClassName)}
+              className={cn('h-full w-full object-contain', chevronClassName)}
               aria-hidden
               {...chevronProps}
             />
@@ -85,7 +84,7 @@ function Calendar({
               alt=""
               width={24}
               height={24}
-              className={cn('h-full w-full object-contain mr-4', chevronClassName)}
+              className={cn('h-full w-full object-contain', chevronClassName)}
               aria-hidden
               {...chevronProps}
             />

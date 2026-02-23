@@ -21,7 +21,7 @@ import {
   subscribeAuthSession,
 } from '@/features/auth/login/lib/authSession';
 import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation';
-import { toast } from '@/shared/ui/toast';
+import { Toast, toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
 
@@ -48,7 +48,6 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
   const userName = authSession?.userName || tCommon('defaultUserName');
-  const isSessionDetailPage = pathname.startsWith('/sessions/');
 
   useEffect(() => {
     const latestSession = getAuthSession();
@@ -65,16 +64,21 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     });
   }, [router]);
 
+  useEffect(() => {
+    if (pathname !== '/') return;
+    const shouldShowSummaryToast = window.sessionStorage.getItem('kkebi:summarySubmitted') === '1';
+    if (!shouldShowSummaryToast) return;
+
+    window.sessionStorage.removeItem('kkebi:summarySubmitted');
+    toast(locale === 'en' ? 'Session content has been saved.' : '상담 내용이 저장되었습니다.');
+  }, [locale, pathname]);
+
   const currentTitle =
     navItems.find(
       (item) =>
         (item.href === '/' && pathname === '/') ||
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.key ?? 'dashboard';
-
-  if (isSessionDetailPage) {
-    return <main className="min-h-screen w-full bg-white p-5">{children}</main>;
-  }
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -201,6 +205,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       </div>
 
       <NotificationDrawer open={isNotificationOpen} onOpenChange={setIsNotificationOpen} />
+      <Toast />
     </div>
   );
 }

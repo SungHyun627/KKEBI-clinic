@@ -222,4 +222,23 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  .session-transcript-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--Neutral-95, #dcdcdc) transparent;
+  }
+
+  .session-transcript-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .session-transcript-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .session-transcript-scroll::-webkit-scrollbar-thumb {
+    min-height: 168px;
+    border-radius: 999px;
+    background: var(--Neutral-95, #dcdcdc);
+  }
 }
