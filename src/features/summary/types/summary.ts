@@ -66,6 +66,12 @@ export type SubmitSessionSummaryResponse = {
   message?: string;
 };
 
+export type SummaryApiResponse<TData = undefined> = {
+  success: boolean;
+  message?: string;
+  data?: TData;
+};
+
 export type MissionItem = {
   id: string;
   name: string;

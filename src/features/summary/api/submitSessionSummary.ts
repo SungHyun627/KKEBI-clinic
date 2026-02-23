@@ -1,4 +1,6 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
 import type {
+  SummaryApiResponse,
   SubmitSessionSummaryPayload,
   SubmitSessionSummaryResponse,
 } from '@/features/summary/types/summary';
@@ -8,29 +10,25 @@ export const submitSessionSummary = async (
   payload: SubmitSessionSummaryPayload,
 ): Promise<SubmitSessionSummaryResponse> => {
   try {
-    const response = await fetch(
+    const response = await httpClient.post<SummaryApiResponse>(
       `/api/v1/sessions/${encodeURIComponent(sessionId)}/summary/submit`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        cache: 'no-store',
-      },
+      payload,
+      { skipAuth: true },
     );
 
-    const data = (await response.json().catch(() => null)) as SubmitSessionSummaryResponse | null;
-    if (data && typeof data === 'object' && 'success' in data) {
-      return data;
-    }
-
     return {
-      success: false,
-      message: 'Failed to submit session summary.',
+      success: response.success,
+      message: response.message,
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message:
+        error instanceof ApiError
+          ? error.message || 'Failed to submit session summary.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
     };
   }
 };

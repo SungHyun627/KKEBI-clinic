@@ -1,38 +1,28 @@
-import type { SummaryPayload } from '@/features/summary/types/summary';
-
-interface SessionSummaryResponse {
-  success: boolean;
-  data?: SummaryPayload;
-  message?: string;
-}
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import type { SummaryApiResponse, SummaryPayload } from '@/features/summary/types/summary';
 
 export const getSessionSummaryData = async (
   sessionId: string,
   locale: string,
-): Promise<SessionSummaryResponse> => {
+): Promise<SummaryApiResponse<SummaryPayload>> => {
   try {
-    const response = await fetch(
+    const response = await httpClient.get<SummaryApiResponse<SummaryPayload>>(
       `/api/v1/sessions/${encodeURIComponent(sessionId)}/summary?locale=${encodeURIComponent(locale)}`,
       {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        cache: 'no-store',
+        skipAuth: true,
       },
     );
 
-    const data = (await response.json().catch(() => null)) as SessionSummaryResponse | null;
-    if (data && typeof data === 'object' && 'success' in data) {
-      return data;
-    }
-
-    return {
-      success: false,
-      message: 'Failed to load session summary data.',
-    };
+    return response;
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message:
+        error instanceof ApiError
+          ? error.message || 'Failed to load session summary data.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
     };
   }
 };
