@@ -418,7 +418,7 @@ export default function SessionAutoRecordPanel({
         />
         <SessionCounselorMemoCard locale={locale} defaultValue={autoRecord.counselorMemo} />
       </div>
-      <div className="absolute bottom-[30px] left-0 right-0 z-30 flex justify-center px-8">
+      <div className="fixed bottom-[30px] left-[40%] right-0 z-30 flex justify-center px-8 max-[1200px]:left-0 max-[1200px]:right-0 max-[1200px]:px-6 max-[900px]:px-4">
         <SessionAudioControls
           isRecording={isRecording}
           isPaused={isPaused}
