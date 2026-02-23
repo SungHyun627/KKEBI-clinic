@@ -8,7 +8,7 @@ import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import Divider from '@/shared/ui/divider';
 import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeChip';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { ScheduledSessionItem } from '../types/session-list';
 import RescheduleSessionDialog from './RescheduleSessionDialog';
 import { useRouter } from '@/i18n/navigation';
@@ -30,6 +30,7 @@ export default function ScheduledSessionItemCard({
   stressLabel,
 }: ScheduledSessionItemCardProps) {
   const router = useRouter();
+  const locale = useLocale();
   const tCommon = useTranslations('common');
   const tSessions = useTranslations('sessionList');
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
@@ -54,7 +55,9 @@ export default function ScheduledSessionItemCard({
       sessionType: item.sessionType,
       riskType: item.riskType,
     });
-    router.push(`/session/${result.sessionId}`);
+    router.push(
+      `/session/${result.sessionId}?returnTo=${encodeURIComponent(`/${locale}/sessions`)}`,
+    );
   };
 
   return (

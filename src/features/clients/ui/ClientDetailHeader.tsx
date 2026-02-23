@@ -40,7 +40,9 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
       name: localizedClientName,
       riskType: client.riskType,
     });
-    router.push(`/session/${result.sessionId}`);
+    router.push(
+      `/session/${result.sessionId}?returnTo=${encodeURIComponent(`/${locale}/clients`)}`,
+    );
   };
 
   return (

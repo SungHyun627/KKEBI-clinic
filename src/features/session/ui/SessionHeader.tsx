@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { LocaleSwitchButton } from '@/shared/ui/locale-switch-button';
 import { getSessionStartContext } from '@/shared/lib/session-start-context';
 import type { SessionStartContextValue } from '@/shared/lib/session-start-context';
@@ -52,6 +52,7 @@ export default function SessionHeader({
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [context, setContext] = useState<SessionStartContextValue | null>(null);
   const [isEndDialogOpen, setIsEndDialogOpen] = useState(false);
 
@@ -67,6 +68,27 @@ export default function SessionHeader({
   const elapsedSeconds = recorderState?.elapsedSeconds ?? 0;
   const visibleAudioLevel = recorderState?.visibleAudioLevel ?? 0;
   const totalSessionTime = formatElapsed(elapsedSeconds > 0 ? elapsedSeconds : 10 * 60);
+  const handleBackWithLocale = () => {
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(`kkebi:session-auto-record:${sessionId}`);
+    }
+
+    const returnTo = searchParams.get('returnTo');
+    let safeReturnTo: string | null = null;
+    if (returnTo) {
+      try {
+        const decoded = decodeURIComponent(returnTo);
+        if (decoded.startsWith(`/${locale}`) && !decoded.includes('/session/')) {
+          safeReturnTo = decoded;
+        }
+      } catch {
+        safeReturnTo = null;
+      }
+    }
+
+    router.push(safeReturnTo ?? `/${locale}/sessions`);
+  };
+
   const handleEndSession = () => {
     if (typeof window !== 'undefined') {
       const runtimeKey = getSessionAutoRecordStorageKey(sessionId);
@@ -159,12 +181,7 @@ export default function SessionHeader({
           </Button>
           <Button
             variant="icon"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                window.sessionStorage.removeItem(`kkebi:session-auto-record:${sessionId}`);
-              }
-              router.back();
-            }}
+            onClick={handleBackWithLocale}
             className="p-0 border-none hover:bg-white h-6 w-6"
           >
             <Image src="/icons/backward.svg" alt="" width={24} height={24} />

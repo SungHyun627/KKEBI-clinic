@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/shared/ui/button';
 import { startSession } from '@/features/sessions/api/startSession';
@@ -27,6 +27,7 @@ export default function TodayScheduleAction({
 }: TodayScheduleActionProps) {
   const tDashboard = useTranslations('dashboard');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const router = useRouter();
   const [isStarting, setIsStarting] = useState(false);
 
@@ -45,7 +46,7 @@ export default function TodayScheduleAction({
       sessionType: sessionType,
       riskType: riskType,
     });
-    router.push(`/session/${result.sessionId}`);
+    router.push(`/session/${result.sessionId}?returnTo=${encodeURIComponent(`/${locale}`)}`);
   };
 
   return (
