@@ -112,7 +112,12 @@ export default function SessionHeader({
           </Button>
           <Button
             variant="icon"
-            onClick={() => router.back()}
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.sessionStorage.removeItem(`kkebi:session-auto-record:${sessionId}`);
+              }
+              router.back();
+            }}
             className="p-0 border-none hover:bg-white h-6 w-6"
           >
             <Image src="/icons/backward.svg" alt="" width={24} height={24} />
