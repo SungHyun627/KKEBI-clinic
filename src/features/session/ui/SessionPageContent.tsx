@@ -112,15 +112,12 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             onRecorderStateChange={setRecorderState}
             onRiskSignalDetected={(payload) => setRiskBanner(payload)}
             onAnalysisChange={(nextInsights) => {
-              setAnalysisInsights(nextInsights);
               if (!nextInsights) return;
+              setAnalysisInsights(nextInsights);
 
               setRecentEmotionHistory((prev) => {
-                const next = [
-                  nextInsights.currentEmotion,
-                  ...prev.filter((item) => item !== nextInsights.currentEmotion),
-                ];
-                return next.slice(0, 6);
+                if (prev[0] === nextInsights.currentEmotion) return prev;
+                return [nextInsights.currentEmotion, ...prev].slice(0, 6);
               });
 
               setKeyConcernHistory((prev) => {

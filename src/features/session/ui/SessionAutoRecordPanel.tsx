@@ -65,9 +65,29 @@ function renderHighlightedText(text: string, locale: string) {
 function detectEmotionFromText(text: string): SessionInsightsData['currentEmotion'] {
   const lower = text.toLowerCase();
   const rules: Array<{ emotion: SessionInsightsData['currentEmotion']; keywords: string[] }> = [
-    { emotion: 'anxious', keywords: ['불안', '초조', 'anxious', 'anxiety', 'nervous'] },
-    { emotion: 'sad', keywords: ['슬프', '우울', 'sad', 'depressed'] },
-    { emotion: 'angry', keywords: ['화나', '분노', 'angry', 'furious', 'irritated'] },
+    {
+      emotion: 'anxious',
+      keywords: [
+        '불안',
+        '초조',
+        '긴장',
+        '걱정',
+        '힘들',
+        '버겁',
+        'anxious',
+        'anxiety',
+        'nervous',
+        'worried',
+        'stress',
+        'hard',
+        'overwhelmed',
+      ],
+    },
+    {
+      emotion: 'sad',
+      keywords: ['슬프', '우울', '지쳤', '무기력', 'sad', 'depressed', 'tired', 'exhausted'],
+    },
+    { emotion: 'angry', keywords: ['화나', '분노', '짜증', 'angry', 'furious', 'irritated'] },
     { emotion: 'fearful', keywords: ['무섭', '두렵', 'fear', 'afraid', 'scared'] },
     { emotion: 'happy', keywords: ['기뻐', '좋아', 'happy', 'glad', 'relieved'] },
   ];
@@ -85,6 +105,121 @@ function detectDistortionType(texts: string[]): SessionInsightsData['distortionT
   return 'should_statement';
 }
 
+function buildLiveSummary(
+  transcripts: SessionAutoRecordData['transcripts'],
+  locale: string,
+  fallbackTitle: string,
+  fallbackBody: string,
+) {
+  if (transcripts.length === 0) return { title: '', body: '' };
+
+  const clientLines = transcripts.filter((line) => line.speaker === 'client');
+  const clientTexts = clientLines.map((line) => line.text);
+  if (clientTexts.length < 2 || transcripts.length < 4) return { title: '', body: '' };
+
+  const fullText = clientTexts.join(' ').toLowerCase();
+  const topicPool =
+    locale === 'en'
+      ? [
+          { label: 'work stress', test: /work|boss|report|deadline/ },
+          { label: 'sleep issues', test: /sleep|insomnia/ },
+          { label: 'self-criticism', test: /failure|worthless|ruined/ },
+          { label: 'safety concerns', test: /self-harm|suicide|want to die|give up/ },
+        ]
+      : [
+          { label: '업무 스트레스', test: /회사|업무|상사|보고서/ },
+          { label: '수면 문제', test: /잠|수면/ },
+          { label: '자기비난', test: /실패|망했|완전히/ },
+          { label: '안전 위험', test: /자해|자살|죽고 싶|포기/ },
+        ];
+  const topics = topicPool.filter((item) => item.test.test(fullText)).map((item) => item.label);
+  const topicText =
+    topics.length > 0
+      ? topics.slice(0, 2).join(locale === 'en' ? ' and ' : ' 및 ')
+      : locale === 'en'
+        ? 'daily stress'
+        : '일상 스트레스';
+
+  const trim = (text: string) => (text.length > 34 ? `${text.slice(0, 34)}...` : text);
+  const recentFocus = clientTexts
+    .slice(-2)
+    .map(trim)
+    .join(locale === 'en' ? ' / ' : ' / ');
+
+  const resolvedEmotions = clientTexts.map((text, index) => {
+    const detected = detectEmotionFromText(text);
+    if (detected !== 'calm') return detected;
+    const prev = clientTexts
+      .slice(0, index)
+      .map((item) => detectEmotionFromText(item))
+      .reverse()
+      .find((emotion) => emotion !== 'calm');
+    return prev ?? 'calm';
+  });
+  const currentEmotion = resolvedEmotions[resolvedEmotions.length - 1] ?? 'calm';
+  const emotionLabel =
+    locale === 'en'
+      ? {
+          anxious: 'anxious',
+          sad: 'sad',
+          angry: 'angry',
+          happy: 'positive',
+          calm: 'calm',
+          fearful: 'fearful',
+        }[currentEmotion]
+      : {
+          anxious: '불안',
+          sad: '슬픔',
+          angry: '분노',
+          happy: '긍정',
+          calm: '평온',
+          fearful: '두려움',
+        }[currentEmotion];
+
+  const distortionType = detectDistortionType(clientTexts);
+  const distortionLabel =
+    locale === 'en'
+      ? {
+          black_and_white: 'black-and-white thinking',
+          overgeneralization: 'overgeneralization',
+          catastrophizing: 'catastrophizing',
+          should_statement: 'should statements',
+        }[distortionType]
+      : {
+          black_and_white: '흑백논리',
+          overgeneralization: '과잉일반화',
+          catastrophizing: '파국화',
+          should_statement: '당위적 사고',
+        }[distortionType];
+
+  const riskCount =
+    fullText.match(/자해|자살|죽고 싶|포기|self-harm|suicide|want to die|give up/g)?.length ?? 0;
+  const riskSuffix =
+    riskCount > 0
+      ? locale === 'en'
+        ? ` Safety-related wording appeared ${riskCount} time(s).`
+        : ` 안전 관련 표현이 ${riskCount}회 확인되었습니다.`
+      : '';
+
+  return locale === 'en'
+    ? {
+        title: fallbackTitle || 'Session summary in progress',
+        body:
+          `Across ${clientTexts.length} client turns, the session centers on ${topicText}. ` +
+          `Recent statements: "${recentFocus}". Current affect is estimated as ${emotionLabel}, ` +
+          `with ${distortionLabel} tendencies in the narrative.` +
+          riskSuffix,
+      }
+    : {
+        title: fallbackTitle || '상담 요약 업데이트',
+        body:
+          `내담자 발화 ${clientTexts.length}개를 기준으로 ${topicText} 중심의 상담이 진행되고 있습니다. ` +
+            `최근 진술: "${recentFocus}". 현재 정서 반응은 ${emotionLabel}로 해석되며, ` +
+            `${distortionLabel} 경향이 함께 관찰됩니다.` +
+            riskSuffix || fallbackBody,
+      };
+}
+
 function buildLiveInsights(
   base: SessionInsightsData,
   transcripts: SessionAutoRecordData['transcripts'],
@@ -95,26 +230,43 @@ function buildLiveInsights(
   const clientLines = transcripts.filter((line) => line.speaker === 'client');
   if (clientLines.length === 0) return null;
   const sourceLines = clientLines;
-  const latestText = sourceLines[sourceLines.length - 1]?.text ?? '';
   const texts = sourceLines.map((line) => line.text);
   const fullText = texts.join(' ').toLowerCase();
 
-  let currentEmotion = detectEmotionFromText(latestText);
+  const resolvedEmotions = sourceLines.map((line, index) => {
+    const detected = detectEmotionFromText(line.text);
+    if (detected !== 'calm') return detected;
+    const previousDetected = sourceLines
+      .slice(0, index)
+      .map((prev) => detectEmotionFromText(prev.text))
+      .reverse()
+      .find((emotion) => emotion !== 'calm');
+    return previousDetected ?? 'calm';
+  });
+  let currentEmotion = resolvedEmotions[resolvedEmotions.length - 1] ?? 'calm';
   const confidence = Math.max(62, Math.min(96, 68 + Math.min(texts.length, 6) * 4));
 
   const riskHits = (
     fullText.match(/자해|자살|죽고 싶|포기|self-harm|suicide|give up|want to die/g) ?? []
   ).length;
-  if (currentEmotion === 'calm' && riskHits > 0) {
-    currentEmotion = riskHits >= 2 ? 'fearful' : 'anxious';
+  if (riskHits >= 2) {
+    currentEmotion = 'fearful';
+  } else if (currentEmotion === 'calm' && riskHits > 0) {
+    currentEmotion = 'anxious';
+  }
+  if (resolvedEmotions.length > 0) {
+    resolvedEmotions[resolvedEmotions.length - 1] = currentEmotion;
   }
   const riskType = riskHits >= 2 ? '위험' : riskHits >= 1 ? '주의' : '안정';
   const phq9Score = riskType === '위험' ? 19 : riskType === '주의' ? 13 : 7;
 
-  const recentClientLines = sourceLines.slice(-3);
-  const emotionHistory = recentClientLines.map((line, idx) => ({
-    emotion: detectEmotionFromText(line.text),
-    minutesAgo: (recentClientLines.length - 1 - idx) * 3,
+  const rawEmotionHistory = resolvedEmotions.slice(-3);
+  const dedupedEmotionHistory = rawEmotionHistory.filter(
+    (emotion, idx, arr) => idx === 0 || emotion !== arr[idx - 1],
+  );
+  const emotionHistory = dedupedEmotionHistory.map((emotion, idx) => ({
+    emotion,
+    minutesAgo: (dedupedEmotionHistory.length - 1 - idx) * 3,
   }));
 
   const distortionType = detectDistortionType(texts);
@@ -199,6 +351,18 @@ export default function SessionAutoRecordPanel({
   const [audioLevel, setAudioLevel] = useState(0);
   const [demoIndex, setDemoIndex] = useState(0);
   const visibleAudioLevel = isRecording && !isPaused ? audioLevel : 0;
+  const liveSummary = useMemo(
+    () =>
+      isRecording
+        ? buildLiveSummary(
+            transcriptItems,
+            locale,
+            autoRecord.liveSummaryTitle,
+            autoRecord.liveSummaryBody,
+          )
+        : { title: '', body: '' },
+    [autoRecord.liveSummaryBody, autoRecord.liveSummaryTitle, isRecording, locale, transcriptItems],
+  );
 
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
 
@@ -314,7 +478,7 @@ export default function SessionAutoRecordPanel({
         speaker: 'counselor',
         text: '오늘은 지난주보다 표정이 조금 무거워 보이는데, 어떤 일이 있었나요?',
       },
-      { speaker: 'client', text: '회사에서 매번 실수하는 것 같아서 너무 힘들어요.' },
+      { speaker: 'client', text: '회사에서 매번 실수하는 것 같아서 자신감이 많이 떨어졌어요.' },
       {
         speaker: 'counselor',
         text: '매번이라는 표현이 나왔네요. 최근에 특히 기억나는 순간이 있을까요?',
@@ -341,7 +505,10 @@ export default function SessionAutoRecordPanel({
         speaker: 'counselor',
         text: 'You look a bit heavier than last week. What happened recently?',
       },
-      { speaker: 'client', text: 'I feel like I fail at work every single time. It is hard.' },
+      {
+        speaker: 'client',
+        text: 'I feel like I fail at work every single time, and my confidence has dropped a lot.',
+      },
       {
         speaker: 'counselor',
         text: 'I heard “every single time.” Can you share one recent moment?',
@@ -410,7 +577,7 @@ export default function SessionAutoRecordPanel({
   };
 
   return (
-    <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px]">
+    <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
       <div className="text-[24px] font-semibold">
         {locale === 'en' ? 'Session record' : '상담 기록'}
       </div>
@@ -426,12 +593,8 @@ export default function SessionAutoRecordPanel({
           formatTimestampToHms={formatTimestampToHms}
           renderHighlightedText={renderHighlightedText}
         />
-        <SessionLiveSummaryCard
-          locale={locale}
-          title={isRecording ? autoRecord.liveSummaryTitle : ''}
-          body={isRecording ? autoRecord.liveSummaryBody : ''}
-        />
-        <SessionCounselorMemoCard locale={locale} defaultValue={autoRecord.counselorMemo} />
+        <SessionLiveSummaryCard locale={locale} title={liveSummary.title} body={liveSummary.body} />
+        <SessionCounselorMemoCard locale={locale} defaultValue="" />
       </div>
       <div className="fixed bottom-[30px] left-[40%] right-0 z-30 flex justify-center px-8 max-[1200px]:left-0 max-[1200px]:right-0 max-[1200px]:px-6 max-[900px]:px-4">
         <SessionAudioControls

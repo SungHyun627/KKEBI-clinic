@@ -119,6 +119,8 @@ export default function SessionInsightsPanel({
               {isRecording ? (
                 <div className="flex w-full body-14">
                   {insights.emotionHistory
+                    .slice()
+                    .reverse()
                     .map((item) => emotionLabel(item.emotion, locale))
                     .join(', ')}
                 </div>
@@ -215,7 +217,7 @@ export default function SessionInsightsPanel({
                 {locale === 'en' ? 'Example' : '사례'}
               </span>
               {distortionExampleHistory.length > 0 ? (
-                <div className="flex w-full flex-col gap-1 body-14">
+                <div className="flex w-full flex-col gap-1 body-14 items-start pt-[3px]">
                   {distortionExampleHistory.map((item, index) => (
                     <span key={`${item}-${index}`} className="text-label-normal">
                       {item}

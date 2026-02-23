@@ -22,9 +22,7 @@ export default function SessionTranscriptCard({
   renderHighlightedText,
 }: SessionTranscriptCardProps) {
   const emptyMessage =
-    locale === 'en'
-      ? 'Transcript will appear when recording starts'
-      : '녹음을 시작하면 상담 기록이 표시됩니다';
+    locale === 'en' ? 'Transcript will appear when recording starts' : '녹음 중인 상담이 없습니다';
 
   return (
     <div className="flex flex-col w-full justify-center p-[26px] rounded-[24px] bg-white">
