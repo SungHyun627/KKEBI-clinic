@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SessionAutoRecordData } from '../types/session-page';
 import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
 import { toast } from '@/shared/ui/toast';
 import { getDemoConversation } from '../lib/demo-conversations';
 import { formatElapsedToTimestamp } from '../lib/session-analysis';
+import { useSessionPersistence } from './useSessionPersistence';
 
 export type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
 
@@ -40,42 +41,12 @@ export function useSessionAutoRecordRuntime({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [demoIndex, setDemoIndex] = useState(0);
-  const [isHydrated, setIsHydrated] = useState(false);
 
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
   const visibleAudioLevel = isRecording && !isPaused ? audioLevel : 0;
   const storageKey = `kkebi:session-auto-record:${sessionId}`;
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const raw = window.sessionStorage.getItem(storageKey);
-    if (!raw) {
-      setIsHydrated(true);
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(raw) as PersistedAutoRecordState;
-      setTranscriptItems(parsed.transcriptItems ?? []);
-      setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
-      setMicPermission(parsed.micPermission ?? 'idle');
-      setIsRecording(Boolean(parsed.isRecording));
-      setIsPaused(Boolean(parsed.isPaused));
-      setElapsedSeconds(parsed.elapsedSeconds ?? 0);
-      setAudioLevel(parsed.audioLevel ?? 0);
-      setDemoIndex(parsed.demoIndex ?? 0);
-    } catch {
-      window.sessionStorage.removeItem(storageKey);
-    } finally {
-      setIsHydrated(true);
-    }
-  }, [storageKey]);
-
-  useEffect(() => {
-    if (!isHydrated || typeof window === 'undefined') return;
-
-    const payload: PersistedAutoRecordState = {
+  const snapshot = useMemo<PersistedAutoRecordState>(
+    () => ({
       transcriptItems,
       bookmarkIds: Array.from(bookmarkIds),
       micPermission,
@@ -84,40 +55,55 @@ export function useSessionAutoRecordRuntime({
       elapsedSeconds,
       audioLevel,
       demoIndex,
-    };
-    window.sessionStorage.setItem(storageKey, JSON.stringify(payload));
-  }, [
-    audioLevel,
-    bookmarkIds,
-    demoIndex,
-    elapsedSeconds,
-    isHydrated,
-    isPaused,
-    isRecording,
-    micPermission,
+    }),
+    [
+      audioLevel,
+      bookmarkIds,
+      demoIndex,
+      elapsedSeconds,
+      isPaused,
+      isRecording,
+      micPermission,
+      transcriptItems,
+    ],
+  );
+
+  const hydrate = useCallback((parsed: PersistedAutoRecordState) => {
+    setTranscriptItems(parsed.transcriptItems ?? []);
+    setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
+    setMicPermission(parsed.micPermission ?? 'idle');
+    setIsRecording(Boolean(parsed.isRecording));
+    setIsPaused(Boolean(parsed.isPaused));
+    setElapsedSeconds(parsed.elapsedSeconds ?? 0);
+    setAudioLevel(parsed.audioLevel ?? 0);
+    setDemoIndex(parsed.demoIndex ?? 0);
+  }, []);
+
+  const { isHydrated } = useSessionPersistence<PersistedAutoRecordState>({
     storageKey,
-    transcriptItems,
-  ]);
+    snapshot,
+    hydrate,
+  });
 
   useEffect(() => {
-    if (!isRecording || isPaused) return;
+    if (!isHydrated || !isRecording || isPaused) return;
 
     const timer = window.setInterval(() => {
       setElapsedSeconds((prev) => prev + 1);
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [isPaused, isRecording]);
+  }, [isHydrated, isPaused, isRecording]);
 
   useEffect(() => {
-    if (!isRecording || isPaused) return;
+    if (!isHydrated || !isRecording || isPaused) return;
 
     const levelTimer = window.setInterval(() => {
       setAudioLevel(Math.floor(Math.random() * 100));
     }, 250);
 
     return () => window.clearInterval(levelTimer);
-  }, [isPaused, isRecording]);
+  }, [isHydrated, isPaused, isRecording]);
 
   const toggleBookmark = async (transcriptId: string) => {
     if (pendingMap.has(transcriptId)) return;

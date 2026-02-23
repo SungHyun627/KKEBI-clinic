@@ -1,15 +1,11 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useLocale } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../types/session-page';
 import { useSessionAutoRecordRuntime } from '../hooks/useSessionAutoRecordRuntime';
-import {
-  buildLiveInsights,
-  buildLiveSummary,
-  formatTimestampToHms,
-  renderHighlightedText,
-} from '../lib/session-analysis';
+import { useSessionAnalysis } from '../hooks/useSessionAnalysis';
+import { formatTimestampToHms, renderHighlightedText } from '../lib/session-analysis';
 import SessionTranscriptCard from './SessionTranscriptCard';
 import SessionLiveSummaryCard from './SessionLiveSummaryCard';
 import SessionCounselorMemoCard from './SessionCounselorMemoCard';
@@ -56,19 +52,14 @@ export default function SessionAutoRecordPanel({
     locale,
     onRiskSignalDetected,
   });
-
-  const liveSummary = useMemo(
-    () =>
-      isRecording
-        ? buildLiveSummary(
-            transcriptItems,
-            locale,
-            autoRecord.liveSummaryTitle,
-            autoRecord.liveSummaryBody,
-          )
-        : { title: '', body: '' },
-    [autoRecord.liveSummaryBody, autoRecord.liveSummaryTitle, isRecording, locale, transcriptItems],
-  );
+  const { liveSummary } = useSessionAnalysis({
+    locale,
+    isRecording,
+    transcriptItems,
+    autoRecord,
+    baseInsights,
+    onAnalysisChange,
+  });
 
   useEffect(() => {
     onRecorderStateChange?.({
@@ -78,11 +69,6 @@ export default function SessionAutoRecordPanel({
       visibleAudioLevel,
     });
   }, [elapsedSeconds, isPaused, isRecording, onRecorderStateChange, visibleAudioLevel]);
-
-  useEffect(() => {
-    if (!onAnalysisChange) return;
-    onAnalysisChange(buildLiveInsights(baseInsights, transcriptItems, locale));
-  }, [baseInsights, locale, onAnalysisChange, transcriptItems]);
 
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
