@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../types/session-page';
-import { buildLiveInsights, buildLiveSummary } from '../lib/session-analysis';
+import { analyzeLiveSummary, buildLiveInsights } from '../lib/session-analysis';
 
 interface UseSessionAnalysisParams {
   locale: string;
@@ -21,18 +22,47 @@ export function useSessionAnalysis({
   baseInsights,
   onAnalysisChange,
 }: UseSessionAnalysisParams) {
-  const liveSummary = useMemo(
-    () =>
-      isRecording
-        ? buildLiveSummary(
-            transcriptItems,
-            locale,
-            autoRecord.liveSummaryTitle,
-            autoRecord.liveSummaryBody,
-          )
-        : { title: '', body: '' },
-    [autoRecord.liveSummaryBody, autoRecord.liveSummaryTitle, isRecording, locale, transcriptItems],
-  );
+  const tSession = useTranslations('sessionList');
+
+  const liveSummaryAnalysis = useMemo(() => analyzeLiveSummary(transcriptItems), [transcriptItems]);
+
+  const liveSummary = useMemo(() => {
+    if (!isRecording || !liveSummaryAnalysis) return { title: '', body: '' };
+
+    const topicLabels = liveSummaryAnalysis.topicKeys
+      .slice(0, 2)
+      .map((topic) => tSession(`summaryTopic.${topic}`));
+    const topicText =
+      topicLabels.length > 0
+        ? topicLabels.join(` ${tSession('summaryJoinWord')} `)
+        : tSession('summaryTopic.default');
+
+    const emotionLabel = tSession(`summaryEmotion.${liveSummaryAnalysis.currentEmotion}`);
+    const distortionLabel = tSession(`summaryDistortion.${liveSummaryAnalysis.distortionType}`);
+
+    const body =
+      tSession('summaryBodyTemplate', {
+        count: liveSummaryAnalysis.clientTurnCount,
+        topic: topicText,
+        recentFocus: liveSummaryAnalysis.recentFocus,
+        emotion: emotionLabel,
+        distortion: distortionLabel,
+      }) +
+      (liveSummaryAnalysis.riskCount > 0
+        ? ` ${tSession('summaryRiskSuffix', { count: liveSummaryAnalysis.riskCount })}`
+        : '');
+
+    return {
+      title: autoRecord.liveSummaryTitle || tSession('summaryTitle'),
+      body: body || autoRecord.liveSummaryBody,
+    };
+  }, [
+    autoRecord.liveSummaryBody,
+    autoRecord.liveSummaryTitle,
+    isRecording,
+    liveSummaryAnalysis,
+    tSession,
+  ]);
 
   const liveInsights = useMemo(
     () => buildLiveInsights(baseInsights, transcriptItems, locale),

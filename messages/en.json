@@ -277,6 +277,31 @@
     "rescheduleStartTimeLabel": "Start time",
     "rescheduleEndTimeLabel": "End time",
     "rescheduleSuccessToast": "Schedule change completed.",
+    "summaryTitle": "Session summary in progress",
+    "summaryJoinWord": "and",
+    "summaryBodyTemplate": "Across {count} client turns, the session centers on {topic}. Recent statements: \"{recentFocus}\". Current affect is estimated as {emotion}, with {distortion} tendencies in the narrative.",
+    "summaryRiskSuffix": "Safety-related wording appeared {count} time(s).",
+    "summaryTopic": {
+      "workStress": "work stress",
+      "sleepIssues": "sleep issues",
+      "selfCriticism": "self-criticism",
+      "safetyConcerns": "safety concerns",
+      "default": "daily stress"
+    },
+    "summaryEmotion": {
+      "anxious": "anxious",
+      "sad": "sad",
+      "angry": "angry",
+      "happy": "positive",
+      "calm": "calm",
+      "fearful": "fearful"
+    },
+    "summaryDistortion": {
+      "black_and_white": "black-and-white thinking",
+      "overgeneralization": "overgeneralization",
+      "catastrophizing": "catastrophizing",
+      "should_statement": "should statements"
+    },
     "toastMicUnsupported": "Microphone is not supported in this browser.",
     "toastMicPermissionDenied": "Microphone permission denied. Please allow microphone access.",
     "toastRecordingStarted": "Recording started.",

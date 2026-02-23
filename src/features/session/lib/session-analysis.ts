@@ -4,6 +4,17 @@ import type {
   SessionInsightsData,
 } from '../types/session-page';
 
+export type SummaryTopicKey = 'workStress' | 'sleepIssues' | 'selfCriticism' | 'safetyConcerns';
+
+export interface LiveSummaryAnalysis {
+  clientTurnCount: number;
+  topicKeys: SummaryTopicKey[];
+  recentFocus: string;
+  currentEmotion: SessionEmotionType;
+  distortionType: SessionInsightsData['distortionType'];
+  riskCount: number;
+}
+
 export function formatTimestampToHms(value: string): string {
   const parts = value.split(':');
   if (parts.length === 3) return value;
@@ -61,46 +72,26 @@ function detectDistortionType(texts: string[]): SessionInsightsData['distortionT
   return 'should_statement';
 }
 
-export function buildLiveSummary(
+export function analyzeLiveSummary(
   transcripts: SessionAutoRecordData['transcripts'],
-  locale: string,
-  fallbackTitle: string,
-  fallbackBody: string,
-) {
-  if (transcripts.length === 0) return { title: '', body: '' };
+): LiveSummaryAnalysis | null {
+  if (transcripts.length === 0) return null;
 
   const clientLines = transcripts.filter((line) => line.speaker === 'client');
   const clientTexts = clientLines.map((line) => line.text);
-  if (clientTexts.length < 2 || transcripts.length < 4) return { title: '', body: '' };
+  if (clientTexts.length < 2 || transcripts.length < 4) return null;
 
   const fullText = clientTexts.join(' ').toLowerCase();
-  const topicPool =
-    locale === 'en'
-      ? [
-          { label: 'work stress', test: /work|boss|report|deadline/ },
-          { label: 'sleep issues', test: /sleep|insomnia/ },
-          { label: 'self-criticism', test: /failure|worthless|ruined/ },
-          { label: 'safety concerns', test: /self-harm|suicide|want to die|give up/ },
-        ]
-      : [
-          { label: '업무 스트레스', test: /회사|업무|상사|보고서/ },
-          { label: '수면 문제', test: /잠|수면/ },
-          { label: '자기비난', test: /실패|망했|완전히/ },
-          { label: '안전 위험', test: /자해|자살|죽고 싶|포기/ },
-        ];
-  const topics = topicPool.filter((item) => item.test.test(fullText)).map((item) => item.label);
-  const topicText =
-    topics.length > 0
-      ? topics.slice(0, 2).join(locale === 'en' ? ' and ' : ' 및 ')
-      : locale === 'en'
-        ? 'daily stress'
-        : '일상 스트레스';
+  const topicPool: Array<{ key: SummaryTopicKey; test: RegExp }> = [
+    { key: 'workStress', test: /회사|업무|상사|보고서|work|boss|report|deadline/ },
+    { key: 'sleepIssues', test: /잠|수면|sleep|insomnia/ },
+    { key: 'selfCriticism', test: /실패|망했|완전히|failure|worthless|ruined/ },
+    { key: 'safetyConcerns', test: /자해|자살|죽고 싶|포기|self-harm|suicide|want to die|give up/ },
+  ];
+  const topicKeys = topicPool.filter((item) => item.test.test(fullText)).map((item) => item.key);
 
   const trim = (text: string) => (text.length > 34 ? `${text.slice(0, 34)}...` : text);
-  const recentFocus = clientTexts
-    .slice(-2)
-    .map(trim)
-    .join(locale === 'en' ? ' / ' : ' / ');
+  const recentFocus = clientTexts.slice(-2).map(trim).join(' / ');
 
   const resolvedEmotions = clientTexts.map((text, index) => {
     const detected = detectEmotionFromText(text);
@@ -113,67 +104,20 @@ export function buildLiveSummary(
     return prev ?? 'calm';
   });
   const currentEmotion = resolvedEmotions[resolvedEmotions.length - 1] ?? 'calm';
-  const emotionLabel =
-    locale === 'en'
-      ? {
-          anxious: 'anxious',
-          sad: 'sad',
-          angry: 'angry',
-          happy: 'positive',
-          calm: 'calm',
-          fearful: 'fearful',
-        }[currentEmotion]
-      : {
-          anxious: '불안',
-          sad: '슬픔',
-          angry: '분노',
-          happy: '긍정',
-          calm: '평온',
-          fearful: '두려움',
-        }[currentEmotion];
 
   const distortionType = detectDistortionType(clientTexts);
-  const distortionLabel =
-    locale === 'en'
-      ? {
-          black_and_white: 'black-and-white thinking',
-          overgeneralization: 'overgeneralization',
-          catastrophizing: 'catastrophizing',
-          should_statement: 'should statements',
-        }[distortionType]
-      : {
-          black_and_white: '흑백논리',
-          overgeneralization: '과잉일반화',
-          catastrophizing: '파국화',
-          should_statement: '당위적 사고',
-        }[distortionType];
 
   const riskCount =
     fullText.match(/자해|자살|죽고 싶|포기|self-harm|suicide|want to die|give up/g)?.length ?? 0;
-  const riskSuffix =
-    riskCount > 0
-      ? locale === 'en'
-        ? ` Safety-related wording appeared ${riskCount} time(s).`
-        : ` 안전 관련 표현이 ${riskCount}회 확인되었습니다.`
-      : '';
 
-  return locale === 'en'
-    ? {
-        title: fallbackTitle || 'Session summary in progress',
-        body:
-          `Across ${clientTexts.length} client turns, the session centers on ${topicText}. ` +
-          `Recent statements: "${recentFocus}". Current affect is estimated as ${emotionLabel}, ` +
-          `with ${distortionLabel} tendencies in the narrative.` +
-          riskSuffix,
-      }
-    : {
-        title: fallbackTitle || '상담 요약 업데이트',
-        body:
-          `내담자 발화 ${clientTexts.length}개를 기준으로 ${topicText} 중심의 상담이 진행되고 있습니다. ` +
-            `최근 진술: "${recentFocus}". 현재 정서 반응은 ${emotionLabel}로 해석되며, ` +
-            `${distortionLabel} 경향이 함께 관찰됩니다.` +
-            riskSuffix || fallbackBody,
-      };
+  return {
+    clientTurnCount: clientTexts.length,
+    topicKeys,
+    recentFocus,
+    currentEmotion,
+    distortionType,
+    riskCount,
+  };
 }
 
 export function buildLiveInsights(
