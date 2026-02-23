@@ -37,6 +37,34 @@ export interface SummaryTranscriptItem {
 
 export type RiskEvaluation = 'stable' | 'caution' | 'risk' | 'urgent';
 export type FollowUpSessionTiming = '1w' | '2w' | '1m' | 'as-needed';
+export type SummaryNextSessionSchedule = {
+  date: string;
+  startTime: string;
+  endTime: string;
+};
+
+export type SummarySubmitFormValues = {
+  riskEvaluation: RiskEvaluation | '';
+  followUpSessionTiming: FollowUpSessionTiming | '';
+  additionalMemo: string;
+  selectedMissionIds: string[];
+  nextDate: string;
+  nextStartTime: string;
+  nextEndTime: string;
+};
+
+export type SubmitSessionSummaryPayload = {
+  summaryText: string;
+  riskEvaluation: RiskEvaluation;
+  followUpSessionTiming: FollowUpSessionTiming;
+  selectedMissionIds: string[];
+  nextSession: SummaryNextSessionSchedule | null;
+};
+
+export type SubmitSessionSummaryResponse = {
+  success: boolean;
+  message?: string;
+};
 
 export type MissionItem = {
   id: string;

@@ -1,19 +1,7 @@
-interface SubmitSessionSummaryPayload {
-  summaryText: string;
-  riskEvaluation: 'stable' | 'caution' | 'risk' | 'urgent';
-  followUpSessionTiming: '1w' | '2w' | '1m' | 'as-needed';
-  selectedMissionIds: string[];
-  nextSession: {
-    date: string;
-    startTime: string;
-    endTime: string;
-  } | null;
-}
-
-interface SubmitSessionSummaryResponse {
-  success: boolean;
-  message?: string;
-}
+import type {
+  SubmitSessionSummaryPayload,
+  SubmitSessionSummaryResponse,
+} from '@/features/summary/types/summary';
 
 export const submitSessionSummary = async (
   sessionId: string,

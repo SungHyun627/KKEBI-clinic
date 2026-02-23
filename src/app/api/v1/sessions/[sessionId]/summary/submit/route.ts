@@ -1,19 +1,20 @@
 import { NextResponse } from 'next/server';
+import type {
+  FollowUpSessionTiming,
+  RiskEvaluation,
+  SubmitSessionSummaryPayload,
+} from '@/features/summary/types/summary';
 
 interface SubmitSummaryBody {
   summaryText?: string;
-  riskEvaluation?: 'stable' | 'caution' | 'risk' | 'urgent';
-  followUpSessionTiming?: '1w' | '2w' | '1m' | 'as-needed';
+  riskEvaluation?: RiskEvaluation;
+  followUpSessionTiming?: FollowUpSessionTiming;
   selectedMissionIds?: string[];
-  nextSession?: {
-    date?: string;
-    startTime?: string;
-    endTime?: string;
-  } | null;
+  nextSession?: Partial<NonNullable<SubmitSessionSummaryPayload['nextSession']>> | null;
 }
 
-const VALID_RISK = new Set(['stable', 'caution', 'risk', 'urgent']);
-const VALID_FOLLOW_UP = new Set(['1w', '2w', '1m', 'as-needed']);
+const VALID_RISK = new Set<RiskEvaluation>(['stable', 'caution', 'risk', 'urgent']);
+const VALID_FOLLOW_UP = new Set<FollowUpSessionTiming>(['1w', '2w', '1m', 'as-needed']);
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_PATTERN = /^\d{2}:\d{2}$/;
 

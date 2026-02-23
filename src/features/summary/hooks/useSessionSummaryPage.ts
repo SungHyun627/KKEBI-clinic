@@ -15,22 +15,13 @@ import type {
   FollowUpSessionTiming,
   MissionItem,
   RiskEvaluation,
+  SummarySubmitFormValues,
   SummaryPayload,
 } from '@/features/summary/types/summary';
 
 interface UseSessionSummaryPageProps {
   locale: string;
   sessionId: string;
-}
-
-interface SummarySubmitFormValues {
-  riskEvaluation: RiskEvaluation | '';
-  followUpSessionTiming: FollowUpSessionTiming | '';
-  additionalMemo: string;
-  selectedMissionIds: string[];
-  nextDate: string;
-  nextStartTime: string;
-  nextEndTime: string;
 }
 
 function formatSummaryDate(iso?: string) {
