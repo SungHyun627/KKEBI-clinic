@@ -15,15 +15,15 @@ export default function SessionLiveSummaryCard({
   body,
 }: SessionLiveSummaryCardProps) {
   return (
-    <div className="flex flex-col w-full justify-center p-[26px] rounded-[24px] bg-white gap-[23px]">
+    <div className="flex min-h-[220px] w-full flex-col justify-center gap-[23px] rounded-[24px] bg-white p-[26px]">
       <div className="flex flex-col gap-3">
         <span className="body-18 font-medium text-neutral-40">
           {locale === 'en' ? 'Live summary' : '실시간 요약'}
         </span>
-        <div className="w-full body-18 font-semibold">{title}</div>
+        <div className="body-18 min-h-[28px] w-full font-semibold text-label-normal">{title}</div>
       </div>
       <Divider />
-      <div className="flex items-start gap-3">
+      <div className="flex min-h-[52px] items-start gap-3">
         <Image src="/icons/speaker.svg" alt="speaker" width={20} height={20} />
         <div className="body-14 text-label-alternative">{body}</div>
       </div>

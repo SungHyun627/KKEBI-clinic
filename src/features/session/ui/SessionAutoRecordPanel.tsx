@@ -65,7 +65,7 @@ export default function SessionAutoRecordPanel({
   onRecorderStateChange,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
-  const [transcriptItems, setTranscriptItems] = useState(() => autoRecord.transcripts);
+  const [transcriptItems, setTranscriptItems] = useState(() => []);
   const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(
     () => new Set(autoRecord.transcripts.filter((item) => item.bookmarked).map((item) => item.id)),
   );
@@ -165,6 +165,7 @@ export default function SessionAutoRecordPanel({
       setMicPermission('granted');
       setIsRecording(true);
       setIsPaused(false);
+      setTranscriptItems((prev) => (prev.length > 0 ? prev : autoRecord.transcripts));
       toast(locale === 'en' ? 'Recording started.' : '녹음을 시작했습니다.');
     } catch {
       setMicPermission('denied');
@@ -242,8 +243,8 @@ export default function SessionAutoRecordPanel({
         />
         <SessionLiveSummaryCard
           locale={locale}
-          title={autoRecord.liveSummaryTitle}
-          body={autoRecord.liveSummaryBody}
+          title={isRecording ? autoRecord.liveSummaryTitle : ''}
+          body={isRecording ? autoRecord.liveSummaryBody : ''}
         />
         <SessionCounselorMemoCard locale={locale} defaultValue={autoRecord.counselorMemo} />
       </div>

@@ -12,6 +12,7 @@ import type {
 
 interface SessionInsightsPanelProps {
   insights: SessionInsightsData;
+  isRecording: boolean;
 }
 
 const emotionLabel = (emotion: SessionEmotionType, locale: string) => {
@@ -36,8 +37,20 @@ const distortionLabel = (type: CognitiveDistortionType, locale: string) => {
   return locale === 'en' ? map[type].en : map[type].ko;
 };
 
-export default function SessionInsightsPanel({ insights }: SessionInsightsPanelProps) {
+export default function SessionInsightsPanel({ insights, isRecording }: SessionInsightsPanelProps) {
   const locale = useLocale();
+  const emotionWaitingMessage =
+    locale === 'en'
+      ? 'Emotion and confidence will appear during recording'
+      : '녹음 중 감정과 신뢰도가 표시됩니다';
+  const summaryWaitingMessage =
+    locale === 'en'
+      ? 'PHQ-9 and risk level will update during recording'
+      : '녹음 중 PHQ-9 점수와 위험도가 업데이트됩니다';
+  const distortionWaitingMessage =
+    locale === 'en'
+      ? 'Detected distortion type will appear during recording'
+      : '녹음 중 감지된 왜곡 유형이 표시됩니다';
 
   return (
     <section className="flex min-h-full flex-col gap-[25px] pb-10">
@@ -49,25 +62,39 @@ export default function SessionInsightsPanel({ insights }: SessionInsightsPanelP
           title={locale === 'en' ? 'Real-time emotion analysis' : '실시간 감정 분석'}
           iconSrc="/icons/analyze.svg"
           mainContent={
-            <div className="flex items-center gap-[6px]">
-              <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
-                {emotionLabel(insights.currentEmotion, locale)}
-              </span>
-              <Image
-                src="/icons/kkebi-character.svg"
-                alt="KKEBI Character"
-                width={28}
-                height={28}
-              />
-            </div>
+            isRecording ? (
+              <div className="flex items-center gap-[6px]">
+                <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
+                  {emotionLabel(insights.currentEmotion, locale)}
+                </span>
+                <Image
+                  src="/icons/kkebi-character.svg"
+                  alt="KKEBI Character"
+                  width={28}
+                  height={28}
+                />
+              </div>
+            ) : (
+              <div className="flex min-h-[34px] items-center">
+                <span className="body-14 text-label-disable">{emotionWaitingMessage}</span>
+              </div>
+            )
           }
           subContent={
-            <>
-              <span className="body-16 text-label-alternative">
-                {locale === 'en' ? 'Confidence' : '신뢰도'}
+            isRecording ? (
+              <>
+                <span className="body-16 text-label-alternative">
+                  {locale === 'en' ? 'Confidence' : '신뢰도'}
+                </span>
+                <span className="body-16 font-medium text-label-neutral">
+                  {insights.confidence}%
+                </span>
+              </>
+            ) : (
+              <span className="body-16 text-label-disable">
+                {locale === 'en' ? 'Confidence pending' : '신뢰도 분석 대기'}
               </span>
-              <span className="body-16 font-medium text-label-neutral">{insights.confidence}%</span>
-            </>
+            )
           }
         >
           <div className="flex w-full flex-col items-start gap-[18px]">
@@ -88,19 +115,31 @@ export default function SessionInsightsPanel({ insights }: SessionInsightsPanelP
           title={locale === 'en' ? 'KKEBI data summary' : 'KKEBI 데이터 요약'}
           iconSrc="/icons/clipboard.svg"
           mainContent={
-            <div className="flex items-center gap-2">
-              <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
-                {locale === 'en' ? `${insights.phq9Score}` : `${insights.phq9Score}점`}
-              </span>
-            </div>
+            isRecording ? (
+              <div className="flex items-center gap-2">
+                <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
+                  {locale === 'en' ? `${insights.phq9Score}` : `${insights.phq9Score}점`}
+                </span>
+              </div>
+            ) : (
+              <div className="flex min-h-[34px] items-center">
+                <span className="body-14 text-label-disable">{summaryWaitingMessage}</span>
+              </div>
+            )
           }
           subContent={
-            <>
-              <span className="body-16 text-label-alternative">
-                {locale === 'en' ? 'Risk' : '위험도'}
+            isRecording ? (
+              <>
+                <span className="body-16 text-label-alternative">
+                  {locale === 'en' ? 'Risk' : '위험도'}
+                </span>
+                <RiskTypeChip value={insights.riskType} />
+              </>
+            ) : (
+              <span className="body-16 text-label-disable">
+                {locale === 'en' ? 'Risk level pending' : '위험도 분석 대기'}
               </span>
-              <RiskTypeChip value={insights.riskType} />
-            </>
+            )
           }
         >
           <div className="flex w-full flex-col items-start gap-[18px]">
@@ -123,9 +162,15 @@ export default function SessionInsightsPanel({ insights }: SessionInsightsPanelP
           title={locale === 'en' ? 'Detected cognitive distortion' : '감지된 인지적 왜곡'}
           iconSrc="/icons/brain.svg"
           mainContent={
-            <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
-              {distortionLabel(insights.distortionType, locale)}
-            </span>
+            isRecording ? (
+              <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
+                {distortionLabel(insights.distortionType, locale)}
+              </span>
+            ) : (
+              <div className="flex min-h-[34px] items-center">
+                <span className="body-14 text-label-disable">{distortionWaitingMessage}</span>
+              </div>
+            )
           }
         >
           <div className="flex w-full flex-col items-start gap-[18px]">
