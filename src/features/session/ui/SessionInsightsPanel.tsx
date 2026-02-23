@@ -40,7 +40,7 @@ export default function SessionInsightsPanel({ insights }: SessionInsightsPanelP
   const locale = useLocale();
 
   return (
-    <section className="flex min-h-full flex-col gap-[25px] pb-20">
+    <section className="flex min-h-full flex-col gap-[25px] pb-10">
       <div className="text-[24px] font-semibold">
         {locale === 'en' ? 'KKEBI Insights' : 'KKEBI 인사이트'}
       </div>

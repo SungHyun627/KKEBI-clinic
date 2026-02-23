@@ -16,7 +16,7 @@ export default function SessionCounselorMemoCard({
       </span>
       <textarea
         defaultValue={defaultValue}
-        className="body-14 min-h-[120px] w-full resize-none rounded-[12px] border border-neutral-95 bg-white p-3 text-label-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+        className="body-14 min-h-[60px] w-full resize-none rounded-[12px] border border-neutral-95 bg-white p-3 text-label-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
       />
     </div>
   );
