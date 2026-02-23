@@ -253,6 +253,7 @@
     "scaleEmpty": "아직 평가 척도 결과가 없습니다."
   },
   "sessionList": {
+    "recordTitle": "상담 기록",
     "tabScheduled": "예정된 상담",
     "tabCompleted": "완료된 상담",
     "loading": "상담 세션 목록을 불러오는 중입니다.",
@@ -275,7 +276,11 @@
     "reschedulePickDateAria": "변경 날짜 선택",
     "rescheduleStartTimeLabel": "시작 시간",
     "rescheduleEndTimeLabel": "종료 시간",
-    "rescheduleSuccessToast": "일정 변경이 완료되었습니다."
+    "rescheduleSuccessToast": "일정 변경이 완료되었습니다.",
+    "toastMicUnsupported": "브라우저에서 마이크를 지원하지 않습니다.",
+    "toastMicPermissionDenied": "마이크 권한이 거부되었습니다. 브라우저 권한을 허용해 주세요.",
+    "toastRecordingStarted": "녹음을 시작했습니다.",
+    "toastRiskDetected": "전사에서 위험 신호가 감지되었습니다."
   },
   "notification": {
     "commonFold": "접기",

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SessionAutoRecordData } from '../types/session-page';
 import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
 import { toast } from '@/shared/ui/toast';
@@ -32,6 +33,7 @@ export function useSessionAutoRecordRuntime({
   locale,
   onRiskSignalDetected,
 }: UseSessionAutoRecordRuntimeParams) {
+  const tSession = useTranslations('sessionList');
   const [transcriptItems, setTranscriptItems] = useState<SessionAutoRecordData['transcripts']>([]);
   const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(() => new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
@@ -146,11 +148,7 @@ export function useSessionAutoRecordRuntime({
   const handleStartRecording = async () => {
     if (isRecording) return;
     if (!navigator?.mediaDevices?.getUserMedia) {
-      toast(
-        locale === 'en'
-          ? 'Microphone is not supported in this browser.'
-          : '브라우저에서 마이크를 지원하지 않습니다.',
-      );
+      toast(tSession('toastMicUnsupported'));
       return;
     }
 
@@ -161,14 +159,10 @@ export function useSessionAutoRecordRuntime({
       setMicPermission('granted');
       setIsRecording(true);
       setIsPaused(false);
-      toast(locale === 'en' ? 'Recording started.' : '녹음을 시작했습니다.');
+      toast(tSession('toastRecordingStarted'));
     } catch {
       setMicPermission('denied');
-      toast(
-        locale === 'en'
-          ? 'Microphone permission denied. Please allow microphone access.'
-          : '마이크 권한이 거부되었습니다. 브라우저 권한을 허용해 주세요.',
-      );
+      toast(tSession('toastMicPermissionDenied'));
     }
   };
 
@@ -202,11 +196,7 @@ export function useSessionAutoRecordRuntime({
     if (hasRiskSignal) {
       setBookmarkIds((prev) => new Set(prev).add(transcriptId));
       onRiskSignalDetected?.({ text: dialogue.text, timestamp });
-      toast(
-        locale === 'en'
-          ? 'Risk signal detected in transcript.'
-          : '전사에서 위험 신호가 감지되었습니다.',
-      );
+      toast(tSession('toastRiskDetected'));
     }
   };
 

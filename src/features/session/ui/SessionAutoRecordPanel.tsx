@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../types/session-page';
 import { useSessionAutoRecordRuntime } from '../hooks/useSessionAutoRecordRuntime';
 import { useSessionAnalysis } from '../hooks/useSessionAnalysis';
@@ -34,6 +34,7 @@ export default function SessionAutoRecordPanel({
   onAnalysisChange,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
+  const tSession = useTranslations('sessionList');
   const {
     transcriptItems,
     bookmarkIds,
@@ -72,9 +73,7 @@ export default function SessionAutoRecordPanel({
 
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
-      <div className="text-[24px] font-semibold">
-        {locale === 'en' ? 'Session record' : '상담 기록'}
-      </div>
+      <div className="text-[24px] font-semibold">{tSession('recordTitle')}</div>
       <div className="flex w-full flex-col items-start gap-4">
         <SessionTranscriptCard
           locale={locale}

@@ -253,6 +253,7 @@
     "scaleEmpty": "There are no scale results yet."
   },
   "sessionList": {
+    "recordTitle": "Session record",
     "tabScheduled": "Scheduled",
     "tabCompleted": "Completed",
     "loading": "Loading session list.",
@@ -275,7 +276,11 @@
     "reschedulePickDateAria": "Select reschedule date",
     "rescheduleStartTimeLabel": "Start time",
     "rescheduleEndTimeLabel": "End time",
-    "rescheduleSuccessToast": "Schedule change completed."
+    "rescheduleSuccessToast": "Schedule change completed.",
+    "toastMicUnsupported": "Microphone is not supported in this browser.",
+    "toastMicPermissionDenied": "Microphone permission denied. Please allow microphone access.",
+    "toastRecordingStarted": "Recording started.",
+    "toastRiskDetected": "Risk signal detected in transcript."
   },
   "notification": {
     "commonFold": "Collapse",
