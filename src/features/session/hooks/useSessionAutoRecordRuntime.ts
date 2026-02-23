@@ -159,7 +159,6 @@ export function useSessionAutoRecordRuntime({
       setMicPermission('granted');
       setIsRecording(true);
       setIsPaused(false);
-      toast(tSession('toastRecordingStarted'));
     } catch {
       setMicPermission('denied');
       toast(tSession('toastMicPermissionDenied'));
