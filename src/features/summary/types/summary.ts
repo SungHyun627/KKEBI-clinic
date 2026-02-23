@@ -41,7 +41,8 @@ export type FollowUpSessionTiming = '1w' | '2w' | '1m' | 'as-needed';
 export type MissionItem = {
   id: string;
   name: string;
-  eta: string;
+  category: string;
+  duration: string;
 };
 
 export const isSessionType = (value?: string): value is SessionType =>

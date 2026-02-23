@@ -43,7 +43,7 @@ export default function TasksTabCard({ locale, assignedTasks, missions }: TasksT
                     className="rounded-[12px] border border-neutral-95 bg-white px-3 py-2 text-left body-14 text-label-normal hover:bg-neutral-99"
                   >
                     <p className="font-medium">{mission.name}</p>
-                    <p className="text-label-alternative">{mission.eta}</p>
+                    <p className="text-label-alternative">{mission.duration}</p>
                   </button>
                 ))}
               </div>
