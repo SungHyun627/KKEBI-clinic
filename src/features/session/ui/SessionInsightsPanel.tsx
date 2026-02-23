@@ -13,6 +13,9 @@ import type {
 interface SessionInsightsPanelProps {
   insights: SessionInsightsData;
   isRecording: boolean;
+  recentEmotionHistory: SessionEmotionType[];
+  keyConcernHistory: string[];
+  distortionExampleHistory: string[];
 }
 
 const emotionLabel = (emotion: SessionEmotionType, locale: string) => {
@@ -37,8 +40,15 @@ const distortionLabel = (type: CognitiveDistortionType, locale: string) => {
   return locale === 'en' ? map[type].en : map[type].ko;
 };
 
-export default function SessionInsightsPanel({ insights, isRecording }: SessionInsightsPanelProps) {
+export default function SessionInsightsPanel({
+  insights,
+  isRecording,
+  recentEmotionHistory,
+  keyConcernHistory,
+  distortionExampleHistory,
+}: SessionInsightsPanelProps) {
   const locale = useLocale();
+
   const emotionWaitingMessage =
     locale === 'en'
       ? 'Emotion and confidence will appear during recording'
@@ -51,6 +61,10 @@ export default function SessionInsightsPanel({ insights, isRecording }: SessionI
     locale === 'en'
       ? 'Detected distortion type will appear during recording'
       : '녹음 중 감지된 왜곡 유형이 표시됩니다';
+  const historyWaitingMessage =
+    locale === 'en'
+      ? 'Data will be collected during the session'
+      : '상담 진행 중 데이터가 누적됩니다';
 
   return (
     <section className="flex min-h-full flex-col gap-[25px] pb-10">
@@ -102,11 +116,17 @@ export default function SessionInsightsPanel({ insights, isRecording }: SessionI
               <span className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 text-label-alternative whitespace-nowrap">
                 {locale === 'en' ? 'Emotion history' : '최근 감정'}
               </span>
-              <div className="flex w-full body-14">
-                {insights.emotionHistory
-                  .map((item) => emotionLabel(item.emotion, locale))
-                  .join(', ')}
-              </div>
+              {isRecording ? (
+                <div className="flex w-full body-14">
+                  {insights.emotionHistory
+                    .map((item) => emotionLabel(item.emotion, locale))
+                    .join(', ')}
+                </div>
+              ) : (
+                <div className="flex w-full body-14 text-label-disable">
+                  {historyWaitingMessage}
+                </div>
+              )}
             </div>
           </div>
         </SessionInsightCard>
@@ -147,13 +167,43 @@ export default function SessionInsightsPanel({ insights, isRecording }: SessionI
               <span className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 text-label-alternative whitespace-nowrap">
                 {locale === 'en' ? 'Recent pattern' : '최근 감정'}
               </span>
-              <div className="flex w-full body-14">{insights.recentEmotionPattern}</div>
+              {recentEmotionHistory.length > 0 ? (
+                <div className="flex w-full flex-wrap items-center gap-2 body-14">
+                  {recentEmotionHistory.map((item, index) => (
+                    <span
+                      key={`${item}-${index}`}
+                      className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] text-label-normal"
+                    >
+                      {emotionLabel(item, locale)}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex w-full body-14 text-label-disable">
+                  {historyWaitingMessage}
+                </div>
+              )}
             </div>
             <div className="flex w-full items-center gap-2">
               <span className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 text-label-alternative whitespace-nowrap">
                 {locale === 'en' ? 'Key concerns' : '주요 고민'}
               </span>
-              <div className="flex w-full body-14">{insights.keyConcerns.join(', ')}</div>
+              {keyConcernHistory.length > 0 ? (
+                <div className="flex w-full flex-wrap items-center gap-2 body-14">
+                  {keyConcernHistory.map((item, index) => (
+                    <span
+                      key={`${item}-${index}`}
+                      className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] text-label-normal"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex w-full body-14 text-label-disable">
+                  {historyWaitingMessage}
+                </div>
+              )}
             </div>
           </div>
         </SessionInsightCard>
@@ -178,7 +228,19 @@ export default function SessionInsightsPanel({ insights, isRecording }: SessionI
               <span className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 text-label-alternative whitespace-nowrap">
                 {locale === 'en' ? 'Example' : '사례'}
               </span>
-              <div className="flex w-full body-14">{insights.distortionExample}</div>
+              {distortionExampleHistory.length > 0 ? (
+                <div className="flex w-full flex-col gap-1 body-14">
+                  {distortionExampleHistory.map((item, index) => (
+                    <span key={`${item}-${index}`} className="text-label-normal">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex w-full body-14 text-label-disable">
+                  {historyWaitingMessage}
+                </div>
+              )}
             </div>
           </div>
         </SessionInsightCard>

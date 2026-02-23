@@ -93,17 +93,21 @@ function buildLiveInsights(
   if (transcripts.length === 0) return null;
 
   const clientLines = transcripts.filter((line) => line.speaker === 'client');
-  const sourceLines = clientLines.length > 0 ? clientLines : transcripts;
+  if (clientLines.length === 0) return null;
+  const sourceLines = clientLines;
   const latestText = sourceLines[sourceLines.length - 1]?.text ?? '';
   const texts = sourceLines.map((line) => line.text);
   const fullText = texts.join(' ').toLowerCase();
 
-  const currentEmotion = detectEmotionFromText(latestText);
+  let currentEmotion = detectEmotionFromText(latestText);
   const confidence = Math.max(62, Math.min(96, 68 + Math.min(texts.length, 6) * 4));
 
   const riskHits = (
     fullText.match(/자해|자살|죽고 싶|포기|self-harm|suicide|give up|want to die/g) ?? []
   ).length;
+  if (currentEmotion === 'calm' && riskHits > 0) {
+    currentEmotion = riskHits >= 2 ? 'fearful' : 'anxious';
+  }
   const riskType = riskHits >= 2 ? '위험' : riskHits >= 1 ? '주의' : '안정';
   const phq9Score = riskType === '위험' ? 19 : riskType === '주의' ? 13 : 7;
 
@@ -114,19 +118,18 @@ function buildLiveInsights(
   }));
 
   const distortionType = detectDistortionType(texts);
+  const distortionPatternMap: Record<SessionInsightsData['distortionType'], RegExp> = {
+    black_and_white: /항상|절대|완전히|전혀|always|never|completely/,
+    overgeneralization: /매번|언제나|모든 사람|아무도|every time|everyone|no one/,
+    catastrophizing: /최악|끔찍|망했|재앙|worst|disaster|ruined/,
+    should_statement: /해야 해|하면 안 돼|should|must|have to/,
+  };
+  const distortionPattern = distortionPatternMap[distortionType];
   const distortionExample =
     texts
       .slice()
       .reverse()
-      .find((line) => {
-        const lower = line.toLowerCase();
-        return (
-          /항상|절대|완전히|전혀|always|never|completely/.test(lower) ||
-          /매번|언제나|모든 사람|아무도|every time|everyone|no one/.test(lower) ||
-          /최악|끔찍|망했|재앙|worst|disaster|ruined/.test(lower) ||
-          /해야 해|하면 안 돼|should|must|have to/.test(lower)
-        );
-      }) ?? base.distortionExample;
+      .find((line) => distortionPattern.test(line.toLowerCase())) ?? base.distortionExample;
 
   const concernsPool: Array<{ key: string; ko: string; en: string; test: RegExp }> = [
     {
@@ -158,7 +161,19 @@ function buildLiveInsights(
     recentEmotionPattern:
       locale === 'en'
         ? `Latest trend: ${currentEmotion} response is dominant`
-        : `최근 패턴: ${currentEmotion === 'anxious' ? '불안' : currentEmotion === 'sad' ? '슬픔' : currentEmotion === 'angry' ? '분노' : currentEmotion === 'fearful' ? '두려움' : currentEmotion === 'happy' ? '기쁨' : '평온'} 반응이 우세`,
+        : `최근 패턴: ${
+            currentEmotion === 'anxious'
+              ? '불안'
+              : currentEmotion === 'sad'
+                ? '슬픔'
+                : currentEmotion === 'angry'
+                  ? '분노'
+                  : currentEmotion === 'fearful'
+                    ? '두려움'
+                    : currentEmotion === 'happy'
+                      ? '기쁨'
+                      : '평온'
+          } 반응이 우세`,
     keyConcerns: keyConcerns.length > 0 ? keyConcerns : base.keyConcerns,
     distortionType,
     distortionExample,

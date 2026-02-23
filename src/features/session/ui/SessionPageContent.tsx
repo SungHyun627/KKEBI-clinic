@@ -6,7 +6,7 @@ import SessionHeader from './SessionHeader';
 import SessionInsightsPanel from './SessionInsightsPanel';
 import SessionAutoRecordPanel from './SessionAutoRecordPanel';
 import { getSessionPageData } from '../api/getSessionPageData';
-import type { SessionPageData } from '../types/session-page';
+import type { SessionEmotionType, SessionPageData } from '../types/session-page';
 
 interface SessionPageContentProps {
   sessionId: string;
@@ -27,6 +27,9 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
   const [analysisInsights, setAnalysisInsights] = useState<SessionPageData['insights'] | null>(
     null,
   );
+  const [recentEmotionHistory, setRecentEmotionHistory] = useState<SessionEmotionType[]>([]);
+  const [keyConcernHistory, setKeyConcernHistory] = useState<string[]>([]);
+  const [distortionExampleHistory, setDistortionExampleHistory] = useState<string[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -98,6 +101,9 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
           <SessionInsightsPanel
             insights={analysisInsights ?? data.insights}
             isRecording={Boolean(analysisInsights)}
+            recentEmotionHistory={recentEmotionHistory}
+            keyConcernHistory={keyConcernHistory}
+            distortionExampleHistory={distortionExampleHistory}
           />
           <SessionAutoRecordPanel
             sessionId={sessionId}
@@ -105,7 +111,32 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             baseInsights={data.insights}
             onRecorderStateChange={setRecorderState}
             onRiskSignalDetected={(payload) => setRiskBanner(payload)}
-            onAnalysisChange={setAnalysisInsights}
+            onAnalysisChange={(nextInsights) => {
+              setAnalysisInsights(nextInsights);
+              if (!nextInsights) return;
+
+              setRecentEmotionHistory((prev) => {
+                const next = [
+                  nextInsights.currentEmotion,
+                  ...prev.filter((item) => item !== nextInsights.currentEmotion),
+                ];
+                return next.slice(0, 6);
+              });
+
+              setKeyConcernHistory((prev) => {
+                const merged = [...nextInsights.keyConcerns, ...prev];
+                const deduped = merged.filter((item, index) => merged.indexOf(item) === index);
+                return deduped.slice(0, 8);
+              });
+
+              setDistortionExampleHistory((prev) => {
+                const next = [
+                  nextInsights.distortionExample,
+                  ...prev.filter((item) => item !== nextInsights.distortionExample),
+                ];
+                return next.slice(0, 6);
+              });
+            }}
           />
         </div>
       )}
