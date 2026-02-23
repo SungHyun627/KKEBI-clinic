@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { getSessionSummaryData } from '@/features/summary/api/getSessionSummaryData';
+import {
+  downloadSessionRecordingFile,
+  downloadSessionTranscriptTxt,
+  printSessionSummaryPdf,
+} from '@/features/summary/lib/downloads';
 import type {
   MissionItem,
   NextSessionRecommendation,
@@ -32,16 +37,6 @@ function formatElapsed(seconds: number) {
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
   return `${mm}:${ss}`;
-}
-
-function triggerDownload(filename: string, content: string, type = 'text/plain') {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 function getDistortionLabel(locale: string, distortionType?: string) {
@@ -171,24 +166,19 @@ export default function SessionSummaryContent({
   };
 
   const handleDownloadTxt = () => {
-    const rows = transcriptItems.map(
-      (item) => `[${item.timestamp ?? '--:--:--'}] ${item.speaker}: ${item.text ?? ''}`,
-    );
-    triggerDownload(
-      `${sessionId}-transcript.txt`,
-      rows.join('\n') || (locale === 'en' ? 'No transcript.' : '전사 내용이 없습니다.'),
-    );
+    downloadSessionTranscriptTxt({
+      sessionId,
+      transcriptItems,
+      locale,
+    });
   };
 
   const handleDownloadAudio = () => {
-    const content = transcriptItems
-      .map((item) => `${item.timestamp ?? '--:--:--'} ${item.speaker}: ${item.text ?? ''}`)
-      .join('\n');
-    triggerDownload(
-      `${sessionId}-recording.webm`,
-      content || (locale === 'en' ? 'No recording data.' : '녹음 데이터가 없습니다.'),
-      'audio/webm',
-    );
+    downloadSessionRecordingFile({
+      sessionId,
+      transcriptItems,
+      locale,
+    });
   };
 
   if (loading) {
@@ -220,7 +210,7 @@ export default function SessionSummaryContent({
         hasRecording={hasRecording}
         onDownloadTxt={handleDownloadTxt}
         onDownloadAudio={handleDownloadAudio}
-        onPrintPdf={() => window.print()}
+        onPrintPdf={printSessionSummaryPdf}
         onBack={() => router.push(`/${locale}`)}
       />
 

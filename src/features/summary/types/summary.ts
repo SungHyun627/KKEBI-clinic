@@ -21,15 +21,17 @@ export type SummaryPayload = {
     distortionExampleHistory?: string[];
   } | null;
   runtime?: {
-    transcriptItems?: Array<{
-      id?: string;
-      speaker?: 'counselor' | 'client';
-      text?: string;
-      timestamp?: string;
-    }>;
+    transcriptItems?: SummaryTranscriptItem[];
     bookmarkIds?: string[];
   } | null;
 };
+
+export interface SummaryTranscriptItem {
+  id?: string;
+  speaker?: 'counselor' | 'client';
+  text?: string;
+  timestamp?: string;
+}
 
 export type RiskEvaluation = 'stable' | 'caution' | 'risk' | 'urgent';
 export type NextSessionRecommendation = '1w' | '2w' | '1m' | 'as-needed';
