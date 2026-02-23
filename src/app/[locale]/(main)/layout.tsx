@@ -64,6 +64,15 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     });
   }, [router]);
 
+  useEffect(() => {
+    if (pathname !== '/') return;
+    const shouldShowSummaryToast = window.sessionStorage.getItem('kkebi:summarySubmitted') === '1';
+    if (!shouldShowSummaryToast) return;
+
+    window.sessionStorage.removeItem('kkebi:summarySubmitted');
+    toast(locale === 'en' ? 'Session content has been saved.' : '상담 내용이 저장되었습니다.');
+  }, [locale, pathname]);
+
   const currentTitle =
     navItems.find(
       (item) =>

@@ -3,14 +3,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/shared/ui/button';
 import { getSessionSummaryData } from '@/features/summary/api/getSessionSummaryData';
+import { submitSessionSummary } from '@/features/summary/api/submitSessionSummary';
 import {
   downloadSessionRecordingFile,
   downloadSessionTranscriptTxt,
   printSessionSummaryPdf,
 } from '@/features/summary/lib/downloads';
-import type { MissionItem, SummaryPayload } from '@/features/summary/types/summary';
+import { toast } from '@/shared/ui/toast';
+import type {
+  FollowUpSessionTiming,
+  MissionItem,
+  RiskEvaluation,
+  SummaryPayload,
+} from '@/features/summary/types/summary';
 import {
   AiSummaryCard,
   CompletionCard,
@@ -27,6 +35,11 @@ interface SessionSummaryContentProps {
   locale: string;
   sessionId: string;
   backLabel: string;
+}
+
+interface SummarySubmitFormValues {
+  riskEvaluation: RiskEvaluation | '';
+  followUpSessionTiming: FollowUpSessionTiming | '';
 }
 
 function formatSummaryDate(iso?: string) {
@@ -54,8 +67,16 @@ export default function SessionSummaryContent({
   const [summaryTextOverride, setSummaryTextOverride] = useState('');
   const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
   const [nextDate, setNextDate] = useState('');
-  const [nextStartTime, setNextStartTime] = useState('09:00');
-  const [nextEndTime, setNextEndTime] = useState('10:00');
+  const [nextStartTime, setNextStartTime] = useState('');
+  const [nextEndTime, setNextEndTime] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setValue, watch } = useForm<SummarySubmitFormValues>({
+    mode: 'onChange',
+    defaultValues: {
+      riskEvaluation: '',
+      followUpSessionTiming: '',
+    },
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -106,6 +127,18 @@ export default function SessionSummaryContent({
   }, [locale, payload?.summarySnapshot?.insights?.keyConcerns, transcriptItems]);
 
   const summaryText = summaryTextOverride || derivedSummaryText;
+  const riskEvaluation = watch('riskEvaluation');
+  const followUpSessionTiming = watch('followUpSessionTiming');
+  const isNextSessionAllSelected =
+    Boolean(nextDate) && Boolean(nextStartTime) && Boolean(nextEndTime);
+  const isNextSessionAllEmpty = !nextDate && !nextStartTime && !nextEndTime;
+  const isNextSessionSelectionValid = isNextSessionAllSelected || isNextSessionAllEmpty;
+  const isSubmitEnabled =
+    Boolean(riskEvaluation) &&
+    Boolean(followUpSessionTiming) &&
+    selectedMissions.length > 0 &&
+    isNextSessionSelectionValid &&
+    !isSubmitting;
 
   const bookmarkedMoments = useMemo(() => {
     const bookmarkedIds = new Set(payload?.runtime?.bookmarkIds ?? []);
@@ -151,11 +184,6 @@ export default function SessionSummaryContent({
     },
   ];
 
-  const assignedTasks = [
-    locale === 'en' ? 'Emotion log (3x)' : '감정 기록 3회 작성',
-    locale === 'en' ? 'Sleep routine check' : '수면 루틴 체크',
-  ];
-
   const handleSummaryChange = (value: string) => {
     const trimmed = value.trim();
     const defaultTrimmed = derivedSummaryText.trim();
@@ -178,6 +206,37 @@ export default function SessionSummaryContent({
     });
   };
 
+  const handleSubmitSummary = async () => {
+    if (!riskEvaluation || !followUpSessionTiming) return;
+
+    setIsSubmitting(true);
+    const result = await submitSessionSummary(sessionId, {
+      summaryText,
+      riskEvaluation,
+      followUpSessionTiming,
+      selectedMissionIds: selectedMissions,
+      nextSession:
+        nextDate && nextStartTime && nextEndTime
+          ? {
+              date: nextDate,
+              startTime: nextStartTime,
+              endTime: nextEndTime,
+            }
+          : null,
+    });
+
+    if (!result.success) {
+      toast(
+        result.message || (locale === 'en' ? 'Failed to submit summary.' : '제출에 실패했습니다.'),
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
+    window.sessionStorage.setItem('kkebi:summarySubmitted', '1');
+    router.push(`/${locale}`);
+  };
+
   if (loading) {
     return (
       <section className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
@@ -196,7 +255,7 @@ export default function SessionSummaryContent({
   }
 
   return (
-    <section className="flex w-full flex-col gap-[62px]">
+    <section className="flex w-full flex-col gap-[62px] pb-5">
       <SummaryTopBar
         locale={locale}
         backLabel={backLabel}
@@ -220,51 +279,67 @@ export default function SessionSummaryContent({
           isPlaying={isPlaying}
           onTogglePlay={() => setIsPlaying((prev) => !prev)}
         />
-        <div className="flex flex-col gap-[70px] items-start w-full">
-          <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
+        <div className="flex flex-col gap-[100px] items-start w-full">
+          <div className="flex flex-col gap-[70px] items-start w-full">
+            <AiSummaryCard locale={locale} value={summaryText} onChange={handleSummaryChange} />
 
-          <EmotionPatternsCard
-            locale={locale}
-            emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
-          />
-          <DetectedCognitiveDistortionCard
-            locale={locale}
-            distortions={payload?.summarySnapshot?.recentCognitiveDistortions ?? []}
-          />
-          <BookmarkedMomentsCard locale={locale} moments={bookmarkedMoments} />
+            <EmotionPatternsCard
+              locale={locale}
+              emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
+            />
+            <DetectedCognitiveDistortionCard
+              locale={locale}
+              distortions={payload?.summarySnapshot?.recentCognitiveDistortions ?? []}
+            />
+            <BookmarkedMomentsCard locale={locale} moments={bookmarkedMoments} />
 
-          <CounselorEvaluationCard
-            locale={locale}
-            additionalMemo={payload?.summarySnapshot?.additionalMemo}
-          />
+            <CounselorEvaluationCard
+              locale={locale}
+              riskEvaluation={riskEvaluation}
+              followUpSessionTiming={followUpSessionTiming}
+              onRiskEvaluationChange={(value) =>
+                setValue('riskEvaluation', value, { shouldDirty: true, shouldValidate: true })
+              }
+              onFollowUpSessionTimingChange={(value) =>
+                setValue('followUpSessionTiming', value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
+            />
 
-          <RecommendedMissionsCard
-            locale={locale}
-            missions={missions}
-            selectedMissions={selectedMissions}
-            onToggleMission={(id, checked) => {
-              setSelectedMissions((prev) =>
-                checked ? [...prev, id] : prev.filter((missionId) => missionId !== id),
-              );
-            }}
-          />
+            <RecommendedMissionsCard
+              locale={locale}
+              missions={missions}
+              selectedMissions={selectedMissions}
+              onToggleMission={(id, checked) => {
+                setSelectedMissions((prev) =>
+                  checked ? [...prev, id] : prev.filter((missionId) => missionId !== id),
+                );
+              }}
+            />
 
-          <NextSessionBookingCard
-            locale={locale}
-            nextDate={nextDate}
-            nextStartTime={nextStartTime}
-            nextEndTime={nextEndTime}
-            onNextDateChange={setNextDate}
-            onNextStartTimeChange={setNextStartTime}
-            onNextEndTimeChange={setNextEndTime}
-          />
+            <NextSessionBookingCard
+              locale={locale}
+              nextDate={nextDate}
+              nextStartTime={nextStartTime}
+              nextEndTime={nextEndTime}
+              onNextDateChange={setNextDate}
+              onNextStartTimeChange={setNextStartTime}
+              onNextEndTimeChange={setNextEndTime}
+            />
+          </div>
+          <div className="flex justify-center items-center w-full">
+            <Button
+              type="button"
+              className="w-full max-w-[416px]"
+              disabled={!isSubmitEnabled}
+              onClick={handleSubmitSummary}
+            >
+              {locale === 'en' ? 'Save record and complete' : '기록 저장 및 완료'}
+            </Button>
+          </div>
         </div>
-      </div>
-
-      <div className="mt-4 pb-8">
-        <Button type="button" className="h-12 w-full rounded-[12px]">
-          {locale === 'en' ? 'Save record and complete' : '기록 저장 및 완료'}
-        </Button>
       </div>
     </section>
   );

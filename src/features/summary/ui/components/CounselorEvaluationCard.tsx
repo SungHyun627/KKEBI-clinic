@@ -1,21 +1,23 @@
-import { useState } from 'react';
 import type { FollowUpSessionTiming, RiskEvaluation } from '@/features/summary/types/summary';
 import Image from 'next/image';
 import { cn } from '@/shared/lib/utils';
+import { Textarea } from '@/shared/ui/textarea';
 
 interface CounselorEvaluationCardProps {
   locale: string;
-  additionalMemo?: string;
+  riskEvaluation: RiskEvaluation | '';
+  followUpSessionTiming: FollowUpSessionTiming | '';
+  onRiskEvaluationChange: (value: RiskEvaluation) => void;
+  onFollowUpSessionTimingChange: (value: FollowUpSessionTiming) => void;
 }
 
 export default function CounselorEvaluationCard({
   locale,
-  additionalMemo,
+  riskEvaluation,
+  followUpSessionTiming,
+  onRiskEvaluationChange,
+  onFollowUpSessionTimingChange,
 }: CounselorEvaluationCardProps) {
-  const [selectedRiskEvaluation, setSelectedRiskEvaluation] = useState<RiskEvaluation | null>(null);
-  const [selectedFollowUpSessionTiming, setSelectedFollowUpSessionTiming] =
-    useState<FollowUpSessionTiming | null>(null);
-
   return (
     <div className="flex w-full flex-col items-start gap-7">
       <div className="flex items-center gap-2">
@@ -42,12 +44,12 @@ export default function CounselorEvaluationCard({
               { key: 'risk', label: locale === 'en' ? 'Risk' : '위험' },
               { key: 'urgent', label: locale === 'en' ? 'Urgent' : '긴급' },
             ].map((option, idx) => {
-              const isSelected = selectedRiskEvaluation === option.key;
+              const isSelected = riskEvaluation === option.key;
               return (
                 <button
                   type="button"
                   key={option.key}
-                  onClick={() => setSelectedRiskEvaluation(option.key as RiskEvaluation)}
+                  onClick={() => onRiskEvaluationChange(option.key as RiskEvaluation)}
                   className={cn(
                     'flex h-24 w-full flex-col items-center justify-center gap-[6px] rounded-[16px] border p-5 hover:cursor-pointer hover:bg-neutral-95',
                     isSelected ? 'border-primary bg-fill-pressed' : 'border-neutral-95',
@@ -83,14 +85,12 @@ export default function CounselorEvaluationCard({
               { key: '1m', label: locale === 'en' ? 'Within 1 month' : '1개월 이내' },
               { key: 'as-needed', label: locale === 'en' ? 'As needed' : '필요시' },
             ].map((option) => {
-              const isSelected = selectedFollowUpSessionTiming === option.key;
+              const isSelected = followUpSessionTiming === option.key;
               return (
                 <button
                   type="button"
                   key={option.key}
-                  onClick={() =>
-                    setSelectedFollowUpSessionTiming(option.key as FollowUpSessionTiming)
-                  }
+                  onClick={() => onFollowUpSessionTimingChange(option.key as FollowUpSessionTiming)}
                   className={cn(
                     'flex h-24 w-full flex-col items-center justify-center gap-[6px] rounded-[16px] border p-5 hover:cursor-pointer hover:bg-neutral-95',
                     isSelected ? 'border-primary bg-fill-pressed' : 'border-neutral-95',
@@ -111,9 +111,14 @@ export default function CounselorEvaluationCard({
         </div>
         <div className="flex w-full flex-col items-start gap-4">
           <span className="body-16 font-medium text-label-neutral">추가 메모</span>
-          <div className="flex w-full rounded-[16px] border border-neutral-95 px-[26px] py-[23px]">
-            {additionalMemo || (locale === 'en' ? 'No memo available.' : '추가 메모 내용')}
-          </div>
+          <Textarea
+            className="w-full min-h-[120px] px-[26px] py-[23px]"
+            placeholder={
+              locale === 'en'
+                ? 'Write additional memo (optional).'
+                : '추가 메모를 입력하세요. (선택)'
+            }
+          />
         </div>
       </div>
     </div>

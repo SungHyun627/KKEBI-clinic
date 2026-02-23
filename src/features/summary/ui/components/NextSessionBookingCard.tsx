@@ -56,10 +56,11 @@ function TimeWheelPicker({
   open,
   onOpenChange,
 }: TimeWheelPickerProps) {
-  const normalizedValue = TIME_OPTIONS.includes(value) ? value : '09:00';
+  const hasSelectedValue = TIME_OPTIONS.includes(value);
+  const normalizedValue = hasSelectedValue ? value : '09:00';
   const [draftValue, setDraftValue] = useState(normalizedValue);
   const activeIndex = TIME_OPTIONS.indexOf(draftValue);
-  const isUnchanged = draftValue === normalizedValue;
+  const isUnchanged = hasSelectedValue && draftValue === normalizedValue;
   const panelAlignClass = align === 'end' ? '-ml-[calc(100%+45px)]' : '';
 
   const step = (delta: number) => {
@@ -80,7 +81,7 @@ function TimeWheelPicker({
         className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
       >
         <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
-          {value || '09:00'}
+          {value || (locale === 'en' ? 'Select time' : '시간 선택')}
         </span>
         <span className="flex h-6 w-6 shrink-0 items-center justify-center">
           <Image src="/icons/clock.svg" alt="" width={24} height={24} aria-hidden />
@@ -270,7 +271,7 @@ export default function NextSessionBookingCard({
           <TimeWheelPicker
             locale={locale}
             label={locale === 'en' ? 'Start time' : '시작 시간'}
-            value={nextStartTime || '09:00'}
+            value={nextStartTime}
             onValueChange={onNextStartTimeChange}
             align="start"
             open={openTimePicker === 'start'}
@@ -284,7 +285,7 @@ export default function NextSessionBookingCard({
           <TimeWheelPicker
             locale={locale}
             label={locale === 'en' ? 'End time' : '종료 시간'}
-            value={nextEndTime || '10:00'}
+            value={nextEndTime}
             onValueChange={onNextEndTimeChange}
             align="end"
             open={openTimePicker === 'end'}
