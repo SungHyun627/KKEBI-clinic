@@ -177,7 +177,7 @@ export default function SessionHeader({
             }}
             className="h-[38px] w-[92px] rounded-[8px]"
           >
-            상담 종료
+            {locale === 'en' ? 'End' : '상담 종료'}
           </Button>
           <Button
             variant="icon"

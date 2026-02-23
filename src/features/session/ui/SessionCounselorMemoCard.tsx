@@ -17,7 +17,9 @@ export default function SessionCounselorMemoCard({
       <textarea
         defaultValue={defaultValue}
         className="body-14 min-h-[60px] w-full resize-none rounded-[12px] bg-white p-3 text-label-normal focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary placehoder:text-label-assistive"
-        placeholder="상담 중 메모를 작성해 보세요."
+        placeholder={
+          locale === 'en' ? 'Write memo during counseling.' : '상담 중 메모를 작성해 보세요.'
+        }
       />
     </div>
   );
