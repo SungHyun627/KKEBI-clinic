@@ -11,6 +11,12 @@ import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
 import type { SessionPageData } from '../types/session-page';
+import SessionEndConfirmDialog from './SessionEndConfirmDialog';
+import type { SessionEmotionType, SessionInsightsData } from '../types/session-page';
+import {
+  getSessionAutoRecordStorageKey,
+  getSessionSummaryStorageKey,
+} from '../lib/session-storage';
 
 interface SessionHeaderProps {
   sessionId: string;
@@ -20,6 +26,12 @@ interface SessionHeaderProps {
     isPaused: boolean;
     elapsedSeconds: number;
     visibleAudioLevel: number;
+  };
+  summarySnapshot?: {
+    insights: SessionInsightsData;
+    recentEmotionHistory: SessionEmotionType[];
+    keyConcernHistory: string[];
+    distortionExampleHistory: string[];
   };
 }
 
@@ -33,11 +45,13 @@ export default function SessionHeader({
   sessionId,
   sessionData,
   recorderState,
+  summarySnapshot,
 }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
   const [context, setContext] = useState<SessionStartContextValue | null>(null);
+  const [isEndDialogOpen, setIsEndDialogOpen] = useState(false);
 
   useEffect(() => {
     setContext(getSessionStartContext(sessionId));
@@ -50,6 +64,31 @@ export default function SessionHeader({
   const isPaused = recorderState?.isPaused ?? false;
   const elapsedSeconds = recorderState?.elapsedSeconds ?? 0;
   const visibleAudioLevel = recorderState?.visibleAudioLevel ?? 0;
+  const totalSessionTime = formatElapsed(elapsedSeconds > 0 ? elapsedSeconds : 10 * 60);
+  const handleEndSession = () => {
+    if (typeof window !== 'undefined') {
+      const runtimeKey = getSessionAutoRecordStorageKey(sessionId);
+      const summaryKey = getSessionSummaryStorageKey(sessionId);
+      const runtimeRaw = window.sessionStorage.getItem(runtimeKey);
+      const runtime = runtimeRaw ? JSON.parse(runtimeRaw) : null;
+
+      window.sessionStorage.setItem(
+        summaryKey,
+        JSON.stringify({
+          sessionId,
+          endedAt: new Date().toISOString(),
+          sessionData: sessionData ?? null,
+          recorderState: recorderState ?? null,
+          summarySnapshot: summarySnapshot ?? null,
+          runtime,
+        }),
+      );
+      window.sessionStorage.removeItem(runtimeKey);
+    }
+
+    setIsEndDialogOpen(false);
+    router.push(`/${locale}/session/${sessionId}/summary`);
+  };
 
   return (
     <div className="flex w-full justify-between p-5">
@@ -107,7 +146,10 @@ export default function SessionHeader({
 
       <div className="flex gap-3">
         <div className="flex items-center gap-[19px] max-w-[135px] w-full">
-          <Button onClick={() => {}} className="h-[38px] w-[92px] rounded-[8px]">
+          <Button
+            onClick={() => setIsEndDialogOpen(true)}
+            className="h-[38px] w-[92px] rounded-[8px]"
+          >
             상담 종료
           </Button>
           <Button
@@ -125,6 +167,13 @@ export default function SessionHeader({
         </div>
         <LocaleSwitchButton />
       </div>
+
+      <SessionEndConfirmDialog
+        open={isEndDialogOpen}
+        totalSessionTime={totalSessionTime}
+        onOpenChange={setIsEndDialogOpen}
+        onConfirm={handleEndSession}
+      />
     </div>
   );
 }

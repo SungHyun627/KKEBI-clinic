@@ -8,6 +8,7 @@ import { toast } from '@/shared/ui/toast';
 import { getDemoConversation } from '../lib/demo-conversations';
 import { formatElapsedToTimestamp } from '../lib/session-analysis';
 import { useSessionPersistence } from './useSessionPersistence';
+import { getSessionAutoRecordStorageKey } from '../lib/session-storage';
 
 export type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
 
@@ -46,7 +47,7 @@ export function useSessionAutoRecordRuntime({
 
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
   const visibleAudioLevel = isRecording && !isPaused ? audioLevel : 0;
-  const storageKey = `kkebi:session-auto-record:${sessionId}`;
+  const storageKey = getSessionAutoRecordStorageKey(sessionId);
   const snapshot = useMemo<PersistedAutoRecordState>(
     () => ({
       transcriptItems,

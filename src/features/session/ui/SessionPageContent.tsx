@@ -91,6 +91,16 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             : undefined
         }
         recorderState={recorderState}
+        summarySnapshot={
+          data
+            ? {
+                insights: analysisInsights ?? data.insights,
+                recentEmotionHistory,
+                keyConcernHistory,
+                distortionExampleHistory,
+              }
+            : undefined
+        }
       />
       {riskBanner ? (
         <div className="flex items-center justify-between gap-4 rounded-[14px] bg-[#FFE5E5] px-4 py-3">
