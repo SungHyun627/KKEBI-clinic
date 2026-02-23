@@ -93,7 +93,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
         recorderState={recorderState}
       />
       {riskBanner ? (
-        <div className="mx-8 flex items-center justify-between gap-4 rounded-[14px] bg-[#FFE5E5] px-4 py-3">
+        <div className="flex items-center justify-between gap-4 rounded-[14px] bg-[#FFE5E5] px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#FA5454] text-white body-12 font-semibold">
               !

@@ -196,7 +196,6 @@ export function useSessionAutoRecordRuntime({
     if (hasRiskSignal) {
       setBookmarkIds((prev) => new Set(prev).add(transcriptId));
       onRiskSignalDetected?.({ text: dialogue.text, timestamp });
-      toast(tSession('toastRiskDetected'));
     }
   };
 
