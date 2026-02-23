@@ -17,6 +17,12 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
   const [data, setData] = useState<SessionPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [recorderState, setRecorderState] = useState({
+    isRecording: false,
+    isPaused: false,
+    elapsedSeconds: 0,
+    visibleAudioLevel: 0,
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -49,6 +55,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
               }
             : undefined
         }
+        recorderState={recorderState}
       />
       {loading ? (
         <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
@@ -61,7 +68,11 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ) : (
         <div className="grid w-full flex-1 grid-cols-[1fr_1.5fr] gap-[34px]">
           <SessionInsightsPanel insights={data.insights} />
-          <SessionAutoRecordPanel sessionId={sessionId} autoRecord={data.autoRecord} />
+          <SessionAutoRecordPanel
+            sessionId={sessionId}
+            autoRecord={data.autoRecord}
+            onRecorderStateChange={setRecorderState}
+          />
         </div>
       )}
     </section>

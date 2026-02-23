@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { LocaleSwitchButton } from '@/shared/ui/locale-switch-button';
 import { getSessionStartContext } from '@/shared/lib/session-start-context';
@@ -15,10 +15,27 @@ import type { SessionPageData } from '../types/session-page';
 interface SessionHeaderProps {
   sessionId: string;
   sessionData?: Pick<SessionPageData, 'clientName' | 'sessionType' | 'riskType'>;
+  recorderState?: {
+    isRecording: boolean;
+    isPaused: boolean;
+    elapsedSeconds: number;
+    visibleAudioLevel: number;
+  };
 }
 
-export default function SessionHeader({ sessionId, sessionData }: SessionHeaderProps) {
+function formatElapsed(seconds: number): string {
+  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const ss = String(seconds % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}
+
+export default function SessionHeader({
+  sessionId,
+  sessionData,
+  recorderState,
+}: SessionHeaderProps) {
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const router = useRouter();
   const [context, setContext] = useState<SessionStartContextValue | null>(null);
 
@@ -29,19 +46,65 @@ export default function SessionHeader({ sessionId, sessionData }: SessionHeaderP
   const clientName = sessionData?.clientName ?? context?.name?.trim() ?? tCommon('defaultUserName');
   const sessionType = sessionData?.sessionType ?? context?.sessionType;
   const riskType = sessionData?.riskType ?? context?.riskType;
+  const isRecording = recorderState?.isRecording ?? false;
+  const isPaused = recorderState?.isPaused ?? false;
+  const elapsedSeconds = recorderState?.elapsedSeconds ?? 0;
+  const visibleAudioLevel = recorderState?.visibleAudioLevel ?? 0;
 
   return (
     <div className="flex w-full justify-between p-5">
-      <div className="flex items-center gap-4">
-        <span className="body-18 font-semibold text-label-normal">
-          {clientName}
-          {tCommon('profileSuffix')}
-        </span>
-        <div className="flex items-center gap-2">
-          {sessionType ? <SessionTypeChip value={sessionType} /> : null}
-          {riskType ? <RiskTypeChip value={riskType} /> : null}
+      <div className="flex items-center gap-13">
+        <div className="flex items-center gap-4">
+          <span className="body-18 font-semibold text-label-normal">
+            {clientName}
+            {tCommon('profileSuffix')}
+          </span>
+          <div className="flex items-center gap-2">
+            {sessionType ? <SessionTypeChip value={sessionType} /> : null}
+            {riskType ? <RiskTypeChip value={riskType} /> : null}
+          </div>
         </div>
+        {isRecording ? (
+          <div className="flex items-center gap-8">
+            <span className="body-16 font-semibold text-label-normal">
+              {formatElapsed(elapsedSeconds)}
+            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex h-3 w-3 rounded-full ${
+                  isRecording && !isPaused ? 'bg-[#FA5454]' : 'bg-neutral-95'
+                }`}
+                aria-hidden
+              />
+              <span className="body-16 font-semibold text-label-normal">
+                {isPaused
+                  ? locale === 'en'
+                    ? 'Paused'
+                    : '일시정지'
+                  : locale === 'en'
+                    ? 'Recording'
+                    : '녹음 중'}
+              </span>
+            </div>
+
+            <div className="flex items-center">
+              <Image src="/icons/speaker-2.svg" alt="" width={28} height={28} aria-hidden />
+              <div className="flex h-[26px] items-center gap-[2px]">
+                {[14, 28, 42, 56, 70, 84, 100].map((threshold) => (
+                  <span
+                    key={threshold}
+                    className={`h-6 w-[6px] rounded-[2px] ${
+                      visibleAudioLevel >= threshold ? 'bg-label-alternative' : 'bg-label-disable'
+                    }`}
+                    aria-hidden
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
+
       <div className="flex gap-3">
         <div className="flex items-center gap-[19px] max-w-[135px] w-full">
           <Button onClick={() => {}} className="h-[38px] w-[92px] rounded-[8px]">

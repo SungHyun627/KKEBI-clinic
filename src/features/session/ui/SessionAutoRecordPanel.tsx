@@ -8,11 +8,17 @@ import { toast } from '@/shared/ui/toast';
 import SessionTranscriptCard from './SessionTranscriptCard';
 import SessionLiveSummaryCard from './SessionLiveSummaryCard';
 import SessionCounselorMemoCard from './SessionCounselorMemoCard';
-import SessionAudioControlBar from './SessionAudioControlBar';
+import SessionAudioControls from './SessionAudioControls';
 
 interface SessionAutoRecordPanelProps {
   sessionId: string;
   autoRecord: SessionAutoRecordData;
+  onRecorderStateChange?: (state: {
+    isRecording: boolean;
+    isPaused: boolean;
+    elapsedSeconds: number;
+    visibleAudioLevel: number;
+  }) => void;
 }
 
 type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
@@ -22,12 +28,6 @@ function formatTimestampToHms(value: string): string {
   if (parts.length === 3) return value;
   if (parts.length === 2) return `${value}:00`;
   return value;
-}
-
-function formatElapsed(seconds: number): string {
-  const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
-  const ss = String(seconds % 60).padStart(2, '0');
-  return `${mm}:${ss}`;
 }
 
 function formatElapsedToTimestamp(seconds: number): string {
@@ -62,6 +62,7 @@ function renderHighlightedText(text: string, locale: string) {
 export default function SessionAutoRecordPanel({
   sessionId,
   autoRecord,
+  onRecorderStateChange,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const [transcriptItems, setTranscriptItems] = useState(() => autoRecord.transcripts);
@@ -88,6 +89,15 @@ export default function SessionAutoRecordPanel({
 
     return () => window.clearInterval(timer);
   }, [isPaused, isRecording]);
+
+  useEffect(() => {
+    onRecorderStateChange?.({
+      isRecording,
+      isPaused,
+      elapsedSeconds,
+      visibleAudioLevel,
+    });
+  }, [elapsedSeconds, isPaused, isRecording, onRecorderStateChange, visibleAudioLevel]);
 
   useEffect(() => {
     if (!isRecording || isPaused) return;
@@ -214,7 +224,7 @@ export default function SessionAutoRecordPanel({
   };
 
   return (
-    <section className="flex min-h-full flex-col gap-[25px] px-8 py-[26px] bg-neutral-99">
+    <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px]">
       <div className="text-[24px] font-semibold">
         {locale === 'en' ? 'Session record' : '상담 기록'}
       </div>
@@ -236,12 +246,11 @@ export default function SessionAutoRecordPanel({
           body={autoRecord.liveSummaryBody}
         />
         <SessionCounselorMemoCard locale={locale} defaultValue={autoRecord.counselorMemo} />
-        <SessionAudioControlBar
+      </div>
+      <div className="absolute bottom-[30px] left-8 right-8">
+        <SessionAudioControls
           locale={locale}
-          isRecording={isRecording}
           isPaused={isPaused}
-          elapsed={formatElapsed(elapsedSeconds)}
-          visibleAudioLevel={visibleAudioLevel}
           isStartDisabled={isRecording || micPermission === 'requesting'}
           isPauseDisabled={!isRecording}
           onStart={() => {
