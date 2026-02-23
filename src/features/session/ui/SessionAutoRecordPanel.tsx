@@ -19,6 +19,7 @@ interface SessionAutoRecordPanelProps {
     elapsedSeconds: number;
     visibleAudioLevel: number;
   }) => void;
+  onRiskSignalDetected?: (payload: { text: string; timestamp: string }) => void;
 }
 
 type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
@@ -63,12 +64,11 @@ export default function SessionAutoRecordPanel({
   sessionId,
   autoRecord,
   onRecorderStateChange,
+  onRiskSignalDetected,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const [transcriptItems, setTranscriptItems] = useState(() => []);
-  const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(
-    () => new Set(autoRecord.transcripts.filter((item) => item.bookmarked).map((item) => item.id)),
-  );
+  const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(() => new Set());
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [micPermission, setMicPermission] = useState<MicPermissionState>('idle');
   const [isRecording, setIsRecording] = useState(false);
@@ -165,7 +165,6 @@ export default function SessionAutoRecordPanel({
       setMicPermission('granted');
       setIsRecording(true);
       setIsPaused(false);
-      setTranscriptItems((prev) => (prev.length > 0 ? prev : autoRecord.transcripts));
       toast(locale === 'en' ? 'Recording started.' : '녹음을 시작했습니다.');
     } catch {
       setMicPermission('denied');
@@ -183,27 +182,85 @@ export default function SessionAutoRecordPanel({
   };
 
   const handleAddDemoDialogue = () => {
-    const demoTextsKo = [
-      '최근 너무 힘들어서 포기하고 싶은 마음이 들어요.',
-      '상담 중에는 그래도 숨을 고르면 조금 괜찮아져요.',
-      '가끔 자해 생각이 떠올라서 걱정돼요.',
+    const demoConversationKo: Array<{ speaker: 'counselor' | 'client'; text: string }> = [
+      {
+        speaker: 'counselor',
+        text: '오늘은 지난주보다 표정이 조금 무거워 보이는데, 어떤 일이 있었나요?',
+      },
+      { speaker: 'client', text: '회사에서 매번 실수하는 것 같아서 너무 힘들어요.' },
+      {
+        speaker: 'counselor',
+        text: '매번이라는 표현이 나왔네요. 최근에 특히 기억나는 순간이 있을까요?',
+      },
+      { speaker: 'client', text: '어제 보고서가 늦었는데, 상사가 이러면 망했다고 했어요.' },
+      { speaker: 'counselor', text: '그 말을 들었을 때 몸이나 감정은 어떻게 반응했나요?' },
+      {
+        speaker: 'client',
+        text: '심장이 빨리 뛰고, 저는 완전히 실패한 사람이라는 생각이 들었어요.',
+      },
+      { speaker: 'counselor', text: '그 생각이 들 때 스스로에게 어떤 말을 하게 되나요?' },
+      { speaker: 'client', text: '절대 나아질 수 없고, 그냥 포기하고 싶다는 생각이 들어요.' },
+      {
+        speaker: 'counselor',
+        text: '포기하고 싶은 마음이 커질 때, 자해나 자살 같은 생각도 함께 떠오르나요?',
+      },
+      {
+        speaker: 'client',
+        text: '가끔 자해 생각이 스쳐 지나가고, 죽고 싶다는 생각도 잠깐 들어요.',
+      },
     ];
-    const demoTextsEn = [
-      'Lately I feel like giving up because things are too hard.',
-      'During the session, breathing slowly helps me calm down.',
-      'Sometimes I get self-harm thoughts and it scares me.',
+    const demoConversationEn: Array<{ speaker: 'counselor' | 'client'; text: string }> = [
+      {
+        speaker: 'counselor',
+        text: 'You look a bit heavier than last week. What happened recently?',
+      },
+      { speaker: 'client', text: 'I feel like I fail at work every single time. It is hard.' },
+      {
+        speaker: 'counselor',
+        text: 'I heard “every single time.” Can you share one recent moment?',
+      },
+      {
+        speaker: 'client',
+        text: 'My report was late yesterday, and I thought everything was ruined.',
+      },
+      {
+        speaker: 'counselor',
+        text: 'When you heard that, what happened in your body and emotions?',
+      },
+      {
+        speaker: 'client',
+        text: 'My heart raced and I felt like I was a complete failure.',
+      },
+      {
+        speaker: 'counselor',
+        text: 'When that thought appears, what do you say to yourself?',
+      },
+      {
+        speaker: 'client',
+        text: 'I feel I can never get better, and I just want to give up.',
+      },
+      {
+        speaker: 'counselor',
+        text: 'When that feeling grows, do self-harm or suicide thoughts come up too?',
+      },
+      {
+        speaker: 'client',
+        text: 'Sometimes self-harm thoughts pass by, and I briefly think about suicide.',
+      },
     ];
-    const list = locale === 'en' ? demoTextsEn : demoTextsKo;
-    const text = list[demoIndex % list.length];
+
+    const list = locale === 'en' ? demoConversationEn : demoConversationKo;
+    const dialogue = list[demoIndex % list.length];
     const nextIndex = demoIndex + 1;
     setDemoIndex(nextIndex);
 
     const transcriptId = `${sessionId}-demo-${Date.now()}`;
+    const timestamp = formatElapsedToTimestamp(elapsedSeconds);
     const newItem = {
       id: transcriptId,
-      speaker: 'client' as const,
-      text,
-      timestamp: formatElapsedToTimestamp(elapsedSeconds),
+      speaker: dialogue.speaker,
+      text: dialogue.text,
+      timestamp,
       bookmarked: false,
     };
 
@@ -211,11 +268,12 @@ export default function SessionAutoRecordPanel({
 
     const hasRiskSignal =
       locale === 'en'
-        ? /self-harm|suicide|give up|hard/i.test(text)
-        : /자해|자살|죽고 싶다|힘들어|포기/.test(text);
+        ? /self-harm|suicide|want to die|give up|hard/i.test(dialogue.text)
+        : /자해|자살|죽고 싶다|힘들어|포기/.test(dialogue.text);
 
     if (hasRiskSignal) {
       setBookmarkIds((prev) => new Set(prev).add(transcriptId));
+      onRiskSignalDetected?.({ text: dialogue.text, timestamp });
       toast(
         locale === 'en'
           ? 'Risk signal detected in transcript.'

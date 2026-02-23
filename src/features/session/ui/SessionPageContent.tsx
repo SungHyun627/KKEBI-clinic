@@ -23,6 +23,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     elapsedSeconds: 0,
     visibleAudioLevel: 0,
   });
+  const [riskBanner, setRiskBanner] = useState<{ text: string; timestamp: string } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -57,6 +58,30 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
         }
         recorderState={recorderState}
       />
+      {riskBanner ? (
+        <div className="mx-8 flex items-center justify-between gap-4 rounded-[14px] bg-[#FFE5E5] px-4 py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#FA5454] text-white body-12 font-semibold">
+              !
+            </span>
+            <div className="min-w-0">
+              <p className="body-14 font-medium text-[#B42323]">
+                {locale === 'en' ? 'Risk signal detected' : '위험 신호 감지'}
+              </p>
+              <p className="body-14 truncate text-[#8F3030]">
+                {riskBanner.text} · {riskBanner.timestamp}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="shrink-0 rounded-[8px] bg-[#FA5454] px-3 py-[6px] body-14 font-semibold text-white hover:cursor-pointer"
+            onClick={() => setRiskBanner(null)}
+          >
+            {locale === 'en' ? 'Confirm' : '확인'}
+          </button>
+        </div>
+      ) : null}
       {loading ? (
         <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
           Loading session data...
@@ -72,6 +97,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             sessionId={sessionId}
             autoRecord={data.autoRecord}
             onRecorderStateChange={setRecorderState}
+            onRiskSignalDetected={(payload) => setRiskBanner(payload)}
           />
         </div>
       )}
