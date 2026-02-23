@@ -29,6 +29,16 @@ interface SessionAutoRecordPanelProps {
 }
 
 type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
+type PersistedAutoRecordState = {
+  transcriptItems: SessionAutoRecordData['transcripts'];
+  bookmarkIds: string[];
+  micPermission: MicPermissionState;
+  isRecording: boolean;
+  isPaused: boolean;
+  elapsedSeconds: number;
+  audioLevel: number;
+  demoIndex: number;
+};
 
 function formatTimestampToHms(value: string): string {
   const parts = value.split(':');
@@ -354,7 +364,9 @@ export default function SessionAutoRecordPanel({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [demoIndex, setDemoIndex] = useState(0);
+  const [isHydrated, setIsHydrated] = useState(false);
   const visibleAudioLevel = isRecording && !isPaused ? audioLevel : 0;
+  const storageKey = `kkebi:session-auto-record:${sessionId}`;
   const liveSummary = useMemo(
     () =>
       isRecording
@@ -369,6 +381,59 @@ export default function SessionAutoRecordPanel({
   );
 
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const raw = window.sessionStorage.getItem(storageKey);
+    if (!raw) {
+      setIsHydrated(true);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as PersistedAutoRecordState;
+      setTranscriptItems(parsed.transcriptItems ?? []);
+      setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
+      setMicPermission(parsed.micPermission ?? 'idle');
+      setIsRecording(Boolean(parsed.isRecording));
+      setIsPaused(Boolean(parsed.isPaused));
+      setElapsedSeconds(parsed.elapsedSeconds ?? 0);
+      setAudioLevel(parsed.audioLevel ?? 0);
+      setDemoIndex(parsed.demoIndex ?? 0);
+    } catch {
+      window.sessionStorage.removeItem(storageKey);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (!isHydrated || typeof window === 'undefined') return;
+
+    const payload: PersistedAutoRecordState = {
+      transcriptItems,
+      bookmarkIds: Array.from(bookmarkIds),
+      micPermission,
+      isRecording,
+      isPaused,
+      elapsedSeconds,
+      audioLevel,
+      demoIndex,
+    };
+    window.sessionStorage.setItem(storageKey, JSON.stringify(payload));
+  }, [
+    audioLevel,
+    bookmarkIds,
+    demoIndex,
+    elapsedSeconds,
+    isHydrated,
+    isPaused,
+    isRecording,
+    micPermission,
+    storageKey,
+    transcriptItems,
+  ]);
 
   useEffect(() => {
     if (!isRecording || isPaused) return;
