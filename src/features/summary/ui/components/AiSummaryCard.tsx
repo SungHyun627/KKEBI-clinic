@@ -1,4 +1,5 @@
 import { Textarea } from '@/shared/ui/textarea';
+import Image from 'next/image';
 
 interface AiSummaryCardProps {
   locale: string;
@@ -8,20 +9,34 @@ interface AiSummaryCardProps {
 
 export default function AiSummaryCard({ locale, value, onChange }: AiSummaryCardProps) {
   return (
-    <div className="rounded-[20px] border border-neutral-95 bg-white p-6">
-      <div className="body-18 font-semibold text-label-normal">
-        {locale === 'en' ? 'AI generated summary' : 'AI 생성 요약'}
+    <div className="flex flex-col w-full items-start gap-7">
+      <div className="flex items-center gap-2">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-fill-pressed">
+          <Image
+            src="/icons/clipboard.svg"
+            alt={locale === 'en' ? 'AI summary' : 'AI summary'}
+            width={20}
+            height={20}
+            aria-hidden
+          />
+        </div>
+        <div className="text-[24px] font-semibold text-label-normal">
+          {locale === 'en' ? 'AI Session Summary' : 'AI 상담 요약'}
+        </div>
       </div>
-      <p className="mt-2 body-14 text-label-alternative">
-        {locale === 'en'
-          ? 'Editable auto-generated summary based on session data.'
-          : '세션 데이터를 기반으로 생성된 요약입니다. 수정할 수 있습니다.'}
-      </p>
-      <Textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-3 min-h-[124px]"
-      />
+
+      <div className="flex min-h-[124px] w-full px-[26px] py-[23px] rounded-[16px] border border-neutral-95 body-16 text-label-normal">
+        {value}
+      </div>
+      <div className="flex flex-col items-start gap-[10px] w-full">
+        <span className="body-16 font-medium text-label-neutral">직접 수정</span>
+        <Textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full px-[26px] py-[23px]  min-h-[74px]"
+          placeholder="상담 내용을 직접 수정해 보세요."
+        />
+      </div>
     </div>
   );
 }
