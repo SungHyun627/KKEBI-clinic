@@ -25,6 +25,7 @@ import {
   SummaryTopBar,
   TasksTabCard,
   EmotionPatternsCard,
+  DetectedCognitiveDistortionCard,
 } from './components';
 
 interface SessionSummaryContentProps {
@@ -47,16 +48,6 @@ function formatSummaryDate(iso?: string) {
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   return `${yyyy}. ${mm}. ${dd}`;
-}
-
-function getDistortionLabel(locale: string, distortionType?: string) {
-  if (distortionType === 'black_and_white') return locale === 'en' ? 'Black-and-white' : '흑백논리';
-  if (distortionType === 'overgeneralization')
-    return locale === 'en' ? 'Overgeneralization' : '과잉일반화';
-  if (distortionType === 'catastrophizing') return locale === 'en' ? 'Catastrophizing' : '파국화';
-  if (distortionType === 'should_statement')
-    return locale === 'en' ? 'Should statement' : '당위적 사고';
-  return locale === 'en' ? 'Not detected' : '미감지';
 }
 
 export default function SessionSummaryContent({
@@ -146,11 +137,6 @@ export default function SessionSummaryContent({
     return transcriptItems.filter((item) => item.id && bookmarkedIds.has(item.id));
   }, [payload?.runtime?.bookmarkIds, transcriptItems]);
 
-  const distortionLabel = getDistortionLabel(
-    locale,
-    payload?.summarySnapshot?.insights?.distortionType,
-  );
-
   const missions: MissionItem[] = [
     { id: 'breathing', name: locale === 'en' ? 'Breathing log' : '호흡 훈련 일지', eta: '10m' },
     { id: 'sleep', name: locale === 'en' ? 'Sleep routine check' : '수면 루틴 체크', eta: '15m' },
@@ -239,8 +225,10 @@ export default function SessionSummaryContent({
           <EmotionPatternsCard
             locale={locale}
             emotions={payload?.summarySnapshot?.recentEmotionHistory ?? []}
-            distortionLabel={distortionLabel}
-            bookmarkedMoments={bookmarkedMoments}
+          />
+          <DetectedCognitiveDistortionCard
+            locale={locale}
+            distortions={payload?.summarySnapshot?.recentCognitiveDistortions ?? []}
           />
 
           <CounselorEvaluationCard

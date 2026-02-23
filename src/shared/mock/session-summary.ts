@@ -25,6 +25,19 @@ function emotionLabelByLocale(
   return locale === 'en' ? map[emotion].en : map[emotion].ko;
 }
 
+function distortionLabelByLocale(distortionType: string, locale: string) {
+  const map: Record<string, { ko: string; en: string }> = {
+    black_and_white: { ko: '흑백논리', en: 'Black-and-white' },
+    overgeneralization: { ko: '과잉일반화', en: 'Overgeneralization' },
+    catastrophizing: { ko: '파국화', en: 'Catastrophizing' },
+    should_statement: { ko: '당위적 사고', en: 'Should statement' },
+  };
+
+  const label = map[distortionType];
+  if (!label) return locale === 'en' ? 'Not detected' : '미감지';
+  return locale === 'en' ? label.en : label.ko;
+}
+
 export function getSessionSummaryMock(sessionId: string, locale: string): SummaryPayload {
   const sessionPage = getSessionPageMock(sessionId, locale);
   const seed = hashString(sessionId);
@@ -63,6 +76,9 @@ export function getSessionSummaryMock(sessionId: string, locale: string): Summar
       recentEmotionHistory: sessionPage.insights.emotionHistory.map((item) =>
         emotionLabelByLocale(item.emotion, locale),
       ),
+      recentCognitiveDistortions: [
+        distortionLabelByLocale(sessionPage.insights.distortionType, locale),
+      ],
       distortionExampleHistory: [sessionPage.insights.distortionExample],
     },
     runtime: {

@@ -6,3 +6,4 @@ export { default as CounselorEvaluationCard } from './CounselorEvaluationCard';
 export { default as RecommendedMissionsCard } from './RecommendedMissionsCard';
 export { default as NextSessionBookingCard } from './NextSessionBookingCard';
 export { default as TasksTabCard } from './TasksTabCard';
+export { default as DetectedCognitiveDistortionCard } from './DetectedCognitiveDistortionCard';

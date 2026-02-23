@@ -18,6 +18,7 @@ export type SummaryPayload = {
       distortionType?: string;
     } | null;
     recentEmotionHistory?: string[];
+    recentCognitiveDistortions?: string[];
     distortionExampleHistory?: string[];
   } | null;
   runtime?: {
