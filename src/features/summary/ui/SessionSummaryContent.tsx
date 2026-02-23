@@ -26,6 +26,7 @@ import {
   TasksTabCard,
   EmotionPatternsCard,
   DetectedCognitiveDistortionCard,
+  BookmarkedMomentsCard,
 } from './components';
 
 interface SessionSummaryContentProps {
@@ -230,6 +231,7 @@ export default function SessionSummaryContent({
             locale={locale}
             distortions={payload?.summarySnapshot?.recentCognitiveDistortions ?? []}
           />
+          <BookmarkedMomentsCard locale={locale} moments={bookmarkedMoments} />
 
           <CounselorEvaluationCard
             locale={locale}

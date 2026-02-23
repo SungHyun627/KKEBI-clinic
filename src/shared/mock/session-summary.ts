@@ -43,16 +43,29 @@ export function getSessionSummaryMock(sessionId: string, locale: string): Summar
   const seed = hashString(sessionId);
   const endedAt = new Date(Date.now() - (seed % (1000 * 60 * 60 * 48))).toISOString();
 
-  const transcriptItems = sessionPage.autoRecord.transcripts.map((item) => ({
+  const baseTranscriptItems = sessionPage.autoRecord.transcripts.map((item) => ({
     id: item.id,
     speaker: item.speaker,
     text: item.text,
     timestamp: item.timestamp,
   }));
 
-  const bookmarkIds = sessionPage.autoRecord.transcripts
-    .filter((item) => Boolean(item.bookmarked))
-    .map((item) => item.id);
+  const transcriptItems = [...baseTranscriptItems];
+  while (transcriptItems.length < 6) {
+    const idx = transcriptItems.length % baseTranscriptItems.length;
+    const source = baseTranscriptItems[idx];
+    transcriptItems.push({
+      id: `${sessionId}-summary-line-${transcriptItems.length + 1}`,
+      speaker: source.speaker,
+      text: source.text,
+      timestamp: source.timestamp,
+    });
+  }
+
+  const bookmarkIds = transcriptItems
+    .slice(0, 5)
+    .map((item) => item.id ?? '')
+    .filter(Boolean);
 
   const elapsedSeconds = Math.max(600, transcriptItems.length * 180 + (seed % 240));
 
