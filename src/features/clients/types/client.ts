@@ -92,3 +92,64 @@ export interface ClientDetailResponse {
   data?: ClientDetailData;
   message?: string;
 }
+
+export interface ClientDetailUpdatePayload {
+  age: number;
+  gender: ClientDetailData['gender'];
+  counselingStartDate: string;
+  currentSession: number;
+  totalSession: number;
+  visitPurpose: string;
+  nextCounselingAt: string;
+}
+
+export interface ClientDetailUpdateResponse {
+  success: boolean;
+  data?: ClientDetailData;
+  message?: string;
+}
+
+export type ClientCloseReason = 'session-complete' | 'dropout' | 'other';
+
+export interface ClientClosePayload {
+  reason: ClientCloseReason;
+  detail: string;
+}
+
+export interface ClientCloseResponse {
+  success: boolean;
+  data?: {
+    clientId: string;
+    reason: ClientCloseReason;
+    detail: string;
+    closedAt: string;
+  };
+  message?: string;
+}
+
+export interface ClientRestoreResponse {
+  success: boolean;
+  data?: {
+    clientId: string;
+    restoredAt: string;
+  };
+  message?: string;
+}
+
+export type ClosedClientReasonLabel = '회기 종료' | '중도 탈락' | '기타';
+
+export interface ClosedClientItem {
+  id: string;
+  clientId: string;
+  counselingPeriod: string;
+  clientName: string;
+  ageGender: string;
+  chiefConcern: string[];
+  closeReason: ClosedClientReasonLabel;
+}
+
+export interface ClosedClientsResponse {
+  success: boolean;
+  data?: ClosedClientItem[];
+  message?: string;
+}

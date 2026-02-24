@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
-import { TODAY_SCHEDULES_MOCK } from '@/shared/mock/today-schedules';
-import type { ClientDetailData, CounselingChiefConcern, RiskReason } from '@/features/clients';
+import { getActiveSchedules } from '@/shared/mock/client-lifecycle-store';
+import type {
+  ClientDetailData,
+  ClientDetailUpdatePayload,
+  CounselingChiefConcern,
+  RiskReason,
+} from '@/features/clients';
 
 const CHIEF_CONCERNS = ['우울', '스트레스', '수면'] as const;
 const RISK_REASONS: RiskReason[] = ['자살 언급', '자해 시도', '타해 위험'];
@@ -20,9 +25,9 @@ const COUNSELING_CHIEF_CONCERNS: CounselingChiefConcern[] = [
 
 export async function GET(_request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
+  const detail = buildClientDetail(clientId);
 
-  const target = TODAY_SCHEDULES_MOCK.find((item) => item.clientId === clientId);
-  if (!target) {
+  if (!detail) {
     return NextResponse.json(
       {
         success: false,
@@ -30,6 +35,60 @@ export async function GET(_request: Request, context: { params: Promise<{ client
       },
       { status: 404 },
     );
+  }
+
+  return NextResponse.json({
+    success: true,
+    data: detail,
+  });
+}
+
+export async function PATCH(request: Request, context: { params: Promise<{ clientId: string }> }) {
+  const { clientId } = await context.params;
+  const base = buildClientDetail(clientId);
+
+  if (!base) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: '내담자 상세 정보를 찾을 수 없습니다.',
+      },
+      { status: 404 },
+    );
+  }
+
+  const body = (await request.json().catch(() => null)) as ClientDetailUpdatePayload | null;
+  if (!body) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: '요청 본문이 올바르지 않습니다.',
+      },
+      { status: 400 },
+    );
+  }
+
+  const next: ClientDetailData = {
+    ...base,
+    age: body.age,
+    gender: body.gender,
+    counselingStartDate: body.counselingStartDate,
+    currentSession: body.currentSession,
+    totalSession: body.totalSession,
+    visitPurpose: body.visitPurpose,
+    nextCounselingAt: body.nextCounselingAt,
+  };
+
+  return NextResponse.json({
+    success: true,
+    data: next,
+  });
+}
+
+function buildClientDetail(clientId: string): ClientDetailData | null {
+  const target = getActiveSchedules().find((item) => item.clientId === clientId);
+  if (!target) {
+    return null;
   }
 
   const idNumber = Number(target.clientId.replace(/\D/g, '')) || 1;
@@ -49,7 +108,7 @@ export async function GET(_request: Request, context: { params: Promise<{ client
   const nextDay = (idNumber % 18) + 10;
   const nextHour = 9 + (idNumber % 7);
 
-  const detail: ClientDetailData = {
+  return {
     time: target.time,
     clientId: target.clientId,
     clientName: target.clientName,
@@ -134,9 +193,4 @@ export async function GET(_request: Request, context: { params: Promise<{ client
       selfDescription: '책임감이 높지만 쉽게 긴장하는 사람',
     },
   };
-
-  return NextResponse.json({
-    success: true,
-    data: detail,
-  });
 }

@@ -15,6 +15,8 @@ import { useRouter } from '@/i18n/navigation';
 import { startSession } from '../api/startSession';
 import { toast } from '@/shared/ui/toast';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
+import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';
+import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 interface ScheduledSessionItemCardProps {
   item: ScheduledSessionItem;
@@ -34,7 +36,9 @@ export default function ScheduledSessionItemCard({
   const tCommon = useTranslations('common');
   const tSessions = useTranslations('sessionList');
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const localizedClientName = getClientNameByLocale(item.clientId, item.clientName, locale);
 
   const handleStart = async () => {
     setIsStarting(true);
@@ -51,7 +55,7 @@ export default function ScheduledSessionItemCard({
     }
 
     setSessionStartContext(result.sessionId, {
-      name: item.clientName,
+      name: localizedClientName,
       sessionType: item.sessionType,
       riskType: item.riskType,
     });
@@ -75,7 +79,7 @@ export default function ScheduledSessionItemCard({
             type="button"
             variant="icon"
             size="icon"
-            disabled
+            onClick={() => setIsReminderOpen(true)}
             aria-label={tSessions('sendAria')}
             className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
           >
@@ -135,6 +139,13 @@ export default function ScheduledSessionItemCard({
         onOpenChange={setIsRescheduleOpen}
         currentDate={scheduledDate}
         initialStartTime={item.scheduledTime}
+      />
+      <SessionReminderDrawer
+        open={isReminderOpen}
+        onOpenChange={setIsReminderOpen}
+        clientId={item.clientId}
+        clientName={localizedClientName}
+        scheduledTime={item.scheduledTime}
       />
     </div>
   );

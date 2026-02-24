@@ -39,7 +39,13 @@ export default function CompletedSessionItemCard({
           <RecordCompleteChip />
         </div>
         <div className="flex w-full max-w-[181px] items-center gap-3">
-          <Button type="button" size="md" className="w-full w-max-[181px]" onClick={() => {}}>
+          <Button
+            type="button"
+            size="md"
+            className="w-full w-max-[181px]"
+            onClick={() => {}}
+            disabled
+          >
             {tSessions('viewDetails')}
           </Button>
         </div>
