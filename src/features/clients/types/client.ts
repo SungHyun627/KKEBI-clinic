@@ -108,3 +108,21 @@ export interface ClientDetailUpdateResponse {
   data?: ClientDetailData;
   message?: string;
 }
+
+export type ClientCloseReason = 'session-complete' | 'dropout' | 'other';
+
+export interface ClientClosePayload {
+  reason: ClientCloseReason;
+  detail: string;
+}
+
+export interface ClientCloseResponse {
+  success: boolean;
+  data?: {
+    clientId: string;
+    reason: ClientCloseReason;
+    detail: string;
+    closedAt: string;
+  };
+  message?: string;
+}

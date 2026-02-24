@@ -5,14 +5,15 @@ import { useLocale } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { Textarea } from '@/shared/ui/textarea';
+import type { ClientCloseReason } from '../types/client';
 
-type CloseReason = 'session-complete' | 'dropout' | 'other';
+type CloseReason = ClientCloseReason;
 
 interface SessionCloseDialogProps {
   open: boolean;
   clientName: string;
   onOpenChange: (open: boolean) => void;
-  onConfirm?: (payload: { reason: CloseReason; detail: string }) => void;
+  onConfirm?: (payload: { reason: CloseReason; detail: string }) => Promise<void> | void;
 }
 
 const MAX_REASON_LENGTH = 300;
@@ -26,6 +27,7 @@ const SessionCloseDialog = ({
   const locale = useLocale();
   const [reason, setReason] = useState<CloseReason>('session-complete');
   const [reasonDetail, setReasonDetail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isOther = reason === 'other';
   const charCount = reasonDetail.length;
@@ -151,9 +153,11 @@ const SessionCloseDialog = ({
               type="button"
               size="lg"
               className="flex-[11] rounded-[16px]"
-              disabled={isConfirmDisabled}
-              onClick={() => {
-                onConfirm?.({ reason, detail: reasonDetail.trim() });
+              disabled={isConfirmDisabled || isSubmitting}
+              onClick={async () => {
+                setIsSubmitting(true);
+                await onConfirm?.({ reason, detail: reasonDetail.trim() });
+                setIsSubmitting(false);
                 closeDialog();
               }}
             >

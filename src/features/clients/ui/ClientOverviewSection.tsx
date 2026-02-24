@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { closeClient } from '@/features/clients';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import ClientInfoField from './ClientInfoField';
@@ -240,6 +241,9 @@ export default function ClientOverviewSection({
         open={isSessionCloseDialogOpen}
         onOpenChange={setIsSessionCloseDialogOpen}
         clientName={detail.clientName}
+        onConfirm={async ({ reason, detail: closeDetail }) => {
+          await closeClient(detail.clientId, { reason, detail: closeDetail });
+        }}
       />
     </section>
   );
