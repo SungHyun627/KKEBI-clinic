@@ -77,6 +77,7 @@ export default function TodayScheduleAction({
       <SessionReminderDrawer
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
+        clientId={clientId}
         clientName={clientName}
         scheduledTime={scheduledTime}
       />

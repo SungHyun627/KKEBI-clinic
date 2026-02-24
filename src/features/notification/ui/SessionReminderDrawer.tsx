@@ -8,6 +8,8 @@ import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@
 import { Textarea } from '@/shared/ui/textarea';
 import { cn } from '@/shared/lib/utils';
 import Divider from '@/shared/ui/divider';
+import { sendSessionReminder } from '@/features/notification/api/sendSessionReminder';
+import { toast } from '@/shared/ui/toast';
 
 type ReminderChannel = 'push' | 'email' | 'sms';
 const MESSAGE_MAX_LENGTH = 1000;
@@ -15,6 +17,7 @@ const MESSAGE_MAX_LENGTH = 1000;
 interface SessionReminderDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  clientId: string;
   clientName: string;
   scheduledTime?: string;
 }
@@ -34,14 +37,17 @@ const CHANNELS: Array<{
 const SessionReminderDrawer = ({
   open,
   onOpenChange,
+  clientId,
   clientName,
   scheduledTime,
 }: SessionReminderDrawerProps) => {
   const locale = useLocale();
-  const todayDate = formatTodayDateForDisplay(locale);
+  const todayDateKey = getTodayDateKey();
+  const todayDate = formatDateForDisplay(todayDateKey, locale);
   const fixedTime = normalizeScheduleTime(scheduledTime) ?? '09:00';
   const [channels, setChannels] = useState<ReminderChannel[]>([]);
   const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const labels = useMemo(
     () => ({
@@ -62,6 +68,7 @@ const SessionReminderDrawer = ({
   );
 
   const readonlyScheduleLabel = `${todayDate} ${fixedTime}`;
+  const isSendEnabled = channels.length > 0;
 
   const toggleChannel = (next: ReminderChannel) => {
     setChannels((prev) => {
@@ -70,6 +77,32 @@ const SessionReminderDrawer = ({
       }
       return [...prev, next];
     });
+  };
+
+  const handleSend = async () => {
+    if (!isSendEnabled || isSubmitting) return;
+
+    setIsSubmitting(true);
+    const result = await sendSessionReminder({
+      clientId,
+      clientName,
+      scheduleDate: todayDateKey,
+      scheduleTime: fixedTime,
+      channels,
+      message,
+    });
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      toast(
+        result.message ||
+          (locale === 'en' ? 'Failed to send session reminder.' : '세션 알림 발송에 실패했습니다.'),
+      );
+      return;
+    }
+
+    toast(locale === 'en' ? 'Session reminder sent.' : '세션 알림이 발송되었습니다.');
+    onOpenChange(false);
   };
 
   return (
@@ -179,8 +212,14 @@ const SessionReminderDrawer = ({
           >
             {labels.cancel}
           </Button>
-          <Button type="submit" size="lg" className="w-full max-w-[264px]">
-            {labels.send}
+          <Button
+            type="button"
+            size="lg"
+            className="w-full max-w-[264px]"
+            disabled={!isSendEnabled || isSubmitting}
+            onClick={handleSend}
+          >
+            {isSubmitting ? (locale === 'en' ? 'Sending...' : '발송 중...') : labels.send}
           </Button>
         </div>
       </DrawerContent>
@@ -188,12 +227,22 @@ const SessionReminderDrawer = ({
   );
 };
 
-const formatTodayDateForDisplay = (locale: string) => {
+const getTodayDateKey = () => {
   const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const date = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${date}`;
+};
+
+const formatDateForDisplay = (dateKey: string, locale: string) => {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const safeDate = new Date(year, (month || 1) - 1, day || 1);
+
   if (locale === 'en') {
-    return now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return safeDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
-  return `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+  return `${year}년 ${month}월 ${day}일`;
 };
 
 const normalizeScheduleTime = (value?: string) => {
