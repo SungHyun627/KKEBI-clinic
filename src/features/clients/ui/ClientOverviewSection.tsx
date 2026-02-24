@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import ClientInfoField from './ClientInfoField';
+import SessionTerminationDialog from './SessionTerminationDialog';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
 import type { ClientDetailData } from '../types/client';
@@ -32,6 +33,7 @@ export default function ClientOverviewSection({
   const locale = useLocale();
   const isKo = locale === 'ko';
   const [draft, setDraft] = useState<ClientDetailData>(detail);
+  const [isSessionTerminationDialogOpen, setIsSessionTerminationDialogOpen] = useState(false);
   const [ageGenderInput, setAgeGenderInput] = useState(`${detail.age} / ${detail.gender}`);
   const [sessionCountInput, setSessionCountInput] = useState(
     `${detail.currentSession}회/${detail.totalSession}회`,
@@ -89,7 +91,9 @@ export default function ClientOverviewSection({
               onClick={() => {
                 if (isEditing) {
                   onSave(draft);
+                  return;
                 }
+                setIsSessionTerminationDialogOpen(true);
               }}
             >
               {isEditing ? '저장하기' : tCommon('closeCase')}
@@ -231,6 +235,12 @@ export default function ClientOverviewSection({
           )}
         </div>
       </div>
+
+      <SessionTerminationDialog
+        open={isSessionTerminationDialogOpen}
+        onOpenChange={setIsSessionTerminationDialogOpen}
+        clientName={detail.clientName}
+      />
     </section>
   );
 }
