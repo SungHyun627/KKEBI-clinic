@@ -126,3 +126,30 @@ export interface ClientCloseResponse {
   };
   message?: string;
 }
+
+export interface ClientRestoreResponse {
+  success: boolean;
+  data?: {
+    clientId: string;
+    restoredAt: string;
+  };
+  message?: string;
+}
+
+export type ClosedClientReasonLabel = '회기 종료' | '중도 탈락' | '기타';
+
+export interface ClosedClientItem {
+  id: string;
+  clientId: string;
+  counselingPeriod: string;
+  clientName: string;
+  ageGender: string;
+  chiefConcern: string[];
+  closeReason: ClosedClientReasonLabel;
+}
+
+export interface ClosedClientsResponse {
+  success: boolean;
+  data?: ClosedClientItem[];
+  message?: string;
+}

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { TODAY_SCHEDULES_MOCK } from '@/shared/mock/today-schedules';
+import { closeActiveClient, findActiveClient } from '@/shared/mock/client-lifecycle-store';
 import type { ClientClosePayload, ClientCloseReason } from '@/features/clients';
 
 const VALID_REASONS: ClientCloseReason[] = ['session-complete', 'dropout', 'other'];
 
 export async function POST(request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
-  const target = TODAY_SCHEDULES_MOCK.find((item) => item.clientId === clientId);
+  const target = findActiveClient(clientId);
 
   if (!target) {
     return NextResponse.json(
@@ -26,6 +26,17 @@ export async function POST(request: Request, context: { params: Promise<{ client
         message: '요청 본문이 올바르지 않습니다.',
       },
       { status: 400 },
+    );
+  }
+
+  const closedItem = closeActiveClient(clientId, body.reason);
+  if (!closedItem) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: '내담자 종결 처리에 실패했습니다.',
+      },
+      { status: 500 },
     );
   }
 

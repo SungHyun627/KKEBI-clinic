@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { TODAY_SCHEDULES_MOCK } from '@/shared/mock/today-schedules';
+import { getActiveSchedules } from '@/shared/mock/client-lifecycle-store';
 import type {
   ClientDetailData,
   ClientDetailUpdatePayload,
@@ -86,7 +86,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ clien
 }
 
 function buildClientDetail(clientId: string): ClientDetailData | null {
-  const target = TODAY_SCHEDULES_MOCK.find((item) => item.clientId === clientId);
+  const target = getActiveSchedules().find((item) => item.clientId === clientId);
   if (!target) {
     return null;
   }
