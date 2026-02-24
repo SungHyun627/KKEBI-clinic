@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { closeClient } from '@/features/clients';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
+import { toast } from '@/shared/ui/toast';
 import ClientInfoField from './ClientInfoField';
 import SessionCloseDialog from './SessionCloseDialog';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
@@ -242,7 +243,10 @@ export default function ClientOverviewSection({
         onOpenChange={setIsSessionCloseDialogOpen}
         clientName={detail.clientName}
         onConfirm={async ({ reason, detail: closeDetail }) => {
-          await closeClient(detail.clientId, { reason, detail: closeDetail });
+          const result = await closeClient(detail.clientId, { reason, detail: closeDetail });
+          if (result.success) {
+            toast('성공적으로 종결이 처리되었습니다');
+          }
         }}
       />
     </section>
