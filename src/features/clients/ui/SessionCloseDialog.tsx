@@ -8,7 +8,7 @@ import { Textarea } from '@/shared/ui/textarea';
 
 type CloseReason = 'session-complete' | 'dropout' | 'other';
 
-interface SessionTerminationDialogProps {
+interface SessionCloseDialogProps {
   open: boolean;
   clientName: string;
   onOpenChange: (open: boolean) => void;
@@ -17,12 +17,12 @@ interface SessionTerminationDialogProps {
 
 const MAX_REASON_LENGTH = 300;
 
-const SessionTerminationDialog = ({
+const SessionCloseDialog = ({
   open,
   clientName,
   onOpenChange,
   onConfirm,
-}: SessionTerminationDialogProps) => {
+}: SessionCloseDialogProps) => {
   const locale = useLocale();
   const [reason, setReason] = useState<CloseReason>('session-complete');
   const [reasonDetail, setReasonDetail] = useState('');
@@ -57,14 +57,17 @@ const SessionTerminationDialog = ({
       <div className="relative flex h-full items-center justify-center p-4">
         <div className="flex w-full max-w-[480px] flex-col items-start gap-6 rounded-[24px] bg-white px-8 py-7 shadow-lg outline-none">
           <h2 className="absolute m-0 h-0 w-0 overflow-hidden p-0">
-            <VisuallyHidden>
-              {locale === 'en' ? 'Session Termination' : '상담 종결하기'}
-            </VisuallyHidden>
+            <VisuallyHidden>{locale === 'en' ? 'Close Session' : '상담 종결하기'}</VisuallyHidden>
           </h2>
 
           <div className="flex w-full flex-col items-start gap-7">
             <span className="body-20 font-semibold text-black">
               {locale === 'en' ? 'Close Session' : '상담을 종결하시겠습니까?'}
+            </span>
+            <span className="body-14 text-label-normal">
+              {locale === 'en'
+                ? `Do you want to close the case with ${clientName}?`
+                : `${clientName}님과의 상담을 종결하시겠습니까?`}
             </span>
 
             <div className="flex w-full flex-col gap-[23px] rounded-[16px] border border-neutral-95 bg-white p-4">
@@ -163,4 +166,4 @@ const SessionTerminationDialog = ({
   );
 };
 
-export default SessionTerminationDialog;
+export default SessionCloseDialog;
