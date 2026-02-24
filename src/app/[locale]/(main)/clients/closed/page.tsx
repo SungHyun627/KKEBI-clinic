@@ -15,11 +15,11 @@ export default function ClosedClientsPage() {
   const [closedClients, setClosedClients] = useState<ClosedClientItem[]>([]);
   const [pendingClientIds, setPendingClientIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
-  const periodLabel = locale === 'en' ? 'Counseling period' : '상담기간';
-  const ageGenderLabel = locale === 'en' ? 'Gender & age' : '성별 및 나이';
-  const closeReasonLabel = locale === 'en' ? 'Close reason' : '종결 사유';
-  const detailLabel = locale === 'en' ? 'Details' : '상세';
-  const restoreLabel = locale === 'en' ? 'Restore' : '복구하기';
+  const periodLabel = tClients('closedColumnPeriod');
+  const ageGenderLabel = tClients('closedColumnAgeGender');
+  const closeReasonLabel = tClients('closedColumnReason');
+  const detailLabel = tClients('closedDetail');
+  const restoreLabel = tClients('closedRestore');
 
   useEffect(() => {
     const load = async () => {
@@ -39,9 +39,7 @@ export default function ClosedClientsPage() {
         <h1 className="body-18 font-semibold text-label-normal">
           {tClients('listClosedSessions')}
         </h1>
-        <p className="body-16 text-label-neutral">
-          30일 이내 종결된 내담자를 확인하고 복구할 수 있습니다.
-        </p>
+        <p className="body-16 text-label-neutral">{tClients('closedDescription')}</p>
       </div>
       <div className="w-full mb-12">
         <div className="grid w-full grid-cols-[4fr_2fr_2fr_4fr_2fr_4fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3 max-[1200px]:gap-2 max-[1100px]:grid-cols-[4fr_2fr_4fr_2fr_4fr] max-[1100px]:px-3">
@@ -64,76 +62,90 @@ export default function ClosedClientsPage() {
 
         {isLoading ? (
           <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-            {locale === 'en'
-              ? 'Loading closed clients...'
-              : '종결 상담자 목록을 불러오는 중입니다...'}
+            {tClients('closedLoading')}
           </div>
         ) : (
           <ul className="flex w-full flex-col">
-            {closedClients.map((item, index) => (
-              <li
-                key={item.id}
-                className={[
-                  'grid w-full grid-cols-[4fr_2fr_2fr_4fr_2fr_4fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 max-[1200px]:gap-2 max-[1100px]:grid-cols-[4fr_2fr_4fr_2fr_4fr] max-[1100px]:px-3',
-                  index === closedClients.length - 1 ? 'rounded-b-[8px]' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <span className="body-16 min-w-0 truncate text-label-normal">
-                  {item.counselingPeriod}
-                </span>
-                <span className="body-16 min-w-0 truncate text-label-normal">
-                  {item.clientName}
-                </span>
-                <span className="body-16 min-w-0 truncate text-label-normal max-[1100px]:hidden">
-                  {item.ageGender}
-                </span>
-                <span className="flex min-w-0 flex-wrap gap-2 overflow-hidden">
-                  {item.chiefConcern.map((concern) => (
-                    <ChiefConcernChip key={`${item.id}-${concern}`} value={concern} />
-                  ))}
-                </span>
-                <CloseReasonChip value={item.closeReason} />
-                <div className="flex min-w-0 w-full items-center justify-end gap-2 pl-2">
-                  <Button
-                    disabled
-                    type="button"
-                    variant="icon"
-                    size="icon"
-                    aria-label={detailLabel}
-                    className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
-                  >
-                    <Image src="/icons/report.svg" alt="" width={24} height={24} aria-hidden />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="md"
-                    className="w-full max-w-[181px]"
-                    disabled={pendingClientIds.has(item.clientId)}
-                    onClick={async () => {
-                      if (pendingClientIds.has(item.clientId)) return;
-                      setPendingClientIds((prev) => new Set(prev).add(item.clientId));
-                      const result = await restoreClient(item.clientId);
-                      setPendingClientIds((prev) => {
-                        const next = new Set(prev);
-                        next.delete(item.clientId);
-                        return next;
-                      });
-                      if (!result.success) return;
-                      setClosedClients((prev) =>
-                        prev.filter((closedItem) => closedItem.clientId !== item.clientId),
-                      );
-                    }}
-                  >
-                    {restoreLabel}
-                  </Button>
-                </div>
+            {closedClients.length === 0 ? (
+              <li className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
+                {tClients('closedEmptyLast30Days')}
               </li>
-            ))}
+            ) : (
+              closedClients.map((item, index) => (
+                <li
+                  key={item.id}
+                  className={[
+                    'grid w-full grid-cols-[4fr_2fr_2fr_4fr_2fr_4fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 max-[1200px]:gap-2 max-[1100px]:grid-cols-[4fr_2fr_4fr_2fr_4fr] max-[1100px]:px-3',
+                    index === closedClients.length - 1 ? 'rounded-b-[8px]' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <span className="body-16 min-w-0 truncate text-label-normal">
+                    {item.counselingPeriod}
+                  </span>
+                  <span className="body-16 min-w-0 truncate text-label-normal">
+                    {item.clientName}
+                  </span>
+                  <span className="body-16 min-w-0 truncate text-label-normal max-[1100px]:hidden">
+                    {formatAgeGenderByLocale(item.ageGender, locale)}
+                  </span>
+                  <span className="flex min-w-0 flex-wrap gap-2 overflow-hidden">
+                    {item.chiefConcern.map((concern) => (
+                      <ChiefConcernChip key={`${item.id}-${concern}`} value={concern} />
+                    ))}
+                  </span>
+                  <CloseReasonChip value={item.closeReason} />
+                  <div className="flex min-w-0 w-full items-center justify-end gap-2 pl-2">
+                    <Button
+                      disabled
+                      type="button"
+                      variant="icon"
+                      size="icon"
+                      aria-label={detailLabel}
+                      className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
+                    >
+                      <Image src="/icons/report.svg" alt="" width={24} height={24} aria-hidden />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="md"
+                      className="w-full max-w-[181px]"
+                      disabled={pendingClientIds.has(item.clientId)}
+                      onClick={async () => {
+                        if (pendingClientIds.has(item.clientId)) return;
+                        setPendingClientIds((prev) => new Set(prev).add(item.clientId));
+                        const result = await restoreClient(item.clientId);
+                        setPendingClientIds((prev) => {
+                          const next = new Set(prev);
+                          next.delete(item.clientId);
+                          return next;
+                        });
+                        if (!result.success) return;
+                        setClosedClients((prev) =>
+                          prev.filter((closedItem) => closedItem.clientId !== item.clientId),
+                        );
+                      }}
+                    >
+                      {restoreLabel}
+                    </Button>
+                  </div>
+                </li>
+              ))
+            )}
           </ul>
         )}
       </div>
     </section>
   );
+}
+
+function formatAgeGenderByLocale(value: string, locale: string) {
+  if (locale !== 'en') return value;
+
+  const matched = value.match(/(남성|여성)\s*(\d+)세/);
+  if (!matched) return value;
+
+  const gender = matched[1] === '남성' ? 'Male' : 'Female';
+  return `${gender}, ${matched[2]}`;
 }

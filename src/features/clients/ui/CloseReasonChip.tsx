@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';
 import type { ClosedClientItem } from '../types/client';
 
@@ -13,6 +14,13 @@ const closeReasonStyleByValue: Record<ClosedClientItem['closeReason'], string> =
 };
 
 const CloseReasonChip = ({ value, className }: CloseReasonChipProps) => {
+  const tClients = useTranslations('clients');
+  const closeReasonLabelByValue: Record<ClosedClientItem['closeReason'], string> = {
+    '회기 종료': tClients('closedReasonSessionComplete'),
+    '중도 탈락': tClients('closedReasonDropout'),
+    기타: tClients('closedReasonOther'),
+  };
+
   return (
     <span
       className={cn(
@@ -21,7 +29,9 @@ const CloseReasonChip = ({ value, className }: CloseReasonChipProps) => {
         className,
       )}
     >
-      <span className="whitespace-nowrap text-center leading-[120%]">{value}</span>
+      <span className="whitespace-nowrap text-center leading-[120%]">
+        {closeReasonLabelByValue[value]}
+      </span>
     </span>
   );
 };
