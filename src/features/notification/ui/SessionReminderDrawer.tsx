@@ -1,0 +1,208 @@
+'use client';
+
+import Image from 'next/image';
+import { useMemo, useState } from 'react';
+import { useLocale } from 'next-intl';
+import { Button } from '@/shared/ui/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
+import { Textarea } from '@/shared/ui/textarea';
+import { cn } from '@/shared/lib/utils';
+import Divider from '@/shared/ui/divider';
+
+type ReminderChannel = 'push' | 'email' | 'sms';
+const MESSAGE_MAX_LENGTH = 1000;
+
+interface SessionReminderDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  clientName: string;
+  scheduledTime?: string;
+}
+
+const CHANNELS: Array<{
+  value: ReminderChannel;
+  icon: string;
+  ko: string;
+  en: string;
+  disabled?: boolean;
+}> = [
+  { value: 'push', icon: '/icons/alert.svg', ko: '앱 푸시 알림', en: 'App push', disabled: true },
+  { value: 'email', icon: '/icons/email.svg', ko: '이메일', en: 'Email' },
+  { value: 'sms', icon: '/icons/sms.svg', ko: 'SMS 문자', en: 'SMS', disabled: true },
+];
+
+const SessionReminderDrawer = ({
+  open,
+  onOpenChange,
+  clientName,
+  scheduledTime,
+}: SessionReminderDrawerProps) => {
+  const locale = useLocale();
+  const todayDate = formatTodayDateForDisplay(locale);
+  const fixedTime = normalizeScheduleTime(scheduledTime) ?? '09:00';
+  const [channels, setChannels] = useState<ReminderChannel[]>([]);
+  const [message, setMessage] = useState('');
+
+  const labels = useMemo(
+    () => ({
+      title: locale === 'en' ? 'Send Session Reminder' : '세션 알림 발송',
+      subtitle:
+        locale === 'en'
+          ? `Send the next session reminder to ${clientName}.`
+          : `${clientName}님께 다음 상담 세션 알림을 발송합니다.`,
+      scheduleTitle: locale === 'en' ? 'Next session schedule' : '다음 상담',
+      channelTitle: locale === 'en' ? 'Notification channels' : '알림 유형 선택',
+      messageTitle: locale === 'en' ? 'Message' : '메시지 내용',
+      messagePlaceholder:
+        locale === 'en' ? 'Please enter the message content.' : '메시지 내용을 입력해 주세요.',
+      cancel: locale === 'en' ? 'Cancel' : '취소',
+      send: locale === 'en' ? 'Send' : '발송하기',
+    }),
+    [clientName, locale],
+  );
+
+  const readonlyScheduleLabel = `${todayDate} ${fixedTime}`;
+
+  const toggleChannel = (next: ReminderChannel) => {
+    setChannels((prev) => {
+      if (prev.includes(next)) {
+        return prev.filter((channel) => channel !== next);
+      }
+      return [...prev, next];
+    });
+  };
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => event.preventDefault()}
+        className="flex max-w-[695px] flex-col gap-[26px] overflow-y-auto bg-neutral-99 px-8 py-[23px]"
+      >
+        <DrawerClose asChild>
+          <button
+            type="button"
+            className="flex h-6 w-6 items-center justify-center hover:cursor-pointer"
+          >
+            <Image src="/icons/fold.svg" alt="" width={20} height={20} aria-hidden />
+          </button>
+        </DrawerClose>
+
+        <DrawerHeader className="flex flex-col w-full items-start gap-2 p-0">
+          <DrawerTitle>{labels.title}</DrawerTitle>
+          <p className="body-16 text-neutral-40">{labels.subtitle}</p>
+        </DrawerHeader>
+
+        <div className="flex w-full flex-col gap-[34px]">
+          <div className="flex w-full px-3 py-4 gap-[6px] rounded-2xl bg-white">
+            <div className="flex w-[53px] h-[53px] rounded-[10px] bg-[#FEECEC] justify-center items-center">
+              <Image src="/icons/date.svg" alt="date" width={28} height={28} aria-hidden />
+            </div>
+            <div className="flex flex-col justify-center gap-[3px]">
+              <span className="body-16 text-label-alternative">{labels.scheduleTitle}</span>
+              <span className="body-16 font-semibold text-label-normal">
+                {readonlyScheduleLabel}
+              </span>
+            </div>
+          </div>
+          <Divider />
+
+          <div className="flex flex-col w-full gap-[42px]">
+            <div className="flex flex-col w-full gap-4">
+              <span className="body-18 font-semibold text-neutral-20">{labels.channelTitle}</span>
+              <div className="flex w-full gap-4 justify-between items-center">
+                {CHANNELS.map((channel) => {
+                  const isDisabled = Boolean(channel.disabled);
+                  const selected = channels.includes(channel.value);
+                  return (
+                    <button
+                      key={channel.value}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => toggleChannel(channel.value)}
+                      className={cn(
+                        'flex flex-col w-full h-24 items-center justify-center gap-2 p-5 rounded-2xl border border-neutral-95 body-16 font-medium hover:cursor-pointer active:bg-neutral-95 active:text-label-neutral active:border-neutral-95',
+                        isDisabled
+                          ? 'cursor-not-allowed border-neutral-95 bg-neutral-99 text-label-disable'
+                          : selected
+                            ? 'border-primary bg-fill-pressed text-primary'
+                            : 'border-neutral-95 bg-white text-label-alternative',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'h-6 w-6',
+                          isDisabled
+                            ? 'bg-label-disable'
+                            : selected
+                              ? 'bg-primary'
+                              : 'bg-label-neutral',
+                        )}
+                        style={{
+                          maskImage: `url(${channel.icon})`,
+                          WebkitMaskImage: `url(${channel.icon})`,
+                          maskSize: 'contain',
+                          WebkitMaskSize: 'contain',
+                          maskRepeat: 'no-repeat',
+                          WebkitMaskRepeat: 'no-repeat',
+                          maskPosition: 'center',
+                          WebkitMaskPosition: 'center',
+                        }}
+                        aria-hidden
+                      />
+                      {locale === 'en' ? channel.en : channel.ko}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex flex-col w-full gap-4">
+              <span className="body-18 font-semibold text-neutral-20">{labels.messageTitle}</span>
+              <Textarea
+                value={message}
+                placeholder={labels.messagePlaceholder}
+                onChange={(event) => setMessage(event.target.value.slice(0, MESSAGE_MAX_LENGTH))}
+                className="min-h-[148px] resize-none rounded-2xl border-none bg-white"
+                maxLength={1000}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex w-full justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => onOpenChange(false)}
+            className="w-full max-w-[144px]"
+          >
+            {labels.cancel}
+          </Button>
+          <Button type="submit" size="lg" className="w-full max-w-[264px]">
+            {labels.send}
+          </Button>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+};
+
+const formatTodayDateForDisplay = (locale: string) => {
+  const now = new Date();
+  if (locale === 'en') {
+    return now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  return `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+};
+
+const normalizeScheduleTime = (value?: string) => {
+  if (!value) return null;
+  const matched = value.match(/^(\d{1,2}):(\d{2})/);
+  if (!matched) return null;
+  const hour = String(Number(matched[1])).padStart(2, '0');
+  const minute = matched[2];
+  return `${hour}:${minute}`;
+};
+
+export default SessionReminderDrawer;

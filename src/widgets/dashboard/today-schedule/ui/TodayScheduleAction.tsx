@@ -9,11 +9,13 @@ import { startSession } from '@/features/sessions/api/startSession';
 import { toast } from '@/shared/ui/toast';
 import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
+import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';
 
 interface TodayScheduleActionProps {
   clientId: string;
   scheduleId?: string;
   clientName: string;
+  scheduledTime?: string;
   sessionType: SessionType;
   riskType: RiskType;
 }
@@ -22,6 +24,7 @@ export default function TodayScheduleAction({
   clientId,
   scheduleId,
   clientName,
+  scheduledTime,
   sessionType,
   riskType,
 }: TodayScheduleActionProps) {
@@ -30,6 +33,7 @@ export default function TodayScheduleAction({
   const locale = useLocale();
   const router = useRouter();
   const [isStarting, setIsStarting] = useState(false);
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
 
   const handleStart = async () => {
     setIsStarting(true);
@@ -55,7 +59,7 @@ export default function TodayScheduleAction({
         type="button"
         variant="icon"
         size="icon"
-        disabled
+        onClick={() => setIsReminderOpen(true)}
         aria-label={tDashboard('todayScheduleSendNotification', { name: clientName })}
         className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
       >
@@ -70,6 +74,12 @@ export default function TodayScheduleAction({
       >
         {tCommon('start')}
       </Button>
+      <SessionReminderDrawer
+        open={isReminderOpen}
+        onOpenChange={setIsReminderOpen}
+        clientName={clientName}
+        scheduledTime={scheduledTime}
+      />
     </div>
   );
 }
