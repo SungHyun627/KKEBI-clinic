@@ -79,6 +79,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         (item.href === '/' && pathname === '/') ||
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.key ?? 'dashboard';
+  const isClosedClientsPage = pathname === '/clients/closed';
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -179,9 +180,25 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
         <SidebarInset>
           <div className="flex w-full items-center justify-between bg-white p-5">
-            <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
-              {tNav(currentTitle)}
-            </p>
+            {isClosedClientsPage ? (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push('/clients')}
+                  className="flex h-[30px] w-[30px] items-center justify-center rounded-[8px] hover:cursor-pointer hover:bg-neutral-99 hover:bg-white"
+                  aria-label={tNav('clients')}
+                >
+                  <Image src="/icons/back.svg" alt="" width={30} height={30} aria-hidden />
+                </button>
+                <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
+                  {tNav('clients')}
+                </p>
+              </div>
+            ) : (
+              <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
+                {tNav(currentTitle)}
+              </p>
+            )}
             <div className="flex items-center gap-2">
               <button className="hover:cursor-pointer" type="button" onClick={switchLocale}>
                 <Image
