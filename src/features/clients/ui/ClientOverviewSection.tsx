@@ -17,6 +17,7 @@ interface ClientOverviewSectionProps {
   detail: ClientDetailData;
   isEditing: boolean;
   onEditToggle: () => void;
+  onClientClosed: (clientId: string) => void;
   onSave: (next: ClientDetailData) => void;
 }
 
@@ -28,6 +29,7 @@ export default function ClientOverviewSection({
   detail,
   isEditing,
   onEditToggle,
+  onClientClosed,
   onSave,
 }: ClientOverviewSectionProps) {
   const tCommon = useTranslations('common');
@@ -246,6 +248,7 @@ export default function ClientOverviewSection({
           const result = await closeClient(detail.clientId, { reason, detail: closeDetail });
           if (result.success) {
             toast('성공적으로 종결이 처리되었습니다');
+            onClientClosed(detail.clientId);
           }
         }}
       />

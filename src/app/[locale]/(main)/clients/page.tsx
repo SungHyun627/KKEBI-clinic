@@ -293,6 +293,16 @@ export default function ClientsPage() {
           setIsDrawerOpen(nextOpen);
         }}
         client={activeClient}
+        onClientClosed={(closedClientId) => {
+          setClients((prev) => prev.filter((item) => item.clientId !== closedClientId));
+          setSelectedClient((prev) => (prev?.clientId === closedClientId ? null : prev));
+          setIsDrawerOpen(false);
+
+          if (targetQueryKey) {
+            setDismissedQueryKey(targetQueryKey);
+            router.replace(pathname, { scroll: false });
+          }
+        }}
       />
     </section>
   );

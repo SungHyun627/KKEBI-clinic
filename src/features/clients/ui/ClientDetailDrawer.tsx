@@ -21,6 +21,7 @@ interface ClientDetailDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   client: ClientLookupItem | null;
+  onClientClosed: (clientId: string) => void;
 }
 
 interface ClientDetailDrawerBodyProps {
@@ -30,6 +31,7 @@ interface ClientDetailDrawerBodyProps {
   detail: ClientDetailData | null;
   isEditing: boolean;
   onEditToggle: () => void;
+  onClientClosed: (clientId: string) => void;
   onSaveDetail: (next: ClientDetailData) => Promise<void>;
 }
 
@@ -39,6 +41,7 @@ export default function ClientDetailDrawer({
   open,
   onOpenChange,
   client,
+  onClientClosed,
 }: ClientDetailDrawerProps) {
   const tClients = useTranslations('clients');
   const tNotification = useTranslations('notification');
@@ -99,6 +102,7 @@ export default function ClientDetailDrawer({
           detail={detail}
           isEditing={isEditing}
           onEditToggle={() => setIsEditing((prev) => !prev)}
+          onClientClosed={onClientClosed}
           onSaveDetail={async (next) => {
             const payload: ClientDetailUpdatePayload = {
               age: next.age,
@@ -133,6 +137,7 @@ function ClientDetailDrawerBody({
   detail,
   isEditing,
   onEditToggle,
+  onClientClosed,
   onSaveDetail,
 }: ClientDetailDrawerBodyProps) {
   const tClients = useTranslations('clients');
@@ -165,6 +170,7 @@ function ClientDetailDrawerBody({
           detail={detail}
           isEditing={isEditing}
           onEditToggle={onEditToggle}
+          onClientClosed={onClientClosed}
           onSave={(next) => void onSaveDetail(next)}
         />
       ) : null}
