@@ -8,6 +8,7 @@ import { getClosedClients, restoreClient, type ClosedClientItem } from '@/featur
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import { Button } from '@/shared/ui/button';
 import CloseReasonChip from '@/features/clients/ui/CloseReasonChip';
+import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 export default function ClosedClientsPage() {
   const tClients = useTranslations('clients');
@@ -20,6 +21,48 @@ export default function ClosedClientsPage() {
   const closeReasonLabel = tClients('closedColumnReason');
   const detailLabel = tClients('closedDetail');
   const restoreLabel = tClients('closedRestore');
+  const localizeChiefConcern = (value: string) => {
+    const concernKeyByValue: Record<string, keyof ClientsTranslationConcernKeyMap> = {
+      우울: 'concernsDepression',
+      Depression: 'concernsDepression',
+      스트레스: 'concernsStress',
+      Stress: 'concernsStress',
+      수면: 'concernsSleep',
+      Sleep: 'concernsSleep',
+      직장: 'concernsWork',
+      Work: 'concernsWork',
+      건강: 'concernsHealth',
+      Health: 'concernsHealth',
+      돈: 'concernsMoney',
+      Money: 'concernsMoney',
+      가족: 'concernsFamily',
+      Family: 'concernsFamily',
+      '연애•결혼': 'concernsDatingMarriage',
+      'Dating/Marriage': 'concernsDatingMarriage',
+      우정: 'concernsFriendship',
+      Friendship: 'concernsFriendship',
+      '진로•취업': 'concernsCareerJob',
+      'Career/Job': 'concernsCareerJob',
+      반려동물: 'concernsPet',
+      Pet: 'concernsPet',
+      학업: 'concernsStudy',
+      Study: 'concernsStudy',
+      기타: 'concernsOther',
+      Other: 'concernsOther',
+      불안: 'concernsAnxiety',
+      Anxiety: 'concernsAnxiety',
+      대인관계: 'concernsInterpersonal',
+      Interpersonal: 'concernsInterpersonal',
+      번아웃: 'concernsBurnout',
+      Burnout: 'concernsBurnout',
+      공황: 'concernsPanic',
+      Panic: 'concernsPanic',
+    };
+
+    const translationKey = concernKeyByValue[value.trim()];
+    if (!translationKey) return value;
+    return tClients(translationKey);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -85,14 +128,17 @@ export default function ClosedClientsPage() {
                     {item.counselingPeriod}
                   </span>
                   <span className="body-16 min-w-0 truncate text-label-normal">
-                    {item.clientName}
+                    {getClientNameByLocale(item.clientId, item.clientName, locale)}
                   </span>
                   <span className="body-16 min-w-0 truncate text-label-normal max-[1100px]:hidden">
                     {formatAgeGenderByLocale(item.ageGender, locale)}
                   </span>
                   <span className="flex min-w-0 flex-wrap gap-2 overflow-hidden">
                     {item.chiefConcern.map((concern) => (
-                      <ChiefConcernChip key={`${item.id}-${concern}`} value={concern} />
+                      <ChiefConcernChip
+                        key={`${item.id}-${concern}`}
+                        value={localizeChiefConcern(concern)}
+                      />
                     ))}
                   </span>
                   <CloseReasonChip value={item.closeReason} />
@@ -139,6 +185,26 @@ export default function ClosedClientsPage() {
     </section>
   );
 }
+
+type ClientsTranslationConcernKeyMap = {
+  concernsDepression: string;
+  concernsStress: string;
+  concernsSleep: string;
+  concernsAnxiety: string;
+  concernsInterpersonal: string;
+  concernsBurnout: string;
+  concernsPanic: string;
+  concernsWork: string;
+  concernsHealth: string;
+  concernsMoney: string;
+  concernsFamily: string;
+  concernsDatingMarriage: string;
+  concernsFriendship: string;
+  concernsCareerJob: string;
+  concernsPet: string;
+  concernsStudy: string;
+  concernsOther: string;
+};
 
 function formatAgeGenderByLocale(value: string, locale: string) {
   if (locale !== 'en') return value;

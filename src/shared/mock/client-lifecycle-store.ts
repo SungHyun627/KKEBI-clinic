@@ -41,7 +41,7 @@ const CLOSED_CLIENTS: ClosedClientItem[] = [
     counselingPeriod: '2025/10/11 - 2026/02/02',
     clientName: '이준호',
     ageGender: '남성 28세',
-    chiefConcern: ['공황', '수면', '직장 스트레스'],
+    chiefConcern: ['공황', '수면'],
     closeReason: '기타',
   },
 ];

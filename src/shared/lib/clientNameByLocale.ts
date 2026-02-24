@@ -22,6 +22,9 @@ const CLIENT_NAME_MAP: Record<string, { ko: string; en: string }> = {
   client_1028: { ko: '오세훈', en: 'Sehun Oh' },
   client_1029: { ko: '류수아', en: 'Sua Ryu' },
   client_1030: { ko: '배지후', en: 'Jihoo Bae' },
+  client_2001: { ko: '김하늘', en: 'Haneul Kim' },
+  client_2002: { ko: '박민서', en: 'Minseo Park' },
+  client_2003: { ko: '이준호', en: 'Junho Lee' },
 };
 
 export function getClientNameByLocale(
