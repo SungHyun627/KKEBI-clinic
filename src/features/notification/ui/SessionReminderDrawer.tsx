@@ -106,7 +106,11 @@ const SessionReminderDrawer = ({
       return;
     }
 
-    toast(locale === 'en' ? 'Session reminder sent.' : '세션 알림이 발송되었습니다.');
+    toast(
+      locale === 'en'
+        ? `Session reminder sent to ${clientName}.`
+        : `${clientName} 님에게 세션 알림이 발송되었습니다.`,
+    );
     onOpenChange(false);
   };
 
