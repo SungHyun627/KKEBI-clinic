@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { getClientDetail } from '@/features/clients';
+import { getClientDetail, updateClientDetail } from '@/features/clients';
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import Image from 'next/image';
 import CheckinHistorySection from './CheckinHistorySection';
@@ -10,13 +10,18 @@ import CounselingHistorySection from './CounselingHistorySection';
 import AssessmentResultsSection from './AssessmentResultsSection';
 import ClientDetailHeader from './ClientDetailHeader';
 import ClientOverviewSection from './ClientOverviewSection';
-import type { ClientDetailData, ClientLookupItem } from '../types/client';
+import type {
+  ClientDetailData,
+  ClientDetailUpdatePayload,
+  ClientLookupItem,
+} from '../types/client';
 import Divider from '@/shared/ui/divider';
 
 interface ClientDetailDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   client: ClientLookupItem | null;
+  onClientClosed: (clientId: string) => void;
 }
 
 interface ClientDetailDrawerBodyProps {
@@ -24,6 +29,10 @@ interface ClientDetailDrawerBodyProps {
   errorMessage: string | null;
   displayClient: ClientLookupItem | null;
   detail: ClientDetailData | null;
+  isEditing: boolean;
+  onEditToggle: () => void;
+  onClientClosed: (clientId: string) => void;
+  onSaveDetail: (next: ClientDetailData) => Promise<void>;
 }
 
 const DRAWER_BODY_CLASSNAME = 'flex w-full flex-col gap-[42px]';
@@ -32,10 +41,12 @@ export default function ClientDetailDrawer({
   open,
   onOpenChange,
   client,
+  onClientClosed,
 }: ClientDetailDrawerProps) {
   const tClients = useTranslations('clients');
   const tNotification = useTranslations('notification');
   const [detail, setDetail] = useState<ClientDetailData | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -55,6 +66,7 @@ export default function ClientDetailDrawer({
       }
 
       setDetail(result.data);
+      setIsEditing(false);
       setErrorMessage(null);
       setIsLoading(false);
     };
@@ -88,6 +100,30 @@ export default function ClientDetailDrawer({
           errorMessage={errorMessage}
           displayClient={displayClient}
           detail={detail}
+          isEditing={isEditing}
+          onEditToggle={() => setIsEditing((prev) => !prev)}
+          onClientClosed={onClientClosed}
+          onSaveDetail={async (next) => {
+            const payload: ClientDetailUpdatePayload = {
+              age: next.age,
+              gender: next.gender,
+              counselingStartDate: next.counselingStartDate,
+              currentSession: next.currentSession,
+              totalSession: next.totalSession,
+              visitPurpose: next.visitPurpose,
+              nextCounselingAt: next.nextCounselingAt,
+            };
+            const result = await updateClientDetail(next.clientId, payload);
+
+            if (!result.success || !result.data) {
+              setErrorMessage(result.message || tClients('detailLoadFailed'));
+              return;
+            }
+
+            setDetail(result.data);
+            setErrorMessage(null);
+            setIsEditing(false);
+          }}
         />
       </DrawerContent>
     </Drawer>
@@ -99,6 +135,10 @@ function ClientDetailDrawerBody({
   errorMessage,
   displayClient,
   detail,
+  isEditing,
+  onEditToggle,
+  onClientClosed,
+  onSaveDetail,
 }: ClientDetailDrawerBodyProps) {
   const tClients = useTranslations('clients');
 
@@ -125,7 +165,15 @@ function ClientDetailDrawerBody({
   return (
     <div className={DRAWER_BODY_CLASSNAME}>
       <ClientDetailHeader client={displayClient} />
-      {detail ? <ClientOverviewSection detail={detail} /> : null}
+      {detail ? (
+        <ClientOverviewSection
+          detail={detail}
+          isEditing={isEditing}
+          onEditToggle={onEditToggle}
+          onClientClosed={onClientClosed}
+          onSave={(next) => void onSaveDetail(next)}
+        />
+      ) : null}
 
       <Divider />
       <CheckinHistorySection checkins={detail?.recentCheckins ?? []} />

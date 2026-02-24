@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getActiveSchedules } from '@/shared/mock/client-lifecycle-store';
+import { getClosedClients } from '@/shared/mock/client-lifecycle-store';
 
 export async function GET() {
   return NextResponse.json({
     success: true,
-    data: getActiveSchedules(),
+    data: getClosedClients(),
   });
 }

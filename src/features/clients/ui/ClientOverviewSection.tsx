@@ -1,8 +1,13 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { closeClient } from '@/features/clients';
 import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { toast } from '@/shared/ui/toast';
 import ClientInfoField from './ClientInfoField';
+import SessionCloseDialog from './SessionCloseDialog';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
 import type { ClientDetailData } from '../types/client';
@@ -10,17 +15,39 @@ import { formatDateByLocale } from '../lib/format';
 
 interface ClientOverviewSectionProps {
   detail: ClientDetailData;
+  isEditing: boolean;
+  onEditToggle: () => void;
+  onClientClosed: (clientId: string) => void;
+  onSave: (next: ClientDetailData) => void;
 }
 
 const CARD_CLASSNAME =
   'flex w-full max-w-[300px] flex-col items-start gap-[23px] rounded-2xl bg-white p-4';
 const SECTION_TITLE_CLASSNAME = 'body-18 font-semibold';
 
-export default function ClientOverviewSection({ detail }: ClientOverviewSectionProps) {
+export default function ClientOverviewSection({
+  detail,
+  isEditing,
+  onEditToggle,
+  onClientClosed,
+  onSave,
+}: ClientOverviewSectionProps) {
   const tCommon = useTranslations('common');
   const tClients = useTranslations('clients');
   const locale = useLocale();
   const isKo = locale === 'ko';
+  const [draft, setDraft] = useState<ClientDetailData>(detail);
+  const [isSessionCloseDialogOpen, setIsSessionCloseDialogOpen] = useState(false);
+  const [ageGenderInput, setAgeGenderInput] = useState(`${detail.age} / ${detail.gender}`);
+  const [sessionCountInput, setSessionCountInput] = useState(
+    `${detail.currentSession}회/${detail.totalSession}회`,
+  );
+
+  useEffect(() => {
+    setDraft(detail);
+    setAgeGenderInput(`${detail.age} / ${detail.gender}`);
+    setSessionCountInput(`${detail.currentSession}회/${detail.totalSession}회`);
+  }, [detail]);
   const localizedVisitPurpose = (() => {
     if (!detail.visitPurpose.endsWith('관련 정서 조절')) return detail.visitPurpose;
 
@@ -48,42 +75,135 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
               variant="outline"
               size="sm"
               className="text-label-neutral rounded-lg"
+              onClick={() => {
+                if (!isEditing) {
+                  onEditToggle();
+                  return;
+                }
+
+                setDraft(detail);
+                onEditToggle();
+              }}
             >
-              {tCommon('edit')}
+              {isEditing ? tCommon('cancel') : tCommon('edit')}
             </Button>
             <Button
               type="button"
               variant="outline"
               size="sm"
               className="text-primary bg-[rgba(250,84,84,0.10)] rounded-lg"
+              onClick={() => {
+                if (isEditing) {
+                  onSave(draft);
+                  return;
+                }
+                setIsSessionCloseDialogOpen(true);
+              }}
             >
-              {tCommon('closeCase')}
+              {isEditing ? '저장하기' : tCommon('closeCase')}
             </Button>
           </div>
         </div>
         <div className="flex flex-col w-full items-start gap-[18px]">
-          <ClientInfoField
-            label={tClients('detailAgeGender')}
-            value={
-              isKo
-                ? `${detail.age}세 ${detail.gender}`
-                : `${detail.gender === '남성' ? 'Male' : 'Female'}, ${detail.age}`
-            }
-          />
-          <ClientInfoField
-            label={tClients('detailStartDate')}
-            value={formatDateByLocale(detail.counselingStartDate, locale)}
-          />
-          <ClientInfoField
-            label={tClients('detailSessions')}
-            value={
-              isKo
-                ? `${detail.currentSession}회/${detail.totalSession}회`
-                : `${detail.currentSession}/${detail.totalSession}`
-            }
-          />
-          <ClientInfoField label={tClients('detailVisitReason')} value={localizedVisitPurpose} />
-          <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
+          {isEditing ? (
+            <>
+              <div className="flex w-full flex-col gap-2">
+                <span className="body-14 text-neutral-60">{tClients('detailAgeGender')}</span>
+                <Input
+                  type="text"
+                  value={ageGenderInput}
+                  onChange={(event) => {
+                    const nextValue = event.target.value;
+                    setAgeGenderInput(nextValue);
+
+                    const parsed = parseAgeGenderInput(nextValue, draft.gender);
+                    setDraft((prev) => ({
+                      ...prev,
+                      age: parsed.age,
+                      gender: parsed.gender,
+                    }));
+                  }}
+                />
+              </div>
+              <div className="flex w-full flex-col gap-2">
+                <NextCounselingDatePicker
+                  label={tClients('detailStartDate')}
+                  value={draft.counselingStartDate}
+                  onValueChange={(nextDate) =>
+                    setDraft((prev) => ({ ...prev, counselingStartDate: nextDate }))
+                  }
+                />
+              </div>
+              <div className="flex w-full flex-col gap-2">
+                <span className="body-14 text-neutral-60">{tClients('detailSessions')}</span>
+                <Input
+                  type="text"
+                  value={sessionCountInput}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    setSessionCountInput(next);
+                    const { currentSession, totalSession } = parseSessionCountInput(
+                      next,
+                      draft.currentSession,
+                      draft.totalSession,
+                    );
+                    setDraft((prev) => ({
+                      ...prev,
+                      currentSession,
+                      totalSession,
+                    }));
+                  }}
+                />
+              </div>
+              <div className="flex w-full flex-col gap-2">
+                <span className="body-14 text-neutral-60">{tClients('detailVisitReason')}</span>
+                <Input
+                  type="text"
+                  value={draft.visitPurpose}
+                  onChange={(event) =>
+                    setDraft((prev) => ({ ...prev, visitPurpose: event.target.value }))
+                  }
+                />
+              </div>
+              <div className="flex w-full flex-col gap-2">
+                <NextCounselingDatePicker
+                  label={tClients('detailNextSession')}
+                  value={draft.nextCounselingAt}
+                  onValueChange={(nextDate) =>
+                    setDraft((prev) => ({ ...prev, nextCounselingAt: nextDate }))
+                  }
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <ClientInfoField
+                label={tClients('detailAgeGender')}
+                value={
+                  isKo
+                    ? `${detail.age}세 ${detail.gender}`
+                    : `${detail.gender === '남성' ? 'Male' : 'Female'}, ${detail.age}`
+                }
+              />
+              <ClientInfoField
+                label={tClients('detailStartDate')}
+                value={formatDateByLocale(detail.counselingStartDate, locale)}
+              />
+              <ClientInfoField
+                label={tClients('detailSessions')}
+                value={
+                  isKo
+                    ? `${detail.currentSession}회/${detail.totalSession}회`
+                    : `${detail.currentSession}/${detail.totalSession}`
+                }
+              />
+              <ClientInfoField
+                label={tClients('detailVisitReason')}
+                value={localizedVisitPurpose}
+              />
+              <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
+            </>
+          )}
         </div>
       </div>
 
@@ -119,6 +239,54 @@ export default function ClientOverviewSection({ detail }: ClientOverviewSectionP
           )}
         </div>
       </div>
+
+      <SessionCloseDialog
+        open={isSessionCloseDialogOpen}
+        onOpenChange={setIsSessionCloseDialogOpen}
+        clientName={detail.clientName}
+        onConfirm={async ({ reason, detail: closeDetail }) => {
+          const result = await closeClient(detail.clientId, { reason, detail: closeDetail });
+          if (result.success) {
+            toast('성공적으로 종결이 처리되었습니다');
+            onClientClosed(detail.clientId);
+          }
+        }}
+      />
     </section>
   );
+}
+
+function parseAgeGenderInput(
+  input: string,
+  fallbackGender: ClientDetailData['gender'],
+): { age: number; gender: ClientDetailData['gender'] } {
+  const trimmed = input.trim();
+  const ageMatch = trimmed.match(/\d+/);
+  const parsedAge = ageMatch ? Number(ageMatch[0]) : 0;
+  const lower = trimmed.toLowerCase();
+
+  let gender: ClientDetailData['gender'] = fallbackGender;
+  if (lower.includes('여') || lower.includes('female')) gender = '여성';
+  if (lower.includes('남') || lower.includes('male')) gender = '남성';
+
+  return {
+    age: Number.isNaN(parsedAge) ? 0 : parsedAge,
+    gender,
+  };
+}
+
+function parseSessionCountInput(
+  input: string,
+  fallbackCurrent: number,
+  fallbackTotal: number,
+): { currentSession: number; totalSession: number } {
+  const normalized = input.replace(/\s/g, '');
+  const [currentRaw = '', totalRaw = ''] = normalized.split('/');
+  const parsedCurrent = Number(currentRaw.replace(/[^\d]/g, ''));
+  const parsedTotal = Number(totalRaw.replace(/[^\d]/g, ''));
+
+  return {
+    currentSession: Number.isNaN(parsedCurrent) ? fallbackCurrent : parsedCurrent,
+    totalSession: Number.isNaN(parsedTotal) ? fallbackTotal : parsedTotal,
+  };
 }

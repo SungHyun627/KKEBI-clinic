@@ -147,8 +147,10 @@ export default function ClientsPage() {
           />
         </div>
         <div className="flex items-center gap-3 max-[1100px]:w-full max-[1100px]:justify-start">
-          <Button size="sm">{tClients('listRegister')}</Button>
-          <Button size="sm" variant="outline">
+          <Button disabled size="sm">
+            {tClients('listRegister')}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => router.push('/clients/closed')}>
             {tClients('listClosedSessions')}
           </Button>
         </div>
@@ -293,6 +295,16 @@ export default function ClientsPage() {
           setIsDrawerOpen(nextOpen);
         }}
         client={activeClient}
+        onClientClosed={(closedClientId) => {
+          setClients((prev) => prev.filter((item) => item.clientId !== closedClientId));
+          setSelectedClient((prev) => (prev?.clientId === closedClientId ? null : prev));
+          setIsDrawerOpen(false);
+
+          if (targetQueryKey) {
+            setDismissedQueryKey(targetQueryKey);
+            router.replace(pathname, { scroll: false });
+          }
+        }}
       />
     </section>
   );
