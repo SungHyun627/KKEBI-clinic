@@ -147,7 +147,9 @@ export default function ClientsPage() {
           />
         </div>
         <div className="flex items-center gap-3 max-[1100px]:w-full max-[1100px]:justify-start">
-          <Button size="sm">{tClients('listRegister')}</Button>
+          <Button disabled size="sm">
+            {tClients('listRegister')}
+          </Button>
           <Button size="sm" variant="outline" onClick={() => router.push('/clients/closed')}>
             {tClients('listClosedSessions')}
           </Button>
