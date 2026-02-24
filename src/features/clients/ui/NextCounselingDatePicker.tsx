@@ -10,23 +10,29 @@ import { formatDateByLocale } from '../lib/format';
 
 interface NextCounselingDatePickerProps {
   label?: string;
-  initialValue: string;
+  initialValue?: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 export default function NextCounselingDatePicker({
   label,
   initialValue,
+  value,
+  onValueChange,
+  disabled = false,
 }: NextCounselingDatePickerProps) {
   const tCommon = useTranslations('common');
   const tClients = useTranslations('clients');
   const locale = useLocale();
 
-  const [selectedDate, setSelectedDate] = useState(extractDatePart(initialValue));
-  const [draftDate, setDraftDate] = useState(extractDatePart(initialValue));
+  const defaultDate = extractDatePart(initialValue ?? '');
+  const controlledDate = value !== undefined ? extractDatePart(value) : undefined;
+  const selectedDate = controlledDate ?? defaultDate;
+  const [draftDate, setDraftDate] = useState(selectedDate);
   const [open, setOpen] = useState(false);
-  const [visibleMonth, setVisibleMonth] = useState(
-    parseDateFromIso(extractDatePart(initialValue)) ?? new Date(),
-  );
+  const [visibleMonth, setVisibleMonth] = useState(parseDateFromIso(selectedDate) ?? new Date());
 
   const displayValue = useMemo(
     () => formatDateByLocale(selectedDate, locale),
@@ -43,6 +49,7 @@ export default function NextCounselingDatePicker({
       <Popover
         open={open}
         onOpenChange={(nextOpen) => {
+          if (disabled) return;
           if (nextOpen) {
             setDraftDate(selectedDate);
             setVisibleMonth(parseDateFromIso(selectedDate) ?? new Date());
@@ -54,7 +61,8 @@ export default function NextCounselingDatePicker({
           <button
             type="button"
             aria-label={tClients('detailNextSessionAria')}
-            className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
+            disabled={disabled}
+            className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:border-label-strong focus-within:border-label-normal disabled:cursor-not-allowed disabled:opacity-70 enabled:hover:cursor-pointer"
           >
             <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
               {displayValue}
@@ -91,7 +99,7 @@ export default function NextCounselingDatePicker({
               size="md"
               className="w-full"
               onClick={() => {
-                setSelectedDate(draftDate);
+                onValueChange?.(draftDate);
                 setOpen(false);
               }}
             >

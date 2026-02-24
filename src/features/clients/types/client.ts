@@ -92,3 +92,19 @@ export interface ClientDetailResponse {
   data?: ClientDetailData;
   message?: string;
 }
+
+export interface ClientDetailUpdatePayload {
+  age: number;
+  gender: ClientDetailData['gender'];
+  counselingStartDate: string;
+  currentSession: number;
+  totalSession: number;
+  visitPurpose: string;
+  nextCounselingAt: string;
+}
+
+export interface ClientDetailUpdateResponse {
+  success: boolean;
+  data?: ClientDetailData;
+  message?: string;
+}
