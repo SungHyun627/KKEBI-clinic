@@ -48,6 +48,10 @@ const SessionReminderDrawer = ({
   const [channels, setChannels] = useState<ReminderChannel[]>([]);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const defaultMessage =
+    locale === 'en'
+      ? `Hello ${clientName}, this is a reminder for your counseling session scheduled on ${todayDate} ${fixedTime}. If you cannot attend, please let us know in advance.`
+      : `안녕하세요 ${clientName}님, ${todayDate} ${fixedTime}에 예정된 상담 세션을 알려드립니다. 참석이 어려우시면 미리 알려주세요.`;
 
   const labels = useMemo(
     () => ({
@@ -69,6 +73,7 @@ const SessionReminderDrawer = ({
 
   const readonlyScheduleLabel = `${todayDate} ${fixedTime}`;
   const isSendEnabled = channels.length > 0;
+  const resolvedMessage = message || defaultMessage;
 
   const toggleChannel = (next: ReminderChannel) => {
     setChannels((prev) => {
@@ -89,7 +94,7 @@ const SessionReminderDrawer = ({
       scheduleDate: todayDateKey,
       scheduleTime: fixedTime,
       channels,
-      message,
+      message: resolvedMessage,
     });
     setIsSubmitting(false);
 
@@ -192,7 +197,7 @@ const SessionReminderDrawer = ({
             <div className="flex flex-col w-full gap-4">
               <span className="body-18 font-semibold text-neutral-20">{labels.messageTitle}</span>
               <Textarea
-                value={message}
+                value={resolvedMessage}
                 placeholder={labels.messagePlaceholder}
                 onChange={(event) => setMessage(event.target.value.slice(0, MESSAGE_MAX_LENGTH))}
                 className="min-h-[148px] resize-none rounded-2xl border-none bg-white"
