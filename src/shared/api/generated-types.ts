@@ -4,6 +4,46 @@
  */
 
 export interface paths {
+  '/api/v1/notifications/{notificationId}/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * 알림 읽음 처리
+     * @description 특정 알림을 읽음 상태로 변경합니다. 본인의 알림만 처리 가능합니다.
+     */
+    put: operations['markAsRead'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/intake-analyses/{analysisId}/review': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * 분석 결과 검토 및 승인 (관리자)
+     * @description OCR 결과를 관리자가 검토/편집한 최종 텍스트를 저장합니다. 승인 시 상태가 REVIEWED로 변경되고, 요청 상담사에게 SSE 실시간 알림이 발송됩니다.
+     */
+    put: operations['reviewAnalysis'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/user/onboarding': {
     parameters: {
       query?: never;
@@ -124,6 +164,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/files/upload': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['uploadFile'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/counselors/inquiries': {
     parameters: {
       query?: never;
@@ -178,6 +234,26 @@ export interface paths {
      * @description nbcc.org/verify 등에서 자격 확인 후 승인을 처리합니다.
      */
     post: operations['approveInquiry'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/counselor/test/register-login': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 상담사 등록 문의 + 로그인 자격증명 발급
+     * @description 상담사 등록 문의를 자동으로 생성하고 관리자 승인까지 처리합니다. 승인 메일(상담사 포털 링크 포함, 임시 비밀번호 안내 포함)이 기존 문의 로직과 동일하게 발송되며,응답으로 반환된 이메일/비밀번호를 사용해 QA가 직접 로그인 및 OTP 검증 플로우를 수행할 수 있습니다.
+     */
+    post: operations['registerAndPrepareLogin'];
     delete?: never;
     options?: never;
     head?: never;
@@ -346,6 +422,252 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/api/v1/clients': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 내담자 목록 조회
+     * @description 담당 내담자 목록을 페이지네이션으로 조회합니다. 이름 검색과 위험 유형(STABLE/CAUTION/RISK) 필터를 지원합니다. KKEBI 앱 연동 유저의 경우 7일 평균 기분/스트레스/에너지 점수(1-5)가 포함됩니다.
+     */
+    get: operations['getMyClients'];
+    put?: never;
+    /**
+     * 내담자 등록
+     * @description 기본 정보 + 접수면접 정보(선택)로 신규 내담자를 등록합니다. 이메일이 KKEBI 앱 유저와 일치하면 자동으로 연결됩니다.
+     */
+    post: operations['registerClient'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/clients/{clientId}/tests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 검사 결과 목록 조회
+     * @description 내담자의 검사 결과를 최신순으로 조회합니다.
+     */
+    get: operations['getTestResults'];
+    put?: never;
+    /**
+     * 검사 결과 추가
+     * @description 내담자에게 검사 결과(검사명, 점수, 날짜, 메모)를 추가합니다.
+     */
+    post: operations['addTestResult'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/clients/{clientId}/intake-analysis': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 내담자별 분석 결과 조회 (상담사)
+     * @description 특정 내담자의 접수면접 분석 결과 목록을 조회합니다. 담당 상담사만 조회 가능합니다. 이미지는 S3 presigned URL(1시간 유효)로 반환됩니다.
+     */
+    get: operations['getAnalysesByClient'];
+    put?: never;
+    /**
+     * 접수면접 사진 업로드 및 분석 요청
+     * @description 접수면접 작성 사진을 S3에 업로드하고, GPT-4o-mini OCR로 비동기 텍스트 인식을 시작합니다. 분석 완료 시 관리자에게 SSE 실시간 알림이 발송됩니다. 지원 형식: JPEG, PNG (최대 10MB)
+     */
+    post: operations['submitAnalysis'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 깨비콜 세션 생성 */
+    post: operations['createSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 깨비콜 세션 시작 */
+    post: operations['startSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/report': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 리포트 조회 */
+    get: operations['getReport_1'];
+    put?: never;
+    /** 리포트 생성 (ENDED 상태에서만) */
+    post: operations['generateReport'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/points/completion': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 완료 포인트 지급(중복 지급 방지) */
+    post: operations['awardCompletionPoint'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/infer/ser': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 음성 감정 추론 */
+    post: operations['inferSer'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/infer/fuse': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 멀티 모달 융합 추론 */
+    post: operations['inferFuse'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/infer/face': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 얼굴 표정 감정 추론 */
+    post: operations['inferFace'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/infer/asr': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 음성 텍스트 추출(ASR) */
+    post: operations['inferAsr'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/calls/{callSessionId}/end': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 깨비콜 세션 종료 */
+    post: operations['endSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/clients/{clientId}/email': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * 내담자 이메일 변경
+     * @description 내담자의 이메일을 변경합니다. 새 이메일이 KKEBI 앱 유저와 일치하면 자동 재연결, 불일치 시 연결 해제됩니다.
+     */
+    patch: operations['updateClientEmail'];
     trace?: never;
   };
   '/api/v1/users': {
@@ -528,6 +850,86 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 전체 알림 목록 조회
+     * @description 사용자의 전체 알림을 최신순으로 조회합니다. 각 알림에는 type, title, message, referenceId(관련 리소스 ID), 읽음 여부가 포함됩니다.
+     */
+    get: operations['getNotifications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/notifications/unread': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 미확인 알림 목록 조회
+     * @description 읽지 않은 알림만 최신순으로 조회합니다.
+     */
+    get: operations['getUnreadNotifications'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/notifications/unread/count': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 미확인 알림 수 조회
+     * @description 읽지 않은 알림의 개수를 반환합니다. 알림 아이콘의 빨간 배지 표시에 사용됩니다.
+     */
+    get: operations['getUnreadCount'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/notifications/subscribe': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * SSE 실시간 알림 구독
+     * @description Server-Sent Events로 실시간 알림을 수신합니다. 타임아웃: 30분. 이벤트 타입: 'connect'(연결 확인), 'notification'(새 알림). 접수면접 분석 완료, 검토 완료 시 자동으로 이벤트가 발송됩니다.
+     */
+    get: operations['subscribe'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/missions': {
     parameters: {
       query?: never;
@@ -588,6 +990,66 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/clients/{clientId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 내담자 상세 조회
+     * @description 내담자의 기본 정보, 상담 정보, 접수면접 결과를 포함한 상세 정보를 조회합니다.
+     */
+    get: operations['getClientDetail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/intake-analyses': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 검토 대기 분석 목록 (관리자)
+     * @description OCR 분석 완료(ANALYZED) 상태인 접수면접 목록을 조회합니다. 관리자 전용 엔드포인트입니다.
+     */
+    get: operations['getPendingReviews'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/admin/intake-analyses/{analysisId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 분석 상세 조회 (관리자)
+     * @description 특정 분석의 OCR 결과(JSON), 검토 결과, 원본 이미지를 조회합니다.
+     */
+    get: operations['getAnalysisDetail'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/health': {
     parameters: {
       query?: never;
@@ -608,6 +1070,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/clients/{clientId}/tests/{testId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * 검사 결과 삭제
+     * @description 특정 검사 결과를 삭제합니다.
+     */
+    delete: operations['deleteTestResult'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -618,6 +1100,16 @@ export interface components {
       /** @example 요청한 리소스를 찾을 수 없습니다 */
       message?: string;
       data?: Record<string, never> | null;
+    };
+    ApiResponseVoid: {
+      code?: string;
+      message?: string;
+      data?: Record<string, never>;
+    };
+    /** @description 관리자 분석 검토 요청 DTO */
+    IntakeAnalysisReviewRequest: {
+      /** @description 관리자가 검토/편집한 최종 텍스트 */
+      reviewedResult: string;
     };
     OnboardingRequest: {
       concerns?: string[];
@@ -642,11 +1134,6 @@ export interface components {
       birthDate?: string;
       /** Format: int32 */
       age?: number;
-    };
-    ApiResponseVoid: {
-      code?: string;
-      message?: string;
-      data?: Record<string, never>;
     };
     /** @description 토큰 재발급 요청 */
     ReissueRequest: {
@@ -755,6 +1242,13 @@ export interface components {
        * @example 잘했어요! 오늘도 한 걸음 나아갔어요.
        */
       message?: string;
+    };
+    ApiResponseMapStringString: {
+      code?: string;
+      message?: string;
+      data?: {
+        [key: string]: string;
+      };
     };
     /** @description 상담사 등록 문의 요청 */
     InquirySubmitRequest: {
@@ -874,6 +1368,17 @@ export interface components {
        * @description 처리 완료 일시
        */
       processedAt?: string;
+      /**
+       * Format: int64
+       * @description 생성된 상담사 사용자 ID
+       * @example 101
+       */
+      counselorUserId?: number;
+      /**
+       * Format: date-time
+       * @description 임시 비밀번호 발급 시각
+       */
+      temporaryPasswordIssuedAt?: string;
     };
     /** @description 테스트 상담사 계정 생성 요청 */
     CreateTestCounselorRequest: {
@@ -926,6 +1431,217 @@ export interface components {
        * @example c9f1cb16-867f-47d1-b3f0-5d85b81d7a9d
        */
       challengeId: string;
+    };
+    /** @description 내담자 접수면접 정보 요청 DTO (2.2.2 접수면접 정보 입력) */
+    ClientIntakeRequest: {
+      /**
+       * Format: int32
+       * @description PHQ-9 우울 척도 점수 (0-27)
+       * @example 12
+       */
+      phq9Score?: number;
+      /**
+       * Format: int32
+       * @description PSS-10 스트레스 척도 점수 (0-40)
+       * @example 18
+       */
+      pss10Score?: number;
+      /**
+       * Format: int32
+       * @description MBI 번아웃 척도 점수 (0-132)
+       * @example 45
+       */
+      mbiScore?: number;
+      /** @description 1. 상담 방문 이유 (최대 1000자) */
+      visitReason?: string;
+      /** @description 2. 상담을 통해 얻고 싶은 가장 중요한 변화 (최대 1000자) */
+      desiredChange?: string;
+      /** @description 3. 과거 비슷한 어려움 경험 유무 (최대 1000자) */
+      similarDifficultyHistory?: string;
+      /** @description 3-1. 당시 해결을 위해서 시도한 방법 (최대 1000자) */
+      attemptedSolution?: string;
+      /** @description 3-2. 방법의 효과성 정도 (최대 1000자) */
+      solutionEffectiveness?: string;
+      /** @description 4. 지금 가장 고민되는 문제 (최대 1000자) */
+      currentWorry?: string;
+      /** @description 5. 평균 수면 패턴 (최대 1000자) */
+      sleepPattern?: string;
+      /** @description 5-1. 수면의 질 (최대 1000자) */
+      sleepQuality?: string;
+      /** @description 6. 하고 있는 운동의 종류와 빈도 (최대 1000자) */
+      exerciseFrequency?: string;
+      /** @description 7. 하루에 섭취하는 끼니 수 (최대 1000자) */
+      mealsPerDay?: string;
+      /** @description 8. 가장 의지하는 사람 (최대 1000자) */
+      reliablePerson?: string;
+      /** @description 8-1. 그 사람을 가장 의지하는 이유 (최대 1000자) */
+      reliableReason?: string;
+      /** @description 9. 가족과의 유대감 (최대 1000자) */
+      familyBond?: string;
+      /** @description 9-1. 그렇게 생각한 이유 (최대 1000자) */
+      familyBondReason?: string;
+      /** @description 10. 스스로를 한 문장으로 표현 (최대 1000자) */
+      selfDescription?: string;
+      /** @description 접수면접 사진 URL 목록 */
+      imageUrls?: string[];
+    };
+    /** @description 내담자 등록 요청 DTO */
+    ClientRegistrationRequest: {
+      /**
+       * @description 내담자 이름
+       * @example 김철수
+       */
+      name: string;
+      /**
+       * @description KKEBI 앱 닉네임 (앱 유저가 아닐 경우 null)
+       * @example 해피거북이
+       */
+      nickname?: string;
+      /**
+       * @description 연락처
+       * @example 010-1234-5678
+       */
+      phoneNumber?: string;
+      /**
+       * @description 이메일 (KKEBI 앱 유저 자동 연결에 사용)
+       * @example client@example.com
+       */
+      email?: string;
+      /**
+       * Format: date
+       * @description 생년월일
+       * @example 1990-03-15
+       */
+      birthDate?: string;
+      /**
+       * @description 성별
+       * @example FEMALE
+       * @enum {string}
+       */
+      gender?: 'MALE' | 'FEMALE' | 'NON_BINARY';
+      /**
+       * @description 결제 유형 (SELF: 자비 부담, INSURANCE: 보험 적용)
+       * @example SELF
+       * @enum {string}
+       */
+      paymentType?: 'SELF' | 'INSURANCE';
+      /**
+       * Format: date
+       * @description 상담 시작 일자
+       * @example 2026-01-15
+       */
+      counselingStartDate?: string;
+      /**
+       * @description 주호소문제
+       * @example 우울, 직장 스트레스
+       */
+      chiefComplaint?: string;
+      /**
+       * @description 유입 경로 (검색/지인 추천/병원 의뢰/KKEBI앱/기타)
+       * @example 지인 추천
+       */
+      referralSource?: string;
+      /** @description 프로필 이미지 URL */
+      profileImageUrl?: string;
+      /**
+       * @description 보험사명 (결제 유형이 INSURANCE일 때)
+       * @example 삼성화재
+       */
+      insuranceCompany?: string;
+      intake?: components['schemas']['ClientIntakeRequest'];
+    };
+    ApiResponseLong: {
+      code?: string;
+      message?: string;
+      /** Format: int64 */
+      data?: number;
+    };
+    ClientTestResultRequest: {
+      testName?: string;
+      /** Format: int32 */
+      score?: number;
+      /** Format: date */
+      testDate?: string;
+      memo?: string;
+    };
+    CreateCallSessionRequest: {
+      externalSessionId?: string;
+      preMood?: string;
+      persona?: string;
+      memo?: string;
+    };
+    ApiResponseCallSessionResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['CallSessionResponse'];
+    };
+    CallSessionResponse: {
+      /** Format: int64 */
+      id?: number;
+      fastApiSessionId?: string;
+      status?: string;
+      externalSessionId?: string;
+      /** Format: date-time */
+      createdAt?: string;
+      /** Format: date-time */
+      startedAt?: string;
+      /** Format: date-time */
+      endedAt?: string;
+    };
+    ApiResponseCallReportResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['CallReportResponse'];
+    };
+    CallReportResponse: {
+      /** Format: int64 */
+      callSessionId?: number;
+      status?: string;
+      report?: Record<string, never>;
+      model?: string;
+      pointAward?: components['schemas']['PointAwardResponse'];
+    };
+    PointAwardResponse: {
+      alreadyAwarded?: boolean;
+      /** Format: int32 */
+      gainedPoints?: number;
+      /** Format: int32 */
+      totalPoints?: number;
+      transactionType?: string;
+    };
+    ApiResponsePointAwardResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['PointAwardResponse'];
+    };
+    ApiResponseCallInferenceResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['CallInferenceResponse'];
+    };
+    CallInferenceResponse: {
+      /** Format: int64 */
+      callSessionId?: number;
+      type?: string;
+      topEmotion?: string;
+      /** Format: int32 */
+      segmentId?: number;
+      /** Format: double */
+      confidence?: number;
+      payload?: {
+        [key: string]: Record<string, never>;
+      };
+    };
+    FuseRequest: {
+      face_probs?: {
+        [key: string]: number;
+      };
+      ser_probs?: {
+        [key: string]: number;
+      };
+      text_probs?: {
+        [key: string]: number;
+      };
     };
     ApiResponseListUserResponse: {
       code?: string;
@@ -1048,9 +1764,9 @@ export interface components {
     };
     PageableObject: {
       /** Format: int32 */
-      pageSize?: number;
-      /** Format: int32 */
       pageNumber?: number;
+      /** Format: int32 */
+      pageSize?: number;
       paged?: boolean;
       unpaged?: boolean;
       /** Format: int64 */
@@ -1072,6 +1788,55 @@ export interface components {
       sorted?: boolean;
       unsorted?: boolean;
       empty?: boolean;
+    };
+    ApiResponseListNotificationResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['NotificationResponse'][];
+    };
+    /** @description 알림 응답 DTO */
+    NotificationResponse: {
+      /**
+       * Format: int64
+       * @description 알림 ID
+       * @example 1
+       */
+      id?: number;
+      /**
+       * @description 알림 유형 (INTAKE_ANALYSIS_COMPLETE: 분석 완료, INTAKE_ANALYSIS_READY_FOR_REVIEW: 검토 대기)
+       * @enum {string}
+       */
+      type?: 'INTAKE_ANALYSIS_COMPLETE' | 'INTAKE_ANALYSIS_READY_FOR_REVIEW';
+      /**
+       * @description 알림 제목
+       * @example Intake analysis complete
+       */
+      title?: string;
+      /**
+       * @description 알림 메시지
+       * @example The intake analysis for 김철수 has been reviewed.
+       */
+      message?: string;
+      /**
+       * @description 읽음 여부
+       * @example false
+       */
+      isRead?: boolean;
+      /**
+       * Format: int64
+       * @description 관련 리소스 ID (분석 ID 등)
+       * @example 5
+       */
+      referenceId?: number;
+      /**
+       * Format: date-time
+       * @description 알림 생성 시각
+       */
+      createdAt?: string;
+    };
+    SseEmitter: {
+      /** Format: int64 */
+      timeout?: number;
     };
     ApiResponseMissionResponse: {
       code?: string;
@@ -1111,6 +1876,217 @@ export interface components {
       recommended?: components['schemas']['MissionDto'][];
       history?: components['schemas']['MissionHistoryDto'][];
     };
+    ApiResponsePageClientSummaryResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['PageClientSummaryResponse'];
+    };
+    /** @description 내담자 목록 요약 응답 DTO (2.1.1 내담자 목록 데이터) */
+    ClientSummaryResponse: {
+      /**
+       * Format: int64
+       * @description 내담자 ID
+       * @example 1
+       */
+      id?: number;
+      /**
+       * @description 내담자 이름
+       * @example 김철수
+       */
+      name?: string;
+      /**
+       * @description KKEBI 앱 닉네임 (비앱 유저: null)
+       * @example 해피거북이
+       */
+      nickname?: string;
+      /** @description 프로필 이미지 URL */
+      profileImageUrl?: string;
+      /**
+       * @description 주호소문제
+       * @example 우울, 직장 스트레스
+       */
+      chiefComplaint?: string;
+      /**
+       * @description 위험 유형 (STABLE/CAUTION/RISK)
+       * @enum {string}
+       */
+      riskLevel?: 'STABLE' | 'CAUTION' | 'RISK';
+      /**
+       * Format: int32
+       * @description KKEBI 앱 연속 사용일 (비앱 유저: null)
+       * @example 7
+       */
+      streak?: number;
+      /**
+       * Format: double
+       * @description 최근 7일 기분 점수 평균 (1-5, 비앱 유저: null)
+       * @example 3.5
+       */
+      recentMoodScore?: number;
+      /**
+       * Format: double
+       * @description 최근 7일 스트레스 점수 평균 (1-5, 비앱 유저: null)
+       * @example 2.8
+       */
+      recentStressScore?: number;
+      /**
+       * Format: double
+       * @description 최근 7일 에너지 점수 평균 (1-5, 비앱 유저: null)
+       * @example 4
+       */
+      recentEnergyScore?: number;
+      /**
+       * Format: date-time
+       * @description 마지막 체크인 시각 (ISO-8601)
+       */
+      lastCheckIn?: string;
+      /**
+       * @description 마지막 체크인 상대시간 (예: '2시간 전', 비앱 유저: null)
+       * @example 2시간 전
+       */
+      lastCheckInLabel?: string;
+    };
+    PageClientSummaryResponse: {
+      /** Format: int32 */
+      totalPages?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      first?: boolean;
+      last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
+      /** Format: int32 */
+      numberOfElements?: number;
+      /** Format: int32 */
+      size?: number;
+      content?: components['schemas']['ClientSummaryResponse'][];
+      /** Format: int32 */
+      number?: number;
+      sort?: components['schemas']['SortObject'];
+      empty?: boolean;
+    };
+    ApiResponseClientDetailResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['ClientDetailResponse'];
+    };
+    ClientDetailResponse: {
+      /** Format: int64 */
+      id?: number;
+      name?: string;
+      nickname?: string;
+      phoneNumber?: string;
+      email?: string;
+      /** Format: date */
+      birthDate?: string;
+      /** @enum {string} */
+      gender?: 'MALE' | 'FEMALE' | 'NON_BINARY';
+      /** @enum {string} */
+      paymentType?: 'SELF' | 'INSURANCE';
+      /** Format: date */
+      counselingStartDate?: string;
+      chiefComplaint?: string;
+      referralSource?: string;
+      profileImageUrl?: string;
+      insuranceCompany?: string;
+      intake?: components['schemas']['ClientIntakeResponse'];
+      testResults?: components['schemas']['ClientTestResultResponse'][];
+      /** Format: date-time */
+      createdAt?: string;
+    };
+    ClientIntakeResponse: {
+      /** Format: int32 */
+      phq9Score?: number;
+      /** Format: int32 */
+      pss10Score?: number;
+      /** Format: int32 */
+      mbiScore?: number;
+      visitReason?: string;
+      desiredChange?: string;
+      similarDifficultyHistory?: string;
+      attemptedSolution?: string;
+      solutionEffectiveness?: string;
+      currentWorry?: string;
+      sleepPattern?: string;
+      sleepQuality?: string;
+      exerciseFrequency?: string;
+      mealsPerDay?: string;
+      reliablePerson?: string;
+      reliableReason?: string;
+      familyBond?: string;
+      familyBondReason?: string;
+      selfDescription?: string;
+      imageUrls?: string[];
+    };
+    ClientTestResultResponse: {
+      /** Format: int64 */
+      id?: number;
+      testName?: string;
+      /** Format: int32 */
+      score?: number;
+      /** Format: date */
+      testDate?: string;
+      memo?: string;
+      /** Format: date-time */
+      createdAt?: string;
+    };
+    ApiResponseListClientTestResultResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['ClientTestResultResponse'][];
+    };
+    ApiResponseListIntakeAnalysisResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['IntakeAnalysisResponse'][];
+    };
+    /** @description 접수면접 OCR 분석 결과 DTO */
+    IntakeAnalysisResponse: {
+      /**
+       * Format: int64
+       * @description 분석 ID
+       * @example 1
+       */
+      id?: number;
+      /**
+       * Format: int64
+       * @description 내담자 ID
+       * @example 5
+       */
+      clientId?: number;
+      /**
+       * @description 내담자 이름
+       * @example 김철수
+       */
+      clientName?: string;
+      /**
+       * @description 분석 상태 (PENDING → ANALYZED → REVIEWED → COMPLETED / FAILED)
+       * @enum {string}
+       */
+      status?: 'PENDING' | 'ANALYZED' | 'REVIEWED' | 'COMPLETED' | 'FAILED';
+      /** @description 원본 이미지 presigned URL (1시간 유효) */
+      imageUrl?: string;
+      /** @description GPT-4o-mini OCR 결과 (JSON 형식) */
+      gptResult?: string;
+      /** @description 관리자 검토 완료 텍스트 */
+      reviewedResult?: string;
+      /** @description 분석 실패 사유 */
+      failureReason?: string;
+      /**
+       * Format: date-time
+       * @description 검토 완료 시각
+       */
+      reviewedAt?: string;
+      /**
+       * Format: date-time
+       * @description 분석 요청 시각
+       */
+      createdAt?: string;
+    };
+    ApiResponseIntakeAnalysisResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['IntakeAnalysisResponse'];
+    };
     ApiResponseString: {
       code?: string;
       message?: string;
@@ -1125,6 +2101,62 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+  markAsRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 알림 ID
+         * @example 1
+         */
+        notificationId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  reviewAnalysis: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 분석 ID
+         * @example 1
+         */
+        analysisId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IntakeAnalysisReviewRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
   submitOnboarding: {
     parameters: {
       query?: never;
@@ -1294,6 +2326,33 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseMissionCompletionResponse'];
+        };
+      };
+    };
+  };
+  uploadFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** Format: binary */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseMapStringString'];
         };
       };
     };
@@ -1503,10 +2562,53 @@ export interface operations {
       };
     };
   };
+  registerAndPrepareLogin: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description 내부 공유 테스트 API 키 (환경에 따라 생략 가능) */
+        'X-Test-Api-Key'?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    /** @description 상담사 등록 문의 입력값 */
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InquirySubmitRequest'];
+      };
+    };
+    responses: {
+      /** @description 계정 생성 성공 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "code": "SUCCESS",
+           *       "message": "요청이 성공적으로 처리되었습니다",
+           *       "data": {
+           *         "inquiryId": 1245,
+           *         "counselorId": 987,
+           *         "loginEmail": "qa-20240201@kkebi.com",
+           *         "generatedPassword": "Ab93kLmZ10@"
+           *       }
+           *     }
+           */
+          'application/json': unknown;
+        };
+      };
+    };
+  };
   getAllCounselors: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description 내부 공유 테스트 API 키 (환경에 따라 생략 가능) */
+        'X-Test-Api-Key'?: string;
+      };
       path?: never;
       cookie?: never;
     };
@@ -1541,7 +2643,10 @@ export interface operations {
   createTestCounselor: {
     parameters: {
       query?: never;
-      header?: never;
+      header?: {
+        /** @description 내부 공유 테스트 API 키 (환경에 따라 생략 가능) */
+        'X-Test-Api-Key'?: string;
+      };
       path?: never;
       cookie?: never;
     };
@@ -1780,7 +2885,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 잘못된 OTP */
+      /** @description 만료된 챌린지 */
       400: {
         headers: {
           [name: string]: unknown;
@@ -1830,6 +2935,459 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  getMyClients: {
+    parameters: {
+      query: {
+        pageable: components['schemas']['Pageable'];
+        /**
+         * @description 내담자 이름 검색 (부분 일치)
+         * @example 김
+         */
+        name?: string;
+        /** @description 위험 유형 필터 */
+        riskLevel?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponsePageClientSummaryResponse'];
+        };
+      };
+    };
+  };
+  registerClient: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClientRegistrationRequest'];
+      };
+    };
+    responses: {
+      /** @description 등록된 내담자 ID 반환 */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  getTestResults: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseListClientTestResultResponse'];
+        };
+      };
+    };
+  };
+  addTestResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClientTestResultRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  getAnalysesByClient: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseListIntakeAnalysisResponse'];
+        };
+      };
+    };
+  };
+  submitAnalysis: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /**
+           * Format: binary
+           * @description 접수면접 사진 파일 (JPEG/PNG)
+           */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  createSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCallSessionRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallSessionResponse'];
+        };
+      };
+    };
+  };
+  startSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallSessionResponse'];
+        };
+      };
+    };
+  };
+  getReport_1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallReportResponse'];
+        };
+      };
+    };
+  };
+  generateReport: {
+    parameters: {
+      query?: {
+        awardPoint?: boolean;
+      };
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallReportResponse'];
+        };
+      };
+    };
+  };
+  awardCompletionPoint: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponsePointAwardResponse'];
+        };
+      };
+    };
+  };
+  inferSer: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          audio: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallInferenceResponse'];
+        };
+      };
+    };
+  };
+  inferFuse: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FuseRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallInferenceResponse'];
+        };
+      };
+    };
+  };
+  inferFace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          image: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallInferenceResponse'];
+        };
+      };
+    };
+  };
+  inferAsr: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          audio: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallInferenceResponse'];
+        };
+      };
+    };
+  };
+  endSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        callSessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseCallSessionResponse'];
+        };
+      };
+    };
+  };
+  updateClientEmail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    /** @description 변경할 이메일. {"email": "new@example.com"} */
+    requestBody: {
+      content: {
+        'application/json': {
+          [key: string]: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
         };
       };
     };
@@ -2038,6 +3596,86 @@ export interface operations {
       };
     };
   };
+  getNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseListNotificationResponse'];
+        };
+      };
+    };
+  };
+  getUnreadNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseListNotificationResponse'];
+        };
+      };
+    };
+  };
+  getUnreadCount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  subscribe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'text/event-stream': components['schemas']['SseEmitter'];
+        };
+      };
+    };
+  };
   getMissions: {
     parameters: {
       query?: never;
@@ -2154,6 +3792,78 @@ export interface operations {
       };
     };
   };
+  getClientDetail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseClientDetailResponse'];
+        };
+      };
+    };
+  };
+  getPendingReviews: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseListIntakeAnalysisResponse'];
+        };
+      };
+    };
+  };
+  getAnalysisDetail: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 분석 ID
+         * @example 1
+         */
+        analysisId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseIntakeAnalysisResponse'];
+        };
+      };
+    };
+  };
   healthCheck: {
     parameters: {
       query?: never;
@@ -2170,6 +3880,37 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseString'];
+        };
+      };
+    };
+  };
+  deleteTestResult: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+        /**
+         * @description 검사 결과 ID
+         * @example 1
+         */
+        testId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
         };
       };
     };
