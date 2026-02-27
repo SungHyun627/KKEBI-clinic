@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
 import ClientRegistrationBasicInfoForm, {
@@ -9,14 +8,13 @@ import ClientRegistrationBasicInfoForm, {
 import ClientRegistrationCounselingInfoForm, {
   type CounselingInfoFormValues,
 } from '@/features/clients/ui/ClientRegistrationCounselingInfoForm';
-import { Input } from '@/shared/ui/input';
-import { Select } from '@/shared/ui/select';
+import ClientRegistrationPaymentInfoForm, {
+  type PaymentInfoFormValues,
+} from '@/features/clients/ui/ClientRegistrationPaymentInfoForm';
+import ClientRegistrationKkebiNicknameForm, {
+  type KkebiNicknameFormValues,
+} from '@/features/clients/ui/ClientRegistrationKkebiNicknameForm';
 import { Button } from '@/shared/ui/button';
-
-const PAYMENT_OPTIONS = [
-  { label: 'Private Pay (자비 부담)', value: 'private-pay' },
-  { label: 'Insurance (보험 적용)', value: 'insurance' },
-];
 
 const getTodayDateKey = () => {
   const now = new Date();
@@ -27,11 +25,6 @@ const getTodayDateKey = () => {
 };
 
 const NewClientPage = () => {
-  const [form, setForm] = useState({
-    paymentType: '',
-    insuranceCompany: '',
-    kkebiNickname: '',
-  });
   const basicInfoForm = useForm<BasicInfoFormValues>({
     mode: 'onChange',
     defaultValues: {
@@ -50,8 +43,19 @@ const NewClientPage = () => {
       referralPath: '',
     },
   });
-
-  const isInsurance = form.paymentType === 'insurance';
+  const paymentInfoForm = useForm<PaymentInfoFormValues>({
+    mode: 'onChange',
+    defaultValues: {
+      paymentType: '',
+      insuranceCompany: '',
+    },
+  });
+  const kkebiNicknameForm = useForm<KkebiNicknameFormValues>({
+    mode: 'onChange',
+    defaultValues: {
+      kkebiNickname: '',
+    },
+  });
 
   return (
     <section className="flex w-full items-start justify-center gap-4">
@@ -60,45 +64,8 @@ const NewClientPage = () => {
         <div className="flex w-full flex-col items-start gap-7">
           <ClientRegistrationBasicInfoForm form={basicInfoForm} />
           <ClientRegistrationCounselingInfoForm form={counselingInfoForm} />
-
-          <div className="flex w-full flex-col items-start gap-4 rounded-2xl bg-neutral-99 p-4">
-            <h2 className="body-18 font-semibold text-label-normal">보험/결제 정보</h2>
-            <div className="flex w-full flex-col gap-2">
-              <RequiredLabel>결제 유형</RequiredLabel>
-              <Select
-                options={PAYMENT_OPTIONS}
-                value={form.paymentType}
-                onValueChange={(value) => setForm((prev) => ({ ...prev, paymentType: value }))}
-                placeholder="결제 유형을 선택해 주세요."
-              />
-            </div>
-            {isInsurance ? (
-              <div className="flex w-full flex-col gap-2">
-                <RequiredLabel>보험사명</RequiredLabel>
-                <Input
-                  value={form.insuranceCompany}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, insuranceCompany: event.target.value }))
-                  }
-                  placeholder="보험사명을 입력해 주세요."
-                />
-              </div>
-            ) : null}
-          </div>
-
-          <div className="flex w-full flex-col items-start gap-4 rounded-2xl bg-neutral-99 p-4">
-            <h2 className="body-18 font-semibold text-label-normal">KKEBI 닉네임</h2>
-            <div className="flex w-full flex-col gap-2">
-              <Label>KKEBI 닉네임 입력</Label>
-              <Input
-                value={form.kkebiNickname}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, kkebiNickname: event.target.value }))
-                }
-                placeholder="KKEBI 닉네임을 입력해 주세요"
-              />
-            </div>
-          </div>
+          <ClientRegistrationPaymentInfoForm form={paymentInfoForm} />
+          <ClientRegistrationKkebiNicknameForm form={kkebiNicknameForm} />
 
           <div className="flex w-full justify-end">
             <Button type="button" size="lg" className="w-full max-w-[220px]">
@@ -108,19 +75,6 @@ const NewClientPage = () => {
         </div>
       </div>
     </section>
-  );
-};
-
-const Label = ({ children }: { children: string }) => {
-  return <label className="body-14 font-medium text-label-normal">{children}</label>;
-};
-
-const RequiredLabel = ({ children }: { children: string }) => {
-  return (
-    <label className="body-14 font-medium text-label-normal">
-      {children}
-      <span className="ml-0.5 text-primary">*</span>
-    </label>
   );
 };
 
