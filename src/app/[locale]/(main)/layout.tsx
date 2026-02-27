@@ -37,6 +37,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
+  const tClients = useTranslations('clients');
   const logoutMutation = useLogoutMutation();
   const locale = useLocale();
   const switchLocale = () => {
@@ -79,7 +80,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         (item.href === '/' && pathname === '/') ||
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.key ?? 'dashboard';
-  const isClosedClientsPage = pathname === '/clients/closed';
+  const isClientsBackHeaderPage = pathname === '/clients/closed' || pathname === '/clients/new';
+  const clientsBackHeaderTitle =
+    pathname === '/clients/new' ? tClients('listRegister') : tNav('clients');
 
   return (
     <div className="min-h-screen w-full bg-white">
@@ -180,7 +183,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
         <SidebarInset>
           <div className="flex w-full items-center justify-between bg-white p-5">
-            {isClosedClientsPage ? (
+            {isClientsBackHeaderPage ? (
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -191,7 +194,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                   <Image src="/icons/back.svg" alt="" width={30} height={30} aria-hidden />
                 </button>
                 <p className="font-pretendard text-[24px] leading-[30px] font-semibold text-label-normal">
-                  {tNav('clients')}
+                  {clientsBackHeaderTitle}
                 </p>
               </div>
             ) : (
