@@ -28,14 +28,15 @@ export interface KkebiNicknameFormValues {
 
 export interface AssessmentAdditionalResult {
   testName: string;
-  testResult: string;
+  testResult: number | null;
 }
 
 export interface AssessmentResultsFormValues {
-  phq9Score: string;
-  pss10Score: string;
-  mbiScore: string;
+  phq9Score: number | null;
+  pss10Score: number | null;
+  mbiScore: number | null;
   additionalResults: AssessmentAdditionalResult[];
+  draftTestName: string;
 }
 
 export interface IntakeInterviewFormValues {

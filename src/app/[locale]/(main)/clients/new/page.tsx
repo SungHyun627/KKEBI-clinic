@@ -21,10 +21,11 @@ import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/cl
 import { Button } from '@/shared/ui/button';
 
 const getDefaultAssessmentResults = (): AssessmentResultsFormValues => ({
-  phq9Score: '',
-  pss10Score: '',
-  mbiScore: '',
+  phq9Score: null,
+  pss10Score: null,
+  mbiScore: null,
   additionalResults: [],
+  draftTestName: '',
 });
 
 const getDefaultIntakeInterview = (): IntakeInterviewFormValues => ({
