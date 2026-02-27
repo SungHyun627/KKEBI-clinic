@@ -9,14 +9,41 @@ import ClientRegistrationCounselingInfoForm from '@/features/clients/ui/ClientRe
 import ClientRegistrationPaymentInfoForm from '@/features/clients/ui/ClientRegistrationPaymentInfoForm';
 import ClientRegistrationKkebiNicknameForm from '@/features/clients/ui/ClientRegistrationKkebiNicknameForm';
 import {
+  type AssessmentResultsFormValues,
   type BasicInfoFormValues,
   type CounselingInfoFormValues,
   type KkebiNicknameFormValues,
   type PaymentInfoFormValues,
   type ClientRegistrationDraft,
+  type IntakeInterviewFormValues,
 } from '@/features/clients/types/client-registration';
 import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
 import { Button } from '@/shared/ui/button';
+
+const getDefaultAssessmentResults = (): AssessmentResultsFormValues => ({
+  phq9Score: '',
+  pss10Score: '',
+  mbiScore: '',
+  additionalResults: [],
+});
+
+const getDefaultIntakeInterview = (): IntakeInterviewFormValues => ({
+  reasonForVisit: '',
+  mostImportantChange: '',
+  similarPastExperience: '',
+  attemptedSolution: '',
+  attemptedSolutionEffectiveness: '',
+  currentBiggestConcern: '',
+  averageSleepPattern: '',
+  sleepQuality: '',
+  exerciseTypeAndFrequency: '',
+  mealsPerDay: '',
+  mostReliablePerson: '',
+  reasonForReliance: '',
+  familyBond: '',
+  reasonForFamilyBond: '',
+  selfDescriptionSentence: '',
+});
 
 const getTodayDateKey = () => {
   const now = new Date();
@@ -101,12 +128,25 @@ const NewClientPage = () => {
     (!isInsurancePayment || Boolean(insuranceCompany.trim()));
 
   const saveDraftToSessionStorage = (nextStep: ClientRegistrationDraft['step']) => {
+    const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+    let previousDraft: ClientRegistrationDraft | null = null;
+
+    if (storedDraft) {
+      try {
+        previousDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+      } catch {
+        previousDraft = null;
+      }
+    }
+
     const draft: ClientRegistrationDraft = {
       step: nextStep,
       basicInfo: basicInfoForm.getValues(),
       counselingInfo: counselingInfoForm.getValues(),
       paymentInfo: paymentInfoForm.getValues(),
       kkebiNickname: kkebiNicknameForm.getValues(),
+      assessmentResults: previousDraft?.assessmentResults ?? getDefaultAssessmentResults(),
+      intakeInterview: previousDraft?.intakeInterview ?? getDefaultIntakeInterview(),
     };
     window.sessionStorage.setItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY, JSON.stringify(draft));
   };

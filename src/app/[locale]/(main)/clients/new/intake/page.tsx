@@ -1,14 +1,54 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
 import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
-import { type ClientRegistrationDraft } from '@/features/clients/types/client-registration';
+import ClientRegistrationAssessmentResultsForm from '@/features/clients/ui/ClientRegistrationAssessmentResultsForm';
+import ClientRegistrationIntakeInterviewForm from '@/features/clients/ui/ClientRegistrationIntakeInterviewForm';
+import {
+  type AssessmentResultsFormValues,
+  type ClientRegistrationDraft,
+  type IntakeInterviewFormValues,
+} from '@/features/clients/types/client-registration';
 import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
 import { Button } from '@/shared/ui/button';
 
+const getDefaultAssessmentResults = (): AssessmentResultsFormValues => ({
+  phq9Score: '',
+  pss10Score: '',
+  mbiScore: '',
+  additionalResults: [],
+});
+
+const getDefaultIntakeInterview = (): IntakeInterviewFormValues => ({
+  reasonForVisit: '',
+  mostImportantChange: '',
+  similarPastExperience: '',
+  attemptedSolution: '',
+  attemptedSolutionEffectiveness: '',
+  currentBiggestConcern: '',
+  averageSleepPattern: '',
+  sleepQuality: '',
+  exerciseTypeAndFrequency: '',
+  mealsPerDay: '',
+  mostReliablePerson: '',
+  reasonForReliance: '',
+  familyBond: '',
+  reasonForFamilyBond: '',
+  selfDescriptionSentence: '',
+});
+
 const ClientRegistrationIntakePage = () => {
   const router = useRouter();
+  const assessmentResultsForm = useForm<AssessmentResultsFormValues>({
+    mode: 'onSubmit',
+    defaultValues: getDefaultAssessmentResults(),
+  });
+  const intakeInterviewForm = useForm<IntakeInterviewFormValues>({
+    mode: 'onSubmit',
+    defaultValues: getDefaultIntakeInterview(),
+  });
 
   useEffect(() => {
     const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
@@ -21,14 +61,32 @@ const ClientRegistrationIntakePage = () => {
       const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
       if (!parsedDraft.basicInfo || !parsedDraft.counselingInfo || !parsedDraft.paymentInfo) {
         router.replace('/clients/new');
+        return;
+      }
+
+      if (parsedDraft.assessmentResults) {
+        assessmentResultsForm.reset(parsedDraft.assessmentResults);
+      }
+      if (parsedDraft.intakeInterview) {
+        intakeInterviewForm.reset(parsedDraft.intakeInterview);
       }
     } catch {
       window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
       router.replace('/clients/new');
     }
-  }, [router]);
+  }, [assessmentResultsForm, intakeInterviewForm, router]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    const isAssessmentResultsValid = await assessmentResultsForm.trigger(undefined, {
+      shouldFocus: true,
+    });
+    if (!isAssessmentResultsValid) return;
+
+    const isIntakeInterviewValid = await intakeInterviewForm.trigger(undefined, {
+      shouldFocus: true,
+    });
+    if (!isIntakeInterviewValid) return;
+
     const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
     if (!storedDraft) {
       router.replace('/clients/new');
@@ -40,6 +98,8 @@ const ClientRegistrationIntakePage = () => {
       const nextDraft: ClientRegistrationDraft = {
         ...parsedDraft,
         step: 'registration-complete',
+        assessmentResults: assessmentResultsForm.getValues(),
+        intakeInterview: intakeInterviewForm.getValues(),
       };
       window.sessionStorage.setItem(
         CLIENT_REGISTRATION_DRAFT_STORAGE_KEY,
@@ -57,12 +117,8 @@ const ClientRegistrationIntakePage = () => {
       <div className="flex w-full max-w-[626px] flex-col items-start gap-[33px]">
         <ClientRegistrationStepBar currentStep="intake-interview-info" />
         <div className="flex w-full flex-col items-start gap-7">
-          <div className="flex w-full flex-col items-start gap-4 rounded-4xl border border-neutral-95 p-8">
-            <h2 className="text-[24px] font-semibold text-label-strong">접수 면접 정보</h2>
-            <p className="body-16 text-label-alternative">
-              2단계 폼 화면은 이어서 구현 예정입니다.
-            </p>
-          </div>
+          <ClientRegistrationAssessmentResultsForm form={assessmentResultsForm} />
+          <ClientRegistrationIntakeInterviewForm form={intakeInterviewForm} />
 
           <div className="flex w-full justify-end">
             <Button type="button" size="lg" onClick={handleNext} className="w-full max-w-[244px]">
