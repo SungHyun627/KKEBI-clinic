@@ -55,7 +55,13 @@ const ClientRegistrationBasicInfoForm = ({ form }: ClientRegistrationBasicInfoFo
           <FormField
             control={form.control}
             name="phone"
-            rules={{ required: '전화번호를 입력해 주세요.' }}
+            rules={{
+              required: '전화번호를 입력해 주세요.',
+              pattern: {
+                value: /^\d{3}-\d{4}-\d{4}$/,
+                message: '전화번호 형식은 000-0000-0000 입니다.',
+              },
+            }}
             render={({ field }) => (
               <FormItem className="flex w-full flex-col gap-2">
                 <FormLabel required className="body-14 font-medium text-label-normal">

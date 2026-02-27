@@ -29,7 +29,7 @@ const ClientRegistrationKkebiNicknameForm = ({
                   KKEBI 닉네임 입력
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="KKEBI 닉네임을 입력해 주세요" />
+                  <Input {...field} placeholder="닉네임을 입력해 주세요." />
                 </FormControl>
                 <FormMessage />
               </FormItem>
