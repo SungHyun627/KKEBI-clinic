@@ -26,7 +26,7 @@ const getTodayDateKey = () => {
 
 const NewClientPage = () => {
   const basicInfoForm = useForm<BasicInfoFormValues>({
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       name: '',
       phone: '',
@@ -36,7 +36,7 @@ const NewClientPage = () => {
     },
   });
   const counselingInfoForm = useForm<CounselingInfoFormValues>({
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       counselingStartDate: getTodayDateKey(),
       chiefConcern: '',
@@ -44,18 +44,51 @@ const NewClientPage = () => {
     },
   });
   const paymentInfoForm = useForm<PaymentInfoFormValues>({
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       paymentType: '',
       insuranceCompany: '',
     },
   });
   const kkebiNicknameForm = useForm<KkebiNicknameFormValues>({
-    mode: 'onChange',
+    mode: 'onSubmit',
     defaultValues: {
       kkebiNickname: '',
     },
   });
+  const basicName = basicInfoForm.watch('name');
+  const basicPhone = basicInfoForm.watch('phone');
+  const basicEmail = basicInfoForm.watch('email');
+  const basicBirthDate = basicInfoForm.watch('birthDate');
+  const counselingChiefConcern = counselingInfoForm.watch('chiefConcern');
+  const paymentType = paymentInfoForm.watch('paymentType');
+  const insuranceCompany = paymentInfoForm.watch('insuranceCompany');
+  const isInsurancePayment = paymentType === 'insurance';
+  const isAllRequiredFilled =
+    Boolean(basicName.trim()) &&
+    Boolean(basicPhone.trim()) &&
+    Boolean(basicEmail.trim()) &&
+    Boolean(basicBirthDate.trim()) &&
+    Boolean(counselingChiefConcern.trim()) &&
+    Boolean(paymentType.trim()) &&
+    (!isInsurancePayment || Boolean(insuranceCompany.trim()));
+
+  const handleNext = async () => {
+    const isBasicInfoValid = await basicInfoForm.trigger(undefined, { shouldFocus: true });
+    if (!isBasicInfoValid) return;
+
+    const isCounselingInfoValid = await counselingInfoForm.trigger(undefined, {
+      shouldFocus: true,
+    });
+    if (!isCounselingInfoValid) return;
+
+    const isPaymentInfoValid = await paymentInfoForm.trigger(undefined, { shouldFocus: true });
+    if (!isPaymentInfoValid) return;
+
+    await kkebiNicknameForm.trigger();
+
+    // TODO: 다음 스텝 전환 및 API 저장 로직 연결
+  };
 
   return (
     <section className="flex w-full items-start justify-center gap-4">
@@ -68,7 +101,13 @@ const NewClientPage = () => {
           <ClientRegistrationKkebiNicknameForm form={kkebiNicknameForm} />
 
           <div className="flex w-full justify-end">
-            <Button type="button" size="lg" className="w-full max-w-[220px]">
+            <Button
+              type="button"
+              size="lg"
+              onClick={handleNext}
+              disabled={!isAllRequiredFilled}
+              className="w-full max-w-[244px]"
+            >
               다음으로
             </Button>
           </div>

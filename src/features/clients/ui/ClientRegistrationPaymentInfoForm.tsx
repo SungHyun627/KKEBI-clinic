@@ -31,9 +31,12 @@ const ClientRegistrationPaymentInfoForm = ({ form }: ClientRegistrationPaymentIn
           <FormField
             control={form.control}
             name="paymentType"
+            rules={{ required: '결제 유형을 선택해 주세요.' }}
             render={() => (
               <FormItem className="flex w-full flex-col gap-2">
-                <FormLabel className="body-14 font-medium text-label-normal">결제 유형</FormLabel>
+                <FormLabel required className="body-14 font-medium text-label-normal">
+                  결제 유형
+                </FormLabel>
                 <div className="flex w-full gap-2">
                   {PAYMENT_OPTIONS.map((option) => {
                     const isSelected = paymentType === option.value;
@@ -45,10 +48,10 @@ const ClientRegistrationPaymentInfoForm = ({ form }: ClientRegistrationPaymentIn
                           form.setValue('paymentType', option.value, {
                             shouldDirty: true,
                             shouldTouch: true,
-                            shouldValidate: true,
+                            shouldValidate: false,
                           });
                           if (option.value !== 'insurance') {
-                            form.setValue('insuranceCompany', '', { shouldValidate: true });
+                            form.setValue('insuranceCompany', '', { shouldValidate: false });
                           }
                         }}
                         className={cn(

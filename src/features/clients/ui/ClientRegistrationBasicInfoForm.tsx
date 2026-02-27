@@ -113,12 +113,9 @@ const ClientRegistrationBasicInfoForm = ({ form }: ClientRegistrationBasicInfoFo
           <FormField
             control={form.control}
             name="gender"
-            rules={{ required: '성별을 선택해 주세요.' }}
             render={() => (
               <FormItem className="flex w-full flex-col gap-2">
-                <FormLabel required className="body-14 font-medium text-label-normal">
-                  성별
-                </FormLabel>
+                <FormLabel className="body-14 font-medium text-label-normal">성별</FormLabel>
                 <div className="flex w-full gap-2">
                   {GENDER_OPTIONS.map((option) => {
                     const isSelected = selectedGender === option.value;
@@ -130,7 +127,7 @@ const ClientRegistrationBasicInfoForm = ({ form }: ClientRegistrationBasicInfoFo
                           form.setValue('gender', option.value, {
                             shouldDirty: true,
                             shouldTouch: true,
-                            shouldValidate: true,
+                            shouldValidate: false,
                           })
                         }
                         className={cn(
