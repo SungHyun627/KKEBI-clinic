@@ -1,6 +1,7 @@
 'use client';
 
 import { UseFormReturn } from 'react-hook-form';
+import type { PaymentInfoFormValues } from '@/features/clients/types/client-registration';
 import { cn } from '@/shared/lib/utils';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
@@ -9,11 +10,6 @@ const PAYMENT_OPTIONS = [
   { label: '자비 부담', value: 'private-pay' },
   { label: '보험 적용', value: 'insurance' },
 ];
-
-export type PaymentInfoFormValues = {
-  paymentType: string;
-  insuranceCompany: string;
-};
 
 interface ClientRegistrationPaymentInfoFormProps {
   form: UseFormReturn<PaymentInfoFormValues>;

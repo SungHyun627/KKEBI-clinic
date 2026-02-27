@@ -80,9 +80,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         (item.href === '/' && pathname === '/') ||
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.key ?? 'dashboard';
-  const isClientsBackHeaderPage = pathname === '/clients/closed' || pathname === '/clients/new';
-  const clientsBackHeaderTitle =
-    pathname === '/clients/new' ? tClients('listRegister') : tNav('clients');
+  const isClientsBackHeaderPage =
+    pathname === '/clients/closed' || pathname.startsWith('/clients/new');
+  const clientsBackHeaderTitle = pathname.startsWith('/clients/new')
+    ? tClients('listRegister')
+    : tNav('clients');
 
   return (
     <div className="flex min-h-screen w-full bg-white">
@@ -186,7 +188,13 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => router.push('/clients')}
+                onClick={() => {
+                  if (window.history.length > 1) {
+                    router.back();
+                    return;
+                  }
+                  router.push('/clients');
+                }}
                 className="flex h-[30px] w-[30px] items-center justify-center rounded-[8px] hover:cursor-pointer hover:bg-neutral-99 hover:bg-white"
                 aria-label={tNav('clients')}
               >

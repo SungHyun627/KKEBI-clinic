@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { UseFormReturn } from 'react-hook-form';
+import type { BasicInfoFormValues } from '@/features/clients/types/client-registration';
 import { cn } from '@/shared/lib/utils';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
@@ -15,14 +16,6 @@ const GENDER_OPTIONS = [
   { label: '남자', value: 'male' },
   { label: '논바이너리', value: 'non-binary' },
 ];
-
-export type BasicInfoFormValues = {
-  name: string;
-  phone: string;
-  email: string;
-  birthDate: string;
-  gender: string;
-};
 
 interface ClientRegistrationBasicInfoFormProps {
   form: UseFormReturn<BasicInfoFormValues>;

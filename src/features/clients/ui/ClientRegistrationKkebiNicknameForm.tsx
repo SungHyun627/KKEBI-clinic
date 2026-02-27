@@ -1,12 +1,9 @@
 'use client';
 
 import { UseFormReturn } from 'react-hook-form';
+import type { KkebiNicknameFormValues } from '@/features/clients/types/client-registration';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
-
-export type KkebiNicknameFormValues = {
-  kkebiNickname: string;
-};
 
 interface ClientRegistrationKkebiNicknameFormProps {
   form: UseFormReturn<KkebiNicknameFormValues>;

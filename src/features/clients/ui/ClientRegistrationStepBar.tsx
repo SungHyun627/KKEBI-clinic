@@ -2,15 +2,11 @@
 
 import Divider from '@/shared/ui/divider';
 import { cn } from '@/shared/lib/utils';
+import type { ClientRegistrationStepKey } from '@/features/clients/types/client-registration';
 
 interface ClientRegistrationStepBarProps {
   currentStep: ClientRegistrationStepKey;
 }
-
-export type ClientRegistrationStepKey =
-  | 'basic-info'
-  | 'intake-interview-info'
-  | 'registration-complete';
 
 const STEPS: Array<{
   key: ClientRegistrationStepKey;

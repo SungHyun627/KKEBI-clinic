@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { UseFormReturn } from 'react-hook-form';
+import type { CounselingInfoFormValues } from '@/features/clients/types/client-registration';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { Select } from '@/shared/ui/select';
@@ -17,12 +18,6 @@ const REFERRAL_OPTIONS = [
   { label: 'KKEBI앱', value: 'kkebi-app' },
   { label: '기타', value: 'other' },
 ];
-
-export type CounselingInfoFormValues = {
-  counselingStartDate: string;
-  chiefConcern: string;
-  referralPath: string;
-};
 
 interface ClientRegistrationCounselingInfoFormProps {
   form: UseFormReturn<CounselingInfoFormValues>;

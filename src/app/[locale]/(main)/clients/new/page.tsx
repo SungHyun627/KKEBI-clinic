@@ -1,19 +1,21 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from '@/i18n/navigation';
 import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
-import ClientRegistrationBasicInfoForm, {
+import ClientRegistrationBasicInfoForm from '@/features/clients/ui/ClientRegistrationBasicInfoForm';
+import ClientRegistrationCounselingInfoForm from '@/features/clients/ui/ClientRegistrationCounselingInfoForm';
+import ClientRegistrationPaymentInfoForm from '@/features/clients/ui/ClientRegistrationPaymentInfoForm';
+import ClientRegistrationKkebiNicknameForm from '@/features/clients/ui/ClientRegistrationKkebiNicknameForm';
+import {
   type BasicInfoFormValues,
-} from '@/features/clients/ui/ClientRegistrationBasicInfoForm';
-import ClientRegistrationCounselingInfoForm, {
   type CounselingInfoFormValues,
-} from '@/features/clients/ui/ClientRegistrationCounselingInfoForm';
-import ClientRegistrationPaymentInfoForm, {
-  type PaymentInfoFormValues,
-} from '@/features/clients/ui/ClientRegistrationPaymentInfoForm';
-import ClientRegistrationKkebiNicknameForm, {
   type KkebiNicknameFormValues,
-} from '@/features/clients/ui/ClientRegistrationKkebiNicknameForm';
+  type PaymentInfoFormValues,
+  type ClientRegistrationDraft,
+} from '@/features/clients/types/client-registration';
+import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
 import { Button } from '@/shared/ui/button';
 
 const getTodayDateKey = () => {
@@ -25,6 +27,7 @@ const getTodayDateKey = () => {
 };
 
 const NewClientPage = () => {
+  const router = useRouter();
   const basicInfoForm = useForm<BasicInfoFormValues>({
     mode: 'onSubmit',
     defaultValues: {
@@ -56,6 +59,30 @@ const NewClientPage = () => {
       kkebiNickname: '',
     },
   });
+
+  useEffect(() => {
+    const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+    if (!storedDraft) return;
+
+    try {
+      const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+      if (parsedDraft.basicInfo) {
+        basicInfoForm.reset(parsedDraft.basicInfo);
+      }
+      if (parsedDraft.counselingInfo) {
+        counselingInfoForm.reset(parsedDraft.counselingInfo);
+      }
+      if (parsedDraft.paymentInfo) {
+        paymentInfoForm.reset(parsedDraft.paymentInfo);
+      }
+      if (parsedDraft.kkebiNickname) {
+        kkebiNicknameForm.reset(parsedDraft.kkebiNickname);
+      }
+    } catch {
+      window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+    }
+  }, [basicInfoForm, counselingInfoForm, kkebiNicknameForm, paymentInfoForm]);
+
   const basicName = basicInfoForm.watch('name');
   const basicPhone = basicInfoForm.watch('phone');
   const basicEmail = basicInfoForm.watch('email');
@@ -73,6 +100,17 @@ const NewClientPage = () => {
     Boolean(paymentType.trim()) &&
     (!isInsurancePayment || Boolean(insuranceCompany.trim()));
 
+  const saveDraftToSessionStorage = (nextStep: ClientRegistrationDraft['step']) => {
+    const draft: ClientRegistrationDraft = {
+      step: nextStep,
+      basicInfo: basicInfoForm.getValues(),
+      counselingInfo: counselingInfoForm.getValues(),
+      paymentInfo: paymentInfoForm.getValues(),
+      kkebiNickname: kkebiNicknameForm.getValues(),
+    };
+    window.sessionStorage.setItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+  };
+
   const handleNext = async () => {
     const isBasicInfoValid = await basicInfoForm.trigger(undefined, { shouldFocus: true });
     if (!isBasicInfoValid) return;
@@ -87,7 +125,8 @@ const NewClientPage = () => {
 
     await kkebiNicknameForm.trigger();
 
-    // TODO: 다음 스텝 전환 및 API 저장 로직 연결
+    saveDraftToSessionStorage('intake-interview-info');
+    router.push('/clients/new/intake');
   };
 
   return (
