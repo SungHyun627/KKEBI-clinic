@@ -13,6 +13,8 @@ interface SelectProps {
   className?: string;
   triggerClassName?: string;
   contentClassName?: string;
+  triggerTextClassName?: string;
+  placeholderTextClassName?: string;
   options: SelectOption[];
   value?: string;
   defaultValue?: string;
@@ -27,6 +29,8 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
       className,
       triggerClassName,
       contentClassName,
+      triggerTextClassName,
+      placeholderTextClassName,
       options,
       value,
       defaultValue,
@@ -41,6 +45,8 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
     const [internalValue, setInternalValue] = React.useState(defaultValue ?? '');
     const selectedValue = value ?? internalValue;
     const selected = options.find((option) => option.value === selectedValue);
+    const displayText = triggerLabel ?? selected?.label ?? placeholder ?? '';
+    const isPlaceholder = !triggerLabel && !selected && Boolean(placeholder);
 
     React.useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -85,8 +91,15 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
           aria-expanded={isOpen}
         >
           <span className="flex w-full items-center justify-between gap-2 hover:cursor-pointer">
-            <span className="truncate body-16 text-label-normal">
-              {triggerLabel ?? selected?.label ?? placeholder ?? ''}
+            <span
+              className={cn(
+                'truncate body-16',
+                isPlaceholder ? 'text-label-alternative font-normal' : 'text-label-normal',
+                triggerTextClassName,
+                isPlaceholder && placeholderTextClassName,
+              )}
+            >
+              {displayText}
             </span>
             <Image
               src={isOpen ? '/icons/up.svg' : '/icons/down.svg'}

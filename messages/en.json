@@ -399,6 +399,229 @@
     "riskSelfHarmKeywordDetected": "Self-harm keyword detected.",
     "riskSuicideKeywordDetected": "Suicide keyword detected."
   },
+  "clientRegistration": {
+    "common": {
+      "next": "Next"
+    },
+    "stepBar": {
+      "basic-info": {
+        "label": "Basic info",
+        "mobileLabel": "Basic"
+      },
+      "intake-interview-info": {
+        "label": "Intake interview",
+        "mobileLabel": "Interview"
+      },
+      "registration-complete": {
+        "label": "Complete",
+        "mobileLabel": "Complete"
+      }
+    },
+    "basicInfo": {
+      "title": "Basic Information",
+      "fields": {
+        "name": "Name",
+        "phone": "Phone",
+        "email": "Email",
+        "birthDate": "Date of birth",
+        "gender": "Gender"
+      },
+      "placeholders": {
+        "name": "Enter name",
+        "phone": "Enter phone number",
+        "email": "Enter email",
+        "birthDate": "Select date of birth"
+      },
+      "errors": {
+        "nameRequired": "Please enter name.",
+        "phoneRequired": "Please enter phone number.",
+        "phonePattern": "Phone number format must be 000-0000-0000.",
+        "emailRequired": "Please enter email.",
+        "emailPattern": "Please enter a valid email format.",
+        "birthDateRequired": "Please enter date of birth."
+      },
+      "genderOptions": {
+        "female": "Female",
+        "male": "Male",
+        "nonBinary": "Non-binary"
+      }
+    },
+    "counselingInfo": {
+      "title": "Counseling Information",
+      "fields": {
+        "counselingStartDate": "Counseling start date",
+        "chiefConcern": "Chief concern",
+        "referralPath": "Referral source"
+      },
+      "placeholders": {
+        "counselingStartDate": "Select counseling start date",
+        "chiefConcern": "Enter chief concern",
+        "referralPath": "Referral source - Search/Referral/Hospital referral/KKEBI app/Other"
+      },
+      "errors": {
+        "chiefConcernRequired": "Please enter chief concern."
+      },
+      "referralOptions": {
+        "search": "Search",
+        "referral": "Referral",
+        "hospital": "Hospital referral",
+        "kkebiApp": "KKEBI app",
+        "other": "Other"
+      }
+    },
+    "paymentInfo": {
+      "title": "Insurance/Payment",
+      "fields": {
+        "paymentType": "Payment type",
+        "insuranceCompany": "Insurance company"
+      },
+      "paymentOptions": {
+        "privatePay": "Private pay",
+        "insurance": "Insurance"
+      },
+      "placeholders": {
+        "insuranceCompany": "Enter insurance company."
+      },
+      "errors": {
+        "paymentTypeRequired": "Please select payment type.",
+        "insuranceCompanyRequired": "Please enter insurance company."
+      }
+    },
+    "kkebiNickname": {
+      "title": "KKEBI nickname",
+      "field": "KKEBI nickname",
+      "placeholder": "Enter nickname."
+    },
+    "assessmentResults": {
+      "title": "Assessment Results",
+      "fields": {
+        "phq9Score": "PHQ-9 depression score",
+        "pss10Score": "PSS-10 stress score",
+        "mbiScore": "MBI burnout score",
+        "draftTestName": "Enter test name"
+      },
+      "placeholders": {
+        "phq9Score": "Enter PHQ-9 depression score.",
+        "pss10Score": "Enter PSS-10 stress score.",
+        "mbiScore": "Enter MBI burnout score.",
+        "draftTestName": "Enter test name.",
+        "additionalResult": "Enter result for {testName}."
+      },
+      "errors": {
+        "phq9Required": "Please enter PHQ-9 depression score.",
+        "pss10Required": "Please enter PSS-10 stress score.",
+        "mbiRequired": "Please enter MBI burnout score.",
+        "additionalResultRequired": "Please enter result for {testName}."
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "addTest": "Add test"
+      },
+      "alt": {
+        "delete": "Delete",
+        "add": "Add"
+      },
+      "aria": {
+        "deleteAdditionalResult": "Delete {testName}"
+      }
+    },
+    "intakeInterview": {
+      "title": "Intake Interview",
+      "actions": {
+        "uploadByPhoto": "Upload by photo"
+      },
+      "errors": {
+        "maxLength": "You can enter up to {count} characters."
+      },
+      "placeholders": {
+        "content": "Enter content."
+      },
+      "questions": {
+        "reasonForVisit": "1. Reason for visit",
+        "mostImportantChange": "2. Most important change expected from counseling",
+        "similarPastExperience": "3. Similar past difficulties",
+        "attemptedSolution": "3-1. Attempts made to solve it",
+        "attemptedSolutionEffectiveness": "3-2. Effectiveness of those attempts",
+        "currentBiggestConcern": "4. Current biggest concern",
+        "averageSleepPattern": "5. Average sleep pattern",
+        "sleepQuality": "5-1. Sleep quality",
+        "exerciseTypeAndFrequency": "6. Type and frequency of exercise",
+        "mealsPerDay": "7. Meals per day",
+        "mostReliablePerson": "8. Most reliable person",
+        "reasonForReliance": "8-1. Reason for relying on that person",
+        "familyBond": "9. Family bond",
+        "reasonForFamilyBond": "9-1. Reason for that perception",
+        "selfDescriptionSentence": "10. Describe yourself in one sentence"
+      }
+    },
+    "review": {
+      "hero": {
+        "alt": "Client registration complete",
+        "title": "Client registration is complete.",
+        "description": "Review the information and edit or finish."
+      },
+      "sections": {
+        "basicInfo": "Basic Information",
+        "counselingInfo": "Counseling Information",
+        "paymentInfo": "Insurance/Payment",
+        "assessmentResults": "Assessment Results",
+        "intakeInterview": "Intake Interview"
+      },
+      "fields": {
+        "name": "Name",
+        "phone": "Phone",
+        "email": "Email",
+        "birthDate": "Date of birth",
+        "gender": "Gender",
+        "counselingStartDate": "Counseling start date",
+        "chiefConcern": "Chief concern",
+        "referralPath": "Referral source",
+        "paymentInfo": "Payment"
+      },
+      "payment": {
+        "insurance": "Insurance",
+        "privatePay": "Private pay"
+      },
+      "scoreFields": {
+        "phq9Score": "PHQ-9 depression score",
+        "pss10Score": "PSS-10 stress score",
+        "mbiScore": "MBI burnout score"
+      },
+      "intakeFields": {
+        "reasonForVisit": "1. Reason for visit",
+        "mostImportantChange": "2. Most important change expected from counseling",
+        "similarPastExperience": "3. Similar past difficulties",
+        "attemptedSolution": "3-1. Attempts made to solve it",
+        "attemptedSolutionEffectiveness": "3-2. Effectiveness of those attempts",
+        "currentBiggestConcern": "4. Current biggest concern",
+        "averageSleepPattern": "5. Average sleep pattern",
+        "sleepQuality": "5-1. Sleep quality",
+        "exerciseTypeAndFrequency": "6. Type and frequency of exercise",
+        "mealsPerDay": "7. Meals per day",
+        "mostReliablePerson": "8. Most reliable person",
+        "reasonForReliance": "8-1. Reason for relying on that person",
+        "familyBond": "9. Family bond",
+        "reasonForFamilyBond": "9-1. Reason for that perception",
+        "selfDescriptionSentence": "10. Describe yourself in one sentence"
+      },
+      "gender": {
+        "female": "Female",
+        "male": "Male",
+        "nonBinary": "Non-binary"
+      },
+      "actions": {
+        "edit": "Edit",
+        "home": "Home",
+        "submitting": "Submitting..."
+      },
+      "toast": {
+        "registerFailed": "Failed to register client.",
+        "additionalResultFailed": "Failed to save additional test result.",
+        "registerSuccess": "Client registration completed."
+      }
+    }
+  },
   "notFound": {
     "title": "Page not found.",
     "description": "The page you requested does not exist or the URL is invalid.",

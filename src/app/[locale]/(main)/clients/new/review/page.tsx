@@ -1,0 +1,553 @@
+'use client';
+
+import { useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
+import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
+import { addClientTestResult, registerClient } from '@/features/clients/api/registerClient';
+import type { components } from '@/shared/api/generated-types';
+import type {
+  AssessmentResultsFormValues,
+  BasicInfoFormValues,
+  CounselingInfoFormValues,
+  ClientRegistrationDraft,
+  IntakeInterviewFormValues,
+  KkebiNicknameFormValues,
+  PaymentInfoFormValues,
+} from '@/features/clients/types/client-registration';
+import LabelCell from '@/features/clients/ui/ClientRegistrationLabelCell';
+import ValueCell from '@/features/clients/ui/ClientRegistrationValueCell';
+import { Button } from '@/shared/ui/button';
+import { toast } from '@/shared/ui/toast';
+import Image from 'next/image';
+
+const EMPTY_BASIC_INFO: BasicInfoFormValues = {
+  name: '',
+  phone: '',
+  email: '',
+  birthDate: '',
+  gender: '',
+};
+
+const EMPTY_COUNSELING_INFO: CounselingInfoFormValues = {
+  counselingStartDate: '',
+  chiefConcern: '',
+  referralPath: '',
+};
+
+const EMPTY_PAYMENT_INFO: PaymentInfoFormValues = {
+  paymentType: '',
+  insuranceCompany: '',
+};
+
+const EMPTY_KKEBI_NICKNAME: KkebiNicknameFormValues = {
+  kkebiNickname: '',
+};
+
+const EMPTY_ASSESSMENT_RESULTS: AssessmentResultsFormValues = {
+  phq9Score: null,
+  pss10Score: null,
+  mbiScore: null,
+  additionalResults: [],
+  draftTestName: '',
+};
+
+const EMPTY_INTAKE_INTERVIEW: IntakeInterviewFormValues = {
+  reasonForVisit: '',
+  mostImportantChange: '',
+  similarPastExperience: '',
+  attemptedSolution: '',
+  attemptedSolutionEffectiveness: '',
+  currentBiggestConcern: '',
+  averageSleepPattern: '',
+  sleepQuality: '',
+  exerciseTypeAndFrequency: '',
+  mealsPerDay: '',
+  mostReliablePerson: '',
+  reasonForReliance: '',
+  familyBond: '',
+  reasonForFamilyBond: '',
+  selfDescriptionSentence: '',
+};
+
+const getBasicInfoFromSessionStorage = (): BasicInfoFormValues => {
+  if (typeof window === 'undefined') {
+    return EMPTY_BASIC_INFO;
+  }
+
+  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+  if (!storedDraft) return EMPTY_BASIC_INFO;
+
+  try {
+    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+    return parsedDraft.basicInfo ?? EMPTY_BASIC_INFO;
+  } catch {
+    return EMPTY_BASIC_INFO;
+  }
+};
+
+const getCounselingInfoFromSessionStorage = (): CounselingInfoFormValues => {
+  if (typeof window === 'undefined') {
+    return EMPTY_COUNSELING_INFO;
+  }
+
+  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+  if (!storedDraft) return EMPTY_COUNSELING_INFO;
+
+  try {
+    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+    return parsedDraft.counselingInfo ?? EMPTY_COUNSELING_INFO;
+  } catch {
+    return EMPTY_COUNSELING_INFO;
+  }
+};
+
+const getPaymentInfoFromSessionStorage = (): PaymentInfoFormValues => {
+  if (typeof window === 'undefined') {
+    return EMPTY_PAYMENT_INFO;
+  }
+
+  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+  if (!storedDraft) return EMPTY_PAYMENT_INFO;
+
+  try {
+    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+    return parsedDraft.paymentInfo ?? EMPTY_PAYMENT_INFO;
+  } catch {
+    return EMPTY_PAYMENT_INFO;
+  }
+};
+
+const getKkebiNicknameFromSessionStorage = (): KkebiNicknameFormValues => {
+  if (typeof window === 'undefined') {
+    return EMPTY_KKEBI_NICKNAME;
+  }
+
+  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+  if (!storedDraft) return EMPTY_KKEBI_NICKNAME;
+
+  try {
+    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+    return parsedDraft.kkebiNickname ?? EMPTY_KKEBI_NICKNAME;
+  } catch {
+    return EMPTY_KKEBI_NICKNAME;
+  }
+};
+
+const getAssessmentResultsFromSessionStorage = (): AssessmentResultsFormValues => {
+  if (typeof window === 'undefined') {
+    return EMPTY_ASSESSMENT_RESULTS;
+  }
+
+  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+  if (!storedDraft) return EMPTY_ASSESSMENT_RESULTS;
+
+  try {
+    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+    return parsedDraft.assessmentResults ?? EMPTY_ASSESSMENT_RESULTS;
+  } catch {
+    return EMPTY_ASSESSMENT_RESULTS;
+  }
+};
+
+const getIntakeInterviewFromSessionStorage = (): IntakeInterviewFormValues => {
+  if (typeof window === 'undefined') {
+    return EMPTY_INTAKE_INTERVIEW;
+  }
+
+  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+  if (!storedDraft) return EMPTY_INTAKE_INTERVIEW;
+
+  try {
+    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+    return parsedDraft.intakeInterview ?? EMPTY_INTAKE_INTERVIEW;
+  } catch {
+    return EMPTY_INTAKE_INTERVIEW;
+  }
+};
+
+const ClientRegistrationReviewPage = () => {
+  const locale = useLocale();
+  const t = useTranslations('clientRegistration.review');
+  const router = useRouter();
+  const [basicInfo] = useState<BasicInfoFormValues>(getBasicInfoFromSessionStorage);
+  const [counselingInfo] = useState<CounselingInfoFormValues>(getCounselingInfoFromSessionStorage);
+  const [paymentInfo] = useState<PaymentInfoFormValues>(getPaymentInfoFromSessionStorage);
+  const [kkebiNickname] = useState<KkebiNicknameFormValues>(getKkebiNicknameFromSessionStorage);
+  const [assessmentResults] = useState<AssessmentResultsFormValues>(
+    getAssessmentResultsFromSessionStorage,
+  );
+  const [intakeInterview] = useState<IntakeInterviewFormValues>(
+    getIntakeInterviewFromSessionStorage,
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const paymentValue =
+    paymentInfo.paymentType === 'insurance'
+      ? `${t('payment.insurance')}${paymentInfo.insuranceCompany ? ` - ${paymentInfo.insuranceCompany}` : ''}`
+      : paymentInfo.paymentType === 'private-pay'
+        ? t('payment.privatePay')
+        : paymentInfo.paymentType;
+
+  const scoreRows: Array<{ field: string; value: string }> = [
+    { field: t('scoreFields.phq9Score'), value: assessmentResults.phq9Score?.toString() ?? '' },
+    { field: t('scoreFields.pss10Score'), value: assessmentResults.pss10Score?.toString() ?? '' },
+    { field: t('scoreFields.mbiScore'), value: assessmentResults.mbiScore?.toString() ?? '' },
+    ...assessmentResults.additionalResults.map((result) => ({
+      field: result.testName,
+      value: result.testResult?.toString() ?? '',
+    })),
+  ];
+
+  const intakeRows: Array<{ field: string; value: string }> = [
+    { field: t('intakeFields.reasonForVisit'), value: intakeInterview.reasonForVisit },
+    {
+      field: t('intakeFields.mostImportantChange'),
+      value: intakeInterview.mostImportantChange,
+    },
+    {
+      field: t('intakeFields.similarPastExperience'),
+      value: intakeInterview.similarPastExperience,
+    },
+    { field: t('intakeFields.attemptedSolution'), value: intakeInterview.attemptedSolution },
+    {
+      field: t('intakeFields.attemptedSolutionEffectiveness'),
+      value: intakeInterview.attemptedSolutionEffectiveness,
+    },
+    {
+      field: t('intakeFields.currentBiggestConcern'),
+      value: intakeInterview.currentBiggestConcern,
+    },
+    { field: t('intakeFields.averageSleepPattern'), value: intakeInterview.averageSleepPattern },
+    { field: t('intakeFields.sleepQuality'), value: intakeInterview.sleepQuality },
+    {
+      field: t('intakeFields.exerciseTypeAndFrequency'),
+      value: intakeInterview.exerciseTypeAndFrequency,
+    },
+    { field: t('intakeFields.mealsPerDay'), value: intakeInterview.mealsPerDay },
+    { field: t('intakeFields.mostReliablePerson'), value: intakeInterview.mostReliablePerson },
+    { field: t('intakeFields.reasonForReliance'), value: intakeInterview.reasonForReliance },
+    { field: t('intakeFields.familyBond'), value: intakeInterview.familyBond },
+    { field: t('intakeFields.reasonForFamilyBond'), value: intakeInterview.reasonForFamilyBond },
+    {
+      field: t('intakeFields.selfDescriptionSentence'),
+      value: intakeInterview.selfDescriptionSentence,
+    },
+  ];
+
+  const getGenderDisplayValue = (value: string) => {
+    if (value === 'female') return t('gender.female');
+    if (value === 'male') return t('gender.male');
+    if (value === 'non-binary') return t('gender.nonBinary');
+    return value;
+  };
+
+  const getReferralPathDisplayValue = (value: string) => {
+    if (value === 'search') return locale === 'en' ? 'Search' : '검색';
+    if (value === 'referral') return locale === 'en' ? 'Referral' : '지인 추천';
+    if (value === 'hospital') return locale === 'en' ? 'Hospital referral' : '병원 의뢰';
+    if (value === 'kkebi-app') return 'KKEBI앱';
+    if (value === 'other') return locale === 'en' ? 'Other' : '기타';
+    return value;
+  };
+
+  const mapGender = (
+    value: string,
+  ): components['schemas']['ClientRegistrationRequest']['gender'] | undefined => {
+    if (value === 'female') return 'FEMALE';
+    if (value === 'male') return 'MALE';
+    if (value === 'non-binary') return 'NON_BINARY';
+    return undefined;
+  };
+
+  const mapPaymentType = (
+    value: string,
+  ): components['schemas']['ClientRegistrationRequest']['paymentType'] | undefined => {
+    if (value === 'insurance') return 'INSURANCE';
+    if (value === 'private-pay') return 'SELF';
+    return undefined;
+  };
+
+  const mapReferralSource = (value: string) => {
+    if (value === 'search') return locale === 'en' ? 'Search' : '검색';
+    if (value === 'referral') return locale === 'en' ? 'Referral' : '지인 추천';
+    if (value === 'hospital') return locale === 'en' ? 'Hospital referral' : '병원 의뢰';
+    if (value === 'kkebi-app') return 'KKEBI앱';
+    if (value === 'other') return locale === 'en' ? 'Other' : '기타';
+    return value || undefined;
+  };
+
+  const handleEdit = () => {
+    router.push('/clients/new');
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const payload = {
+      name: basicInfo.name.trim(),
+      nickname: kkebiNickname.kkebiNickname.trim() || undefined,
+      phoneNumber: basicInfo.phone.trim() || undefined,
+      email: basicInfo.email.trim() || undefined,
+      birthDate: basicInfo.birthDate || undefined,
+      gender: mapGender(basicInfo.gender),
+      paymentType: mapPaymentType(paymentInfo.paymentType),
+      counselingStartDate: counselingInfo.counselingStartDate || undefined,
+      chiefComplaint: counselingInfo.chiefConcern.trim() || undefined,
+      referralSource: mapReferralSource(counselingInfo.referralPath),
+      insuranceCompany:
+        paymentInfo.paymentType === 'insurance'
+          ? paymentInfo.insuranceCompany.trim() || undefined
+          : undefined,
+      intake: {
+        phq9Score: assessmentResults.phq9Score ?? undefined,
+        pss10Score: assessmentResults.pss10Score ?? undefined,
+        mbiScore: assessmentResults.mbiScore ?? undefined,
+        visitReason: intakeInterview.reasonForVisit || undefined,
+        desiredChange: intakeInterview.mostImportantChange || undefined,
+        similarDifficultyHistory: intakeInterview.similarPastExperience || undefined,
+        attemptedSolution: intakeInterview.attemptedSolution || undefined,
+        solutionEffectiveness: intakeInterview.attemptedSolutionEffectiveness || undefined,
+        currentWorry: intakeInterview.currentBiggestConcern || undefined,
+        sleepPattern: intakeInterview.averageSleepPattern || undefined,
+        sleepQuality: intakeInterview.sleepQuality || undefined,
+        exerciseFrequency: intakeInterview.exerciseTypeAndFrequency || undefined,
+        mealsPerDay: intakeInterview.mealsPerDay || undefined,
+        reliablePerson: intakeInterview.mostReliablePerson || undefined,
+        reliableReason: intakeInterview.reasonForReliance || undefined,
+        familyBond: intakeInterview.familyBond || undefined,
+        familyBondReason: intakeInterview.reasonForFamilyBond || undefined,
+        selfDescription: intakeInterview.selfDescriptionSentence || undefined,
+      },
+    };
+
+    const registerResult = await registerClient(payload);
+    if (!registerResult.success) {
+      toast(registerResult.message || t('toast.registerFailed'));
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (registerResult.clientId && assessmentResults.additionalResults.length > 0) {
+      const testDate = counselingInfo.counselingStartDate || new Date().toISOString().slice(0, 10);
+      for (const result of assessmentResults.additionalResults) {
+        if (!result.testName.trim() || result.testResult == null) continue;
+        const testResultResponse = await addClientTestResult(registerResult.clientId, {
+          testName: result.testName.trim(),
+          score: result.testResult,
+          testDate,
+        });
+        if (!testResultResponse.success) {
+          toast(testResultResponse.message || t('toast.additionalResultFailed'));
+          setIsSubmitting(false);
+          return;
+        }
+      }
+    }
+
+    window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+    toast(t('toast.registerSuccess'));
+    setIsSubmitting(false);
+    router.push('/clients');
+  };
+
+  return (
+    <section className="flex w-full items-start justify-center gap-4 pb-4">
+      <div className="flex w-full flex-col items-start max-w-[1200px] gap-[33px]">
+        <div className="flex w-full flex-col justify-center items-start gap-[42px]">
+          <div className="flex flex-col w-full justify-center items-center gap-[23px]">
+            <Image src="/icons/checkmark.svg" alt={t('hero.alt')} width={96} height={96} />
+            <div className="flex flex-col justify-center items-center gap-2">
+              <span className="text-[24px] font-semibold text-label-normal">{t('hero.title')}</span>
+              <span className="body-16 text-label-alternative">{t('hero.description')}</span>
+            </div>
+          </div>
+
+          <ClientRegistrationStepBar
+            currentStep="registration-complete"
+            className="w-full max-w-[626px] self-center"
+          />
+        </div>
+
+        <div className="flex w-full flex-col items-start gap-[23px]">
+          <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
+            <h2 className="text-[24px] font-semibold text-label-strong">
+              {t('sections.basicInfo')}
+            </h2>
+            <div className="flex w-full flex-col gap-4">
+              <div className="grid w-full grid-cols-2 divide-x divide-gray-10 bg-white">
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.name')} />
+                  <ValueCell value={basicInfo.name} />
+                </div>
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.phone')} />
+                  <ValueCell value={basicInfo.phone} />
+                </div>
+              </div>
+
+              <div className="grid w-full grid-cols-2 divide-x divide-gray-10 bg-white">
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.email')} />
+                  <ValueCell value={basicInfo.email} />
+                </div>
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.birthDate')} />
+                  <ValueCell value={basicInfo.birthDate} />
+                </div>
+              </div>
+
+              <div className="grid w-full grid-cols-1 bg-white">
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.gender')} />
+                  <ValueCell value={getGenderDisplayValue(basicInfo.gender)} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
+            <h2 className="text-[24px] font-semibold text-label-strong">
+              {t('sections.counselingInfo')}
+            </h2>
+            <div className="flex w-full flex-col gap-4">
+              <div className="grid w-full grid-cols-2 divide-x divide-gray-10 bg-white">
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.counselingStartDate')} />
+                  <ValueCell value={counselingInfo.counselingStartDate} />
+                </div>
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.chiefConcern')} />
+                  <ValueCell value={counselingInfo.chiefConcern} />
+                </div>
+              </div>
+
+              <div className="grid w-full grid-cols-1 bg-white">
+                <div className="flex flex-col">
+                  <LabelCell field={t('fields.referralPath')} />
+                  <ValueCell value={getReferralPathDisplayValue(counselingInfo.referralPath)} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
+            <h2 className="text-[24px] font-semibold text-label-strong">
+              {t('sections.paymentInfo')}
+            </h2>
+            <div className="grid w-full grid-cols-1 bg-white">
+              <div className="flex flex-col">
+                <LabelCell field={t('fields.paymentInfo')} />
+                <ValueCell value={paymentValue} />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
+            <h2 className="text-[24px] font-semibold text-label-strong">
+              {t('sections.assessmentResults')}
+            </h2>
+            <div className="flex w-full flex-col gap-4">
+              {Array.from({ length: Math.ceil(scoreRows.length / 2) }).map((_, rowIndex) => {
+                const left = scoreRows[rowIndex * 2];
+                const right = scoreRows[rowIndex * 2 + 1];
+
+                if (!right) {
+                  return (
+                    <div key={left.field} className="grid w-full grid-cols-1 bg-white">
+                      <div className="flex flex-col">
+                        <LabelCell field={left.field} />
+                        <ValueCell value={left.value} />
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div
+                    key={`${left.field}-${right.field}`}
+                    className="grid w-full grid-cols-2 divide-x divide-gray-10 bg-white"
+                  >
+                    <div className="flex flex-col">
+                      <LabelCell field={left.field} />
+                      <ValueCell value={left.value} />
+                    </div>
+                    <div className="flex flex-col">
+                      <LabelCell field={right.field} />
+                      <ValueCell value={right.value} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
+            <h2 className="text-[24px] font-semibold text-label-strong">
+              {t('sections.intakeInterview')}
+            </h2>
+            <div className="flex w-full flex-col gap-4">
+              {Array.from({ length: Math.ceil(intakeRows.length / 2) }).map((_, rowIndex) => {
+                const left = intakeRows[rowIndex * 2];
+                const right = intakeRows[rowIndex * 2 + 1];
+
+                if (!right) {
+                  return (
+                    <div key={left.field} className="grid w-full grid-cols-1 bg-white">
+                      <div className="flex flex-col">
+                        <LabelCell field={left.field} />
+                        <ValueCell value={left.value} />
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div
+                    key={`${left.field}-${right.field}`}
+                    className="grid w-full grid-cols-2 divide-x divide-gray-10 bg-white"
+                  >
+                    <div className="flex flex-col">
+                      <LabelCell field={left.field} />
+                      <ValueCell value={left.value} />
+                    </div>
+                    <div className="flex flex-col">
+                      <LabelCell field={right.field} />
+                      <ValueCell value={right.value} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex w-full justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full max-w-[144px]"
+              onClick={handleEdit}
+              disabled={isSubmitting}
+            >
+              {t('actions.edit')}
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              className="w-full max-w-[236px]"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? t('actions.submitting') : t('actions.home')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default ClientRegistrationReviewPage;

@@ -147,7 +147,12 @@ export default function ClientsPage() {
           />
         </div>
         <div className="flex items-center gap-3 max-[1100px]:w-full max-[1100px]:justify-start">
-          <Button disabled size="sm">
+          <Button
+            size="sm"
+            onClick={() => {
+              router.push('/clients/new');
+            }}
+          >
             {tClients('listRegister')}
           </Button>
           <Button size="sm" variant="outline" onClick={() => router.push('/clients/closed')}>
