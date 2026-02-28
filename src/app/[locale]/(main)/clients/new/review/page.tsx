@@ -1,19 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from '@/i18n/navigation';
 import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
 import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
+import { addClientTestResult, registerClient } from '@/features/clients/api/registerClient';
+import type { components } from '@/shared/api/generated-types';
 import type {
   AssessmentResultsFormValues,
   BasicInfoFormValues,
   CounselingInfoFormValues,
   ClientRegistrationDraft,
   IntakeInterviewFormValues,
+  KkebiNicknameFormValues,
   PaymentInfoFormValues,
 } from '@/features/clients/types/client-registration';
 import LabelCell from '@/features/clients/ui/ClientRegistrationLabelCell';
 import ValueCell from '@/features/clients/ui/ClientRegistrationValueCell';
 import { Button } from '@/shared/ui/button';
+import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
 
 const EMPTY_BASIC_INFO: BasicInfoFormValues = {
@@ -33,6 +38,10 @@ const EMPTY_COUNSELING_INFO: CounselingInfoFormValues = {
 const EMPTY_PAYMENT_INFO: PaymentInfoFormValues = {
   paymentType: '',
   insuranceCompany: '',
+};
+
+const EMPTY_KKEBI_NICKNAME: KkebiNicknameFormValues = {
+  kkebiNickname: '',
 };
 
 const EMPTY_ASSESSMENT_RESULTS: AssessmentResultsFormValues = {
@@ -109,6 +118,22 @@ const getPaymentInfoFromSessionStorage = (): PaymentInfoFormValues => {
   }
 };
 
+const getKkebiNicknameFromSessionStorage = (): KkebiNicknameFormValues => {
+  if (typeof window === 'undefined') {
+    return EMPTY_KKEBI_NICKNAME;
+  }
+
+  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+  if (!storedDraft) return EMPTY_KKEBI_NICKNAME;
+
+  try {
+    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
+    return parsedDraft.kkebiNickname ?? EMPTY_KKEBI_NICKNAME;
+  } catch {
+    return EMPTY_KKEBI_NICKNAME;
+  }
+};
+
 const getAssessmentResultsFromSessionStorage = (): AssessmentResultsFormValues => {
   if (typeof window === 'undefined') {
     return EMPTY_ASSESSMENT_RESULTS;
@@ -142,15 +167,18 @@ const getIntakeInterviewFromSessionStorage = (): IntakeInterviewFormValues => {
 };
 
 const ClientRegistrationReviewPage = () => {
+  const router = useRouter();
   const [basicInfo] = useState<BasicInfoFormValues>(getBasicInfoFromSessionStorage);
   const [counselingInfo] = useState<CounselingInfoFormValues>(getCounselingInfoFromSessionStorage);
   const [paymentInfo] = useState<PaymentInfoFormValues>(getPaymentInfoFromSessionStorage);
+  const [kkebiNickname] = useState<KkebiNicknameFormValues>(getKkebiNicknameFromSessionStorage);
   const [assessmentResults] = useState<AssessmentResultsFormValues>(
     getAssessmentResultsFromSessionStorage,
   );
   const [intakeInterview] = useState<IntakeInterviewFormValues>(
     getIntakeInterviewFromSessionStorage,
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const paymentValue =
     paymentInfo.paymentType === 'insurance'
@@ -189,6 +217,107 @@ const ClientRegistrationReviewPage = () => {
     { field: '9-1. 그렇게 생각한 이유', value: intakeInterview.reasonForFamilyBond },
     { field: '10. 스스로를 한 문장으로 표현', value: intakeInterview.selfDescriptionSentence },
   ];
+
+  const mapGender = (
+    value: string,
+  ): components['schemas']['ClientRegistrationRequest']['gender'] | undefined => {
+    if (value === 'female') return 'FEMALE';
+    if (value === 'male') return 'MALE';
+    if (value === 'non-binary') return 'NON_BINARY';
+    return undefined;
+  };
+
+  const mapPaymentType = (
+    value: string,
+  ): components['schemas']['ClientRegistrationRequest']['paymentType'] | undefined => {
+    if (value === 'insurance') return 'INSURANCE';
+    if (value === 'private-pay') return 'SELF';
+    return undefined;
+  };
+
+  const mapReferralSource = (value: string) => {
+    if (value === 'search') return '검색';
+    if (value === 'referral') return '지인 추천';
+    if (value === 'hospital') return '병원 의뢰';
+    if (value === 'kkebi-app') return 'KKEBI앱';
+    if (value === 'other') return '기타';
+    return value || undefined;
+  };
+
+  const handleEdit = () => {
+    router.push('/clients/new');
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const payload = {
+      name: basicInfo.name.trim(),
+      nickname: kkebiNickname.kkebiNickname.trim() || undefined,
+      phoneNumber: basicInfo.phone.trim() || undefined,
+      email: basicInfo.email.trim() || undefined,
+      birthDate: basicInfo.birthDate || undefined,
+      gender: mapGender(basicInfo.gender),
+      paymentType: mapPaymentType(paymentInfo.paymentType),
+      counselingStartDate: counselingInfo.counselingStartDate || undefined,
+      chiefComplaint: counselingInfo.chiefConcern.trim() || undefined,
+      referralSource: mapReferralSource(counselingInfo.referralPath),
+      insuranceCompany:
+        paymentInfo.paymentType === 'insurance'
+          ? paymentInfo.insuranceCompany.trim() || undefined
+          : undefined,
+      intake: {
+        phq9Score: assessmentResults.phq9Score ?? undefined,
+        pss10Score: assessmentResults.pss10Score ?? undefined,
+        mbiScore: assessmentResults.mbiScore ?? undefined,
+        visitReason: intakeInterview.reasonForVisit || undefined,
+        desiredChange: intakeInterview.mostImportantChange || undefined,
+        similarDifficultyHistory: intakeInterview.similarPastExperience || undefined,
+        attemptedSolution: intakeInterview.attemptedSolution || undefined,
+        solutionEffectiveness: intakeInterview.attemptedSolutionEffectiveness || undefined,
+        currentWorry: intakeInterview.currentBiggestConcern || undefined,
+        sleepPattern: intakeInterview.averageSleepPattern || undefined,
+        sleepQuality: intakeInterview.sleepQuality || undefined,
+        exerciseFrequency: intakeInterview.exerciseTypeAndFrequency || undefined,
+        mealsPerDay: intakeInterview.mealsPerDay || undefined,
+        reliablePerson: intakeInterview.mostReliablePerson || undefined,
+        reliableReason: intakeInterview.reasonForReliance || undefined,
+        familyBond: intakeInterview.familyBond || undefined,
+        familyBondReason: intakeInterview.reasonForFamilyBond || undefined,
+        selfDescription: intakeInterview.selfDescriptionSentence || undefined,
+      },
+    };
+
+    const registerResult = await registerClient(payload);
+    if (!registerResult.success) {
+      toast(registerResult.message || '내담자 등록에 실패했습니다.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (registerResult.clientId && assessmentResults.additionalResults.length > 0) {
+      const testDate = counselingInfo.counselingStartDate || new Date().toISOString().slice(0, 10);
+      for (const result of assessmentResults.additionalResults) {
+        if (!result.testName.trim() || result.testResult == null) continue;
+        const testResultResponse = await addClientTestResult(registerResult.clientId, {
+          testName: result.testName.trim(),
+          score: result.testResult,
+          testDate,
+        });
+        if (!testResultResponse.success) {
+          toast(testResultResponse.message || '추가 검사 결과 저장에 실패했습니다.');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+    }
+
+    window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+    toast('내담자 등록이 완료되었습니다.');
+    setIsSubmitting(false);
+    router.push('/clients');
+  };
 
   return (
     <section className="flex w-full items-start justify-center gap-4 pb-4">
@@ -354,9 +483,25 @@ const ClientRegistrationReviewPage = () => {
             </div>
           </div>
 
-          <div className="flex w-full justify-end">
-            <Button type="button" size="lg" className="w-full max-w-[244px]">
-              등록 완료
+          <div className="flex w-full justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full max-w-[144px]"
+              onClick={handleEdit}
+              disabled={isSubmitting}
+            >
+              수정하기
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              className="w-full max-w-[236px]"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? '등록 중...' : '홈으로'}
             </Button>
           </div>
         </div>
