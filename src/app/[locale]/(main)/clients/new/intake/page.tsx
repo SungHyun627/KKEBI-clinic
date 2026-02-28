@@ -109,7 +109,7 @@ const ClientRegistrationIntakePage = () => {
         CLIENT_REGISTRATION_DRAFT_STORAGE_KEY,
         JSON.stringify(nextDraft),
       );
-      router.push('/clients/new/complete');
+      router.push('/clients/new/review');
     } catch {
       window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
       router.replace('/clients/new');
