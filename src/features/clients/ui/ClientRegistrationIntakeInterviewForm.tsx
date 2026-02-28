@@ -37,9 +37,14 @@ const ClientRegistrationIntakeInterviewForm = ({
     <Form {...form}>
       <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
         <h2 className="text-[24px] font-semibold text-label-strong">접수면접 결과</h2>
-        <div className="flex w-full justify-end">
-          <Button type="button" variant="outline" size="sm" className="h-10 rounded-xl px-4">
-            사진으로 업로드하기
+        <div className="flex w-full">
+          <Button
+            disabled
+            type="button"
+            size="sm"
+            className="h-[34px] rounded-[8px] px-3 bg-[rgba(250,84,84,0.10)] text-primary hover:bg-[rgba(178, 60, 60, 0.10)] hover:text-primary-dark disabled:bg-label-disable disabled:text-white"
+          >
+            사진으로 업로드 하기
           </Button>
         </div>
         <div className="flex w-full flex-col items-start gap-5">
