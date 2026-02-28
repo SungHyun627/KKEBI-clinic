@@ -399,6 +399,229 @@
     "riskSelfHarmKeywordDetected": "자해 키워드가 감지되었습니다.",
     "riskSuicideKeywordDetected": "자살 키워드가 감지되었습니다."
   },
+  "clientRegistration": {
+    "common": {
+      "next": "다음으로"
+    },
+    "stepBar": {
+      "basic-info": {
+        "label": "기본 정보",
+        "mobileLabel": "기본정보"
+      },
+      "intake-interview-info": {
+        "label": "면접 정보",
+        "mobileLabel": "면접정보"
+      },
+      "registration-complete": {
+        "label": "등록 완료",
+        "mobileLabel": "등록완료"
+      }
+    },
+    "basicInfo": {
+      "title": "기본 정보",
+      "fields": {
+        "name": "이름",
+        "phone": "전화번호",
+        "email": "이메일",
+        "birthDate": "생년월일",
+        "gender": "성별"
+      },
+      "placeholders": {
+        "name": "이름을 입력해 주세요",
+        "phone": "전화번호를 입력해 주세요",
+        "email": "이메일을 입력해 주세요",
+        "birthDate": "생년월일을 선택해 주세요"
+      },
+      "errors": {
+        "nameRequired": "이름을 입력해 주세요.",
+        "phoneRequired": "전화번호를 입력해 주세요.",
+        "phonePattern": "전화번호 형식은 000-0000-0000 입니다.",
+        "emailRequired": "이메일을 입력해 주세요.",
+        "emailPattern": "유효한 이메일 형식을 입력해 주세요.",
+        "birthDateRequired": "생년월일을 입력해 주세요."
+      },
+      "genderOptions": {
+        "female": "여성",
+        "male": "남성",
+        "nonBinary": "논바이너리"
+      }
+    },
+    "counselingInfo": {
+      "title": "상담 정보",
+      "fields": {
+        "counselingStartDate": "상담 시작 일자",
+        "chiefConcern": "주 호소 문제",
+        "referralPath": "유입 경로"
+      },
+      "placeholders": {
+        "counselingStartDate": "상담 시작 일자를 선택해 주세요",
+        "chiefConcern": "주 호소 문제를 입력해 주세요",
+        "referralPath": "유입 경로-검색/지인 추천/병원 의뢰/KKEBI앱/기타"
+      },
+      "errors": {
+        "chiefConcernRequired": "주 호소 문제를 입력해 주세요."
+      },
+      "referralOptions": {
+        "search": "검색",
+        "referral": "지인 추천",
+        "hospital": "병원 의뢰",
+        "kkebiApp": "KKEBI앱",
+        "other": "기타"
+      }
+    },
+    "paymentInfo": {
+      "title": "보험/결제 정보 선택",
+      "fields": {
+        "paymentType": "결제 유형",
+        "insuranceCompany": "보험사명"
+      },
+      "paymentOptions": {
+        "privatePay": "자비 부담",
+        "insurance": "보험 적용"
+      },
+      "placeholders": {
+        "insuranceCompany": "보험사명을 입력해 주세요."
+      },
+      "errors": {
+        "paymentTypeRequired": "결제 유형을 선택해 주세요.",
+        "insuranceCompanyRequired": "보험사명을 입력해 주세요."
+      }
+    },
+    "kkebiNickname": {
+      "title": "KKEBI 닉네임",
+      "field": "KKEBI 닉네임 입력",
+      "placeholder": "닉네임을 입력해 주세요."
+    },
+    "assessmentResults": {
+      "title": "검사 결과",
+      "fields": {
+        "phq9Score": "PHQ-9 우울 척도 점수",
+        "pss10Score": "PSS-10 스트레스 척도 점수",
+        "mbiScore": "MBI 소진 척도 점수",
+        "draftTestName": "검사명을 입력해 주세요"
+      },
+      "placeholders": {
+        "phq9Score": "PHQ-9 우울 척도 점수를 입력해 주세요.",
+        "pss10Score": "PSS-10 척도 점수를 입력해 주세요.",
+        "mbiScore": "MBI 척도 점수를 입력해 주세요.",
+        "draftTestName": "검사명을 입력해 주세요.",
+        "additionalResult": "{testName} 결과를 입력해 주세요."
+      },
+      "errors": {
+        "phq9Required": "PHQ-9 우울 척도 점수를 입력해 주세요.",
+        "pss10Required": "PSS-10 스트레스 척도 점수를 입력해 주세요.",
+        "mbiRequired": "MBI 소진 척도 점수를 입력해 주세요.",
+        "additionalResultRequired": "{testName} 결과를 입력해 주세요."
+      },
+      "actions": {
+        "cancel": "취소",
+        "save": "저장",
+        "addTest": "검사 추가하기"
+      },
+      "alt": {
+        "delete": "삭제",
+        "add": "추가"
+      },
+      "aria": {
+        "deleteAdditionalResult": "{testName} 삭제"
+      }
+    },
+    "intakeInterview": {
+      "title": "접수면접 결과",
+      "actions": {
+        "uploadByPhoto": "사진으로 업로드 하기"
+      },
+      "errors": {
+        "maxLength": "최대 {count}자까지 입력할 수 있습니다."
+      },
+      "placeholders": {
+        "content": "내용을 입력해 주세요."
+      },
+      "questions": {
+        "reasonForVisit": "1. 상담 방문 이유",
+        "mostImportantChange": "2. 상담을 통해 얻고 싶은 가장 중요한 변화",
+        "similarPastExperience": "3. 과거 비슷한 어려움 경험 유무",
+        "attemptedSolution": "3-1. 당시 해결을 위해서 시도한 방법",
+        "attemptedSolutionEffectiveness": "3-2. 방법의 효과성 정도",
+        "currentBiggestConcern": "4. 지금 가장 고민되는 문제",
+        "averageSleepPattern": "5. 평균 수면 패턴",
+        "sleepQuality": "5-1. 수면의 질",
+        "exerciseTypeAndFrequency": "6. 하고 있는 운동의 종류와 빈도",
+        "mealsPerDay": "7. 하루에 섭취하는 끼니 수",
+        "mostReliablePerson": "8. 가장 의지하는 사람",
+        "reasonForReliance": "8-1. 그 사람을 가장 의지하는 이유",
+        "familyBond": "9. 가족과의 유대감",
+        "reasonForFamilyBond": "9-1. 그렇게 생각한 이유",
+        "selfDescriptionSentence": "10. 스스로를 한 문장으로 표현"
+      }
+    },
+    "review": {
+      "hero": {
+        "alt": "내담자 등록 완료",
+        "title": "내담자 등록이 완료되었습니다.",
+        "description": "정보 확인 후 수정 또는 완료해주세요."
+      },
+      "sections": {
+        "basicInfo": "기본 정보",
+        "counselingInfo": "상담 정보",
+        "paymentInfo": "보험/결제 정보",
+        "assessmentResults": "검사 결과",
+        "intakeInterview": "접수면접 결과"
+      },
+      "fields": {
+        "name": "이름",
+        "phone": "연락처",
+        "email": "이메일",
+        "birthDate": "생년월일",
+        "gender": "성별",
+        "counselingStartDate": "상담 시작 일자",
+        "chiefConcern": "주 호소 문제",
+        "referralPath": "유입 경로",
+        "paymentInfo": "결제 정보"
+      },
+      "payment": {
+        "insurance": "보험 적용",
+        "privatePay": "자비 부담"
+      },
+      "scoreFields": {
+        "phq9Score": "PHQ-9 우울 척도 점수",
+        "pss10Score": "PSS-10 스트레스 척도 점수",
+        "mbiScore": "MBI 소진 척도 점수"
+      },
+      "intakeFields": {
+        "reasonForVisit": "1. 상담 방문 이유",
+        "mostImportantChange": "2. 상담을 통해 얻고 싶은 가장 중요한 변화",
+        "similarPastExperience": "3. 과거 비슷한 어려움 경험 유무",
+        "attemptedSolution": "3-1. 당시 해결을 위해서 시도한 방법",
+        "attemptedSolutionEffectiveness": "3-2. 방법의 효과성 정도",
+        "currentBiggestConcern": "4. 지금 가장 고민되는 문제",
+        "averageSleepPattern": "5. 평균 수면 패턴",
+        "sleepQuality": "5-1. 수면의 질",
+        "exerciseTypeAndFrequency": "6. 하고 있는 운동의 종류와 빈도",
+        "mealsPerDay": "7. 하루에 섭취하는 끼니 수",
+        "mostReliablePerson": "8. 가장 의지하는 사람",
+        "reasonForReliance": "8-1. 그 사람을 가장 의지하는 이유",
+        "familyBond": "9. 가족과의 유대감",
+        "reasonForFamilyBond": "9-1. 그렇게 생각한 이유",
+        "selfDescriptionSentence": "10. 스스로를 한 문장으로 표현"
+      },
+      "gender": {
+        "female": "여성",
+        "male": "남성",
+        "nonBinary": "논바이너리"
+      },
+      "actions": {
+        "edit": "수정하기",
+        "home": "홈으로",
+        "submitting": "등록 중..."
+      },
+      "toast": {
+        "registerFailed": "내담자 등록에 실패했습니다.",
+        "additionalResultFailed": "추가 검사 결과 저장에 실패했습니다.",
+        "registerSuccess": "내담자 등록이 완료되었습니다."
+      }
+    }
+  },
   "notFound": {
     "title": "페이지를 찾을 수 없습니다.",
     "description": "요청하신 페이지가 없거나 주소가 잘못되었습니다.",

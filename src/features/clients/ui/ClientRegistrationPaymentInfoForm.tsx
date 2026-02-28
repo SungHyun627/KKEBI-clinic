@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { UseFormReturn } from 'react-hook-form';
 import type { PaymentInfoFormValues } from '@/features/clients/types/client-registration';
 import { cn } from '@/shared/lib/utils';
@@ -7,31 +8,32 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/shared/ui/input';
 
 const PAYMENT_OPTIONS = [
-  { label: '자비 부담', value: 'private-pay' },
-  { label: '보험 적용', value: 'insurance' },
-];
+  { labelKey: 'privatePay', value: 'private-pay' },
+  { labelKey: 'insurance', value: 'insurance' },
+] as const;
 
 interface ClientRegistrationPaymentInfoFormProps {
   form: UseFormReturn<PaymentInfoFormValues>;
 }
 
 const ClientRegistrationPaymentInfoForm = ({ form }: ClientRegistrationPaymentInfoFormProps) => {
+  const t = useTranslations('clientRegistration.paymentInfo');
   const paymentType = form.watch('paymentType');
   const isInsurance = paymentType === 'insurance';
 
   return (
     <Form {...form}>
       <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
-        <h2 className="text-[24px] font-semibold text-label-strong">보험/결제 정보 선택</h2>
+        <h2 className="text-[24px] font-semibold text-label-strong">{t('title')}</h2>
         <div className="flex w-full flex-col items-start gap-5">
           <FormField
             control={form.control}
             name="paymentType"
-            rules={{ required: '결제 유형을 선택해 주세요.' }}
+            rules={{ required: t('errors.paymentTypeRequired') }}
             render={() => (
               <FormItem className="flex w-full flex-col gap-2">
                 <FormLabel required className="body-14 font-medium text-label-normal">
-                  결제 유형
+                  {t('fields.paymentType')}
                 </FormLabel>
                 <div className="flex w-full gap-2">
                   {PAYMENT_OPTIONS.map((option) => {
@@ -61,7 +63,7 @@ const ClientRegistrationPaymentInfoForm = ({ form }: ClientRegistrationPaymentIn
                             isSelected ? 'text-primary' : 'text-label-alternative',
                           )}
                         >
-                          {option.label}
+                          {t(`paymentOptions.${option.labelKey}`)}
                         </span>
                       </button>
                     );
@@ -79,16 +81,16 @@ const ClientRegistrationPaymentInfoForm = ({ form }: ClientRegistrationPaymentIn
               rules={{
                 validate: (value) => {
                   if (!isInsurance) return true;
-                  return Boolean(value.trim()) || '보험사명을 입력해 주세요.';
+                  return Boolean(value.trim()) || t('errors.insuranceCompanyRequired');
                 },
               }}
               render={({ field }) => (
                 <FormItem className="flex w-full flex-col gap-2">
                   <FormLabel required className="body-14 font-medium text-label-normal">
-                    보험사명
+                    {t('fields.insuranceCompany')}
                   </FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="보험사명을 입력해 주세요." />
+                    <Input {...field} placeholder={t('placeholders.insuranceCompany')} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Divider from '@/shared/ui/divider';
 import { cn } from '@/shared/lib/utils';
 import type { ClientRegistrationStepKey } from '@/features/clients/types/client-registration';
@@ -12,15 +13,14 @@ interface ClientRegistrationStepBarProps {
 const STEPS: Array<{
   key: ClientRegistrationStepKey;
   order: 1 | 2 | 3;
-  label: string;
-  mobileLabel: string;
 }> = [
-  { key: 'basic-info', order: 1, label: '기본 정보', mobileLabel: '기본정보' },
-  { key: 'intake-interview-info', order: 2, label: '접수 면접 정보', mobileLabel: '면접정보' },
-  { key: 'registration-complete', order: 3, label: '등록 완료', mobileLabel: '등록완료' },
+  { key: 'basic-info', order: 1 },
+  { key: 'intake-interview-info', order: 2 },
+  { key: 'registration-complete', order: 3 },
 ];
 
 const ClientRegistrationStepBar = ({ currentStep, className }: ClientRegistrationStepBarProps) => {
+  const t = useTranslations('clientRegistration.stepBar');
   const currentStepOrder = STEPS.find((step) => step.key === currentStep)?.order ?? 1;
 
   return (
@@ -54,7 +54,7 @@ const ClientRegistrationStepBar = ({ currentStep, className }: ClientRegistratio
                   isHighlighted ? 'text-primary' : 'text-label-assistive',
                 )}
               >
-                {item.label}
+                {t(`${item.key}.label`)}
               </span>
               <span
                 className={cn(
@@ -62,7 +62,7 @@ const ClientRegistrationStepBar = ({ currentStep, className }: ClientRegistratio
                   isHighlighted ? 'text-primary' : 'text-label-assistive',
                 )}
               >
-                {item.mobileLabel}
+                {t(`${item.key}.mobileLabel`)}
               </span>
             </div>
             {index < STEPS.length - 1 ? (

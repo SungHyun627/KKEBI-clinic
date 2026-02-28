@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useLocale, useTranslations } from 'next-intl';
 import { UseFormReturn } from 'react-hook-form';
 import type { CounselingInfoFormValues } from '@/features/clients/types/client-registration';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
@@ -12,12 +13,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { Button } from '@/shared/ui/button';
 
 const REFERRAL_OPTIONS = [
-  { label: '검색', value: 'search' },
-  { label: '지인 추천', value: 'referral' },
-  { label: '병원 의뢰', value: 'hospital' },
-  { label: 'KKEBI앱', value: 'kkebi-app' },
-  { label: '기타', value: 'other' },
-];
+  { labelKey: 'search', value: 'search' },
+  { labelKey: 'referral', value: 'referral' },
+  { labelKey: 'hospital', value: 'hospital' },
+  { labelKey: 'kkebiApp', value: 'kkebi-app' },
+  { labelKey: 'other', value: 'other' },
+] as const;
 
 interface ClientRegistrationCounselingInfoFormProps {
   form: UseFormReturn<CounselingInfoFormValues>;
@@ -26,10 +27,17 @@ interface ClientRegistrationCounselingInfoFormProps {
 const ClientRegistrationCounselingInfoForm = ({
   form,
 }: ClientRegistrationCounselingInfoFormProps) => {
+  const t = useTranslations('clientRegistration.counselingInfo');
+  const locale = useLocale();
+  const referralOptions = REFERRAL_OPTIONS.map((option) => ({
+    value: option.value,
+    label: t(`referralOptions.${option.labelKey}`),
+  }));
+
   return (
     <Form {...form}>
       <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
-        <h2 className="text-[24px] font-semibold text-label-strong">상담 정보</h2>
+        <h2 className="text-[24px] font-semibold text-label-strong">{t('title')}</h2>
         <div className="flex w-full flex-col items-start gap-5">
           <FormField
             control={form.control}
@@ -37,13 +45,14 @@ const ClientRegistrationCounselingInfoForm = ({
             render={({ field }) => (
               <FormItem className="flex w-full flex-col gap-2">
                 <FormLabel className="body-14 font-medium text-label-normal">
-                  상담 시작 일자
+                  {t('fields.counselingStartDate')}
                 </FormLabel>
                 <FormControl>
                   <DatePickerField
+                    locale={locale}
                     value={field.value}
                     onValueChange={field.onChange}
-                    placeholder="상담 시작 일자를 선택해 주세요"
+                    placeholder={t('placeholders.counselingStartDate')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -53,14 +62,14 @@ const ClientRegistrationCounselingInfoForm = ({
           <FormField
             control={form.control}
             name="chiefConcern"
-            rules={{ required: '주 호소 문제를 입력해 주세요.' }}
+            rules={{ required: t('errors.chiefConcernRequired') }}
             render={({ field }) => (
               <FormItem className="flex w-full flex-col gap-2">
                 <FormLabel required className="body-14 font-medium text-label-normal">
-                  주 호소 문제
+                  {t('fields.chiefConcern')}
                 </FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder="주 호소 문제를 입력해 주세요" />
+                  <Input {...field} placeholder={t('placeholders.chiefConcern')} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -71,13 +80,15 @@ const ClientRegistrationCounselingInfoForm = ({
             name="referralPath"
             render={({ field }) => (
               <FormItem className="flex w-full flex-col gap-2">
-                <FormLabel className="body-14 font-medium text-label-normal">유입 경로</FormLabel>
+                <FormLabel className="body-14 font-medium text-label-normal">
+                  {t('fields.referralPath')}
+                </FormLabel>
                 <FormControl>
                   <Select
-                    options={REFERRAL_OPTIONS}
+                    options={referralOptions}
                     value={field.value}
                     onValueChange={field.onChange}
-                    placeholder="유입 경로-검색/지인 추천/병원 의뢰/KKEBI앱/기타"
+                    placeholder={t('placeholders.referralPath')}
                     placeholderTextClassName="text-label-alternative font-normal"
                     triggerClassName="h-14.5 rounded-2xl border border-neutral-95 bg-white px-4 py-0"
                   />
@@ -93,10 +104,12 @@ const ClientRegistrationCounselingInfoForm = ({
 };
 
 const DatePickerField = ({
+  locale,
   value,
   onValueChange,
   placeholder,
 }: {
+  locale: string;
   value: string;
   onValueChange: (value: string) => void;
   placeholder: string;
@@ -126,7 +139,7 @@ const DatePickerField = ({
           className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:border-label-strong focus-within:border-label-normal enabled:hover:cursor-pointer"
         >
           <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
-            {formatDateForDisplay(value) || placeholder}
+            {formatDateForDisplay(value, locale) || placeholder}
           </span>
           <span className="flex h-6 w-6 shrink-0 items-center justify-center">
             <Image src="/icons/calendar.svg" alt="" width={20} height={20} aria-hidden />
@@ -165,7 +178,7 @@ const DatePickerField = ({
             }}
             className="inline-flex h-[42px] w-full rounded-[12px]"
           >
-            저장
+            {locale === 'en' ? 'Save' : '저장'}
           </Button>
         </div>
       </PopoverContent>
@@ -179,10 +192,14 @@ const parseDateFromIso = (input: string) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
-const formatDateForDisplay = (input: string) => {
+const formatDateForDisplay = (input: string, locale: string) => {
   if (!input) return '';
   const [year, month, day] = input.split('-');
   if (!year || !month || !day) return input;
+  if (locale === 'en') {
+    const safeDate = new Date(Number(year), Number(month) - 1, Number(day));
+    return safeDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
   return `${year}년 ${Number(month)}월 ${Number(day)}일`;
 };
 

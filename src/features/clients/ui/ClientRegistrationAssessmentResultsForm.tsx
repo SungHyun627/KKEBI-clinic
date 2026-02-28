@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useFieldArray, UseFormReturn } from 'react-hook-form';
 import type { AssessmentResultsFormValues } from '@/features/clients/types/client-registration';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
@@ -15,6 +16,7 @@ interface ClientRegistrationAssessmentResultsFormProps {
 const ClientRegistrationAssessmentResultsForm = ({
   form,
 }: ClientRegistrationAssessmentResultsFormProps) => {
+  const t = useTranslations('clientRegistration.assessmentResults');
   const [isAddingAdditionalResult, setIsAddingAdditionalResult] = useState(false);
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -31,16 +33,16 @@ const ClientRegistrationAssessmentResultsForm = ({
   return (
     <Form {...form}>
       <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
-        <h2 className="text-[24px] font-semibold text-label-strong">검사 결과</h2>
+        <h2 className="text-[24px] font-semibold text-label-strong">{t('title')}</h2>
         <div className="flex w-full flex-col items-start gap-5">
           <FormField
             control={form.control}
             name="phq9Score"
-            rules={{ required: 'PHQ-9 우울 척도 점수를 입력해 주세요.' }}
+            rules={{ required: t('errors.phq9Required') }}
             render={({ field }) => (
               <FormItem className="flex w-full flex-col gap-2">
                 <FormLabel required className="body-14 font-medium text-label-normal">
-                  PHQ-9 우울 척도 점수
+                  {t('fields.phq9Score')}
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -51,7 +53,7 @@ const ClientRegistrationAssessmentResultsForm = ({
                       field.onChange(parseNumericInput(nextValue));
                     }}
                     inputMode="numeric"
-                    placeholder="PHQ-9 우울 척도 점수를 입력해 주세요."
+                    placeholder={t('placeholders.phq9Score')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -61,11 +63,11 @@ const ClientRegistrationAssessmentResultsForm = ({
           <FormField
             control={form.control}
             name="pss10Score"
-            rules={{ required: 'PSS-10 스트레스 척도 점수를 입력해 주세요.' }}
+            rules={{ required: t('errors.pss10Required') }}
             render={({ field }) => (
               <FormItem className="flex w-full flex-col gap-2">
                 <FormLabel required className="body-14 font-medium text-label-normal">
-                  PSS-10 스트레스 척도 점수
+                  {t('fields.pss10Score')}
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -76,7 +78,7 @@ const ClientRegistrationAssessmentResultsForm = ({
                       field.onChange(parseNumericInput(nextValue));
                     }}
                     inputMode="numeric"
-                    placeholder="PSS-10 척도 점수를 입력해 주세요."
+                    placeholder={t('placeholders.pss10Score')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -86,11 +88,11 @@ const ClientRegistrationAssessmentResultsForm = ({
           <FormField
             control={form.control}
             name="mbiScore"
-            rules={{ required: 'MBI 소진 척도 점수를 입력해 주세요.' }}
+            rules={{ required: t('errors.mbiRequired') }}
             render={({ field }) => (
               <FormItem className="flex w-full flex-col gap-2">
                 <FormLabel required className="body-14 font-medium text-label-normal">
-                  MBI 소진 척도 점수
+                  {t('fields.mbiScore')}
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -101,7 +103,7 @@ const ClientRegistrationAssessmentResultsForm = ({
                       field.onChange(parseNumericInput(nextValue));
                     }}
                     inputMode="numeric"
-                    placeholder="MBI 척도 점수를 입력해 주세요."
+                    placeholder={t('placeholders.mbiScore')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -114,7 +116,9 @@ const ClientRegistrationAssessmentResultsForm = ({
               <FormField
                 control={form.control}
                 name={`additionalResults.${index}.testResult`}
-                rules={{ required: `${item.testName} 결과를 입력해 주세요.` }}
+                rules={{
+                  required: t('errors.additionalResultRequired', { testName: item.testName }),
+                }}
                 render={({ field }) => (
                   <FormItem className="flex w-full flex-col gap-2">
                     <div className="flex w-full items-center justify-between gap-2">
@@ -123,11 +127,16 @@ const ClientRegistrationAssessmentResultsForm = ({
                       </FormLabel>
                       <button
                         type="button"
-                        aria-label={`${item.testName} 삭제`}
+                        aria-label={t('aria.deleteAdditionalResult', { testName: item.testName })}
                         className="flex h-6 w-6 items-center justify-center text-label-assistive transition-colors hover:cursor-pointer hover:text-label-normal"
                         onClick={() => remove(index)}
                       >
-                        <Image src="/icons/trash.svg" alt="Delete" width={24} height={24} />
+                        <Image
+                          src="/icons/trash.svg"
+                          alt={t('alt.delete')}
+                          width={24}
+                          height={24}
+                        />
                       </button>
                     </div>
                     <FormControl>
@@ -139,7 +148,9 @@ const ClientRegistrationAssessmentResultsForm = ({
                           field.onChange(parseNumericInput(nextValue));
                         }}
                         inputMode="numeric"
-                        placeholder={`${item.testName} 결과를 입력해 주세요.`}
+                        placeholder={t('placeholders.additionalResult', {
+                          testName: item.testName,
+                        })}
                       />
                     </FormControl>
                     <FormMessage />
@@ -157,10 +168,10 @@ const ClientRegistrationAssessmentResultsForm = ({
                 render={({ field }) => (
                   <FormItem className="flex w-full flex-col gap-2">
                     <FormLabel className="body-14 font-medium text-label-normal">
-                      검사명을 입력해 주세요
+                      {t('fields.draftTestName')}
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="검사명을 입력해 주세요." />
+                      <Input {...field} placeholder={t('placeholders.draftTestName')} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -177,7 +188,7 @@ const ClientRegistrationAssessmentResultsForm = ({
                     setIsAddingAdditionalResult(false);
                   }}
                 >
-                  취소
+                  {t('actions.cancel')}
                 </Button>
                 <Button
                   type="button"
@@ -193,7 +204,7 @@ const ClientRegistrationAssessmentResultsForm = ({
                     setIsAddingAdditionalResult(false);
                   }}
                 >
-                  저장
+                  {t('actions.save')}
                 </Button>
               </div>
             </div>
@@ -206,8 +217,10 @@ const ClientRegistrationAssessmentResultsForm = ({
             className="flex w-full gap-[6px] border-primary active:bg-[rgba(250,84,84,0.10)]"
             onClick={() => setIsAddingAdditionalResult(true)}
           >
-            <Image src="/icons/plus.svg" alt="Add" width={24} height={24} />
-            <span className="text-primary body-16 font-semibold leading-[160%]">검사 추가하기</span>
+            <Image src="/icons/plus.svg" alt={t('alt.add')} width={24} height={24} />
+            <span className="text-primary body-16 font-semibold leading-[160%]">
+              {t('actions.addTest')}
+            </span>
           </Button>
         </div>
       </div>

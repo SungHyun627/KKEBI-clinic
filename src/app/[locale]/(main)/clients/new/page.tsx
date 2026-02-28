@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
 import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
@@ -55,6 +56,7 @@ const getTodayDateKey = () => {
 };
 
 const NewClientPage = () => {
+  const t = useTranslations('clientRegistration.common');
   const router = useRouter();
   const basicInfoForm = useForm<BasicInfoFormValues>({
     mode: 'onSubmit',
@@ -188,7 +190,7 @@ const NewClientPage = () => {
               disabled={!isAllRequiredFilled}
               className="w-full max-w-[244px]"
             >
-              다음으로
+              {t('next')}
             </Button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
 import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
@@ -41,6 +42,7 @@ const getDefaultIntakeInterview = (): IntakeInterviewFormValues => ({
 });
 
 const ClientRegistrationIntakePage = () => {
+  const t = useTranslations('clientRegistration.common');
   const router = useRouter();
   const assessmentResultsForm = useForm<AssessmentResultsFormValues>({
     mode: 'onSubmit',
@@ -126,7 +128,7 @@ const ClientRegistrationIntakePage = () => {
 
           <div className="flex w-full justify-end">
             <Button type="button" size="lg" onClick={handleNext} className="w-full max-w-[244px]">
-              다음으로
+              {t('next')}
             </Button>
           </div>
         </div>
