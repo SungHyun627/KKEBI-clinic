@@ -6,6 +6,7 @@ import type { ClientRegistrationStepKey } from '@/features/clients/types/client-
 
 interface ClientRegistrationStepBarProps {
   currentStep: ClientRegistrationStepKey;
+  className?: string;
 }
 
 const STEPS: Array<{
@@ -19,11 +20,16 @@ const STEPS: Array<{
   { key: 'registration-complete', order: 3, label: '등록 완료', mobileLabel: '등록완료' },
 ];
 
-const ClientRegistrationStepBar = ({ currentStep }: ClientRegistrationStepBarProps) => {
+const ClientRegistrationStepBar = ({ currentStep, className }: ClientRegistrationStepBarProps) => {
   const currentStepOrder = STEPS.find((step) => step.key === currentStep)?.order ?? 1;
 
   return (
-    <div className="flex h-13 w-full items-center justify-center gap-[6px] rounded-[12px] bg-neutral-99 px-[13px] py-3">
+    <div
+      className={cn(
+        'flex h-13 w-full items-center justify-center gap-[6px] rounded-[12px] bg-neutral-99 px-[13px] py-3',
+        className,
+      )}
+    >
       {STEPS.map((item, index) => {
         const isActive = item.key === currentStep;
         const isCompleted = item.order < currentStepOrder;

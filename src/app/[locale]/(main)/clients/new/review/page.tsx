@@ -14,6 +14,7 @@ import type {
 import LabelCell from '@/features/clients/ui/ClientRegistrationLabelCell';
 import ValueCell from '@/features/clients/ui/ClientRegistrationValueCell';
 import { Button } from '@/shared/ui/button';
+import Image from 'next/image';
 
 const EMPTY_BASIC_INFO: BasicInfoFormValues = {
   name: '',
@@ -191,8 +192,26 @@ const ClientRegistrationReviewPage = () => {
 
   return (
     <section className="flex w-full items-start justify-center gap-4 pb-4">
-      <div className="flex w-full max-w-[626px] flex-col items-start gap-[33px]">
-        <ClientRegistrationStepBar currentStep="registration-complete" />
+      <div className="flex w-full flex-col items-start max-w-[1200px] gap-[33px]">
+        <div className="flex w-full flex-col justify-center items-start gap-[42px]">
+          <div className="flex flex-col w-full justify-center items-center gap-[23px]">
+            <Image src="/icons/checkmark.svg" alt={'내담자 등록 완료'} width={96} height={96} />
+            <div className="flex flex-col justify-center items-center gap-2">
+              <span className="text-[24px] font-semibold text-label-normal">
+                {'내담자 등록이 완료되었습니다.'}
+              </span>
+              <span className="body-16 text-label-alternative">
+                정보 확인 후 수정 또는 완료해주세요.
+              </span>
+            </div>
+          </div>
+
+          <ClientRegistrationStepBar
+            currentStep="registration-complete"
+            className="w-full max-w-[626px] self-center"
+          />
+        </div>
+
         <div className="flex w-full flex-col items-start gap-[23px]">
           <div className="flex w-full flex-col items-start gap-[26px] rounded-4xl border border-neutral-95 p-8">
             <h2 className="text-[24px] font-semibold text-label-strong">기본 정보</h2>
