@@ -102,10 +102,7 @@ const ClientRegistrationIntakePage = () => {
       const nextDraft: ClientRegistrationDraft = {
         ...parsedDraft,
         step: 'registration-complete',
-        assessmentResults: {
-          ...assessmentResultsForm.getValues(),
-          draftTestName: '',
-        },
+        assessmentResults: assessmentResultsForm.getValues(),
         intakeInterview: intakeInterviewForm.getValues(),
       };
       window.sessionStorage.setItem(
