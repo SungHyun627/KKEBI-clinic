@@ -25,6 +25,5 @@ const requestClosedClients = async (url: string): Promise<ClosedClientsResponse>
   }
 };
 
-export const getClosedClientsMock = () => requestClosedClients('/api/v1/clients/closed');
-
-export const getClosedClients = getClosedClientsMock;
+export const getClosedClients = () => requestClosedClients('/api/v1/clients/closed');
+export const getClosedClientsMock = getClosedClients;

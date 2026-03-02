@@ -27,7 +27,7 @@ const requestClientDetail = async (url: string): Promise<ClientDetailResponse> =
   }
 };
 
-export const getClientDetailMock = (clientId: string) =>
+export const getClientDetail = (clientId: string) =>
   requestClientDetail(`/api/v1/clients/${clientId}`);
 
 export const getClientDetailServer = (clientId: string) => {
@@ -41,5 +41,4 @@ export const getClientDetailServer = (clientId: string) => {
   return requestClientDetail(`${SERVER_API_BASE_URL}/api/v1/clients/${clientId}`);
 };
 
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const getClientDetail = getClientDetailMock;
+export const getClientDetailMock = getClientDetail;

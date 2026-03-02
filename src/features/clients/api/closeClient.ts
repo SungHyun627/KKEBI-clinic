@@ -28,8 +28,6 @@ const requestCloseClient = async (
   }
 };
 
-export const closeClientMock = (clientId: string, payload: ClientClosePayload) =>
+export const closeClient = (clientId: string, payload: ClientClosePayload) =>
   requestCloseClient(`/api/v1/clients/${clientId}/close`, payload);
-
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const closeClient = closeClientMock;
+export const closeClientMock = closeClient;

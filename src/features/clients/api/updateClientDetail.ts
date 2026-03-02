@@ -28,8 +28,6 @@ const requestUpdateClientDetail = async (
   }
 };
 
-export const updateClientDetailMock = (clientId: string, payload: ClientDetailUpdatePayload) =>
+export const updateClientDetail = (clientId: string, payload: ClientDetailUpdatePayload) =>
   requestUpdateClientDetail(`/api/v1/clients/${clientId}`, payload);
-
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const updateClientDetail = updateClientDetailMock;
+export const updateClientDetailMock = updateClientDetail;

@@ -45,7 +45,7 @@ const toQueryString = (status: SessionStatus, options?: GetSessionListOptions) =
   return params.toString();
 };
 
-export const getSessionListMock = (
+export const getSessionList = (
   status: SessionStatus = 'scheduled',
   options?: GetSessionListOptions,
 ) => requestSessionList(`/api/v1/sessions?${toQueryString(status, options)}`);
@@ -67,5 +67,4 @@ export const getSessionListServer = (
   );
 };
 
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const getSessionList = getSessionListMock;
+export const getSessionListMock = getSessionList;
