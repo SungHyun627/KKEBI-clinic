@@ -14,33 +14,74 @@ interface AddTestResultResponse {
   message?: string;
 }
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const registerClientMock = async (
+export const registerClient = async (
   payload: RegisterClientRequest,
 ): Promise<RegisterClientResponse> => {
-  await wait(250);
+  try {
+    const response = await fetch('/api/v1/clients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-  if (!payload.name?.trim()) {
+    const data = (await response.json().catch(() => null)) as {
+      success?: boolean;
+      message?: string;
+      data?: { clientId?: number };
+      clientId?: number;
+    } | null;
+
+    if (!data) {
+      return {
+        success: false,
+        message: '내담자 등록 응답을 확인할 수 없습니다.',
+      };
+    }
+
+    return {
+      success: Boolean(data.success),
+      message: data.message,
+      clientId: data.data?.clientId ?? data.clientId,
+    };
+  } catch (error) {
     return {
       success: false,
-      message: '내담자 이름이 필요합니다.',
+      message: error instanceof Error ? error.message : 'Network error',
     };
   }
-
-  return {
-    success: true,
-    clientId: Date.now(),
-  };
 };
 
-const addClientTestResultMock = async (
-  _clientId: number,
-  _payload: AddTestResultRequest,
+export const addClientTestResult = async (
+  clientId: number,
+  payload: AddTestResultRequest,
 ): Promise<AddTestResultResponse> => {
-  await wait(100);
-  return { success: true };
-};
+  try {
+    const response = await fetch(`/api/v1/clients/${clientId}/tests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-export const registerClient = registerClientMock;
-export const addClientTestResult = addClientTestResultMock;
+    const data = (await response.json().catch(() => null)) as {
+      success?: boolean;
+      message?: string;
+    } | null;
+
+    if (!data) {
+      return {
+        success: false,
+        message: '검사 결과 저장 응답을 확인할 수 없습니다.',
+      };
+    }
+
+    return {
+      success: Boolean(data.success),
+      message: data.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Network error',
+    };
+  }
+};

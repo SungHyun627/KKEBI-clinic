@@ -24,7 +24,6 @@ const requestRestoreClient = async (url: string): Promise<ClientRestoreResponse>
   }
 };
 
-export const restoreClientMock = (clientId: string) =>
+export const restoreClient = (clientId: string) =>
   requestRestoreClient(`/api/v1/clients/${clientId}/restore`);
-
-export const restoreClient = restoreClientMock;
+export const restoreClientMock = restoreClient;

@@ -20,9 +20,7 @@ interface StartSessionResult {
   message?: string;
 }
 
-export const startSessionMock = async (
-  payload: StartSessionRequest,
-): Promise<StartSessionResult> => {
+export const startSession = async (payload: StartSessionRequest): Promise<StartSessionResult> => {
   try {
     const response = await httpClient.post<StartSessionResponseEnvelope>(
       '/api/v1/sessions/start',
@@ -70,4 +68,4 @@ export const startSessionServer = async (
   }
 };
 
-export const startSession = startSessionMock;
+export const startSessionMock = startSession;
