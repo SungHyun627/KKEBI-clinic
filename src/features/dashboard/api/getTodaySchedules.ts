@@ -27,8 +27,7 @@ const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse
   }
 };
 
-export const getTodaySchedulesMock = () =>
-  requestTodaySchedules('/api/v1/dashboard/today-schedules');
+export const getTodaySchedules = () => requestTodaySchedules('/api/v1/dashboard/today-schedules');
 
 export const getTodaySchedulesServer = () => {
   if (!SERVER_API_BASE_URL) {
@@ -41,5 +40,4 @@ export const getTodaySchedulesServer = () => {
   return requestTodaySchedules(`${SERVER_API_BASE_URL}/api/v1/dashboard/today-schedules`);
 };
 
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const getTodaySchedules = getTodaySchedulesMock;
+export const getTodaySchedulesMock = getTodaySchedules;

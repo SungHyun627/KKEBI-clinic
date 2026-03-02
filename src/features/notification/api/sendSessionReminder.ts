@@ -28,7 +28,6 @@ const requestSendSessionReminder = async (
   }
 };
 
-export const sendSessionReminderMock = (payload: SessionReminderPayload) =>
+export const sendSessionReminder = (payload: SessionReminderPayload) =>
   requestSendSessionReminder('/api/v1/notifications/session-reminder', payload);
-
-export const sendSessionReminder = sendSessionReminderMock;
+export const sendSessionReminderMock = sendSessionReminder;

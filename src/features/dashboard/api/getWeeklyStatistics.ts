@@ -27,7 +27,7 @@ const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsRes
   }
 };
 
-export const getWeeklyStatisticsMock = () =>
+export const getWeeklyStatistics = () =>
   requestWeeklyStatistics('/api/v1/dashboard/weekly-statistics');
 
 export const getWeeklyStatisticsServer = () => {
@@ -41,5 +41,4 @@ export const getWeeklyStatisticsServer = () => {
   return requestWeeklyStatistics(`${SERVER_API_BASE_URL}/api/v1/dashboard/weekly-statistics`);
 };
 
-// 현재 화면은 데모 API를 기본으로 사용합니다.
-export const getWeeklyStatistics = getWeeklyStatisticsMock;
+export const getWeeklyStatisticsMock = getWeeklyStatistics;
