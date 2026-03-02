@@ -57,7 +57,7 @@ export async function requestCounselorInquiry(
 
   try {
     const response = await httpClient.post<CounselorInquirySubmitSuccessResponse>(
-      '/api/v1/counselors/inquiries',
+      '/api/v1/counselor/test/register-login',
       requestBody,
       { skipAuth: true },
     );
