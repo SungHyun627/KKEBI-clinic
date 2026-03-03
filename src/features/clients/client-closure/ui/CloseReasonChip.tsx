@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';
-import type { ClosedClientItem } from '../types/client';
+import type { ClosedClientItem } from '@/features/clients/types/client';
 
 interface CloseReasonChipProps {
   value: ClosedClientItem['closeReason'];

@@ -1,4 +1,4 @@
-import type { ClientRestoreResponse } from '../types/client';
+import type { ClientRestoreResponse } from '@/features/clients/types/client';
 
 const requestRestoreClient = async (url: string): Promise<ClientRestoreResponse> => {
   try {

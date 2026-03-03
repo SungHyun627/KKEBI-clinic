@@ -1,4 +1,4 @@
-import type { ClosedClientsResponse } from '../types/client';
+import type { ClosedClientsResponse } from '@/features/clients/types/client';
 
 const requestClosedClients = async (url: string): Promise<ClosedClientsResponse> => {
   try {
