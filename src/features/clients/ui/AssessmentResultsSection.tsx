@@ -20,48 +20,97 @@ interface QaItemProps {
 
 export default function AssessmentResultsSection({ detail }: AssessmentResultsSectionProps) {
   const tClients = useTranslations('clients');
+  const removeLeadingOrder = (question: string) =>
+    question.replace(/^\s*\d+(?:-\d+)?[\.\)]\s*/, '');
+  const withFallback = (question: string, answer?: string) =>
+    answer && answer.trim().length > 0
+      ? answer
+      : `${removeLeadingOrder(question)}을(를) 보여주세요`;
+
   const qaItems: QaItemProps[] = detail
     ? [
         {
           question: tClients('scaleReasonForVisit'),
-          answer: tClients('scaleAnswerReasonForVisit'),
+          answer: withFallback(
+            tClients('scaleReasonForVisit'),
+            detail.intakeAnswers.reasonForVisit,
+          ),
         },
-        { question: tClients('scaleDesiredChange'), answer: tClients('scaleAnswerDesiredChange') },
+        {
+          question: tClients('scaleDesiredChange'),
+          answer: withFallback(tClients('scaleDesiredChange'), detail.intakeAnswers.expectedChange),
+        },
         {
           question: tClients('scaleSolutionsTried'),
-          answer: tClients('scaleAnswerSolutionsTried'),
+          answer: withFallback(tClients('scaleSolutionsTried'), detail.intakeAnswers.triedMethod),
         },
-        { question: tClients('scaleEffectiveness'), answer: tClients('scaleAnswerEffectiveness') },
+        {
+          question: tClients('scaleEffectiveness'),
+          answer: withFallback(
+            tClients('scaleEffectiveness'),
+            detail.intakeAnswers.methodEffectiveness,
+          ),
+        },
         {
           question: tClients('scaleBiggestConcern'),
-          answer: tClients('scaleAnswerBiggestConcern'),
+          answer: withFallback(
+            tClients('scaleBiggestConcern'),
+            detail.intakeAnswers.biggestConcern,
+          ),
         },
         {
           question: tClients('scaleAverageSleepPattern'),
-          answer: tClients('scaleAnswerAverageSleepPattern'),
+          answer: withFallback(
+            tClients('scaleAverageSleepPattern'),
+            detail.intakeAnswers.sleepPattern,
+          ),
         },
-        { question: tClients('scaleSleepQuality'), answer: tClients('scaleAnswerSleepQuality') },
+        {
+          question: tClients('scaleSleepQuality'),
+          answer: withFallback(tClients('scaleSleepQuality'), detail.intakeAnswers.sleepQuality),
+        },
         {
           question: tClients('scaleExerciseFrequency'),
-          answer: tClients('scaleAnswerExerciseFrequency'),
+          answer: withFallback(
+            tClients('scaleExerciseFrequency'),
+            detail.intakeAnswers.exerciseHabit,
+          ),
         },
-        { question: tClients('scaleMealsPerDay'), answer: tClients('scaleAnswerMealsPerDay') },
+        {
+          question: tClients('scaleMealsPerDay'),
+          answer: withFallback(tClients('scaleMealsPerDay'), detail.intakeAnswers.mealsPerDay),
+        },
         {
           question: tClients('scaleMainSupportPerson'),
-          answer: tClients('scaleAnswerMainSupportPerson'),
+          answer: withFallback(
+            tClients('scaleMainSupportPerson'),
+            detail.intakeAnswers.mostReliablePerson,
+          ),
         },
-        { question: tClients('scaleSupportReason'), answer: tClients('scaleAnswerSupportReason') },
+        {
+          question: tClients('scaleSupportReason'),
+          answer: withFallback(
+            tClients('scaleSupportReason'),
+            detail.intakeAnswers.reliabilityReason,
+          ),
+        },
         {
           question: tClients('scaleFamilyCohesion'),
-          answer: tClients('scaleAnswerFamilyCohesion'),
+          answer: withFallback(tClients('scaleFamilyCohesion'), detail.intakeAnswers.familyBond),
         },
         {
           question: tClients('scaleFamilyCohesionReason'),
-          answer: tClients('scaleAnswerFamilyCohesionReason'),
+          answer: withFallback(
+            tClients('scaleFamilyCohesionReason'),
+            detail.intakeAnswers.familyBondReason,
+          ),
         },
         {
           question: tClients('scaleSelfDescription'),
-          answer: tClients('scaleAnswerSelfDescription'),
+          answer: withFallback(
+            tClients('scaleSelfDescription'),
+            detail.intakeAnswers.selfDescription,
+          ),
         },
       ]
     : [];

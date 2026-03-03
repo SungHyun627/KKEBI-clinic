@@ -1,8 +1,11 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import type { components } from '@/shared/api/generated-types';
 import type { ClientDetailResponse } from '../types/client';
+import { mapApiClientDetailToUi } from '@/features/clients/lib/client-detail-mapper';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
-const requestClientDetail = async (url: string): Promise<ClientDetailResponse> => {
+const requestClientDetailByFetch = async (url: string): Promise<ClientDetailResponse> => {
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -27,8 +30,37 @@ const requestClientDetail = async (url: string): Promise<ClientDetailResponse> =
   }
 };
 
-export const getClientDetail = (clientId: string) =>
-  requestClientDetail(`/api/v1/clients/${clientId}`);
+export const getClientDetail = async (clientId: string): Promise<ClientDetailResponse> => {
+  try {
+    const response = await httpClient.get<components['schemas']['ApiResponseClientDetailResponse']>(
+      `/api/v1/clients/${clientId}`,
+    );
+
+    const mapped = mapApiClientDetailToUi(response.data);
+    if (!mapped) {
+      return {
+        success: false,
+        message: response.message || '내담자 상세 정보를 불러오지 못했습니다.',
+      };
+    }
+
+    return {
+      success: true,
+      data: mapped,
+      message: response.message,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof ApiError
+          ? error.message || '내담자 상세 정보를 불러오지 못했습니다.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
+    };
+  }
+};
 
 export const getClientDetailServer = (clientId: string) => {
   if (!SERVER_API_BASE_URL) {
@@ -38,7 +70,7 @@ export const getClientDetailServer = (clientId: string) => {
     } satisfies ClientDetailResponse);
   }
 
-  return requestClientDetail(`${SERVER_API_BASE_URL}/api/v1/clients/${clientId}`);
+  return requestClientDetailByFetch(`${SERVER_API_BASE_URL}/api/v1/clients/${clientId}`);
 };
 
 export const getClientDetailMock = getClientDetail;

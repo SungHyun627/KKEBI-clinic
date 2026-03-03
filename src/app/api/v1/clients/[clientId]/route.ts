@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getActiveSchedules } from '@/shared/mock/client-lifecycle-store';
+import { proxyToBackend } from '@/shared/server/backend-proxy';
 import type {
   ClientDetailData,
   ClientDetailUpdatePayload,
@@ -25,22 +26,7 @@ const COUNSELING_CHIEF_CONCERNS: CounselingChiefConcern[] = [
 
 export async function GET(_request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
-  const detail = buildClientDetail(clientId);
-
-  if (!detail) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: '내담자 상세 정보를 찾을 수 없습니다.',
-      },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json({
-    success: true,
-    data: detail,
-  });
+  return proxyToBackend(_request, { method: 'GET', path: `/api/v1/clients/${clientId}` });
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ clientId: string }> }) {

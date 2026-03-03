@@ -16,7 +16,7 @@ export default function CheckinHistorySection({ checkins }: CheckinHistorySectio
   const tClients = useTranslations('clients');
   if (checkins.length === 0) {
     return (
-      <section className="flex w-full flex-col items-start gap-5">
+      <section className="flex w-full flex-col items-start gap-5 min-h-[162px]">
         <div className="flex w-full items-center justify-between">
           <span className="body-18 font-semibold text-neutral-20">{tClients('checkinTitle')}</span>
         </div>
