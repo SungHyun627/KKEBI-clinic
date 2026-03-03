@@ -612,7 +612,7 @@
       },
       "actions": {
         "edit": "수정하기",
-        "home": "홈으로",
+        "home": "등록 완료",
         "submitting": "등록 중..."
       },
       "toast": {
