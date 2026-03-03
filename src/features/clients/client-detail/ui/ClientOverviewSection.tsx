@@ -182,7 +182,7 @@ export default function ClientOverviewSection({
                 value={
                   isKo
                     ? `${detail.age}세 ${detail.gender}`
-                    : `${detail.gender === '남성' ? 'Male' : 'Female'}, ${detail.age}`
+                    : `${toEnglishGenderLabel(detail.gender)}, ${detail.age}`
                 }
               />
               <ClientInfoField
@@ -268,11 +268,19 @@ function parseAgeGenderInput(
   let gender: ClientDetailData['gender'] = fallbackGender;
   if (lower.includes('여') || lower.includes('female')) gender = '여성';
   if (lower.includes('남') || lower.includes('male')) gender = '남성';
+  if (lower.includes('논') || lower.includes('non-binary') || lower.includes('nonbinary'))
+    gender = '논바이너리';
 
   return {
     age: Number.isNaN(parsedAge) ? 0 : parsedAge,
     gender,
   };
+}
+
+function toEnglishGenderLabel(gender: ClientDetailData['gender']) {
+  if (gender === '남성') return 'Male';
+  if (gender === '여성') return 'Female';
+  return 'Non-binary';
 }
 
 function parseSessionCountInput(

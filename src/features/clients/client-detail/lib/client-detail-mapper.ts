@@ -20,7 +20,24 @@ const toSafeNumber = (value: number | null | undefined, fallback = 0) =>
 
 const toGender = (gender?: ApiClientDetail['gender']): ClientDetailData['gender'] => {
   if (gender === 'MALE') return '남성';
-  return '여성';
+  if (gender === 'FEMALE') return '여성';
+  return '논바이너리';
+};
+
+const toFullAge = (birthDate?: string): number => {
+  if (!birthDate) return 0;
+
+  const parsed = new Date(birthDate);
+  if (Number.isNaN(parsed.getTime())) return 0;
+
+  const today = new Date();
+  let age = today.getFullYear() - parsed.getFullYear();
+  const hasNotHadBirthdayThisYear =
+    today.getMonth() < parsed.getMonth() ||
+    (today.getMonth() === parsed.getMonth() && today.getDate() < parsed.getDate());
+
+  if (hasNotHadBirthdayThisYear) age -= 1;
+  return Math.max(age, 0);
 };
 
 const toRiskType = (phq9Score: number): ClientDetailData['riskType'] => {
@@ -90,7 +107,7 @@ export const mapApiClientDetailToUi = (detail?: ApiClientDetail): ClientDetailDa
     stressScore,
     energyScore,
     chiefConcern,
-    age: 0,
+    age: toFullAge(detail.birthDate),
     gender: toGender(detail.gender),
     counselingStartDate: detail.counselingStartDate ?? '',
     currentSession: 1,

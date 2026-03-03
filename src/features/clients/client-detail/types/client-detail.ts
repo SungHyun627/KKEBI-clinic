@@ -57,7 +57,7 @@ export interface ClientIntakeAnswers {
 
 export interface ClientDetailData extends ClientLookupItem {
   age: number;
-  gender: '남성' | '여성';
+  gender: '남성' | '여성' | '논바이너리';
   counselingStartDate: string;
   currentSession: number;
   totalSession: number;
