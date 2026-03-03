@@ -115,12 +115,25 @@ export default function ClientDetailDrawer({
             };
             const result = await updateClientDetail(next.clientId, payload);
 
-            if (!result.success || !result.data) {
+            if (!result.success) {
               setErrorMessage(result.message || tClients('detailLoadFailed'));
               return;
             }
 
-            setDetail(result.data);
+            const refreshed = await getClientDetail(next.clientId);
+            if (!refreshed.success || !refreshed.data) {
+              if (result.data) {
+                setDetail(result.data);
+                setErrorMessage(null);
+                setIsEditing(false);
+                return;
+              }
+
+              setErrorMessage(refreshed.message || tClients('detailLoadFailed'));
+              return;
+            }
+
+            setDetail(refreshed.data);
             setErrorMessage(null);
             setIsEditing(false);
           }}

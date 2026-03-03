@@ -94,7 +94,14 @@ export default function ClientOverviewSection({
               className="text-primary bg-[rgba(250,84,84,0.10)] rounded-lg"
               onClick={() => {
                 if (isEditing) {
-                  onSave(draft);
+                  const parsedAgeGender = parseAgeGenderInput(ageGenderInput, draft.gender);
+                  const nextDraft: ClientDetailData = {
+                    ...draft,
+                    age: parsedAgeGender.age,
+                    gender: parsedAgeGender.gender,
+                  };
+                  setDraft(nextDraft);
+                  onSave(nextDraft);
                   return;
                 }
                 setIsSessionCloseDialogOpen(true);

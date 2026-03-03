@@ -112,7 +112,7 @@ export const mapApiClientDetailToUi = (detail?: ApiClientDetail): ClientDetailDa
     counselingStartDate: detail.counselingStartDate ?? '',
     currentSession: 1,
     totalSession: 1,
-    visitPurpose: detail.chiefComplaint ?? '',
+    visitPurpose: '고민 상담',
     nextCounselingAt: detail.counselingStartDate ?? '',
     recentRisks: EMPTY_RECENT_RISKS,
     recentCheckins: EMPTY_RECENT_CHECKINS,
