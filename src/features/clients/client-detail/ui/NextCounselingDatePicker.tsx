@@ -6,7 +6,7 @@ import { Calendar } from '@/shared/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { Button } from '@/shared/ui/button';
 import { useLocale, useTranslations } from 'next-intl';
-import { formatDateByLocale } from '../lib/format';
+import { formatDateByLocale } from '@/features/clients/client-detail/lib/format';
 
 interface NextCounselingDatePickerProps {
   label?: string;

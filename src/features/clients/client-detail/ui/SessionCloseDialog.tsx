@@ -5,7 +5,7 @@ import { useLocale } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { Textarea } from '@/shared/ui/textarea';
-import type { ClientCloseReason } from '../types/client';
+import type { ClientCloseReason } from '@/features/clients/types/client';
 
 type CloseReason = ClientCloseReason;
 

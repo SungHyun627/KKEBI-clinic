@@ -14,7 +14,7 @@ import type {
   ClientDetailData,
   ClientDetailUpdatePayload,
   ClientLookupItem,
-} from '../types/client';
+} from '@/features/clients/types/client';
 import Divider from '@/shared/ui/divider';
 
 interface ClientDetailDrawerProps {

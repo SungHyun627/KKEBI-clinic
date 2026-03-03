@@ -3,7 +3,10 @@
 import { type ReactNode, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Select } from '@/shared/ui/select';
-import type { ClientCounselingRecord, CounselingChiefConcern } from '../types/client';
+import type {
+  ClientCounselingRecord,
+  CounselingChiefConcern,
+} from '@/features/clients/types/client';
 import Divider from '@/shared/ui/divider';
 import { Button } from '@/shared/ui/button';
 

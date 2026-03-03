@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useClientList } from '@/features/clients';
-import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
+import ClientDetailDrawer from '@/features/clients/client-detail/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
 import { Button } from '@/shared/ui/button';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';

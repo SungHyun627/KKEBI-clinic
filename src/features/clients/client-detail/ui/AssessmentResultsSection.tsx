@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import type { ClientDetailData } from '../types/client';
+import type { ClientDetailData } from '@/features/clients/types/client';
 import Divider from '@/shared/ui/divider';
 
 interface AssessmentResultsSectionProps {

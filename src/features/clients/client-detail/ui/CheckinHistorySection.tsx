@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import type { ClientCheckinRecord } from '../types/client';
+import type { ClientCheckinRecord } from '@/features/clients/types/client';
 
 interface CheckinHistorySectionProps {
   checkins: ClientCheckinRecord[];

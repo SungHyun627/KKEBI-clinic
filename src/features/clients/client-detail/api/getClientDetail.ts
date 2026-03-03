@@ -1,7 +1,7 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
 import type { components } from '@/shared/api/generated-types';
-import type { ClientDetailResponse } from '../types/client';
-import { mapApiClientDetailToUi } from '@/features/clients/lib/client-detail-mapper';
+import type { ClientDetailResponse } from '@/features/clients/types/client';
+import { mapApiClientDetailToUi } from '@/features/clients/client-detail/lib/client-detail-mapper';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
