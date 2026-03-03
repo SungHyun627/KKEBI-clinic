@@ -36,6 +36,13 @@ const formatDate = (value: string, locale: string) => {
   }).format(date);
 };
 
+const formatDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps) => {
   const searchParams = useSearchParams();
   const locale = useLocale();
@@ -89,10 +96,20 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
   }, [locale, selectedStatus, shouldUseEmptyData, tSessions]);
 
   const hasNoData = useMemo(() => {
+    const selectedDateKey = formatDateKey(selectedDate);
+    const visibleScheduledGroups =
+      selectedView === 'calendar'
+        ? scheduledGroups.filter((group) => group.date === selectedDateKey)
+        : scheduledGroups;
+    const visibleCompletedGroups =
+      selectedView === 'calendar'
+        ? completedGroups.filter((group) => group.date === selectedDateKey)
+        : completedGroups;
+
     return selectedStatus === 'scheduled'
-      ? scheduledGroups.length === 0
-      : completedGroups.length === 0;
-  }, [completedGroups.length, scheduledGroups.length, selectedStatus]);
+      ? visibleScheduledGroups.length === 0
+      : visibleCompletedGroups.length === 0;
+  }, [completedGroups, scheduledGroups, selectedDate, selectedStatus, selectedView]);
 
   const selectedDateText = useMemo(() => {
     return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
@@ -101,6 +118,18 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
       day: 'numeric',
     }).format(selectedDate);
   }, [locale, selectedDate]);
+
+  const visibleScheduledGroups = useMemo(() => {
+    if (selectedView !== 'calendar') return scheduledGroups;
+    const selectedDateKey = formatDateKey(selectedDate);
+    return scheduledGroups.filter((group) => group.date === selectedDateKey);
+  }, [scheduledGroups, selectedDate, selectedView]);
+
+  const visibleCompletedGroups = useMemo(() => {
+    if (selectedView !== 'calendar') return completedGroups;
+    const selectedDateKey = formatDateKey(selectedDate);
+    return completedGroups.filter((group) => group.date === selectedDateKey);
+  }, [completedGroups, selectedDate, selectedView]);
 
   const listContent = (() => {
     if (isLoading) {
@@ -134,7 +163,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
     return (
       <div className="mb-[46px] flex w-full flex-col gap-13">
         {selectedStatus === 'scheduled'
-          ? scheduledGroups.map((group) => (
+          ? visibleScheduledGroups.map((group) => (
               <ScheduledSessionDateSection
                 key={`scheduled-${group.date}`}
                 group={group}
@@ -143,7 +172,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
                 stressLabel={tClients('checkinStress')}
               />
             ))
-          : completedGroups.map((group) => (
+          : visibleCompletedGroups.map((group) => (
               <CompletedSessionDateSection
                 key={`completed-${group.date}`}
                 group={group}
