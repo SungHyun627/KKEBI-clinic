@@ -1,3 +1,4 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
 import type { components } from '@/shared/api/generated-types';
 
 type RegisterClientRequest = components['schemas']['ClientRegistrationRequest'];
@@ -18,35 +19,25 @@ export const registerClient = async (
   payload: RegisterClientRequest,
 ): Promise<RegisterClientResponse> => {
   try {
-    const response = await fetch('/api/v1/clients', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    const data = (await response.json().catch(() => null)) as {
-      success?: boolean;
-      message?: string;
-      data?: { clientId?: number };
-      clientId?: number;
-    } | null;
-
-    if (!data) {
-      return {
-        success: false,
-        message: '내담자 등록 응답을 확인할 수 없습니다.',
-      };
-    }
+    const data = await httpClient.post<components['schemas']['ApiResponseLong']>(
+      '/api/v1/clients',
+      payload,
+    );
 
     return {
-      success: Boolean(data.success),
+      success: true,
       message: data.message,
-      clientId: data.data?.clientId ?? data.clientId,
+      clientId: typeof data.data === 'number' ? data.data : undefined,
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message:
+        error instanceof ApiError
+          ? error.message || '내담자 등록에 실패했습니다.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
     };
   }
 };
@@ -56,32 +47,24 @@ export const addClientTestResult = async (
   payload: AddTestResultRequest,
 ): Promise<AddTestResultResponse> => {
   try {
-    const response = await fetch(`/api/v1/clients/${clientId}/tests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    const data = (await response.json().catch(() => null)) as {
-      success?: boolean;
-      message?: string;
-    } | null;
-
-    if (!data) {
-      return {
-        success: false,
-        message: '검사 결과 저장 응답을 확인할 수 없습니다.',
-      };
-    }
+    const data = await httpClient.post<components['schemas']['ApiResponseLong']>(
+      `/api/v1/clients/${clientId}/tests`,
+      payload,
+    );
 
     return {
-      success: Boolean(data.success),
+      success: true,
       message: data.message,
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message:
+        error instanceof ApiError
+          ? error.message || '검사 결과 저장에 실패했습니다.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
     };
   }
 };
