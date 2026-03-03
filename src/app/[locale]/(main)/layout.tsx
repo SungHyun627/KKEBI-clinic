@@ -29,7 +29,6 @@ const navItems = [
   { key: 'dashboard', href: '/', icon: '/icons/dashboard.svg' },
   { key: 'clients', href: '/clients', icon: '/icons/people.svg' },
   { key: 'sessions', href: '/sessions', icon: '/icons/video.svg' },
-  { key: 'settings', href: '/settings', icon: '/icons/setting.svg' },
 ];
 
 export default function MainLayout({ children }: { children: ReactNode }) {
