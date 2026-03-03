@@ -3,30 +3,36 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Title } from '@/shared/ui/title';
-import { getWeeklyStatistics } from '@/features/dashboard';
-import type { WeeklyStatistics } from '@/features/dashboard';
+import { getRiskAlerts, getWeeklyStatistics } from '@/features/dashboard';
+import type { RiskAlert as RiskAlertType, WeeklyStatistics } from '@/features/dashboard';
 import WeeklyStatisticsCard from './ui/WeeklyStatisticsCard';
 import RiskAlert from './ui/RiskAlert';
 
 const WeeklyStatisticsSection = () => {
   const tDashboard = useTranslations('dashboard');
   const [statistics, setStatistics] = useState<WeeklyStatistics | null>(null);
+  const [riskAlerts, setRiskAlerts] = useState<RiskAlertType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const loadWeeklyStatistics = async () => {
       setIsLoading(true);
-      const result = await getWeeklyStatistics();
+      const [statisticsResult, riskAlertsResult] = await Promise.all([
+        getWeeklyStatistics(),
+        getRiskAlerts(),
+      ]);
 
-      if (!result.success || !result.data) {
-        setErrorMessage(result.message || tDashboard('weeklyStatsLoadFailed'));
+      if (!statisticsResult.success || !statisticsResult.data) {
+        setErrorMessage(statisticsResult.message || tDashboard('weeklyStatsLoadFailed'));
         setStatistics(null);
+        setRiskAlerts([]);
         setIsLoading(false);
         return;
       }
 
-      setStatistics(result.data);
+      setStatistics(statisticsResult.data);
+      setRiskAlerts(riskAlertsResult.success && riskAlertsResult.data ? riskAlertsResult.data : []);
       setErrorMessage(null);
       setIsLoading(false);
     };
@@ -47,7 +53,7 @@ const WeeklyStatisticsSection = () => {
   }
 
   if (!statistics) return null;
-  const riskAlert = statistics.riskAlerts?.[0];
+  const riskAlert = riskAlerts[0];
 
   return (
     <section

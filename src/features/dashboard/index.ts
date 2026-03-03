@@ -1,4 +1,9 @@
-export type { RiskAlert, WeeklyStatistics, WeeklyStatisticsResponse } from './types/statistics';
+export type {
+  RiskAlert,
+  RiskAlertsResponse,
+  WeeklyStatistics,
+  WeeklyStatisticsResponse,
+} from './types/statistics';
 export type {
   SessionType,
   RiskType,
@@ -10,6 +15,7 @@ export {
   getWeeklyStatisticsMock,
   getWeeklyStatisticsServer,
 } from './api/getWeeklyStatistics';
+export { getRiskAlerts, getRiskAlertsMock, getRiskAlertsServer } from './api/getRiskAlerts';
 export {
   getTodaySchedules,
   getTodaySchedulesMock,
