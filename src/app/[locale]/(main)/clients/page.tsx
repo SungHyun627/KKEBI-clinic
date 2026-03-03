@@ -7,7 +7,7 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useClientList } from '@/features/clients';
 import ClientDetailDrawer from '@/features/clients/client-detail/ui/ClientDetailDrawer';
-import type { ClientLookupItem } from '@/features/clients/types/client';
+import type { ClientLookupItem } from '@/features/clients/types/common';
 import { Button } from '@/shared/ui/button';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';

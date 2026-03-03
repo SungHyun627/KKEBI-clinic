@@ -10,7 +10,7 @@ import ClientInfoField from './ClientInfoField';
 import SessionCloseDialog from './SessionCloseDialog';
 import NextCounselingDatePicker from './NextCounselingDatePicker';
 import RiskReasonChip from './RiskReasonChip';
-import type { ClientDetailData } from '@/features/clients/types/client';
+import type { ClientDetailData } from '@/features/clients/client-detail/types/client-detail';
 import { formatDateByLocale } from '@/features/clients/client-detail/lib/format';
 
 interface ClientOverviewSectionProps {

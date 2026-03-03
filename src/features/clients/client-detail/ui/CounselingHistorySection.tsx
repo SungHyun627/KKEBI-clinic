@@ -6,7 +6,7 @@ import { Select } from '@/shared/ui/select';
 import type {
   ClientCounselingRecord,
   CounselingChiefConcern,
-} from '@/features/clients/types/client';
+} from '@/features/clients/client-detail/types/client-detail';
 import Divider from '@/shared/ui/divider';
 import { Button } from '@/shared/ui/button';
 

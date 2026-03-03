@@ -13,8 +13,8 @@ import ClientOverviewSection from './ClientOverviewSection';
 import type {
   ClientDetailData,
   ClientDetailUpdatePayload,
-  ClientLookupItem,
-} from '@/features/clients/types/client';
+} from '@/features/clients/client-detail/types/client-detail';
+import type { ClientLookupItem } from '@/features/clients/types/common';
 import Divider from '@/shared/ui/divider';
 
 interface ClientDetailDrawerProps {

@@ -1,4 +1,7 @@
-import type { ClientClosePayload, ClientCloseResponse } from '@/features/clients/types/client';
+import type {
+  ClientClosePayload,
+  ClientCloseResponse,
+} from '@/features/clients/client-closure/types/client-closure';
 
 const requestCloseClient = async (
   url: string,

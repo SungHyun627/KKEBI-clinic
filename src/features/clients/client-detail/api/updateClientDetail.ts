@@ -1,7 +1,7 @@
 import type {
   ClientDetailUpdatePayload,
   ClientDetailUpdateResponse,
-} from '@/features/clients/types/client';
+} from '@/features/clients/client-detail/types/client-detail';
 
 const requestUpdateClientDetail = async (
   url: string,

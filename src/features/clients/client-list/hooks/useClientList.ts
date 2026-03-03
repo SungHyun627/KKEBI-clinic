@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { ClientLookupItem } from '@/features/clients/types/client';
+import type { ClientLookupItem } from '@/features/clients/types/common';
 import { getClientList } from '@/features/clients/client-list/api/getClientList';
 import { mapClientSummariesToClients } from '@/features/clients/client-list/lib/mapClientSummariesToClients';
 import type { RiskFilter } from '@/features/clients/client-list/types/client-list';

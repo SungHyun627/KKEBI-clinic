@@ -5,7 +5,7 @@ import type {
   ClientDetailData,
   ClientIntakeAnswers,
   ClientRiskRecord,
-} from '@/features/clients/types/client';
+} from '@/features/clients/client-detail/types/client-detail';
 
 type ApiClientDetail = components['schemas']['ClientDetailResponse'];
 type ApiClientTestResult = components['schemas']['ClientTestResultResponse'];
