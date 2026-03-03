@@ -5,11 +5,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import type { RiskType } from '@/features/dashboard';
-import { getClientList } from '@/features/clients';
+import { useClientList } from '@/features/clients';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
-import type { components } from '@/shared/api/generated-types';
 import { Button } from '@/shared/ui/button';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
@@ -17,10 +15,7 @@ import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import { Input } from '@/shared/ui/input';
 import { Select } from '@/shared/ui/select';
-import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
-
-type RiskFilter = 'all' | RiskType;
-type ClientSummaryResponse = components['schemas']['ClientSummaryResponse'];
+import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
 
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
@@ -31,41 +26,31 @@ export default function ClientsPage() {
   const targetClientId = searchParams.get('clientId');
   const targetOpenAt = searchParams.get('openAt');
   const targetQueryKey = targetClientId ? `${targetClientId}:${targetOpenAt ?? ''}` : null;
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
-  const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
-  const [clients, setClients] = useState<ClientLookupItem[]>([]);
+  const fallbackConcerns = useMemo(
+    () => [tClients('concernsDepression'), tClients('concernsStress'), tClients('concernsSleep')],
+    [tClients],
+  );
+  const {
+    clients,
+    filteredClients,
+    isLoading,
+    errorMessage,
+    searchKeyword,
+    setSearchKeyword,
+    riskFilter,
+    setRiskFilter,
+    isRiskFilterInteracted,
+    setIsRiskFilterInteracted,
+    removeClient,
+  } = useClientList({
+    locale,
+    listLoadFailedMessage: tClients('listLoadFailed'),
+    fallbackConcerns,
+  });
   const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [dismissedQueryKey, setDismissedQueryKey] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadClients = async () => {
-      setIsLoading(true);
-      const result = await getClientList({ page: 0, size: 10 });
-
-      if (!result.success || !result.data) {
-        setClients([]);
-        setErrorMessage(tClients('listLoadFailed'));
-        setIsLoading(false);
-        return;
-      }
-
-      const mappedClients = mapClientSummariesToClients(result.data, locale, [
-        tClients('concernsDepression'),
-        tClients('concernsStress'),
-        tClients('concernsSleep'),
-      ]);
-      setClients(mappedClients);
-      setErrorMessage(null);
-      setIsLoading(false);
-    };
-
-    void loadClients();
-  }, [locale, tClients]);
 
   useEffect(() => {
     if (!targetClientId || clients.length === 0) return;
@@ -84,17 +69,6 @@ export default function ClientsPage() {
   const isQueryDrawerOpen = Boolean(
     targetClientId && selectedClientFromQuery && targetQueryKey !== dismissedQueryKey,
   );
-
-  const filteredClients = useMemo(() => {
-    const normalizedKeyword = searchKeyword.trim().toLowerCase();
-    return clients.filter((client) => {
-      const matchesRisk = riskFilter === 'all' ? true : client.riskType === riskFilter;
-      const matchesName = normalizedKeyword
-        ? client.clientName.toLowerCase().includes(normalizedKeyword)
-        : true;
-      return matchesRisk && matchesName;
-    });
-  }, [clients, riskFilter, searchKeyword]);
 
   const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize));
@@ -304,7 +278,7 @@ export default function ClientsPage() {
         }}
         client={activeClient}
         onClientClosed={(closedClientId) => {
-          setClients((prev) => prev.filter((item) => item.clientId !== closedClientId));
+          removeClient(closedClientId);
           setSelectedClient((prev) => (prev?.clientId === closedClientId ? null : prev));
           setIsDrawerOpen(false);
 
@@ -317,37 +291,3 @@ export default function ClientsPage() {
     </section>
   );
 }
-
-const mapClientSummariesToClients = (
-  summaries: ClientSummaryResponse[],
-  locale: string,
-  concerns: string[],
-): ClientLookupItem[] => {
-  return summaries.map((summary) => {
-    const clientId = String(summary.id ?? '');
-    const riskType = mapRiskLevel(summary.riskLevel);
-    const moodScore = Number(summary.recentMoodScore ?? 0);
-    const stressScore = Number(summary.recentStressScore ?? 0);
-    const energyScore = Number(summary.recentEnergyScore ?? 0);
-
-    return {
-      time: summary.lastCheckInLabel ?? '-',
-      clientId,
-      clientName: getClientNameByLocale(clientId, summary.name ?? '-', locale),
-      streakDays: Number(summary.streak ?? 0),
-      riskType,
-      moodScore,
-      stressScore,
-      energyScore,
-      chiefConcern: summary.chiefComplaint
-        ? summary.chiefComplaint.split(',').map((value) => value.trim())
-        : concerns,
-    };
-  });
-};
-
-const mapRiskLevel = (riskLevel?: ClientSummaryResponse['riskLevel']): RiskType => {
-  if (riskLevel === 'RISK') return '위험';
-  if (riskLevel === 'CAUTION') return '주의';
-  return '안정';
-};
