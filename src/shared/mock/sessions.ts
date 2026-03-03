@@ -44,6 +44,39 @@ const MARCH_3_SCHEDULED_ITEMS = [
     stressScore: 2,
     riskType: '주의' as const,
   },
+  {
+    id: 'scheduled-march3-3',
+    clientId: 'client-march3-kr-2',
+    names: { ko: '박서준', en: 'Seojun Park' },
+    streakDays: 5,
+    scheduledTime: '11:40',
+    sessionType: '정기' as const,
+    moodScore: 2,
+    stressScore: 4,
+    riskType: '주의' as const,
+  },
+  {
+    id: 'scheduled-march3-4',
+    clientId: 'client-march3-en-2',
+    names: { ko: '클로이 정', en: 'Chloe Jung' },
+    streakDays: 1,
+    scheduledTime: '13:20',
+    sessionType: '초기' as const,
+    moodScore: 5,
+    stressScore: 1,
+    riskType: '안정' as const,
+  },
+  {
+    id: 'scheduled-march3-5',
+    clientId: 'client-march3-kr-3',
+    names: { ko: '최민아', en: 'Mina Choi' },
+    streakDays: 9,
+    scheduledTime: '17:10',
+    sessionType: '정기' as const,
+    moodScore: 3,
+    stressScore: 3,
+    riskType: '주의' as const,
+  },
 ];
 
 const MARCH_3_COMPLETED_ITEMS = [
@@ -58,6 +91,24 @@ const MARCH_3_COMPLETED_ITEMS = [
     clientId: 'client-march3-done-en',
     names: { ko: '소피아 최', en: 'Sophia Choi' },
     counselingDurationMinutes: 45,
+  },
+  {
+    id: 'completed-march3-3',
+    clientId: 'client-march3-done-kr-2',
+    names: { ko: '정유진', en: 'Yujin Jung' },
+    counselingDurationMinutes: 55,
+  },
+  {
+    id: 'completed-march3-4',
+    clientId: 'client-march3-done-en-2',
+    names: { ko: '올리비아 김', en: 'Olivia Kim' },
+    counselingDurationMinutes: 40,
+  },
+  {
+    id: 'completed-march3-5',
+    clientId: 'client-march3-done-kr-3',
+    names: { ko: '한지호', en: 'Jiho Han' },
+    counselingDurationMinutes: 60,
   },
 ];
 
