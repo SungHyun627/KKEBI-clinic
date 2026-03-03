@@ -1,3 +1,4 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
 import type { TodayScheduleResponse } from '../types/schedule';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
@@ -27,7 +28,21 @@ const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse
   }
 };
 
-export const getTodaySchedules = () => requestTodaySchedules('/api/v1/dashboard/today-schedules');
+export const getTodaySchedules = async (): Promise<TodayScheduleResponse> => {
+  try {
+    return await httpClient.get<TodayScheduleResponse>('/api/v1/dashboard/today-schedules');
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof ApiError
+          ? error.message || '오늘의 일정을 불러오지 못했습니다.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
+    };
+  }
+};
 
 export const getTodaySchedulesServer = () => {
   if (!SERVER_API_BASE_URL) {
