@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
-import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
-import { addClientTestResult, registerClient } from '@/features/clients/api/registerClient';
+import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
+import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/client-registration/lib/client-registration-storage';
+import {
+  addClientTestResult,
+  registerClient,
+} from '@/features/clients/client-registration/api/registerClient';
 import type { components } from '@/shared/api/generated-types';
 import type {
   AssessmentResultsFormValues,
@@ -15,9 +18,9 @@ import type {
   IntakeInterviewFormValues,
   KkebiNicknameFormValues,
   PaymentInfoFormValues,
-} from '@/features/clients/types/client-registration';
-import LabelCell from '@/features/clients/ui/ClientRegistrationLabelCell';
-import ValueCell from '@/features/clients/ui/ClientRegistrationValueCell';
+} from '@/features/clients/client-registration/types/client-registration';
+import LabelCell from '@/features/clients/client-registration/ui/ClientRegistrationLabelCell';
+import ValueCell from '@/features/clients/client-registration/ui/ClientRegistrationValueCell';
 import { Button } from '@/shared/ui/button';
 import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';

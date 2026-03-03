@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { UseFormReturn } from 'react-hook-form';
-import type { CounselingInfoFormValues } from '@/features/clients/types/client-registration';
+import type { CounselingInfoFormValues } from '@/features/clients/client-registration/types/client-registration';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { Select } from '@/shared/ui/select';

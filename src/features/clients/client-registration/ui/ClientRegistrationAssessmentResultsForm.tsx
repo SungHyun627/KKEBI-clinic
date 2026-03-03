@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useFieldArray, UseFormReturn } from 'react-hook-form';
-import type { AssessmentResultsFormValues } from '@/features/clients/types/client-registration';
+import type { AssessmentResultsFormValues } from '@/features/clients/client-registration/types/client-registration';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';

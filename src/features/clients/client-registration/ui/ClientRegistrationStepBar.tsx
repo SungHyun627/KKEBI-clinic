@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import Divider from '@/shared/ui/divider';
 import { cn } from '@/shared/lib/utils';
-import type { ClientRegistrationStepKey } from '@/features/clients/types/client-registration';
+import type { ClientRegistrationStepKey } from '@/features/clients/client-registration/types/client-registration';
 
 interface ClientRegistrationStepBarProps {
   currentStep: ClientRegistrationStepKey;

@@ -4,15 +4,15 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
-import ClientRegistrationAssessmentResultsForm from '@/features/clients/ui/ClientRegistrationAssessmentResultsForm';
-import ClientRegistrationIntakeInterviewForm from '@/features/clients/ui/ClientRegistrationIntakeInterviewForm';
+import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
+import ClientRegistrationAssessmentResultsForm from '@/features/clients/client-registration/ui/ClientRegistrationAssessmentResultsForm';
+import ClientRegistrationIntakeInterviewForm from '@/features/clients/client-registration/ui/ClientRegistrationIntakeInterviewForm';
 import {
   type AssessmentResultsFormValues,
   type ClientRegistrationDraft,
   type IntakeInterviewFormValues,
-} from '@/features/clients/types/client-registration';
-import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
+} from '@/features/clients/client-registration/types/client-registration';
+import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/client-registration/lib/client-registration-storage';
 import { Button } from '@/shared/ui/button';
 
 const getDefaultAssessmentResults = (): AssessmentResultsFormValues => ({
