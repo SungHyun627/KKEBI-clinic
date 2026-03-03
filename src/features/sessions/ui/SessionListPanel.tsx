@@ -161,7 +161,13 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
     }
 
     return (
-      <div className="mb-[46px] flex w-full flex-col gap-13">
+      <div
+        className={
+          selectedView === 'calendar'
+            ? 'flex h-full min-h-0 w-full flex-col gap-13 overflow-hidden'
+            : 'mb-[46px] flex w-full flex-col gap-13'
+        }
+      >
         {selectedStatus === 'scheduled'
           ? visibleScheduledGroups.map((group) => (
               <ScheduledSessionDateSection
@@ -170,6 +176,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
                 dateText={formatDate(group.date, locale)}
                 moodLabel={tClients('checkinMood')}
                 stressLabel={tClients('checkinStress')}
+                viewMode={selectedView}
               />
             ))
           : visibleCompletedGroups.map((group) => (
@@ -178,6 +185,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
                 group={group}
                 dateText={formatDate(group.date, locale)}
                 minutesUnit={tSessions('minutesUnit')}
+                viewMode={selectedView}
               />
             ))}
       </div>
@@ -186,7 +194,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
 
   if (selectedView === 'calendar') {
     return (
-      <div className="grid w-full grid-cols-2 items-stretch max-[1200px]:grid-cols-1 border-top border-neutral-95">
+      <div className="grid w-full grid-cols-2 items-stretch border-t border-neutral-95 max-[1200px]:grid-cols-1">
         <section className="flex h-[calc(100dvh-220px)] w-full flex-col gap-3 rounded-3xl bg-white p-4">
           <Calendar
             mode="single"
@@ -195,8 +203,10 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
               if (!date) return;
               setSelectedDate(date);
             }}
-            className="h-full w-full p-0 [--session-calendar-max-h:calc(100dvh)]"
+            className="h-full w-full p-0 [--session-calendar-max-h:calc(100dvh-10px)]"
             classNames={{
+              caption_label:
+                'absolute left-1/2 -translate-x-1/2 pt-3 text-center text-[16px] font-medium text-neutral-30',
               weekdays:
                 'grid w-full grid-cols-7 gap-x-[3px] [&>*:first-child]:text-[#FA8FA8] [&>*:last-child]:text-[#7CB8FF]',
               weekday:
@@ -213,7 +223,9 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
             }}
           />
         </section>
-        <section className="h-full min-w-0">{listContent}</section>
+        <section className="flex h-[calc(100dvh-170px)] min-h-0 min-w-0 overflow-hidden bg-neutral-99">
+          {listContent}
+        </section>
       </div>
     );
   }

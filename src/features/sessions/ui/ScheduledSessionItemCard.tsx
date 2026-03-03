@@ -17,12 +17,14 @@ import { toast } from '@/shared/ui/toast';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
 import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
+import { cn } from '@/shared/lib/utils';
 
 interface ScheduledSessionItemCardProps {
   item: ScheduledSessionItem;
   scheduledDate: string;
   moodLabel: string;
   stressLabel: string;
+  viewMode?: 'list' | 'calendar';
 }
 
 export default function ScheduledSessionItemCard({
@@ -30,6 +32,7 @@ export default function ScheduledSessionItemCard({
   scheduledDate,
   moodLabel,
   stressLabel,
+  viewMode,
 }: ScheduledSessionItemCardProps) {
   const router = useRouter();
   const locale = useLocale();
@@ -65,7 +68,12 @@ export default function ScheduledSessionItemCard({
   };
 
   return (
-    <div className="flex flex-col w-full items-start p-[26px] gap-[18px] justify-center rounded-3xl bg-neutral-99">
+    <div
+      className={cn(
+        'flex flex-col w-full items-start p-[26px] gap-[18px] justify-center rounded-3xl',
+        viewMode === 'calendar' ? 'bg-white' : 'bg-neutral-99',
+      )}
+    >
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="body-20 font-semibold">
@@ -74,7 +82,7 @@ export default function ScheduledSessionItemCard({
           </span>
           <StreakChip days={item.streakDays} responsiveCompact />
         </div>
-        <div className="flex w-full max-w-[235px] items-center gap-3">
+        <div className="flex w-[235px] items-center gap-3">
           <Button
             type="button"
             variant="icon"
@@ -88,7 +96,7 @@ export default function ScheduledSessionItemCard({
           <Button
             type="button"
             size="md"
-            className="w-full w-max-[181px]"
+            className="w-full max-w-[181px]"
             disabled={isStarting}
             onClick={handleStart}
           >
@@ -99,7 +107,7 @@ export default function ScheduledSessionItemCard({
 
       <Divider />
       <div className="flex w-full items-center justify-between">
-        <div className="flex w-full max-w-[268px] flex-col items-start gap-4">
+        <div className="flex w-full flex-col items-start gap-4">
           <div className="flex items-center gap-6">
             <span className="body-14 text-neutral-60 min-w-[52px]">
               {tSessions('scheduledScheduleLabel')}
@@ -120,17 +128,27 @@ export default function ScheduledSessionItemCard({
             </span>
             <SessionTypeChip value={item.sessionType} />
           </div>
-          <div className="flex items-center gap-6">
-            <span className="body-14 text-neutral-60 min-w-[52px]">
-              {tSessions('scheduledRiskLabel')}
-            </span>
-            <RiskTypeChip value={item.riskType} />
+          <div className="flex w-full justify-between">
+            <div className="flex items-center gap-6">
+              <span className="body-14 text-neutral-60 min-w-[52px]">
+                {tSessions('scheduledRiskLabel')}
+              </span>
+              <RiskTypeChip value={item.riskType} />
+            </div>
+            {viewMode === 'calendar' && (
+              <div className="flex gap-3 flex-wrap justify-end">
+                <MoodScoreChip label={moodLabel} score={item.moodScore} />
+                <MoodScoreChip label={stressLabel} score={item.stressScore} />
+              </div>
+            )}
           </div>
         </div>
-        <div className="flex gap-3">
-          <MoodScoreChip label={moodLabel} score={item.moodScore} />
-          <MoodScoreChip label={stressLabel} score={item.stressScore} />
-        </div>
+        {viewMode === 'list' && (
+          <div className="flex gap-3">
+            <MoodScoreChip label={moodLabel} score={item.moodScore} />
+            <MoodScoreChip label={stressLabel} score={item.stressScore} />
+          </div>
+        )}
       </div>
 
       <RescheduleSessionDialog

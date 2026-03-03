@@ -19,7 +19,16 @@ const completedSource = TODAY_SCHEDULES_MOCK.slice(10, 20);
 const getLocalizedClientName = (clientId: string, fallbackName: string, locale: string) =>
   getClientNameByLocale(clientId, fallbackName, locale);
 
-const MARCH_3_DATE = '2026-03-03';
+const MARCH_2026_DATES = Array.from({ length: 31 }, (_, index) => {
+  const day = String(index + 1).padStart(2, '0');
+  return `2026-03-${day}`;
+});
+
+const getMarchMockItemCount = (date: string) => {
+  const day = Number(date.split('-')[2]);
+  const pattern = [3, 4, 5];
+  return pattern[(day - 1) % pattern.length];
+};
 
 const MARCH_3_SCHEDULED_ITEMS = [
   {
@@ -163,20 +172,23 @@ export const getScheduledSessionsMock = (locale: string): ScheduledSessionGroup[
         riskType: item.riskType,
       })),
   })),
-  {
-    date: MARCH_3_DATE,
-    items: MARCH_3_SCHEDULED_ITEMS.map((item) => ({
-      id: item.id,
-      clientId: item.clientId,
-      clientName: locale === 'en' ? item.names.en : item.names.ko,
-      streakDays: item.streakDays,
-      scheduledTime: item.scheduledTime,
-      sessionType: item.sessionType,
-      moodScore: item.moodScore,
-      stressScore: item.stressScore,
-      riskType: item.riskType,
-    })),
-  },
+  ...MARCH_2026_DATES.map((date) => {
+    const itemCount = getMarchMockItemCount(date);
+    return {
+      date,
+      items: MARCH_3_SCHEDULED_ITEMS.slice(0, itemCount).map((item) => ({
+        id: `${item.id}-${date}`,
+        clientId: `${item.clientId}-${date}`,
+        clientName: locale === 'en' ? item.names.en : item.names.ko,
+        streakDays: item.streakDays,
+        scheduledTime: item.scheduledTime,
+        sessionType: item.sessionType,
+        moodScore: item.moodScore,
+        stressScore: item.stressScore,
+        riskType: item.riskType,
+      })),
+    };
+  }),
 ];
 
 export const getCompletedSessionsMock = (locale: string): CompletedSessionGroup[] => [
@@ -192,14 +204,17 @@ export const getCompletedSessionsMock = (locale: string): CompletedSessionGroup[
         counselingDurationMinutes: getDurationMinutes(itemIndex + dateIndex),
       })),
   })),
-  {
-    date: MARCH_3_DATE,
-    items: MARCH_3_COMPLETED_ITEMS.map((item) => ({
-      id: item.id,
-      clientId: item.clientId,
-      clientName: locale === 'en' ? item.names.en : item.names.ko,
-      counselingDate: MARCH_3_DATE,
-      counselingDurationMinutes: item.counselingDurationMinutes,
-    })),
-  },
+  ...MARCH_2026_DATES.map((date) => {
+    const itemCount = getMarchMockItemCount(date);
+    return {
+      date,
+      items: MARCH_3_COMPLETED_ITEMS.slice(0, itemCount).map((item) => ({
+        id: `${item.id}-${date}`,
+        clientId: `${item.clientId}-${date}`,
+        clientName: locale === 'en' ? item.names.en : item.names.ko,
+        counselingDate: date,
+        counselingDurationMinutes: item.counselingDurationMinutes,
+      })),
+    };
+  }),
 ];
