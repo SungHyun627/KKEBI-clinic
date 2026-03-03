@@ -1,3 +1,4 @@
+export { getClientList } from './api/getClientList';
 export { getClientDetail, getClientDetailMock, getClientDetailServer } from './api/getClientDetail';
 export { getClosedClients, getClosedClientsMock } from './api/getClosedClients';
 export { updateClientDetail, updateClientDetailMock } from './api/updateClientDetail';

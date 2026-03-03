@@ -5,9 +5,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { getTodaySchedules, type RiskType, type TodayScheduleItem } from '@/features/dashboard';
+import type { RiskType } from '@/features/dashboard';
+import { getClientList } from '@/features/clients';
 import ClientDetailDrawer from '@/features/clients/ui/ClientDetailDrawer';
 import type { ClientLookupItem } from '@/features/clients/types/client';
+import type { components } from '@/shared/api/generated-types';
 import { Button } from '@/shared/ui/button';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
@@ -18,6 +20,7 @@ import { Select } from '@/shared/ui/select';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 type RiskFilter = 'all' | RiskType;
+type ClientSummaryResponse = components['schemas']['ClientSummaryResponse'];
 
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
@@ -42,7 +45,7 @@ export default function ClientsPage() {
   useEffect(() => {
     const loadClients = async () => {
       setIsLoading(true);
-      const result = await getTodaySchedules();
+      const result = await getClientList({ page: 0, size: 10 });
 
       if (!result.success || !result.data) {
         setClients([]);
@@ -51,12 +54,12 @@ export default function ClientsPage() {
         return;
       }
 
-      const uniqueClients = mapSchedulesToClients(result.data, locale, [
+      const mappedClients = mapClientSummariesToClients(result.data, locale, [
         tClients('concernsDepression'),
         tClients('concernsStress'),
         tClients('concernsSleep'),
       ]);
-      setClients(uniqueClients);
+      setClients(mappedClients);
       setErrorMessage(null);
       setIsLoading(false);
     };
@@ -315,33 +318,36 @@ export default function ClientsPage() {
   );
 }
 
-const mapSchedulesToClients = (
-  schedules: TodayScheduleItem[],
+const mapClientSummariesToClients = (
+  summaries: ClientSummaryResponse[],
   locale: string,
   concerns: string[],
 ): ClientLookupItem[] => {
-  const sortedByTime = [...schedules].sort((a, b) => a.time.localeCompare(b.time));
+  return summaries.map((summary) => {
+    const clientId = String(summary.id ?? '');
+    const riskType = mapRiskLevel(summary.riskLevel);
+    const moodScore = Number(summary.recentMoodScore ?? 0);
+    const stressScore = Number(summary.recentStressScore ?? 0);
+    const energyScore = Number(summary.recentEnergyScore ?? 0);
 
-  return sortedByTime
-    .map((schedule) => ({
-      time: schedule.time,
-      clientId: schedule.clientId,
-      clientName: getClientNameByLocale(schedule.clientId, schedule.clientName, locale),
-      streakDays: schedule.streakDays ?? 0,
-      riskType: schedule.riskType,
-      moodScore: schedule.moodScore ?? 0,
-      stressScore: schedule.stressScore ?? 0,
-      energyScore:
-        schedule.moodScore === null && schedule.stressScore === null
-          ? 0
-          : Math.max(
-              0,
-              Math.min(
-                5,
-                (schedule.moodScore ?? 0) + 1 - Math.floor((schedule.stressScore ?? 0) / 2),
-              ),
-            ),
-      chiefConcern: concerns,
-    }))
-    .sort((a, b) => a.time.localeCompare(b.time));
+    return {
+      time: summary.lastCheckInLabel ?? '-',
+      clientId,
+      clientName: getClientNameByLocale(clientId, summary.name ?? '-', locale),
+      streakDays: Number(summary.streak ?? 0),
+      riskType,
+      moodScore,
+      stressScore,
+      energyScore,
+      chiefConcern: summary.chiefComplaint
+        ? summary.chiefComplaint.split(',').map((value) => value.trim())
+        : concerns,
+    };
+  });
+};
+
+const mapRiskLevel = (riskLevel?: ClientSummaryResponse['riskLevel']): RiskType => {
+  if (riskLevel === 'RISK') return '위험';
+  if (riskLevel === 'CAUTION') return '주의';
+  return '안정';
 };
