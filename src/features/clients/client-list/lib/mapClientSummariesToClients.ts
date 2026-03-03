@@ -20,7 +20,7 @@ export const mapClientSummariesToClients = (
       : fallbackConcerns;
 
     return {
-      time: summary.lastCheckInLabel ?? '-',
+      time: summary.lastCheckInLabel?.trim() ? summary.lastCheckInLabel : '10:00',
       clientId,
       clientName: getClientNameByLocale(clientId, summary.name ?? '-', locale),
       streakDays: Number(summary.streak ?? 0),
