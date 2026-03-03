@@ -32,7 +32,6 @@ const ClientRegistrationReviewPage = () => {
     locale,
     messages: {
       registerFailed: t('toast.registerFailed'),
-      additionalResultFailed: t('toast.additionalResultFailed'),
       registerSuccess: t('toast.registerSuccess'),
     },
     onSuccess: () => router.push('/clients'),

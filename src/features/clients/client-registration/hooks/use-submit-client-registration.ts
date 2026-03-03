@@ -1,10 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  addClientTestResult,
-  registerClient,
-} from '@/features/clients/client-registration/api/registerClient';
+import { registerClient } from '@/features/clients/client-registration/api/registerClient';
 import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/client-registration/lib/client-registration-storage';
 import { buildRegisterClientPayload } from '@/features/clients/client-registration/lib/review-mapper';
 import type {
@@ -21,7 +18,6 @@ interface UseSubmitClientRegistrationParams {
   locale: string;
   messages: {
     registerFailed: string;
-    additionalResultFailed: string;
     registerSuccess: string;
   };
   onSuccess: () => void;
@@ -53,24 +49,6 @@ const useSubmitClientRegistration = ({
       toast(registerResult.message || messages.registerFailed);
       setIsSubmitting(false);
       return;
-    }
-
-    if (registerResult.clientId && values.assessmentResults.additionalResults.length > 0) {
-      const testDate =
-        values.counselingInfo.counselingStartDate || new Date().toISOString().slice(0, 10);
-      for (const result of values.assessmentResults.additionalResults) {
-        if (!result.testName.trim() || result.testResult == null) continue;
-        const testResultResponse = await addClientTestResult(registerResult.clientId, {
-          testName: result.testName.trim(),
-          score: result.testResult,
-          testDate,
-        });
-        if (!testResultResponse.success) {
-          toast(testResultResponse.message || messages.additionalResultFailed);
-          setIsSubmitting(false);
-          return;
-        }
-      }
     }
 
     window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
