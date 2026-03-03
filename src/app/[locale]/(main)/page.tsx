@@ -1,5 +1,5 @@
-import WeeklyStatisticsSection from '@/widgets/dashboard/weekly-statistics';
-import TodayScheduleSection from '@/widgets/dashboard/today-schedule';
+import WeeklyStatisticsSection from '@/features/dashboard/weekly-statistics';
+import TodayScheduleSection from '@/features/dashboard/today-schedule';
 
 export default function DashBoard() {
   return (

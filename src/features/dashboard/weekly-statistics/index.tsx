@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Title } from '@/shared/ui/title';
-import { getRiskAlerts, getWeeklyStatistics } from '@/features/dashboard';
 import type { RiskAlert as RiskAlertType, WeeklyStatistics } from '@/features/dashboard';
+import { getRiskAlerts } from './api/getRiskAlerts';
+import { getWeeklyStatistics } from './api/getWeeklyStatistics';
 import WeeklyStatisticsCard from './ui/WeeklyStatisticsCard';
 import RiskAlert from './ui/RiskAlert';
 

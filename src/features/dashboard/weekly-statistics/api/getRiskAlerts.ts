@@ -1,5 +1,5 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
-import type { RiskAlertsResponse } from '../types/statistics';
+import type { RiskAlertsResponse } from '../../types/statistics';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 

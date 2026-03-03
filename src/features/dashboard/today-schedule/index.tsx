@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { getTodaySchedules } from '@/features/dashboard';
-import type { TodayScheduleItem } from '@/features/dashboard';
 import { Title } from '@/shared/ui/title';
+import type { TodayScheduleItem } from '../types/schedule';
+import { getTodaySchedules } from './api/getTodaySchedules';
 import TodayScheduleHeader from './ui/TodayScheduleHeader';
 import TodayScheduleListItem from './ui/TodayScheduleItem';
 

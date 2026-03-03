@@ -14,10 +14,14 @@ export {
   getWeeklyStatistics,
   getWeeklyStatisticsMock,
   getWeeklyStatisticsServer,
-} from './api/getWeeklyStatistics';
-export { getRiskAlerts, getRiskAlertsMock, getRiskAlertsServer } from './api/getRiskAlerts';
+} from './weekly-statistics/api/getWeeklyStatistics';
+export {
+  getRiskAlerts,
+  getRiskAlertsMock,
+  getRiskAlertsServer,
+} from './weekly-statistics/api/getRiskAlerts';
 export {
   getTodaySchedules,
   getTodaySchedulesMock,
   getTodaySchedulesServer,
-} from './api/getTodaySchedules';
+} from './today-schedule/api/getTodaySchedules';

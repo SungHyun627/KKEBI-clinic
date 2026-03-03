@@ -7,7 +7,7 @@ import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import Divider from '@/shared/ui/divider';
-import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeChip';
+import SessionTypeChip from '@/features/dashboard/today-schedule/ui/SessionTypeChip';
 import { useLocale, useTranslations } from 'next-intl';
 import type { ScheduledSessionItem } from '../types/session-list';
 import RescheduleSessionDialog from './RescheduleSessionDialog';

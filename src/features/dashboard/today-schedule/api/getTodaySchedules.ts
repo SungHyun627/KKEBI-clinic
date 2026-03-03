@@ -1,9 +1,9 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
-import type { WeeklyStatisticsResponse } from '../types/statistics';
+import type { TodayScheduleResponse } from '../../types/schedule';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
-const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsResponse> => {
+const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse> => {
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -13,12 +13,12 @@ const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsRes
 
     const data = await response.json().catch(() => null);
     if (typeof data === 'object' && data !== null && 'success' in data) {
-      return data as WeeklyStatisticsResponse;
+      return data as TodayScheduleResponse;
     }
 
     return {
       success: response.ok,
-      message: response.ok ? undefined : '주간 통계를 불러오지 못했습니다.',
+      message: response.ok ? undefined : '오늘의 일정을 불러오지 못했습니다.',
     };
   } catch (error) {
     return {
@@ -28,15 +28,15 @@ const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsRes
   }
 };
 
-export const getWeeklyStatistics = async (): Promise<WeeklyStatisticsResponse> => {
+export const getTodaySchedules = async (): Promise<TodayScheduleResponse> => {
   try {
-    return await httpClient.get<WeeklyStatisticsResponse>('/api/v1/dashboard/weekly-statistics');
+    return await httpClient.get<TodayScheduleResponse>('/api/v1/dashboard/today-schedules');
   } catch (error) {
     return {
       success: false,
       message:
         error instanceof ApiError
-          ? error.message || '주간 통계를 불러오지 못했습니다.'
+          ? error.message || '오늘의 일정을 불러오지 못했습니다.'
           : error instanceof Error
             ? error.message
             : 'Network error',
@@ -44,15 +44,15 @@ export const getWeeklyStatistics = async (): Promise<WeeklyStatisticsResponse> =
   }
 };
 
-export const getWeeklyStatisticsServer = () => {
+export const getTodaySchedulesServer = () => {
   if (!SERVER_API_BASE_URL) {
     return Promise.resolve({
       success: false,
       message: 'NEXT_PUBLIC_API_BASE_URL is not configured',
-    } satisfies WeeklyStatisticsResponse);
+    } satisfies TodayScheduleResponse);
   }
 
-  return requestWeeklyStatistics(`${SERVER_API_BASE_URL}/api/v1/dashboard/weekly-statistics`);
+  return requestTodaySchedules(`${SERVER_API_BASE_URL}/api/v1/dashboard/today-schedules`);
 };
 
-export const getWeeklyStatisticsMock = getWeeklyStatistics;
+export const getTodaySchedulesMock = getTodaySchedules;
