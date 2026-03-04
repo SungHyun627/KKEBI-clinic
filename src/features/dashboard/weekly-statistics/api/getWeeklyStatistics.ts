@@ -3,6 +3,36 @@ import type { WeeklyStatisticsResponse } from '../../types/statistics';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
+type BackendEnvelope<TData> = {
+  code?: string;
+  message?: string;
+  data?: TData;
+};
+
+const normalizeWeeklyStatisticsResponse = (
+  payload: unknown,
+  fallbackMessage: string,
+): WeeklyStatisticsResponse => {
+  if (typeof payload !== 'object' || payload === null) {
+    return { success: false, message: fallbackMessage };
+  }
+
+  if ('success' in payload) {
+    return payload as WeeklyStatisticsResponse;
+  }
+
+  if ('data' in payload) {
+    const envelope = payload as BackendEnvelope<WeeklyStatisticsResponse['data']>;
+    return {
+      success: true,
+      data: envelope.data,
+      message: envelope.message,
+    };
+  }
+
+  return { success: false, message: fallbackMessage };
+};
+
 const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsResponse> => {
   try {
     const response = await fetch(url, {
@@ -12,13 +42,19 @@ const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsRes
     });
 
     const data = await response.json().catch(() => null);
-    if (typeof data === 'object' && data !== null && 'success' in data) {
-      return data as WeeklyStatisticsResponse;
+    if (response.ok) {
+      return normalizeWeeklyStatisticsResponse(data, '주간 통계를 불러오지 못했습니다.');
     }
 
     return {
-      success: response.ok,
-      message: response.ok ? undefined : '주간 통계를 불러오지 못했습니다.',
+      success: false,
+      message:
+        (typeof data === 'object' &&
+        data !== null &&
+        'message' in data &&
+        typeof data.message === 'string'
+          ? data.message
+          : undefined) || '주간 통계를 불러오지 못했습니다.',
     };
   } catch (error) {
     return {
@@ -30,7 +66,8 @@ const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsRes
 
 export const getWeeklyStatistics = async (): Promise<WeeklyStatisticsResponse> => {
   try {
-    return await httpClient.get<WeeklyStatisticsResponse>('/api/v1/dashboard/weekly-statistics');
+    const response = await httpClient.get<unknown>('/api/v1/dashboard/weekly-statistics');
+    return normalizeWeeklyStatisticsResponse(response, '주간 통계를 불러오지 못했습니다.');
   } catch (error) {
     return {
       success: false,

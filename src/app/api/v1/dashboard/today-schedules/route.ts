@@ -11,13 +11,9 @@ const getTodaySchedulesMockResponse = () =>
 export const GET = async (request: Request) => {
   try {
     const proxied = await proxyToBackend(request, {
-      path: '/api/v1/dashboard/today-schedules',
+      path: '/api/v1/counselor/dashboard/today-schedule',
       method: 'GET',
     });
-
-    if (proxied.status < 500) {
-      return proxied;
-    }
 
     return getTodaySchedulesMockResponse();
   } catch {

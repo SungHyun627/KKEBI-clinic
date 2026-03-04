@@ -49,12 +49,15 @@ const WeeklyStatisticsSection = () => {
     );
   }
 
-  if (errorMessage) {
-    return <section className="body-14 text-status-negative">{errorMessage}</section>;
-  }
-
-  if (!statistics) return null;
+  const hasStatistics = Boolean(statistics);
   const riskAlert = riskAlerts[0];
+  const completedSessionsValue = hasStatistics ? (statistics?.completedSessions ?? '-') : '-';
+  const averageSessionMinutesValue = hasStatistics
+    ? (statistics?.averageSessionMinutes ?? '-')
+    : '-';
+  const clientImprovementRateValue = hasStatistics
+    ? (statistics?.clientImprovementRate ?? '-')
+    : '-';
 
   return (
     <section
@@ -71,14 +74,14 @@ const WeeklyStatisticsSection = () => {
             <div className="flex min-w-0 flex-1">
               <WeeklyStatisticsCard
                 label={tDashboard('weeklyStatsCompletedSessions')}
-                value={statistics.completedSessions}
+                value={completedSessionsValue}
                 icon="/icons/complete.svg"
               />
             </div>
             <div className="flex min-w-0 flex-1">
               <WeeklyStatisticsCard
                 label={tDashboard('weeklyStatsAverageSessionLength')}
-                value={statistics.averageSessionMinutes}
+                value={averageSessionMinutesValue}
                 unit={tDashboard('weeklyStatsMinuteUnit')}
                 icon="/icons/headset.svg"
               />
@@ -86,12 +89,13 @@ const WeeklyStatisticsSection = () => {
             <div className="flex min-w-0 flex-1">
               <WeeklyStatisticsCard
                 label={tDashboard('weeklyStatsClientImprovementRate')}
-                value={statistics.clientImprovementRate}
+                value={clientImprovementRateValue}
                 unit="%"
                 icon="/icons/person.svg"
               />
             </div>
           </div>
+          {errorMessage ? <p className="body-14 text-label-alternative">{errorMessage}</p> : null}
         </div>
       </div>
 

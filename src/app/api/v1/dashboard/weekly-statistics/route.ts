@@ -14,13 +14,9 @@ const getWeeklyStatisticsMockResponse = () =>
 export const GET = async (request: Request) => {
   try {
     const proxied = await proxyToBackend(request, {
-      path: '/api/v1/dashboard/weekly-statistics',
+      path: '/api/v1/counselor/dashboard/weekly-stats',
       method: 'GET',
     });
-
-    if (proxied.status < 500) {
-      return proxied;
-    }
 
     return getWeeklyStatisticsMockResponse();
   } catch {

@@ -3,6 +3,36 @@ import type { TodayScheduleResponse } from '../../types/schedule';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
+type BackendEnvelope<TData> = {
+  code?: string;
+  message?: string;
+  data?: TData;
+};
+
+const normalizeTodaySchedulesResponse = (
+  payload: unknown,
+  fallbackMessage: string,
+): TodayScheduleResponse => {
+  if (typeof payload !== 'object' || payload === null) {
+    return { success: false, message: fallbackMessage };
+  }
+
+  if ('success' in payload) {
+    return payload as TodayScheduleResponse;
+  }
+
+  if ('data' in payload) {
+    const envelope = payload as BackendEnvelope<TodayScheduleResponse['data']>;
+    return {
+      success: true,
+      data: envelope.data,
+      message: envelope.message,
+    };
+  }
+
+  return { success: false, message: fallbackMessage };
+};
+
 const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse> => {
   try {
     const response = await fetch(url, {
@@ -12,13 +42,19 @@ const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse
     });
 
     const data = await response.json().catch(() => null);
-    if (typeof data === 'object' && data !== null && 'success' in data) {
-      return data as TodayScheduleResponse;
+    if (response.ok) {
+      return normalizeTodaySchedulesResponse(data, '오늘의 일정을 불러오지 못했습니다.');
     }
 
     return {
-      success: response.ok,
-      message: response.ok ? undefined : '오늘의 일정을 불러오지 못했습니다.',
+      success: false,
+      message:
+        (typeof data === 'object' &&
+        data !== null &&
+        'message' in data &&
+        typeof data.message === 'string'
+          ? data.message
+          : undefined) || '오늘의 일정을 불러오지 못했습니다.',
     };
   } catch (error) {
     return {
@@ -30,7 +66,8 @@ const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse
 
 export const getTodaySchedules = async (): Promise<TodayScheduleResponse> => {
   try {
-    return await httpClient.get<TodayScheduleResponse>('/api/v1/dashboard/today-schedules');
+    const response = await httpClient.get<unknown>('/api/v1/dashboard/today-schedules');
+    return normalizeTodaySchedulesResponse(response, '오늘의 일정을 불러오지 못했습니다.');
   } catch (error) {
     return {
       success: false,
