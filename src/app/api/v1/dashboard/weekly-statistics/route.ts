@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { proxyToBackend } from '@/shared/server/backend-proxy';
+import { resolveWeeklyStatisticsPayload } from '@/features/dashboard/weekly-statistics/lib/mapWeeklyStatisticsResponse';
 
 const getWeeklyStatisticsMockResponse = () =>
   NextResponse.json({
@@ -12,14 +13,32 @@ const getWeeklyStatisticsMockResponse = () =>
   });
 
 export const GET = async (request: Request) => {
-  try {
-    const proxied = await proxyToBackend(request, {
-      path: '/api/v1/counselor/dashboard/weekly-stats',
-      method: 'GET',
-    });
+  const proxied = await proxyToBackend(request, {
+    path: '/api/v1/counselor/dashboard/weekly-stats',
+    method: 'GET',
+  });
 
-    return getWeeklyStatisticsMockResponse();
-  } catch {
+  if (!proxied.ok) {
+    return proxied;
+  }
+
+  const payload = await proxied
+    .clone()
+    .json()
+    .catch(() => null);
+
+  const resolved = resolveWeeklyStatisticsPayload(payload);
+  if (resolved.type === 'mock') {
     return getWeeklyStatisticsMockResponse();
   }
+
+  if (resolved.type === 'passthrough') {
+    return proxied;
+  }
+
+  return NextResponse.json({
+    success: true,
+    data: resolved.data,
+    message: resolved.message,
+  });
 };

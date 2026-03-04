@@ -1,4 +1,4 @@
-import { ApiError, httpClient } from '@/shared/api/http-client';
+import { httpClient } from '@/shared/api/http-client';
 import type { TodayScheduleResponse } from '../../types/schedule';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
@@ -7,6 +7,26 @@ type BackendEnvelope<TData> = {
   code?: string;
   message?: string;
   data?: TData;
+};
+
+const extractSchedules = (data: unknown): TodayScheduleResponse['data'] | undefined => {
+  if (Array.isArray(data)) {
+    return data as TodayScheduleResponse['data'];
+  }
+
+  if (typeof data !== 'object' || data === null) {
+    return undefined;
+  }
+
+  const candidates = ['schedules', 'todaySchedules', 'items', 'content', 'results'] as const;
+  for (const key of candidates) {
+    const value = (data as Record<string, unknown>)[key];
+    if (Array.isArray(value)) {
+      return value as TodayScheduleResponse['data'];
+    }
+  }
+
+  return undefined;
 };
 
 const normalizeTodaySchedulesResponse = (
@@ -18,14 +38,33 @@ const normalizeTodaySchedulesResponse = (
   }
 
   if ('success' in payload) {
-    return payload as TodayScheduleResponse;
+    const response = payload as TodayScheduleResponse;
+    const schedules = extractSchedules(response.data);
+    if (!schedules) {
+      return {
+        success: false,
+        message: response.message || fallbackMessage,
+      };
+    }
+    return {
+      success: true,
+      data: schedules,
+      message: response.message,
+    };
   }
 
   if ('data' in payload) {
     const envelope = payload as BackendEnvelope<TodayScheduleResponse['data']>;
+    const schedules = extractSchedules(envelope.data);
+    if (!schedules) {
+      return {
+        success: false,
+        message: envelope.message || fallbackMessage,
+      };
+    }
     return {
       success: true,
-      data: envelope.data,
+      data: schedules,
       message: envelope.message,
     };
   }
@@ -71,12 +110,7 @@ export const getTodaySchedules = async (): Promise<TodayScheduleResponse> => {
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof ApiError
-          ? error.message || '오늘의 일정을 불러오지 못했습니다.'
-          : error instanceof Error
-            ? error.message
-            : 'Network error',
+      message: error instanceof Error ? error.message : 'Network error',
     };
   }
 };
@@ -88,7 +122,6 @@ export const getTodaySchedulesServer = () => {
       message: 'NEXT_PUBLIC_API_BASE_URL is not configured',
     } satisfies TodayScheduleResponse);
   }
-
   return requestTodaySchedules(`${SERVER_API_BASE_URL}/api/v1/dashboard/today-schedules`);
 };
 

@@ -1,4 +1,4 @@
-import { ApiError, httpClient } from '@/shared/api/http-client';
+import { httpClient } from '@/shared/api/http-client';
 import type { WeeklyStatisticsResponse } from '../../types/statistics';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
@@ -71,12 +71,7 @@ export const getWeeklyStatistics = async (): Promise<WeeklyStatisticsResponse> =
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof ApiError
-          ? error.message || '주간 통계를 불러오지 못했습니다.'
-          : error instanceof Error
-            ? error.message
-            : 'Network error',
+      message: error instanceof Error ? error.message : 'Network error',
     };
   }
 };
@@ -88,7 +83,6 @@ export const getWeeklyStatisticsServer = () => {
       message: 'NEXT_PUBLIC_API_BASE_URL is not configured',
     } satisfies WeeklyStatisticsResponse);
   }
-
   return requestWeeklyStatistics(`${SERVER_API_BASE_URL}/api/v1/dashboard/weekly-statistics`);
 };
 

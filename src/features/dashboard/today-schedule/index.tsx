@@ -19,7 +19,7 @@ export default function TodayScheduleSection() {
       setIsLoading(true);
       const result = await getTodaySchedules();
 
-      if (!result.success || !result.data) {
+      if (!result.success || !Array.isArray(result.data)) {
         setSchedules([]);
         setErrorMessage(result.message || tDashboard('todayScheduleLoadFailed'));
         setIsLoading(false);
@@ -49,11 +49,11 @@ export default function TodayScheduleSection() {
       <div className="w-full mb-[21px]">
         <TodayScheduleHeader />
         {errorMessage ? (
-          <div className="body-14 flex w-full items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
+          <div className="body-14 flex w-full h-[180px] items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
             {errorMessage}
           </div>
         ) : schedules.length === 0 ? (
-          <div className="body-14 flex w-full items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
+          <div className="body-14 flex w-full h-[180px] items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
             {tDashboard('todayScheduleEmpty')}
           </div>
         ) : (
