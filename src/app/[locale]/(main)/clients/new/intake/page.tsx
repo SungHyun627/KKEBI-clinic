@@ -4,46 +4,29 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
-import ClientRegistrationAssessmentResultsForm from '@/features/clients/ui/ClientRegistrationAssessmentResultsForm';
-import ClientRegistrationIntakeInterviewForm from '@/features/clients/ui/ClientRegistrationIntakeInterviewForm';
+import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
+import ClientRegistrationAssessmentResultsForm from '@/features/clients/client-registration/ui/ClientRegistrationAssessmentResultsForm';
+import ClientRegistrationIntakeInterviewForm from '@/features/clients/client-registration/ui/ClientRegistrationIntakeInterviewForm';
 import {
-  type AssessmentResultsFormValues,
-  type ClientRegistrationDraft,
-  type IntakeInterviewFormValues,
-} from '@/features/clients/types/client-registration';
-import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
+  clearRegistrationDraft,
+  getAssessmentResultsFromDraft,
+  getDefaultAssessmentResults,
+  getDefaultIntakeInterview,
+  getIntakeInterviewFromDraft,
+  getStoredClientRegistrationDraft,
+  hasRequiredRegistrationDraft,
+  saveIntakeStepDraft,
+} from '@/features/clients/client-registration/intake/lib/intake-draft';
+import type {
+  AssessmentResultsFormValues,
+  IntakeInterviewFormValues,
+} from '@/features/clients/client-registration/types/client-registration';
 import { Button } from '@/shared/ui/button';
-
-const getDefaultAssessmentResults = (): AssessmentResultsFormValues => ({
-  phq9Score: null,
-  pss10Score: null,
-  mbiScore: null,
-  additionalResults: [],
-  draftTestName: '',
-});
-
-const getDefaultIntakeInterview = (): IntakeInterviewFormValues => ({
-  reasonForVisit: '',
-  mostImportantChange: '',
-  similarPastExperience: '',
-  attemptedSolution: '',
-  attemptedSolutionEffectiveness: '',
-  currentBiggestConcern: '',
-  averageSleepPattern: '',
-  sleepQuality: '',
-  exerciseTypeAndFrequency: '',
-  mealsPerDay: '',
-  mostReliablePerson: '',
-  reasonForReliance: '',
-  familyBond: '',
-  reasonForFamilyBond: '',
-  selfDescriptionSentence: '',
-});
 
 const ClientRegistrationIntakePage = () => {
   const t = useTranslations('clientRegistration.common');
   const router = useRouter();
+
   const assessmentResultsForm = useForm<AssessmentResultsFormValues>({
     mode: 'onSubmit',
     defaultValues: getDefaultAssessmentResults(),
@@ -54,32 +37,20 @@ const ClientRegistrationIntakePage = () => {
   });
 
   useEffect(() => {
-    const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-    if (!storedDraft) {
+    const draft = getStoredClientRegistrationDraft();
+    if (!draft) {
       router.replace('/clients/new');
       return;
     }
 
-    try {
-      const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-      if (!parsedDraft.basicInfo || !parsedDraft.counselingInfo || !parsedDraft.paymentInfo) {
-        router.replace('/clients/new');
-        return;
-      }
-
-      if (parsedDraft.assessmentResults) {
-        assessmentResultsForm.reset({
-          ...getDefaultAssessmentResults(),
-          ...parsedDraft.assessmentResults,
-        });
-      }
-      if (parsedDraft.intakeInterview) {
-        intakeInterviewForm.reset(parsedDraft.intakeInterview);
-      }
-    } catch {
-      window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
+    if (!hasRequiredRegistrationDraft(draft)) {
+      clearRegistrationDraft();
       router.replace('/clients/new');
+      return;
     }
+
+    assessmentResultsForm.reset(getAssessmentResultsFromDraft(draft));
+    intakeInterviewForm.reset(getIntakeInterviewFromDraft(draft));
   }, [assessmentResultsForm, intakeInterviewForm, router]);
 
   const handleNext = async () => {
@@ -93,29 +64,14 @@ const ClientRegistrationIntakePage = () => {
     });
     if (!isIntakeInterviewValid) return;
 
-    const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-    if (!storedDraft) {
+    const draft = getStoredClientRegistrationDraft();
+    if (!draft) {
       router.replace('/clients/new');
       return;
     }
 
-    try {
-      const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-      const nextDraft: ClientRegistrationDraft = {
-        ...parsedDraft,
-        step: 'registration-complete',
-        assessmentResults: assessmentResultsForm.getValues(),
-        intakeInterview: intakeInterviewForm.getValues(),
-      };
-      window.sessionStorage.setItem(
-        CLIENT_REGISTRATION_DRAFT_STORAGE_KEY,
-        JSON.stringify(nextDraft),
-      );
-      router.push('/clients/new/review');
-    } catch {
-      window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-      router.replace('/clients/new');
-    }
+    saveIntakeStepDraft(draft, assessmentResultsForm.getValues(), intakeInterviewForm.getValues());
+    router.push('/clients/new/review');
   };
 
   return (

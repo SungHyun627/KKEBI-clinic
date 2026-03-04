@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { LocaleSwitchButton } from '@/shared/ui/locale-switch-button';
 import { getSessionStartContext } from '@/shared/lib/session-start-context';
 import type { SessionStartContextValue } from '@/shared/lib/session-start-context';
-import SessionTypeChip from '@/widgets/dashboard/today-schedule/ui/SessionTypeChip';
+import SessionTypeChip from '@/features/dashboard/today-schedule/ui/SessionTypeChip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';

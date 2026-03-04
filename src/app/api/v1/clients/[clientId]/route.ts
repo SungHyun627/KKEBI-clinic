@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getActiveSchedules } from '@/shared/mock/client-lifecycle-store';
+import { proxyToBackend } from '@/shared/server/backend-proxy';
 import type {
   ClientDetailData,
   ClientDetailUpdatePayload,
@@ -25,38 +26,11 @@ const COUNSELING_CHIEF_CONCERNS: CounselingChiefConcern[] = [
 
 export async function GET(_request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
-  const detail = buildClientDetail(clientId);
-
-  if (!detail) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: '내담자 상세 정보를 찾을 수 없습니다.',
-      },
-      { status: 404 },
-    );
-  }
-
-  return NextResponse.json({
-    success: true,
-    data: detail,
-  });
+  return proxyToBackend(_request, { method: 'GET', path: `/api/v1/clients/${clientId}` });
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
-  const base = buildClientDetail(clientId);
-
-  if (!base) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: '내담자 상세 정보를 찾을 수 없습니다.',
-      },
-      { status: 404 },
-    );
-  }
-
   const body = (await request.json().catch(() => null)) as ClientDetailUpdatePayload | null;
   if (!body) {
     return NextResponse.json(
@@ -67,6 +41,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ clien
       { status: 400 },
     );
   }
+
+  const base = buildClientDetail(clientId) ?? buildPatchFallbackDetail(clientId);
 
   const next: ClientDetailData = {
     ...base,
@@ -83,6 +59,53 @@ export async function PATCH(request: Request, context: { params: Promise<{ clien
     success: true,
     data: next,
   });
+}
+
+function buildPatchFallbackDetail(clientId: string): ClientDetailData {
+  return {
+    time: '1일 전',
+    clientId,
+    clientName: '',
+    streakDays: 0,
+    riskType: '안정',
+    moodScore: 0,
+    stressScore: 0,
+    energyScore: 0,
+    chiefConcern: ['기타'],
+    age: 0,
+    gender: '여성',
+    counselingStartDate: '',
+    currentSession: 1,
+    totalSession: 1,
+    visitPurpose: '고민 상담',
+    nextCounselingAt: '',
+    recentRisks: [],
+    recentCheckins: [],
+    counselingHistory: [],
+    scaleResults: {
+      phq9: 0,
+      pss10: 0,
+      mbi: 0,
+      etc: '',
+    },
+    intakeAnswers: {
+      reasonForVisit: '',
+      expectedChange: '',
+      similarPastExperience: '',
+      triedMethod: '',
+      methodEffectiveness: '',
+      biggestConcern: '',
+      sleepPattern: '',
+      sleepQuality: '',
+      exerciseHabit: '',
+      mealsPerDay: '',
+      mostReliablePerson: '',
+      reliabilityReason: '',
+      familyBond: '',
+      familyBondReason: '',
+      selfDescription: '',
+    },
+  };
 }
 
 function buildClientDetail(clientId: string): ClientDetailData | null {

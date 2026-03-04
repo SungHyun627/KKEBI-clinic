@@ -1,0 +1,234 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { getClientDetail, updateClientDetail } from '@/features/clients';
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
+import Image from 'next/image';
+import CheckinHistorySection from './CheckinHistorySection';
+import CounselingHistorySection from './CounselingHistorySection';
+import AssessmentResultsSection from './AssessmentResultsSection';
+import ClientDetailHeader from './ClientDetailHeader';
+import ClientOverviewSection from './ClientOverviewSection';
+import type {
+  ClientCheckinRecord,
+  ClientCounselingRecord,
+  ClientDetailData,
+  ClientDetailUpdatePayload,
+} from '@/features/clients/client-detail/types/client-detail';
+import type { ClientLookupItem } from '@/features/clients/types/common';
+import Divider from '@/shared/ui/divider';
+
+interface ClientDetailDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  client: ClientLookupItem | null;
+  onClientClosed: (clientId: string) => void;
+}
+
+interface ClientDetailDrawerBodyProps {
+  isLoading: boolean;
+  errorMessage: string | null;
+  displayClient: ClientLookupItem | null;
+  detail: ClientDetailData | null;
+  isEditing: boolean;
+  onEditToggle: () => void;
+  onClientClosed: (clientId: string) => void;
+  onSaveDetail: (next: ClientDetailData) => Promise<void>;
+}
+
+const DRAWER_BODY_CLASSNAME = 'flex w-full flex-col gap-[42px]';
+const MOCK_CHECKIN_HISTORY: ClientCheckinRecord[] = [
+  {
+    date: '2026-03-01',
+    time: '21:20',
+    moodScore: 3,
+    stressScore: 4,
+    energyScore: 3,
+    sleepScore: 2,
+  },
+];
+const MOCK_COUNSELING_HISTORY: ClientCounselingRecord[] = [
+  {
+    dateTime: '2026-02-27 10:30',
+    chiefConcern: '직장',
+    taskName: '감정 기록 3회 작성',
+    taskStatus: '진행중',
+    paymentStatus: '납부',
+  },
+  {
+    dateTime: '2026-02-20 11:00',
+    chiefConcern: '건강',
+    taskName: '수면 루틴 체크',
+    taskStatus: '완수',
+    paymentStatus: '미납',
+  },
+];
+
+export default function ClientDetailDrawer({
+  open,
+  onOpenChange,
+  client,
+  onClientClosed,
+}: ClientDetailDrawerProps) {
+  const tClients = useTranslations('clients');
+  const tNotification = useTranslations('notification');
+  const [detail, setDetail] = useState<ClientDetailData | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const clientId = client?.clientId;
+    if (!open || !clientId) return;
+
+    const loadClientDetail = async () => {
+      setIsLoading(true);
+      const result = await getClientDetail(clientId);
+
+      if (!result.success || !result.data) {
+        setDetail(null);
+        setErrorMessage(result.message || tClients('detailLoadFailed'));
+        setIsLoading(false);
+        return;
+      }
+
+      setDetail(result.data);
+      setIsEditing(false);
+      setErrorMessage(null);
+      setIsLoading(false);
+    };
+
+    void loadClientDetail();
+  }, [open, client?.clientId, tClients]);
+
+  const displayClient = detail ?? client;
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => event.preventDefault()}
+        className="flex max-w-[695px] flex-col gap-[26px] overflow-y-auto px-8 py-[23px] bg-neutral-99"
+      >
+        <DrawerHeader className="sr-only p-0">
+          <DrawerTitle>{tClients('detailDrawerTitle')}</DrawerTitle>
+        </DrawerHeader>
+        <DrawerClose asChild>
+          <button
+            type="button"
+            aria-label={tNotification('commonFold')}
+            className="flex h-6 w-6 items-center justify-center hover:cursor-pointer"
+          >
+            <Image src="/icons/fold.svg" alt={tNotification('commonFold')} width={20} height={20} />
+          </button>
+        </DrawerClose>
+        <ClientDetailDrawerBody
+          isLoading={isLoading}
+          errorMessage={errorMessage}
+          displayClient={displayClient}
+          detail={detail}
+          isEditing={isEditing}
+          onEditToggle={() => setIsEditing((prev) => !prev)}
+          onClientClosed={onClientClosed}
+          onSaveDetail={async (next) => {
+            const payload: ClientDetailUpdatePayload = {
+              age: next.age,
+              gender: next.gender,
+              counselingStartDate: next.counselingStartDate,
+              currentSession: next.currentSession,
+              totalSession: next.totalSession,
+              visitPurpose: next.visitPurpose,
+              nextCounselingAt: next.nextCounselingAt,
+            };
+            const result = await updateClientDetail(next.clientId, payload);
+
+            if (!result.success) {
+              setErrorMessage(result.message || tClients('detailLoadFailed'));
+              return;
+            }
+
+            const refreshed = await getClientDetail(next.clientId);
+            if (!refreshed.success || !refreshed.data) {
+              if (result.data) {
+                setDetail(result.data);
+                setErrorMessage(null);
+                setIsEditing(false);
+                return;
+              }
+
+              setErrorMessage(refreshed.message || tClients('detailLoadFailed'));
+              return;
+            }
+
+            setDetail(refreshed.data);
+            setErrorMessage(null);
+            setIsEditing(false);
+          }}
+        />
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+function ClientDetailDrawerBody({
+  isLoading,
+  errorMessage,
+  displayClient,
+  detail,
+  isEditing,
+  onEditToggle,
+  onClientClosed,
+  onSaveDetail,
+}: ClientDetailDrawerBodyProps) {
+  const tClients = useTranslations('clients');
+
+  if (isLoading) {
+    return (
+      <div className={DRAWER_BODY_CLASSNAME}>
+        <div className="body-14 text-label-alternative">{tClients('detailLoading')}</div>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className={DRAWER_BODY_CLASSNAME}>
+        <div className="body-14 text-status-negative">{errorMessage}</div>
+      </div>
+    );
+  }
+
+  if (!displayClient) {
+    return <div className={DRAWER_BODY_CLASSNAME} />;
+  }
+
+  const checkinRecords =
+    detail?.recentCheckins && detail.recentCheckins.length > 0
+      ? detail.recentCheckins
+      : MOCK_CHECKIN_HISTORY;
+  const counselingRecords =
+    detail?.counselingHistory && detail.counselingHistory.length > 0
+      ? detail.counselingHistory
+      : MOCK_COUNSELING_HISTORY;
+
+  return (
+    <div className={DRAWER_BODY_CLASSNAME}>
+      <ClientDetailHeader client={displayClient} />
+      {detail ? (
+        <ClientOverviewSection
+          detail={detail}
+          isEditing={isEditing}
+          onEditToggle={onEditToggle}
+          onClientClosed={onClientClosed}
+          onSave={(next) => void onSaveDetail(next)}
+        />
+      ) : null}
+
+      <Divider />
+      <CheckinHistorySection checkins={checkinRecords} />
+      <CounselingHistorySection records={counselingRecords} />
+      <AssessmentResultsSection detail={detail} />
+    </div>
+  );
+}
