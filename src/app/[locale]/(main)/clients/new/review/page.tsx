@@ -3,185 +3,39 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
-import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
-import { addClientTestResult, registerClient } from '@/features/clients/api/registerClient';
-import type { components } from '@/shared/api/generated-types';
-import type {
-  AssessmentResultsFormValues,
-  BasicInfoFormValues,
-  CounselingInfoFormValues,
-  ClientRegistrationDraft,
-  IntakeInterviewFormValues,
-  KkebiNicknameFormValues,
-  PaymentInfoFormValues,
-} from '@/features/clients/types/client-registration';
-import LabelCell from '@/features/clients/ui/ClientRegistrationLabelCell';
-import ValueCell from '@/features/clients/ui/ClientRegistrationValueCell';
+import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
+import useSubmitClientRegistration from '@/features/clients/client-registration/hooks/use-submit-client-registration';
+import {
+  getGenderDisplayValue,
+  getReferralPathDisplayValue,
+} from '@/features/clients/client-registration/lib/review-mapper';
+import { getReviewStateFromStorage } from '@/features/clients/client-registration/lib/review-draft';
+import LabelCell from '@/features/clients/client-registration/ui/ClientRegistrationLabelCell';
+import ValueCell from '@/features/clients/client-registration/ui/ClientRegistrationValueCell';
 import { Button } from '@/shared/ui/button';
-import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
-
-const EMPTY_BASIC_INFO: BasicInfoFormValues = {
-  name: '',
-  phone: '',
-  email: '',
-  birthDate: '',
-  gender: '',
-};
-
-const EMPTY_COUNSELING_INFO: CounselingInfoFormValues = {
-  counselingStartDate: '',
-  chiefConcern: '',
-  referralPath: '',
-};
-
-const EMPTY_PAYMENT_INFO: PaymentInfoFormValues = {
-  paymentType: '',
-  insuranceCompany: '',
-};
-
-const EMPTY_KKEBI_NICKNAME: KkebiNicknameFormValues = {
-  kkebiNickname: '',
-};
-
-const EMPTY_ASSESSMENT_RESULTS: AssessmentResultsFormValues = {
-  phq9Score: null,
-  pss10Score: null,
-  mbiScore: null,
-  additionalResults: [],
-  draftTestName: '',
-};
-
-const EMPTY_INTAKE_INTERVIEW: IntakeInterviewFormValues = {
-  reasonForVisit: '',
-  mostImportantChange: '',
-  similarPastExperience: '',
-  attemptedSolution: '',
-  attemptedSolutionEffectiveness: '',
-  currentBiggestConcern: '',
-  averageSleepPattern: '',
-  sleepQuality: '',
-  exerciseTypeAndFrequency: '',
-  mealsPerDay: '',
-  mostReliablePerson: '',
-  reasonForReliance: '',
-  familyBond: '',
-  reasonForFamilyBond: '',
-  selfDescriptionSentence: '',
-};
-
-const getBasicInfoFromSessionStorage = (): BasicInfoFormValues => {
-  if (typeof window === 'undefined') {
-    return EMPTY_BASIC_INFO;
-  }
-
-  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-  if (!storedDraft) return EMPTY_BASIC_INFO;
-
-  try {
-    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-    return parsedDraft.basicInfo ?? EMPTY_BASIC_INFO;
-  } catch {
-    return EMPTY_BASIC_INFO;
-  }
-};
-
-const getCounselingInfoFromSessionStorage = (): CounselingInfoFormValues => {
-  if (typeof window === 'undefined') {
-    return EMPTY_COUNSELING_INFO;
-  }
-
-  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-  if (!storedDraft) return EMPTY_COUNSELING_INFO;
-
-  try {
-    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-    return parsedDraft.counselingInfo ?? EMPTY_COUNSELING_INFO;
-  } catch {
-    return EMPTY_COUNSELING_INFO;
-  }
-};
-
-const getPaymentInfoFromSessionStorage = (): PaymentInfoFormValues => {
-  if (typeof window === 'undefined') {
-    return EMPTY_PAYMENT_INFO;
-  }
-
-  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-  if (!storedDraft) return EMPTY_PAYMENT_INFO;
-
-  try {
-    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-    return parsedDraft.paymentInfo ?? EMPTY_PAYMENT_INFO;
-  } catch {
-    return EMPTY_PAYMENT_INFO;
-  }
-};
-
-const getKkebiNicknameFromSessionStorage = (): KkebiNicknameFormValues => {
-  if (typeof window === 'undefined') {
-    return EMPTY_KKEBI_NICKNAME;
-  }
-
-  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-  if (!storedDraft) return EMPTY_KKEBI_NICKNAME;
-
-  try {
-    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-    return parsedDraft.kkebiNickname ?? EMPTY_KKEBI_NICKNAME;
-  } catch {
-    return EMPTY_KKEBI_NICKNAME;
-  }
-};
-
-const getAssessmentResultsFromSessionStorage = (): AssessmentResultsFormValues => {
-  if (typeof window === 'undefined') {
-    return EMPTY_ASSESSMENT_RESULTS;
-  }
-
-  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-  if (!storedDraft) return EMPTY_ASSESSMENT_RESULTS;
-
-  try {
-    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-    return parsedDraft.assessmentResults ?? EMPTY_ASSESSMENT_RESULTS;
-  } catch {
-    return EMPTY_ASSESSMENT_RESULTS;
-  }
-};
-
-const getIntakeInterviewFromSessionStorage = (): IntakeInterviewFormValues => {
-  if (typeof window === 'undefined') {
-    return EMPTY_INTAKE_INTERVIEW;
-  }
-
-  const storedDraft = window.sessionStorage.getItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-  if (!storedDraft) return EMPTY_INTAKE_INTERVIEW;
-
-  try {
-    const parsedDraft = JSON.parse(storedDraft) as ClientRegistrationDraft;
-    return parsedDraft.intakeInterview ?? EMPTY_INTAKE_INTERVIEW;
-  } catch {
-    return EMPTY_INTAKE_INTERVIEW;
-  }
-};
 
 const ClientRegistrationReviewPage = () => {
   const locale = useLocale();
   const t = useTranslations('clientRegistration.review');
   const router = useRouter();
-  const [basicInfo] = useState<BasicInfoFormValues>(getBasicInfoFromSessionStorage);
-  const [counselingInfo] = useState<CounselingInfoFormValues>(getCounselingInfoFromSessionStorage);
-  const [paymentInfo] = useState<PaymentInfoFormValues>(getPaymentInfoFromSessionStorage);
-  const [kkebiNickname] = useState<KkebiNicknameFormValues>(getKkebiNicknameFromSessionStorage);
-  const [assessmentResults] = useState<AssessmentResultsFormValues>(
-    getAssessmentResultsFromSessionStorage,
-  );
-  const [intakeInterview] = useState<IntakeInterviewFormValues>(
-    getIntakeInterviewFromSessionStorage,
-  );
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reviewState] = useState(getReviewStateFromStorage);
+  const {
+    basicInfo,
+    counselingInfo,
+    paymentInfo,
+    kkebiNickname,
+    assessmentResults,
+    intakeInterview,
+  } = reviewState;
+  const { isSubmitting, submit } = useSubmitClientRegistration({
+    locale,
+    messages: {
+      registerFailed: t('toast.registerFailed'),
+      registerSuccess: t('toast.registerSuccess'),
+    },
+    onSuccess: () => router.push('/clients'),
+  });
 
   const paymentValue =
     paymentInfo.paymentType === 'insurance'
@@ -236,121 +90,19 @@ const ClientRegistrationReviewPage = () => {
     },
   ];
 
-  const getGenderDisplayValue = (value: string) => {
-    if (value === 'female') return t('gender.female');
-    if (value === 'male') return t('gender.male');
-    if (value === 'non-binary') return t('gender.nonBinary');
-    return value;
-  };
-
-  const getReferralPathDisplayValue = (value: string) => {
-    if (value === 'search') return locale === 'en' ? 'Search' : '검색';
-    if (value === 'referral') return locale === 'en' ? 'Referral' : '지인 추천';
-    if (value === 'hospital') return locale === 'en' ? 'Hospital referral' : '병원 의뢰';
-    if (value === 'kkebi-app') return 'KKEBI앱';
-    if (value === 'other') return locale === 'en' ? 'Other' : '기타';
-    return value;
-  };
-
-  const mapGender = (
-    value: string,
-  ): components['schemas']['ClientRegistrationRequest']['gender'] | undefined => {
-    if (value === 'female') return 'FEMALE';
-    if (value === 'male') return 'MALE';
-    if (value === 'non-binary') return 'NON_BINARY';
-    return undefined;
-  };
-
-  const mapPaymentType = (
-    value: string,
-  ): components['schemas']['ClientRegistrationRequest']['paymentType'] | undefined => {
-    if (value === 'insurance') return 'INSURANCE';
-    if (value === 'private-pay') return 'SELF';
-    return undefined;
-  };
-
-  const mapReferralSource = (value: string) => {
-    if (value === 'search') return locale === 'en' ? 'Search' : '검색';
-    if (value === 'referral') return locale === 'en' ? 'Referral' : '지인 추천';
-    if (value === 'hospital') return locale === 'en' ? 'Hospital referral' : '병원 의뢰';
-    if (value === 'kkebi-app') return 'KKEBI앱';
-    if (value === 'other') return locale === 'en' ? 'Other' : '기타';
-    return value || undefined;
-  };
-
   const handleEdit = () => {
     router.push('/clients/new');
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
-    const payload = {
-      name: basicInfo.name.trim(),
-      nickname: kkebiNickname.kkebiNickname.trim() || undefined,
-      phoneNumber: basicInfo.phone.trim() || undefined,
-      email: basicInfo.email.trim() || undefined,
-      birthDate: basicInfo.birthDate || undefined,
-      gender: mapGender(basicInfo.gender),
-      paymentType: mapPaymentType(paymentInfo.paymentType),
-      counselingStartDate: counselingInfo.counselingStartDate || undefined,
-      chiefComplaint: counselingInfo.chiefConcern.trim() || undefined,
-      referralSource: mapReferralSource(counselingInfo.referralPath),
-      insuranceCompany:
-        paymentInfo.paymentType === 'insurance'
-          ? paymentInfo.insuranceCompany.trim() || undefined
-          : undefined,
-      intake: {
-        phq9Score: assessmentResults.phq9Score ?? undefined,
-        pss10Score: assessmentResults.pss10Score ?? undefined,
-        mbiScore: assessmentResults.mbiScore ?? undefined,
-        visitReason: intakeInterview.reasonForVisit || undefined,
-        desiredChange: intakeInterview.mostImportantChange || undefined,
-        similarDifficultyHistory: intakeInterview.similarPastExperience || undefined,
-        attemptedSolution: intakeInterview.attemptedSolution || undefined,
-        solutionEffectiveness: intakeInterview.attemptedSolutionEffectiveness || undefined,
-        currentWorry: intakeInterview.currentBiggestConcern || undefined,
-        sleepPattern: intakeInterview.averageSleepPattern || undefined,
-        sleepQuality: intakeInterview.sleepQuality || undefined,
-        exerciseFrequency: intakeInterview.exerciseTypeAndFrequency || undefined,
-        mealsPerDay: intakeInterview.mealsPerDay || undefined,
-        reliablePerson: intakeInterview.mostReliablePerson || undefined,
-        reliableReason: intakeInterview.reasonForReliance || undefined,
-        familyBond: intakeInterview.familyBond || undefined,
-        familyBondReason: intakeInterview.reasonForFamilyBond || undefined,
-        selfDescription: intakeInterview.selfDescriptionSentence || undefined,
-      },
-    };
-
-    const registerResult = await registerClient(payload);
-    if (!registerResult.success) {
-      toast(registerResult.message || t('toast.registerFailed'));
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (registerResult.clientId && assessmentResults.additionalResults.length > 0) {
-      const testDate = counselingInfo.counselingStartDate || new Date().toISOString().slice(0, 10);
-      for (const result of assessmentResults.additionalResults) {
-        if (!result.testName.trim() || result.testResult == null) continue;
-        const testResultResponse = await addClientTestResult(registerResult.clientId, {
-          testName: result.testName.trim(),
-          score: result.testResult,
-          testDate,
-        });
-        if (!testResultResponse.success) {
-          toast(testResultResponse.message || t('toast.additionalResultFailed'));
-          setIsSubmitting(false);
-          return;
-        }
-      }
-    }
-
-    window.sessionStorage.removeItem(CLIENT_REGISTRATION_DRAFT_STORAGE_KEY);
-    toast(t('toast.registerSuccess'));
-    setIsSubmitting(false);
-    router.push('/clients');
+    await submit({
+      basicInfo,
+      counselingInfo,
+      paymentInfo,
+      kkebiNickname,
+      assessmentResults,
+      intakeInterview,
+    });
   };
 
   return (
@@ -402,7 +154,13 @@ const ClientRegistrationReviewPage = () => {
               <div className="grid w-full grid-cols-1 bg-white">
                 <div className="flex flex-col">
                   <LabelCell field={t('fields.gender')} />
-                  <ValueCell value={getGenderDisplayValue(basicInfo.gender)} />
+                  <ValueCell
+                    value={getGenderDisplayValue(basicInfo.gender, {
+                      female: t('gender.female'),
+                      male: t('gender.male'),
+                      nonBinary: t('gender.nonBinary'),
+                    })}
+                  />
                 </div>
               </div>
             </div>
@@ -427,7 +185,9 @@ const ClientRegistrationReviewPage = () => {
               <div className="grid w-full grid-cols-1 bg-white">
                 <div className="flex flex-col">
                   <LabelCell field={t('fields.referralPath')} />
-                  <ValueCell value={getReferralPathDisplayValue(counselingInfo.referralPath)} />
+                  <ValueCell
+                    value={getReferralPathDisplayValue(counselingInfo.referralPath, locale)}
+                  />
                 </div>
               </div>
             </div>

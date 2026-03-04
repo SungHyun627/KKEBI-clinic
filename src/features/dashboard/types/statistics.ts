@@ -10,11 +10,16 @@ export interface WeeklyStatistics {
   completedSessions: number;
   averageSessionMinutes: number;
   clientImprovementRate: number;
-  riskAlerts?: RiskAlert[];
 }
 
 export interface WeeklyStatisticsResponse {
   success: boolean;
   data?: WeeklyStatistics;
+  message?: string;
+}
+
+export interface RiskAlertsResponse {
+  success: boolean;
+  data?: RiskAlert[];
   message?: string;
 }

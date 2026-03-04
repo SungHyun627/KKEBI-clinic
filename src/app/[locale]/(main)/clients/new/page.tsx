@@ -4,11 +4,11 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/ui/ClientRegistrationStepBar';
-import ClientRegistrationBasicInfoForm from '@/features/clients/ui/ClientRegistrationBasicInfoForm';
-import ClientRegistrationCounselingInfoForm from '@/features/clients/ui/ClientRegistrationCounselingInfoForm';
-import ClientRegistrationPaymentInfoForm from '@/features/clients/ui/ClientRegistrationPaymentInfoForm';
-import ClientRegistrationKkebiNicknameForm from '@/features/clients/ui/ClientRegistrationKkebiNicknameForm';
+import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
+import ClientRegistrationBasicInfoForm from '@/features/clients/client-registration/ui/ClientRegistrationBasicInfoForm';
+import ClientRegistrationCounselingInfoForm from '@/features/clients/client-registration/ui/ClientRegistrationCounselingInfoForm';
+import ClientRegistrationPaymentInfoForm from '@/features/clients/client-registration/ui/ClientRegistrationPaymentInfoForm';
+import ClientRegistrationKkebiNicknameForm from '@/features/clients/client-registration/ui/ClientRegistrationKkebiNicknameForm';
 import {
   type AssessmentResultsFormValues,
   type BasicInfoFormValues,
@@ -17,8 +17,8 @@ import {
   type PaymentInfoFormValues,
   type ClientRegistrationDraft,
   type IntakeInterviewFormValues,
-} from '@/features/clients/types/client-registration';
-import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/lib/client-registration-storage';
+} from '@/features/clients/client-registration/types/client-registration';
+import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/client-registration/lib/client-registration-storage';
 import { Button } from '@/shared/ui/button';
 
 const getDefaultAssessmentResults = (): AssessmentResultsFormValues => ({

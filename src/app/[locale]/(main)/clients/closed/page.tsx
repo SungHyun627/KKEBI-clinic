@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import { getClosedClients, restoreClient, type ClosedClientItem } from '@/features/clients';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import { Button } from '@/shared/ui/button';
-import CloseReasonChip from '@/features/clients/ui/CloseReasonChip';
+import CloseReasonChip from '@/features/clients/client-closure/ui/CloseReasonChip';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 export default function ClosedClientsPage() {

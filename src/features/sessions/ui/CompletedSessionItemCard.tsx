@@ -5,10 +5,12 @@ import RecordCompleteChip from '@/shared/ui/chips/record-complete-chip';
 import Divider from '@/shared/ui/divider';
 import type { CompletedSessionItem } from '../types/session-list';
 import { Button } from '@/shared/ui/button';
+import { cn } from '@/shared/lib/utils';
 
 interface CompletedSessionItemCardProps {
   item: CompletedSessionItem;
   minutesUnit: string;
+  viewMode?: 'list' | 'calendar';
 }
 
 const formatCompactDate = (value: string) => {
@@ -23,13 +25,19 @@ const formatCompactDate = (value: string) => {
 export default function CompletedSessionItemCard({
   item,
   minutesUnit,
+  viewMode,
 }: CompletedSessionItemCardProps) {
   const locale = useLocale();
   const tCommon = useTranslations('common');
   const tSessions = useTranslations('sessionList');
 
   return (
-    <div className="flex w-full flex-col items-start justify-center gap-[18px] rounded-3xl bg-neutral-99 p-[26px]">
+    <div
+      className={cn(
+        'flex flex-col w-full items-start p-[26px] gap-[18px] justify-center rounded-3xl',
+        viewMode === 'calendar' ? 'bg-white' : 'bg-neutral-99',
+      )}
+    >
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="body-20 font-semibold">
