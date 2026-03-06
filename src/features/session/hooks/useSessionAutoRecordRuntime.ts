@@ -8,6 +8,7 @@ import { toast } from '@/shared/ui/toast';
 import { getDemoConversation } from '../lib/demo-conversations';
 import { formatElapsedToTimestamp } from '../lib/session-analysis';
 import { useSessionPersistence } from './useSessionPersistence';
+import { useStartSession } from './useStartSession';
 import { getSessionAutoRecordStorageKey } from '../lib/session-storage';
 
 export type MicPermissionState = 'idle' | 'requesting' | 'granted' | 'denied';
@@ -44,6 +45,7 @@ export function useSessionAutoRecordRuntime({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
   const [demoIndex, setDemoIndex] = useState(0);
+  const { isStartingSession, startSession } = useStartSession({ sessionId });
 
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
   const visibleAudioLevel = isRecording && !isPaused ? audioLevel : 0;
@@ -147,7 +149,7 @@ export function useSessionAutoRecordRuntime({
   };
 
   const handleStartRecording = async () => {
-    if (isRecording) return;
+    if (isRecording || isStartingSession) return;
     if (!navigator?.mediaDevices?.getUserMedia) {
       toast(tSession('toastMicUnsupported'));
       return;
@@ -157,6 +159,14 @@ export function useSessionAutoRecordRuntime({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
+
+      const startResult = await startSession();
+      if (!startResult.success) {
+        setMicPermission('idle');
+        toast(startResult.message || tSession('loadFailed'));
+        return;
+      }
+
       setMicPermission('granted');
       setIsRecording(true);
       setIsPaused(false);
@@ -210,6 +220,7 @@ export function useSessionAutoRecordRuntime({
     bookmarkIds,
     pendingIds,
     micPermission,
+    isStartingSession,
     isRecording,
     isPaused,
     elapsedSeconds,

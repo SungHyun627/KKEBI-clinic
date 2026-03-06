@@ -43,6 +43,7 @@ export default function SessionAutoRecordPanel({
     bookmarkIds,
     pendingIds,
     micPermission,
+    isStartingSession,
     isRecording,
     isPaused,
     elapsedSeconds,
@@ -101,7 +102,7 @@ export default function SessionAutoRecordPanel({
         <SessionAudioControls
           isRecording={isRecording}
           isPaused={isPaused}
-          isStartDisabled={isRecording || micPermission === 'requesting'}
+          isStartDisabled={isRecording || micPermission === 'requesting' || isStartingSession}
           isPauseDisabled={!isRecording}
           onStart={() => {
             void handleStartRecording();
