@@ -12,7 +12,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { ScheduledSessionItem } from '../types/session-list';
 import RescheduleSessionDialog from './RescheduleSessionDialog';
 import { useRouter } from '@/i18n/navigation';
-import { startSession } from '../api/startSession';
+import { startSession } from '../../api/startSession';
 import { toast } from '@/shared/ui/toast';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
 import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';

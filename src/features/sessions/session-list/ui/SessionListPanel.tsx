@@ -1,135 +1,36 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Calendar } from '@/shared/ui/calendar';
-import { getSessionList } from '../api/getSessionList';
-import type {
-  CompletedSessionGroup,
-  ScheduledSessionGroup,
-  SessionStatus,
-} from '../types/session-list';
-import type { SessionStatusTab } from './SessionStatusTabs';
+import type { SessionStatus } from '../types/session-list';
 import ScheduledSessionDateSection from './ScheduledSessionDateSection';
 import CompletedSessionDateSection from './CompletedSessionDateSection';
-
-const isSessionStatusTab = (value: string | null): value is SessionStatusTab =>
-  value === 'scheduled' || value === 'completed';
-
-type SessionViewFilter = 'list' | 'calendar';
-
-const isSessionViewFilter = (value: string | null): value is SessionViewFilter =>
-  value === 'list' || value === 'calendar';
+import { useSessionList } from '../hooks/useSessionList';
 
 interface SessionListPanelProps {
   initialStatus?: SessionStatus;
 }
 
-const formatDate = (value: string, locale: string) => {
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(date);
-};
-
-const formatDateKey = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
 const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps) => {
-  const searchParams = useSearchParams();
   const locale = useLocale();
   const tClients = useTranslations('clients');
   const tSessions = useTranslations('sessionList');
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [scheduledGroups, setScheduledGroups] = useState<ScheduledSessionGroup[]>([]);
-  const [completedGroups, setCompletedGroups] = useState<CompletedSessionGroup[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-
-  const statusParam = searchParams.get('status');
-  const viewParam = searchParams.get('view');
-  const emptyParam = searchParams.get('empty');
-  const shouldUseEmptyData = emptyParam === '1';
-  const selectedStatus: SessionStatus = isSessionStatusTab(statusParam)
-    ? statusParam
-    : initialStatus;
-  const selectedView: SessionViewFilter = isSessionViewFilter(viewParam) ? viewParam : 'list';
-
-  useEffect(() => {
-    const load = async () => {
-      setIsLoading(true);
-      const result = await getSessionList(selectedStatus, {
-        empty: shouldUseEmptyData,
-        locale,
-      });
-
-      if (!result.success || !result.data) {
-        setErrorMessage(tSessions('loadFailed'));
-        setScheduledGroups([]);
-        setCompletedGroups([]);
-        setIsLoading(false);
-        return;
-      }
-
-      if (selectedStatus === 'scheduled') {
-        setScheduledGroups(result.data as ScheduledSessionGroup[]);
-        setCompletedGroups([]);
-      } else {
-        setCompletedGroups(result.data as CompletedSessionGroup[]);
-        setScheduledGroups([]);
-      }
-
-      setErrorMessage(null);
-      setIsLoading(false);
-    };
-
-    void load();
-  }, [locale, selectedStatus, shouldUseEmptyData, tSessions]);
-
-  const hasNoData = useMemo(() => {
-    const selectedDateKey = formatDateKey(selectedDate);
-    const visibleScheduledGroups =
-      selectedView === 'calendar'
-        ? scheduledGroups.filter((group) => group.date === selectedDateKey)
-        : scheduledGroups;
-    const visibleCompletedGroups =
-      selectedView === 'calendar'
-        ? completedGroups.filter((group) => group.date === selectedDateKey)
-        : completedGroups;
-
-    return selectedStatus === 'scheduled'
-      ? visibleScheduledGroups.length === 0
-      : visibleCompletedGroups.length === 0;
-  }, [completedGroups, scheduledGroups, selectedDate, selectedStatus, selectedView]);
-
-  const selectedDateText = useMemo(() => {
-    return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(selectedDate);
-  }, [locale, selectedDate]);
-
-  const visibleScheduledGroups = useMemo(() => {
-    if (selectedView !== 'calendar') return scheduledGroups;
-    const selectedDateKey = formatDateKey(selectedDate);
-    return scheduledGroups.filter((group) => group.date === selectedDateKey);
-  }, [scheduledGroups, selectedDate, selectedView]);
-
-  const visibleCompletedGroups = useMemo(() => {
-    if (selectedView !== 'calendar') return completedGroups;
-    const selectedDateKey = formatDateKey(selectedDate);
-    return completedGroups.filter((group) => group.date === selectedDateKey);
-  }, [completedGroups, selectedDate, selectedView]);
+  const {
+    isLoading,
+    errorMessage,
+    selectedDate,
+    setSelectedDate,
+    selectedStatus,
+    selectedView,
+    visibleScheduledGroups,
+    visibleCompletedGroups,
+    hasNoData,
+    formatDate,
+  } = useSessionList({
+    initialStatus,
+    locale,
+    loadFailedMessage: tSessions('loadFailed'),
+  });
 
   const listContent = (() => {
     if (isLoading) {
@@ -173,7 +74,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
               <ScheduledSessionDateSection
                 key={`scheduled-${group.date}`}
                 group={group}
-                dateText={formatDate(group.date, locale)}
+                dateText={formatDate(group.date)}
                 moodLabel={tClients('checkinMood')}
                 stressLabel={tClients('checkinStress')}
                 viewMode={selectedView}
@@ -183,7 +84,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
               <CompletedSessionDateSection
                 key={`completed-${group.date}`}
                 group={group}
-                dateText={formatDate(group.date, locale)}
+                dateText={formatDate(group.date)}
                 minutesUnit={tSessions('minutesUnit')}
                 viewMode={selectedView}
               />
