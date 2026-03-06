@@ -10,7 +10,8 @@ import SessionTypeChip from '@/features/dashboard/today-schedule/ui/SessionTypeC
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
-import type { SessionPageData } from '../types/session-page';
+import { isRiskType, isSessionType } from '../types/session-page';
+import type { SessionBasicInfo } from '../types/session-page';
 import SessionEndConfirmDialog from './SessionEndConfirmDialog';
 import type { SessionEmotionType, SessionInsightsData } from '../types/session-page';
 import {
@@ -20,7 +21,7 @@ import {
 
 interface SessionHeaderProps {
   sessionId: string;
-  sessionData?: Pick<SessionPageData, 'clientName' | 'sessionType' | 'riskType'>;
+  sessionData?: Pick<SessionBasicInfo, 'clientName' | 'sessionType' | 'riskType'>;
   recorderState?: {
     isRecording: boolean;
     isPaused: boolean;
@@ -123,8 +124,10 @@ export default function SessionHeader({
             {tCommon('profileSuffix')}
           </span>
           <div className="flex items-center gap-2">
-            {sessionType ? <SessionTypeChip value={sessionType} /> : null}
-            {riskType ? <RiskTypeChip value={riskType} /> : null}
+            {sessionType && isSessionType(sessionType) ? (
+              <SessionTypeChip value={sessionType} />
+            ) : null}
+            {riskType && isRiskType(riskType) ? <RiskTypeChip value={riskType} /> : null}
           </div>
         </div>
         {isRecording ? (

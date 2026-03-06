@@ -1,12 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
+import { getSessionPageMock } from '@/shared/mock/session-page';
 import SessionHeader from './SessionHeader';
 import SessionInsightsPanel from './SessionInsightsPanel';
 import SessionAutoRecordPanel from './SessionAutoRecordPanel';
-import { getSessionPageData } from '../api/getSessionPageData';
-import type { SessionEmotionType, SessionPageData } from '../types/session-page';
+import type { SessionEmotionType, SessionInsightsData } from '../types/session-page';
+import { isRiskType, isSessionType } from '../types/session-page';
+import { useSessionInfo } from '../hooks/useSessionInfo';
 
 interface SessionPageContentProps {
   sessionId: string;
@@ -14,9 +16,8 @@ interface SessionPageContentProps {
 
 export default function SessionPageContent({ sessionId }: SessionPageContentProps) {
   const locale = useLocale();
-  const [data, setData] = useState<SessionPageData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error } = useSessionInfo({ sessionId });
+  const pageMock = useMemo(() => getSessionPageMock(sessionId, locale), [locale, sessionId]);
   const [recorderState, setRecorderState] = useState({
     isRecording: false,
     isPaused: false,
@@ -24,9 +25,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     visibleAudioLevel: 0,
   });
   const [riskBanner, setRiskBanner] = useState<{ text: string; timestamp: string } | null>(null);
-  const [analysisInsights, setAnalysisInsights] = useState<SessionPageData['insights'] | null>(
-    null,
-  );
+  const [analysisInsights, setAnalysisInsights] = useState<SessionInsightsData | null>(null);
   const [recentEmotionHistory, setRecentEmotionHistory] = useState<SessionEmotionType[]>([]);
   const [keyConcernHistory, setKeyConcernHistory] = useState<string[]>([]);
   const [distortionExampleHistory, setDistortionExampleHistory] = useState<string[]>([]);
@@ -36,7 +35,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     setRiskBanner(payload);
   }, []);
 
-  const handleAnalysisChange = useCallback((nextInsights: SessionPageData['insights'] | null) => {
+  const handleAnalysisChange = useCallback((nextInsights: SessionInsightsData | null) => {
     if (!nextInsights) return;
     setAnalysisInsights(nextInsights);
 
@@ -69,30 +68,12 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     await new Promise((resolve) => setTimeout(resolve, 0));
   }, []);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      const result = await getSessionPageData(sessionId, locale);
-      if (!result.success || !result.data) {
-        setError(result.message || 'Failed to load session data');
-        setData(null);
-        setLoading(false);
-        return;
-      }
-      setData(result.data);
-      setError(null);
-      setLoading(false);
-    };
-
-    void load();
-  }, [sessionId, locale]);
-
   return (
     <section className="flex min-h-[calc(100dvh)] w-full flex-col gap-5 bg-white">
       <SessionHeader
         sessionId={sessionId}
         sessionData={
-          data
+          data && isSessionType(data.sessionType) && isRiskType(data.riskType)
             ? {
                 clientName: data.clientName,
                 sessionType: data.sessionType,
@@ -104,7 +85,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
         summarySnapshot={
           data
             ? {
-                insights: analysisInsights ?? data.insights,
+                insights: analysisInsights ?? pageMock.insights,
                 recentEmotionHistory,
                 keyConcernHistory,
                 distortionExampleHistory,
@@ -148,7 +129,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ) : (
         <div className="grid w-full flex-1 grid-cols-[1fr_1.5fr] gap-[34px]">
           <SessionInsightsPanel
-            insights={analysisInsights ?? data.insights}
+            insights={analysisInsights ?? pageMock.insights}
             isRecording={Boolean(analysisInsights)}
             recentEmotionHistory={recentEmotionHistory}
             keyConcernHistory={keyConcernHistory}
@@ -156,8 +137,8 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
           />
           <SessionAutoRecordPanel
             sessionId={sessionId}
-            autoRecord={data.autoRecord}
-            baseInsights={data.insights}
+            autoRecord={pageMock.autoRecord}
+            baseInsights={pageMock.insights}
             onRecorderStateChange={setRecorderState}
             onRiskSignalDetected={handleRiskSignalDetected}
             onAnalysisChange={handleAnalysisChange}

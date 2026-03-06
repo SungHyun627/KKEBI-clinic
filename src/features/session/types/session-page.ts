@@ -40,18 +40,36 @@ export interface SessionAutoRecordData {
   counselorMemo: string;
 }
 
-export interface SessionPageData {
+export interface SessionBasicInfo {
+  scheduledAt: string;
+  clientName: string;
+  sessionNumber: number;
+  sessionType: string;
+  riskType: string;
+  contact: string;
+}
+
+export interface SessionPageViewData {
   sessionId: string;
   clientId: string;
   clientName: string;
   sessionType: SessionType;
   riskType: RiskType;
+  scheduledAt: string;
+  sessionNumber: number;
+  contact: string;
   insights: SessionInsightsData;
   autoRecord: SessionAutoRecordData;
 }
 
-export interface SessionPageResponse {
-  success: boolean;
-  data?: SessionPageData;
-  message?: string;
+export interface SessionInfoResponse {
+  code: string;
+  message: string;
+  data?: SessionBasicInfo;
 }
+
+export const isSessionType = (value: string): value is SessionType =>
+  value === '초기' || value === '정기' || value === '위기';
+
+export const isRiskType = (value: string): value is RiskType =>
+  value === '안정' || value === '주의' || value === '위험';
