@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { proxyToBackend } from '@/shared/server/backend-proxy';
 import type { SessionStatus } from '@/features/sessions/session-list/types/session-list';
-import { createSessionListMockEnvelope } from '@/features/sessions/session-list/lib/mock-sessions';
+import { buildSessionListMockEnvelope } from '@/features/sessions/session-list/lib/mock-sessions';
 
 const getSessionListMockResponse = (status: SessionStatus, locale: 'ko' | 'en') =>
-  NextResponse.json(createSessionListMockEnvelope(status, locale));
+  NextResponse.json(buildSessionListMockEnvelope(status, locale));
 
 export const GET = async (request: Request) => {
   const { searchParams } = new URL(request.url);
@@ -44,4 +44,22 @@ export const GET = async (request: Request) => {
   } catch {}
 
   return getSessionListMockResponse(status, locale);
+};
+
+export const POST = async (request: Request) => {
+  try {
+    const proxied = await proxyToBackend(request, {
+      method: 'POST',
+      path: '/api/v1/sessions',
+    });
+    return proxied;
+  } catch {
+    return NextResponse.json(
+      {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: '상담 세션 생성 중 오류가 발생했습니다.',
+      },
+      { status: 500 },
+    );
+  }
 };

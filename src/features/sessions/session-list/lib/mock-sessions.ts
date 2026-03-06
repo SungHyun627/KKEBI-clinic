@@ -185,7 +185,7 @@ const createCompletedMock = (locale: Locale) =>
     }),
   );
 
-export const createSessionListMockEnvelope = (
+export const buildSessionListMockEnvelope = (
   status: SessionStatus,
   locale: Locale,
 ): SessionListMockEnvelope => ({

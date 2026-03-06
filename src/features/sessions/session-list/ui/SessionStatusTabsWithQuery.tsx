@@ -5,6 +5,7 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import SessionStatusTabs, { type SessionStatusTab } from './SessionStatusTabs';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { ScheduleSessionButton } from '@/features/sessions/schedule-session';
 
 interface SessionStatusTabsWithQueryProps {
   scheduledLabel: string;
@@ -68,6 +69,14 @@ export default function SessionStatusTabsWithQuery({
         onChange={handleStatusChange}
       />
       <div className="flex items-center gap-2">
+        <ScheduleSessionButton
+          onCreated={() => {
+            replaceWithParams((params) => {
+              params.set('status', 'scheduled');
+            });
+            router.refresh();
+          }}
+        />
         <button
           type="button"
           className="flex items-center gap-[6px] border-none hover:bg-white p-0"
