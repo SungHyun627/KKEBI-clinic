@@ -9,8 +9,8 @@ import { Input } from '@/shared/ui/input';
 import { Textarea } from '@/shared/ui/textarea';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { toast } from '@/shared/ui/toast';
-import { requestCounselorInquiry } from '../api/request';
-import { useTranslations } from 'next-intl';
+import { requestCounselorInquiry } from '../api/submitCounselorInquiry';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface RequestCounselorInquiryDialogProps {
   isOpen: boolean;
@@ -37,6 +37,7 @@ const RequestCounselorInquiryDialog = ({
 }: RequestCounselorInquiryDialogProps) => {
   const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
 
   const createIcon = (iconPath: string) => (
     <div
@@ -93,7 +94,10 @@ const RequestCounselorInquiryDialog = ({
             <form
               className="flex h-full min-h-0 flex-col"
               onSubmit={form.handleSubmit(async (values) => {
-                const result = await requestCounselorInquiry(values);
+                const result = await requestCounselorInquiry({
+                  ...values,
+                  language: locale === 'en' ? 'en' : 'ko',
+                });
                 if (result.success) {
                   const submittedValues = values;
                   form.reset();

@@ -19,5 +19,5 @@ export {
 } from './reset-password/api/resetPassword';
 export type { ResetPasswordFields } from './reset-password/types/resetPassword';
 
-export { requestCounselorInquiry } from './counselor-inquiry/api/request';
+export { requestCounselorInquiry } from './counselor-inquiry/api/submitCounselorInquiry';
 export { RequestCounselorInquiryDialog, CounselorInquiryCompleteDialog } from './counselor-inquiry';

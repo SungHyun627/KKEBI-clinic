@@ -1,8 +1,5 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
-import type {
-  CounselorInquirySubmitRequest,
-  CounselorInquirySubmitSuccessResponse,
-} from '@/shared/api/type';
+import type { CounselorInquirySubmitRequest } from '@/shared/api/type';
 
 export interface CounselorInquiryPayload {
   name: string;
@@ -11,6 +8,7 @@ export interface CounselorInquiryPayload {
   organization: string;
   licenseNumber: string;
   additionalInquiry: string;
+  language?: 'ko' | 'en';
 }
 
 interface CounselorInquiryResult {
@@ -22,6 +20,14 @@ interface CounselorInquiryResult {
     | 'NETWORK_ERROR'
     | 'CONFIG_ERROR'
     | 'UNKNOWN_ERROR';
+}
+
+interface CounselorInquiryResponseShape {
+  success?: boolean;
+  message?: string;
+  expectedResponseMessage?: string;
+  code?: string;
+  data?: unknown;
 }
 
 const validatePayload = (payload: CounselorInquiryPayload) => {
@@ -40,9 +46,25 @@ const validatePayload = (payload: CounselorInquiryPayload) => {
   return null;
 };
 
-export async function requestCounselorInquiry(
+const extractSuccessMessage = (response: CounselorInquiryResponseShape): string | undefined => {
+  if (typeof response.expectedResponseMessage === 'string') {
+    return response.expectedResponseMessage;
+  }
+  if (typeof response.message === 'string') {
+    return response.message;
+  }
+  return undefined;
+};
+
+const isSuccessResponse = (response: CounselorInquiryResponseShape): boolean => {
+  if (response.success === true) return true;
+  if (response.code === 'SUCCESS') return true;
+  return false;
+};
+
+export const requestCounselorInquiry = async (
   payload: CounselorInquiryPayload,
-): Promise<CounselorInquiryResult> {
+): Promise<CounselorInquiryResult> => {
   const invalid = validatePayload(payload);
   if (invalid) return invalid;
 
@@ -53,39 +75,29 @@ export async function requestCounselorInquiry(
     organization: payload.organization,
     licenseNumber: payload.licenseNumber,
     message: payload.additionalInquiry,
+    language: payload.language,
   };
 
   try {
-    const response = await httpClient.post<CounselorInquirySubmitSuccessResponse>(
-      '/api/v1/counselor/test/register-login',
+    const response = await httpClient.post<CounselorInquiryResponseShape>(
+      '/api/v1/counselors/inquiries',
       requestBody,
       { skipAuth: true },
     );
-    return {
-      success: true,
-      message:
-        typeof response === 'object' &&
-        response !== null &&
-        'expectedResponseMessage' in response &&
-        typeof response.expectedResponseMessage === 'string'
-          ? response.expectedResponseMessage
-          : undefined,
-    };
-  } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      try {
-        const fallback = (await httpClient.post('/api/v1/auth/counselor-inquiry', requestBody, {
-          skipAuth: true,
-          skipRefresh: true,
-        })) as { success?: boolean; message?: string };
-        if (fallback?.success) {
-          return { success: true, message: fallback.message };
-        }
-      } catch {
-        // fall through to the original error handling
-      }
+
+    if (!isSuccessResponse(response)) {
+      return {
+        success: false,
+        errorCode: 'UNKNOWN_ERROR',
+        message: extractSuccessMessage(response),
+      };
     }
 
+    return {
+      success: true,
+      message: extractSuccessMessage(response),
+    };
+  } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 409) {
         return { success: false, errorCode: 'DUPLICATE_PENDING', message: error.message };
@@ -98,4 +110,4 @@ export async function requestCounselorInquiry(
       message: error instanceof Error ? error.message : undefined,
     };
   }
-}
+};
