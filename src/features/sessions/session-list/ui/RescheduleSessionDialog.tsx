@@ -1,15 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Calendar } from '@/shared/ui/calendar';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
-import { toast } from '@/shared/ui/toast';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
-import { rescheduleSession } from '@/features/sessions/api/rescheduleSession';
 import Divider from '@/shared/ui/divider';
+import { useRescheduleSessionDialog } from '../hooks/useRescheduleSessionDialog';
 
 interface RescheduleSessionDialogProps {
   sessionId: string;
@@ -18,31 +17,6 @@ interface RescheduleSessionDialogProps {
   currentDate: string;
   initialStartTime?: string;
 }
-
-const parseDateFromIso = (value: string) => {
-  const date = new Date(`${value}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? new Date() : date;
-};
-
-const toDateKey = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const getNextTime = (value: string) => {
-  const [hourRaw, minuteRaw] = value.split(':');
-  const hour = Number(hourRaw);
-  const minute = Number(minuteRaw);
-  if (Number.isNaN(hour) || Number.isNaN(minute)) return '10:00';
-
-  const total = hour * 60 + minute + 60;
-  const normalized = total % (24 * 60);
-  const hh = String(Math.floor(normalized / 60)).padStart(2, '0');
-  const mm = String(normalized % 60).padStart(2, '0');
-  return `${hh}:${mm}`;
-};
 
 const TIME_OPTIONS = Array.from({ length: 24 * 60 }, (_, index) => {
   const hour = String(Math.floor(index / 60)).padStart(2, '0');
@@ -173,34 +147,34 @@ export default function RescheduleSessionDialog({
   currentDate,
   initialStartTime = '09:00',
 }: RescheduleSessionDialogProps) {
-  const locale = useLocale();
   const tCommon = useTranslations('common');
   const tSessions = useTranslations('sessionList');
-
-  const [selectedDate, setSelectedDate] = useState<Date>(parseDateFromIso(currentDate));
-  const [draftDate, setDraftDate] = useState<Date>(parseDateFromIso(currentDate));
-  const [visibleMonth, setVisibleMonth] = useState<Date>(parseDateFromIso(currentDate));
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
-  const [startTime, setStartTime] = useState(initialStartTime);
-  const [endTime, setEndTime] = useState(getNextTime(initialStartTime));
-  const [openTimePicker, setOpenTimePicker] = useState<'start' | 'end' | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const selectedDateLabel = useMemo(() => {
-    return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(selectedDate);
-  }, [selectedDate, locale]);
-
-  const isDateUnchanged = toDateKey(draftDate) === toDateKey(selectedDate);
-  const initialDateKey = toDateKey(parseDateFromIso(currentDate));
-  const initialEndTime = getNextTime(initialStartTime);
-  const hasRescheduleChanges =
-    toDateKey(selectedDate) !== initialDateKey ||
-    startTime !== initialStartTime ||
-    endTime !== initialEndTime;
+  const {
+    selectedDateLabel,
+    draftDate,
+    visibleMonth,
+    isDatePickerOpen,
+    startTime,
+    endTime,
+    openTimePicker,
+    isSubmitting,
+    isDateUnchanged,
+    hasRescheduleChanges,
+    setVisibleMonth,
+    setStartTime,
+    setEndTime,
+    handleToggleDatePicker,
+    handleDateSelect,
+    handleApplyDate,
+    handleStartTimePickerOpenChange,
+    handleEndTimePickerOpenChange,
+    handleSubmit,
+  } = useRescheduleSessionDialog({
+    sessionId,
+    currentDate,
+    initialStartTime,
+    onOpenChange,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -230,15 +204,7 @@ export default function RescheduleSessionDialog({
                 <button
                   type="button"
                   aria-label={tSessions('reschedulePickDateAria')}
-                  onClick={() => {
-                    const nextOpen = !isDatePickerOpen;
-                    if (nextOpen) {
-                      setDraftDate(selectedDate);
-                      setVisibleMonth(selectedDate);
-                      setOpenTimePicker(null);
-                    }
-                    setIsDatePickerOpen(nextOpen);
-                  }}
+                  onClick={handleToggleDatePicker}
                   className="group relative flex h-14.5 w-full items-center gap-[10px] rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
                 >
                   <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
@@ -258,8 +224,7 @@ export default function RescheduleSessionDialog({
                       selected={draftDate}
                       onSelect={(date) => {
                         if (!date) return;
-                        setDraftDate(date);
-                        setVisibleMonth(date);
+                        handleDateSelect(date);
                       }}
                     />
                     <div className="flex justify-end px-2 pb-1">
@@ -268,10 +233,7 @@ export default function RescheduleSessionDialog({
                         size="md"
                         className="w-full"
                         disabled={isDateUnchanged}
-                        onClick={() => {
-                          setSelectedDate(draftDate);
-                          setIsDatePickerOpen(false);
-                        }}
+                        onClick={handleApplyDate}
                       >
                         {tCommon('save')}
                       </Button>
@@ -286,10 +248,7 @@ export default function RescheduleSessionDialog({
                   onValueChange={setStartTime}
                   align="start"
                   open={openTimePicker === 'start'}
-                  onOpenChange={(nextOpen) => {
-                    setIsDatePickerOpen(false);
-                    setOpenTimePicker(nextOpen ? 'start' : null);
-                  }}
+                  onOpenChange={handleStartTimePickerOpenChange}
                 />
                 <div className="flex h-full w-full justify-center items-start pt-16">
                   <Divider className="h-[2.5px] bg-[#303030]" />
@@ -300,10 +259,7 @@ export default function RescheduleSessionDialog({
                   onValueChange={setEndTime}
                   align="end"
                   open={openTimePicker === 'end'}
-                  onOpenChange={(nextOpen) => {
-                    setIsDatePickerOpen(false);
-                    setOpenTimePicker(nextOpen ? 'end' : null);
-                  }}
+                  onOpenChange={handleEndTimePickerOpenChange}
                 />
               </div>
             </div>
@@ -323,23 +279,7 @@ export default function RescheduleSessionDialog({
               type="button"
               size="lg"
               disabled={!hasRescheduleChanges || isSubmitting}
-              onClick={async () => {
-                try {
-                  setIsSubmitting(true);
-                  await rescheduleSession(sessionId, {
-                    sessionDate: toDateKey(selectedDate),
-                    startTime,
-                    endTime,
-                  });
-                  toast(tSessions('rescheduleSuccessToast'));
-                  onOpenChange(false);
-                } catch {
-                  toast(tSessions('rescheduleSuccessToast'));
-                  onOpenChange(false);
-                } finally {
-                  setIsSubmitting(false);
-                }
-              }}
+              onClick={handleSubmit}
               className="w-full max-w-66"
             >
               {tCommon('change')}

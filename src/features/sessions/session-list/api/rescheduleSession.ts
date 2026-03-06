@@ -1,20 +1,13 @@
 import { httpClient } from '@/shared/api/http-client';
 
 export interface RescheduleSessionRequest {
-  sessionDate: string;
-  startTime: string;
-  endTime: string;
+  newScheduledAt: string;
 }
 
 export interface RescheduleSessionResponse {
-  success: boolean;
+  code?: string;
   message?: string;
-  data?: {
-    sessionId: string;
-    sessionDate: string;
-    startTime: string;
-    endTime: string;
-  };
+  data?: Record<string, never> | null;
 }
 
 export const rescheduleSession = async (
@@ -22,10 +15,7 @@ export const rescheduleSession = async (
   payload: RescheduleSessionRequest,
 ): Promise<RescheduleSessionResponse> => {
   return httpClient.patch<RescheduleSessionResponse>(
-    `/api/v1/sessions/${sessionId}/reschedule`,
+    `/api/v1/sessions/${sessionId}/schedule`,
     payload,
-    {
-      skipAuth: true,
-    },
   );
 };
