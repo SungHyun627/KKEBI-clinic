@@ -44,6 +44,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/voice-baseline/{userId}/enroll': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** 음성 기준치 생성 */
+    post: operations['enroll'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/user/onboarding': {
     parameters: {
       query?: never;
@@ -118,6 +135,170 @@ export interface paths {
      * @description 이메일/비밀번호로 로그인하여 Access Token과 Refresh Token을 발급받습니다.
      */
     post: operations['login'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 상담 세션 목록 조회
+     * @description 상태(scheduled/completed)에 따라 세션 목록을 반환합니다.
+     */
+    get: operations['getSessionList'];
+    put?: never;
+    /**
+     * 상담 세션 생성(예약)
+     * @description 내담자를 지정하여 상담 세션을 SCHEDULED 상태로 생성합니다.
+     */
+    post: operations['createSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/summary/submit': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 최종 상담 요약 제출
+     * @description 상담사가 수정/검토한 요약 내용을 최종 저장하고 세션을 COMPLETED로 변경합니다.
+     */
+    post: operations['submitSessionSummary'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 상담 시작
+     * @description 해당 상담 세션을 IN_PROGRESS 상태로 변경하고 세션 식별자를 반환합니다.
+     */
+    post: operations['startSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/reminder': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 세션 리마인더 알림 발송
+     * @description 내담자에게 상담 일정을 다시 한번 안내하는 알림(FCM/SMS 등)을 발송합니다.
+     */
+    post: operations['sendReminder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/bookmarks': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 북마크 추가
+     * @description 진행 중인 상담의 특정 발화 시점에 북마크(메모)를 남깁니다.
+     */
+    post: operations['addBookmark'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/audio-file': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 상담 녹음 파일 전체 업로드
+     * @description 오디오 조각 실시간 전송 대신, 상담 종료 후 또는 이미 있는 녹음 파일을 한 번에 업로드합니다.
+     */
+    post: operations['uploadFullAudioFile'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/audio-chunk': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 오디오 조각 업로드 및 분석
+     * @description 스페이스바로 녹음한 오디오 조각을 전송합니다. S3 저장 → FastAPI STT/SER → DB 저장 → LLM 2차 분석(비동기) → SSE 발행 파이프라인을 실행합니다.
+     */
+    post: operations['processAudioChunk'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/instant-start': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 상담 세션 즉시 시작 생성
+     * @description 내담자를 지정하여 즉시 상담 세션을 생성하고 IN_PROGRESS 상태로 시작합니다.
+     */
+    post: operations['createAndStartInstantSession'];
     delete?: never;
     options?: never;
     head?: never;
@@ -506,7 +687,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** 깨비콜 세션 생성 */
-    post: operations['createSession'];
+    post: operations['createSession_1'];
     delete?: never;
     options?: never;
     head?: never;
@@ -523,7 +704,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** 깨비콜 세션 시작 */
-    post: operations['startSession'];
+    post: operations['startSession_1'];
     delete?: never;
     options?: never;
     head?: never;
@@ -650,6 +831,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/sessions/{sessionId}/schedule': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * 일정 변경
+     * @description 상담 세션의 스케줄 항목을 변경합니다.
+     */
+    patch: operations['updateSchedule'];
+    trace?: never;
+  };
   '/api/v1/clients/{clientId}/email': {
     parameters: {
       query?: never;
@@ -668,6 +869,23 @@ export interface paths {
      * @description 내담자의 이메일을 변경합니다. 새 이메일이 KKEBI 앱 유저와 일치하면 자동 재연결, 불일치 시 연결 해제됩니다.
      */
     patch: operations['updateClientEmail'];
+    trace?: never;
+  };
+  '/api/v1/voice-baseline/prompts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 음성 기준치 문구 목록 */
+    get: operations['getPrompts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/api/v1/users': {
@@ -782,6 +1000,86 @@ export interface paths {
      * @description 로그인한 사용자의 온보딩 설문 결과 및 분석(심각도, 피드백)을 반환합니다.
      */
     get: operations['getMyOnboarding'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 세션 상세 페이지 진입 정보 조회
+     * @description 단일 세션의 기본 정보, 회차, 위험도 등을 조회합니다.
+     */
+    get: operations['getSessionPageData'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/summary': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 상담 페이지 요약 데이터 조회
+     * @description 상담이 끝난 뒤 요약 작성을 위해 세션의 전체 통계, 북마크, 대화록 등을 조회합니다.
+     */
+    get: operations['getSessionSummary'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/reports/download': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 상담 리포트 다운로드
+     * @description 상담 세션의 리포트(TXT, PDF) 및 녹음 파일을 다운로드합니다.
+     */
+    get: operations['downloadReport'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/insights/stream': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 실시간 인사이트 SSE 구독
+     * @description 해당 세션의 AI 감정 분석 및 인지적왜곡 결과 등을 실시간 스트림으로 받습니다.
+     */
+    get: operations['subscribeToInsights'];
     put?: never;
     post?: never;
     delete?: never;
@@ -990,6 +1288,89 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/counselor/dashboard/weekly-stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 주간 통계 조회
+     * @description 로그인된 상담사가 맡은 내담자의 세션/검사 결과만 집계해 이번 주(월~일) 통계 카드를 구성합니다.
+     *     로컬 기본 관리자(admin@kkebi.local / admin123!) 계정에는 더미 상담사/내담자 데이터가 세팅되어 있어 즉시 응답을 확인할 수 있습니다.
+     *      Response
+     *      - completedCount: 완료 상태 세션 수
+     *      - avgDurationMinutes: 완료 세션의 평균 상담 시간(분). 측정 불가 시 null
+     *      - improvementRate: 인테이크 대비 PHQ-9 점수가 내려간 내담자 비율(%). 비교 불가 시 null
+     */
+    get: operations['getWeeklyStats'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/counselor/dashboard/today-schedule': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 오늘의 일정 조회
+     * @description Counselor JWT 인증이 필요한 API이며, 로그인한 상담사가 가진 내담자 일정만 00:00~24:00 범위로 반환합니다.
+     *     로컬 기본 관리자(admin@kkebi.local / admin123!)로 로그인하면 샘플 일정 응답을 바로 확인할 수 있습니다.
+     *      Response.items[]
+     *      - sessionId: 세션 상세 링크를 위한 ID
+     *      - scheduledAt: ISO 8601 형식의 시작 예정 시각
+     *      - clientName: 내담자 실명
+     *      - streakDays: 앱 연속 이용 일수 (DailyCheckIn 미구현 시 0)
+     *      - sessionType: INITIAL(첫 상담) / REGULAR(후속) / CRISIS(PHQ-9 9번 ≥ 2)
+     *      - riskLevel: STABLE(<10) / CAUTION(10~19) / RISK(20 이상)
+     *      - moodScore/stressScore: DailyCheckIn 도입 시 확장할 자리로 현재 null
+     */
+    get: operations['getTodaySchedule'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/counselor/dashboard/risk-alerts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 위험 알림 조회
+     * @description Counselor 인증 토큰이 있어야 호출할 수 있으며, 해당 상담사에게 배정된 내담자 중 아래 조건에 해당하는 사람만 심각도 순으로 반환합니다.
+     *     로컬 기본 관리자(admin@kkebi.local / admin123!) 계정에는 HIGH_PHQ9/APP_INACTIVE 더미 알림이 포함되어 있어 프론트에서 바로 테스트 가능합니다.
+     *      유형 기준
+     *      - HIGH_PHQ9: 최신 PHQ-9 점수가 20 이상
+     *      - APP_INACTIVE: 앱 미접속 7일 이상
+     *      Response
+     *      - items[].clientId/clientName: 클릭 시 내담자 프로필 이동에 사용
+     *      - items[].alertType: HIGH_PHQ9 또는 APP_INACTIVE
+     *      - items[].latestPhq9Score: 위험 알림의 근거 점수(null 허용)
+     *      - page/totalPages: 페이지네이션 정보 (페이지당 5건, 0부터 시작)
+     */
+    get: operations['getRiskAlerts'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/clients/{clientId}': {
     parameters: {
       query?: never;
@@ -1070,6 +1451,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/sessions/{sessionId}/bookmarks/{bookmarkId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * 북마크 삭제
+     * @description 추가했던 북마크(메모)를 삭제합니다.
+     */
+    delete: operations['deleteBookmark'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/clients/{clientId}/tests/{testId}': {
     parameters: {
       query?: never;
@@ -1110,6 +1511,29 @@ export interface components {
     IntakeAnalysisReviewRequest: {
       /** @description 관리자가 검토/편집한 최종 텍스트 */
       reviewedResult: string;
+    };
+    AcousticStats: {
+      /** Format: double */
+      mean?: number;
+      /** Format: double */
+      std?: number;
+    };
+    ApiResponseMlVoiceBaselineResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['MlVoiceBaselineResponse'];
+    };
+    MlVoiceBaselineResponse: {
+      acousticProfile?: {
+        [key: string]: components['schemas']['AcousticStats'];
+      };
+      userId?: string;
+      /** Format: int32 */
+      sampleCount?: number;
+      /** Format: int32 */
+      version?: number;
+      /** Format: date-time */
+      generatedAt?: string;
     };
     OnboardingRequest: {
       concerns?: string[];
@@ -1173,6 +1597,114 @@ export interface components {
        * @example S3curePass!
        */
       password: string;
+    };
+    /** @description 상담 세션 생성(예약) 요청 DTO */
+    SessionCreateRequest: {
+      /**
+       * Format: int64
+       * @description 내담자 ID
+       * @example 1
+       */
+      clientId: number;
+      /**
+       * Format: date-time
+       * @description 예약 일시
+       */
+      scheduledAt: string;
+    };
+    ApiResponseLong: {
+      code?: string;
+      message?: string;
+      /** Format: int64 */
+      data?: number;
+    };
+    /** @description 다음 세션 예약 객체 (선택) */
+    NextSession: {
+      date?: string;
+      time?: string;
+    };
+    /** @description 최종 상담 요약 제출 요청 DTO */
+    SubmitSessionSummaryRequest: {
+      /**
+       * Format: int64
+       * @description 세션 ID
+       * @example 1
+       */
+      sessionId?: number;
+      /**
+       * @description 상담 실제 종료 일시 (ISO-8601)
+       * @example 2024-03-15T15:00:00
+       */
+      endedAt?: string;
+      /**
+       * @description 백엔드 자체 요약 텍스트 또는 수정된 텍스트
+       * @example 내담자는 오늘 비교적 안정적인 모습을 보임...
+       */
+      summaryText?: string;
+      /**
+       * @description 위험도 평가
+       * @example 안정
+       */
+      riskEvaluation?: string;
+      /**
+       * @description 다음 상담 권장 시기
+       * @example 1주 뒤
+       */
+      followUpSessionTiming?: string;
+      /** @description 선택된 미션 ID 목록 */
+      selectedMissionIds?: number[];
+      nextSession?: components['schemas']['NextSession'];
+    };
+    /** @description 상담 시작 요청 DTO */
+    SessionStartRequest: {
+      /**
+       * @description 진입 경로 (APP/WEB 등)
+       * @example WEB
+       */
+      source?: string;
+    };
+    /** @description 상담 북마크 추가 요청 DTO */
+    BookmarkAddRequest: {
+      /**
+       * Format: int64
+       * @description 북마크를 남길 대화록(STT) ID
+       * @example 105
+       */
+      transcriptId: number;
+      /**
+       * @description 선택: 북마크 순간에 대한 메모
+       * @example 중요한 심리적 동요 포인트
+       */
+      memo?: string;
+    };
+    ApiResponseAudioChunkResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['AudioChunkResponse'];
+    };
+    AudioChunkResponse: {
+      /** Format: int64 */
+      transcriptId?: number;
+      text?: string;
+      audioUrl?: string;
+      topEmotion?: string;
+      emotionProbs?: {
+        [key: string]: number;
+      };
+    };
+    /** @description 상담 세션 즉시 시작 생성 요청 DTO */
+    InstantSessionStartRequest: {
+      /**
+       * Format: int64
+       * @description 내담자 ID
+       * @example 1
+       */
+      clientId: number;
+      /**
+       * @description 진입 경로 (APP/WEB 등)
+       * @example WEB
+       */
+      source?: string;
     };
     ApiResponseEmotionReportResponse: {
       code?: string;
@@ -1282,6 +1814,11 @@ export interface components {
        * @example 오전 시간대 연락 가능합니다
        */
       message?: string;
+      /**
+       * @description 언어 설정 (ko | en)
+       * @example en
+       */
+      language?: string;
     };
     /** @description 상담사 등록 문의 응답 */
     InquirySubmitResponse: {
@@ -1452,6 +1989,12 @@ export interface components {
        * @example 45
        */
       mbiScore?: number;
+      /**
+       * Format: int32
+       * @description PHQ-9 9번 문항 응답 (0-3, nullable). 자살/자해 사고 여부
+       * @example 1
+       */
+      phq9Q9Answer?: number;
       /** @description 1. 상담 방문 이유 (최대 1000자) */
       visitReason?: string;
       /** @description 2. 상담을 통해 얻고 싶은 가장 중요한 변화 (최대 1000자) */
@@ -1550,12 +2093,6 @@ export interface components {
       insuranceCompany?: string;
       intake?: components['schemas']['ClientIntakeRequest'];
     };
-    ApiResponseLong: {
-      code?: string;
-      message?: string;
-      /** Format: int64 */
-      data?: number;
-    };
     ClientTestResultRequest: {
       testName?: string;
       /** Format: int32 */
@@ -1643,6 +2180,26 @@ export interface components {
         [key: string]: number;
       };
     };
+    /** @description 상담 변경 요청 DTO */
+    ScheduleModificationRequest: {
+      /**
+       * Format: date-time
+       * @description 변경할 예약 일시 (ISO-8601)
+       */
+      newScheduledAt: string;
+    };
+    ApiResponseVoiceBaselinePromptsResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['VoiceBaselinePromptsResponse'];
+    };
+    VoiceBaselinePrompt: {
+      promptId?: string;
+      text?: string;
+    };
+    VoiceBaselinePromptsResponse: {
+      prompts?: components['schemas']['VoiceBaselinePrompt'][];
+    };
     ApiResponseListUserResponse: {
       code?: string;
       message?: string;
@@ -1727,6 +2284,198 @@ export interface components {
       message?: string;
       data?: components['schemas']['OnboardingResponse'];
     };
+    ApiResponseSessionListResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['SessionListResponse'];
+    };
+    /** @description 완료된 상담 세션 응답 정보 */
+    CompletedSessionGroupResponse: {
+      /**
+       * Format: int64
+       * @description 세션 ID
+       * @example 2
+       */
+      id?: number;
+      /**
+       * Format: date-time
+       * @description 상담 진행 일시(시작 기준)
+       */
+      date?: string;
+      /**
+       * @description 내담자 이름
+       * @example 이영희
+       */
+      clientName?: string;
+      /**
+       * Format: int32
+       * @description 진행 회차
+       * @example 5
+       */
+      sessionNumber?: number;
+      /**
+       * @description 상담 유형
+       * @example 초기 상담
+       */
+      sessionType?: string;
+      /**
+       * @description 위험 수준
+       * @example 안정
+       */
+      riskType?: string;
+      /**
+       * @description 감정 분석 요약 내용
+       * @example 전반적으로 안정적인 상태 유지 중
+       */
+      summary?: string;
+    };
+    /** @description 예정된 상담 세션 응답 정보 */
+    ScheduledSessionGroupResponse: {
+      /**
+       * Format: int64
+       * @description 세션 ID
+       * @example 1
+       */
+      id?: number;
+      /**
+       * Format: date-time
+       * @description 상담 예정 일시
+       */
+      scheduledAt?: string;
+      /**
+       * @description 내담자 이름
+       * @example 김철수
+       */
+      clientName?: string;
+      /**
+       * Format: int32
+       * @description 현재 진행 회차
+       * @example 3
+       */
+      sessionNumber?: number;
+      /**
+       * @description 세션 유형 (초기/정기/위기)
+       * @example 정기 상담
+       */
+      sessionType?: string;
+      /**
+       * @description 위험 수준 (안정/주의/위험)
+       * @example 주의
+       */
+      riskType?: string;
+      /**
+       * @description 연락처
+       * @example 010-1234-5678
+       */
+      contact?: string;
+    };
+    /** @description 상담 세션 목록 통합 응답 객체 (프론트엔드 page 구조 완화 지원) */
+    SessionListResponse: {
+      /** @description 예정된 상담 목록 (status=scheduled 일 때) */
+      scheduledSessions?: components['schemas']['ScheduledSessionGroupResponse'][];
+      /** @description 완료된 상담 목록 (status=completed 일 때) */
+      completedSessions?: components['schemas']['CompletedSessionGroupResponse'][];
+      /**
+       * Format: int32
+       * @description 전체 페이지 수
+       */
+      totalPages?: number;
+      /**
+       * Format: int32
+       * @description 현재 페이지
+       */
+      currentPage?: number;
+      /**
+       * Format: int64
+       * @description 총 데이터 건수
+       */
+      totalElements?: number;
+    };
+    ApiResponseSessionPageResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['SessionPageResponse'];
+    };
+    /** @description 세션 상세/진행 페이지 초기 데이터 응답 */
+    SessionPageResponse: {
+      /**
+       * Format: date-time
+       * @description 상담 예정/시작 일시
+       */
+      scheduledAt?: string;
+      /** @description 내담자 이름 */
+      clientName?: string;
+      /**
+       * Format: int32
+       * @description 진행 회차
+       */
+      sessionNumber?: number;
+      /** @description 세션 유형 (정기/초기) */
+      sessionType?: string;
+      /** @description 위험 수준 (안정/주의/위험) */
+      riskType?: string;
+      /** @description 내담자 연락처 */
+      contact?: string;
+    };
+    ApiResponseSessionSummaryDataResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['SessionSummaryDataResponse'];
+    };
+    BookmarkView: {
+      /** Format: int64 */
+      id?: number;
+      targetText?: string;
+      memo?: string;
+      /** Format: int32 */
+      timeOffset?: number;
+    };
+    Insights: {
+      riskType?: string;
+      keyConcerns?: string[];
+      distortionType?: string;
+    };
+    RecorderState: {
+      /** Format: int32 */
+      elapsedSeconds?: number;
+    };
+    SessionData: {
+      clientName?: string;
+      sessionType?: string;
+      riskType?: string;
+    };
+    /** @description 상담 요약 페이지용 데이터 모델 (SummaryPayload) */
+    SessionSummaryDataResponse: {
+      /**
+       * Format: int64
+       * @description 세션 ID
+       */
+      sessionId?: number;
+      /** @description 종료 시각 (ISO) */
+      endedAt?: string;
+      sessionData?: components['schemas']['SessionData'];
+      recorderState?: components['schemas']['RecorderState'];
+      summarySnapshot?: components['schemas']['SummarySnapshot'];
+    };
+    SummarySnapshot: {
+      insights?: components['schemas']['Insights'];
+      recentEmotionHistory?: string[];
+      transcript?: components['schemas']['TranscriptView'][];
+      bookmarks?: components['schemas']['BookmarkView'][];
+      autoMemo?: string;
+    };
+    TranscriptView: {
+      /** Format: int64 */
+      id?: number;
+      speaker?: string;
+      text?: string;
+      timestamp?: string;
+      isDanger?: boolean;
+    };
+    SseEmitter: {
+      /** Format: int64 */
+      timeout?: number;
+    };
     ApiResponseListEmotionReportResponse: {
       code?: string;
       message?: string;
@@ -1749,11 +2498,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      first?: boolean;
       last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      first?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['RecordDto'][];
@@ -1834,10 +2583,6 @@ export interface components {
        */
       createdAt?: string;
     };
-    SseEmitter: {
-      /** Format: int64 */
-      timeout?: number;
-    };
     ApiResponseMissionResponse: {
       code?: string;
       message?: string;
@@ -1875,6 +2620,65 @@ export interface components {
       progress?: components['schemas']['MissionProgress'];
       recommended?: components['schemas']['MissionDto'][];
       history?: components['schemas']['MissionHistoryDto'][];
+    };
+    ApiResponseWeeklyStatsResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['WeeklyStatsResponse'];
+    };
+    WeeklyStatsResponse: {
+      /** Format: int32 */
+      completedCount?: number;
+      /** Format: int64 */
+      avgDurationMinutes?: number;
+      /** Format: int32 */
+      improvementRate?: number;
+    };
+    ApiResponseTodayScheduleResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['TodayScheduleResponse'];
+    };
+    ScheduleItemResponse: {
+      /** Format: int64 */
+      sessionId?: number;
+      /** Format: date-time */
+      scheduledAt?: string;
+      clientName?: string;
+      /** Format: int32 */
+      streakDays?: number;
+      /** @enum {string} */
+      sessionType?: 'INITIAL' | 'REGULAR' | 'CRISIS';
+      /** @enum {string} */
+      riskLevel?: 'STABLE' | 'CAUTION' | 'RISK';
+      /** Format: int32 */
+      moodScore?: number;
+      /** Format: int32 */
+      stressScore?: number;
+    };
+    TodayScheduleResponse: {
+      items?: components['schemas']['ScheduleItemResponse'][];
+    };
+    ApiResponseRiskAlertPageResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['RiskAlertPageResponse'];
+    };
+    RiskAlertPageResponse: {
+      items?: components['schemas']['RiskAlertResponse'][];
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      totalPages?: number;
+    };
+    RiskAlertResponse: {
+      /** Format: int64 */
+      clientId?: number;
+      clientName?: string;
+      /** @enum {string} */
+      alertType?: 'HIGH_PHQ9' | 'APP_INACTIVE';
+      /** Format: int32 */
+      latestPhq9Score?: number;
     };
     ApiResponsePageClientSummaryResponse: {
       code?: string;
@@ -1951,11 +2755,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      first?: boolean;
       last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      first?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['ClientSummaryResponse'][];
@@ -2157,6 +2961,34 @@ export interface operations {
       };
     };
   };
+  enroll: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          audio: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseMlVoiceBaselineResponse'];
+        };
+      };
+    };
+  };
   submitOnboarding: {
     parameters: {
       query?: never;
@@ -2276,6 +3108,247 @@ export interface operations {
            *     }
            */
           'application/json': unknown;
+        };
+      };
+    };
+  };
+  getSessionList: {
+    parameters: {
+      query?: {
+        /**
+         * @description 세션 상태 필터
+         * @example scheduled
+         */
+        status?: string;
+        /**
+         * @description 언어 설정
+         * @example ko
+         */
+        locale?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseSessionListResponse'];
+        };
+      };
+    };
+  };
+  createSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SessionCreateRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  submitSessionSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SubmitSessionSummaryRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  startSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SessionStartRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  sendReminder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  addBookmark: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['BookmarkAddRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  uploadFullAudioFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          audioFile: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  processAudioChunk: {
+    parameters: {
+      query: {
+        speaker: string;
+        fastApiSessionId: string;
+        timestamp?: string;
+      };
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          audioFile: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseAudioChunkResponse'];
+        };
+      };
+    };
+  };
+  createAndStartInstantSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InstantSessionStartRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseLong'];
         };
       };
     };
@@ -2776,7 +3849,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 유효하지 않은/만료된 토큰 */
+      /** @description 비밀번호 정책 위반 */
       400: {
         headers: {
           [name: string]: unknown;
@@ -2885,7 +3958,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 만료된 챌린지 */
+      /** @description 잘못된 OTP */
       400: {
         headers: {
           [name: string]: unknown;
@@ -3110,7 +4183,7 @@ export interface operations {
       };
     };
   };
-  createSession: {
+  createSession_1: {
     parameters: {
       query?: never;
       header?: never;
@@ -3134,7 +4207,7 @@ export interface operations {
       };
     };
   };
-  startSession: {
+  startSession_1: {
     parameters: {
       query?: never;
       header?: never;
@@ -3359,6 +4432,32 @@ export interface operations {
       };
     };
   };
+  updateSchedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ScheduleModificationRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
   updateClientEmail: {
     parameters: {
       query?: never;
@@ -3388,6 +4487,26 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  getPrompts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoiceBaselinePromptsResponse'];
         };
       };
     };
@@ -3520,6 +4639,98 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseOnboardingResponse'];
+        };
+      };
+    };
+  };
+  getSessionPageData: {
+    parameters: {
+      query?: {
+        locale?: string;
+      };
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseSessionPageResponse'];
+        };
+      };
+    };
+  };
+  getSessionSummary: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseSessionSummaryDataResponse'];
+        };
+      };
+    };
+  };
+  downloadReport: {
+    parameters: {
+      query: {
+        type: string;
+      };
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/octet-stream': string[];
+        };
+      };
+    };
+  };
+  subscribeToInsights: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'text/event-stream': components['schemas']['SseEmitter'];
         };
       };
     };
@@ -3792,6 +5003,72 @@ export interface operations {
       };
     };
   };
+  getWeeklyStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseWeeklyStatsResponse'];
+        };
+      };
+    };
+  };
+  getTodaySchedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseTodayScheduleResponse'];
+        };
+      };
+    };
+  };
+  getRiskAlerts: {
+    parameters: {
+      query?: {
+        /**
+         * @description 페이지 번호 (0부터 시작)
+         * @example 0
+         */
+        page?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseRiskAlertPageResponse'];
+        };
+      };
+    };
+  };
   getClientDetail: {
     parameters: {
       query?: never;
@@ -3880,6 +5157,29 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseString'];
+        };
+      };
+    };
+  };
+  deleteBookmark: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+        bookmarkId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
         };
       };
     };
