@@ -8,6 +8,8 @@ export interface SessionStartContextValue {
   riskType?: RiskType;
 }
 
+type SessionIdentifier = string | number;
+
 type SessionStartContextMap = Record<string, SessionStartContextValue>;
 
 let memoryStore: SessionStartContextMap = {};
@@ -31,16 +33,23 @@ const writeStorage = (value: SessionStartContextMap) => {
   window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
 };
 
-export const setSessionStartContext = (sessionId: string, value: SessionStartContextValue) => {
+export const setSessionStartContext = (
+  sessionId: SessionIdentifier,
+  value: SessionStartContextValue,
+) => {
   if (!sessionId) return;
-  const next = { ...readStorage(), ...memoryStore, [sessionId]: value };
+  const key = String(sessionId);
+  const next = { ...readStorage(), ...memoryStore, [key]: value };
   memoryStore = next;
   writeStorage(next);
 };
 
-export const getSessionStartContext = (sessionId: string): SessionStartContextValue | null => {
+export const getSessionStartContext = (
+  sessionId: SessionIdentifier,
+): SessionStartContextValue | null => {
   if (!sessionId) return null;
+  const key = String(sessionId);
   const stored = readStorage();
   memoryStore = { ...stored, ...memoryStore };
-  return memoryStore[sessionId] ?? null;
+  return memoryStore[key] ?? null;
 };

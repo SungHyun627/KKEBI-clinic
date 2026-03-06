@@ -6,12 +6,12 @@ import type {
 } from '@/features/summary/types/summary';
 
 export const submitSessionSummary = async (
-  sessionId: string,
+  sessionId: number,
   payload: SubmitSessionSummaryPayload,
 ): Promise<SubmitSessionSummaryResponse> => {
   try {
     const response = await httpClient.post<SummaryApiResponse>(
-      `/api/v1/sessions/${encodeURIComponent(sessionId)}/summary/submit`,
+      `/api/v1/sessions/${encodeURIComponent(String(sessionId))}/summary/submit`,
       payload,
       { skipAuth: true },
     );

@@ -17,7 +17,7 @@ export function buildTranscriptText(transcriptItems: SummaryTranscriptItem[]) {
 }
 
 export function downloadSessionTranscriptTxt(params: {
-  sessionId: string;
+  sessionId: number;
   transcriptItems: SummaryTranscriptItem[];
   locale: string;
 }) {
@@ -31,7 +31,7 @@ export function downloadSessionTranscriptTxt(params: {
 }
 
 export function downloadSessionRecordingFile(params: {
-  sessionId: string;
+  sessionId: number;
   transcriptItems: SummaryTranscriptItem[];
   locale: string;
 }) {

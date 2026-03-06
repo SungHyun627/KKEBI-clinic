@@ -23,8 +23,14 @@ export async function POST(request: Request) {
       ? body.scheduleId.replace(/^scheduled-/, '').replace(/^completed-/, '')
       : null;
 
-  const sessionRef = normalizedScheduleId ?? `client-${body.clientId}`;
-  const sessionId = `session_${sessionRef}_${body.clientId}_${Date.now()}`;
+  const parsedScheduleSessionId = normalizedScheduleId ? Number(normalizedScheduleId) : NaN;
+  const parsedClientId = Number(body.clientId);
+  const fallbackSessionId = Number.isFinite(parsedClientId)
+    ? parsedClientId * 100000 + (Date.now() % 100000)
+    : Date.now();
+  const sessionId = Number.isFinite(parsedScheduleSessionId)
+    ? parsedScheduleSessionId
+    : fallbackSessionId;
 
   return NextResponse.json({
     success: true,

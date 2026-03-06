@@ -1,7 +1,7 @@
 import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
 
 export type SummaryPayload = {
-  sessionId: string;
+  sessionId?: number;
   endedAt: string;
   sessionData?: {
     clientName?: string;
@@ -18,21 +18,25 @@ export type SummaryPayload = {
       distortionType?: string;
     } | null;
     recentEmotionHistory?: string[];
-    recentCognitiveDistortions?: string[];
-    distortionExampleHistory?: string[];
-    additionalMemo?: string;
-  } | null;
-  runtime?: {
-    transcriptItems?: SummaryTranscriptItem[];
-    bookmarkIds?: string[];
+    transcript?: SummaryTranscriptItem[];
+    bookmarks?: SummaryBookmarkItem[];
+    autoMemo?: string;
   } | null;
 };
 
 export interface SummaryTranscriptItem {
-  id?: string;
+  id?: number;
   speaker?: 'counselor' | 'client';
   text?: string;
   timestamp?: string;
+  isDanger?: boolean;
+}
+
+export interface SummaryBookmarkItem {
+  id?: number;
+  targetText?: string;
+  memo?: string;
+  timeOffset?: number;
 }
 
 export type RiskEvaluation = 'stable' | 'caution' | 'risk' | 'urgent';

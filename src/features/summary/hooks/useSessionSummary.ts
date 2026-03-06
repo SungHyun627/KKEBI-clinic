@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useForm, useWatch } from 'react-hook-form';
-import { getSessionSummaryData } from '@/features/summary/api/getSessionSummaryData';
+import { getSessionSummary } from '@/features/summary/api/getSessionSummary';
 import { submitSessionSummary } from '@/features/summary/api/submitSessionSummary';
 import {
   downloadSessionRecordingFile,
@@ -20,12 +20,12 @@ import type {
   SummaryPayload,
 } from '@/features/summary/types/summary';
 
-interface UseSessionSummaryPageProps {
+interface UseSessionSummaryProps {
   locale: string;
-  sessionId: string;
+  sessionId: number;
 }
 
-export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPageProps) {
+export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps) {
   const router = useRouter();
   const tCommon = useTranslations('common');
   const tSummary = useTranslations('summary');
@@ -55,7 +55,7 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
 
     const load = async () => {
       setLoading(true);
-      const result = await getSessionSummaryData(sessionId, locale);
+      const result = await getSessionSummary(sessionId);
       if (cancelled) return;
 
       if (!result.success || !result.data) {
@@ -78,8 +78,8 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
   }, [locale, sessionId]);
 
   const transcriptItems = useMemo(
-    () => payload?.runtime?.transcriptItems ?? [],
-    [payload?.runtime?.transcriptItems],
+    () => payload?.summarySnapshot?.transcript ?? [],
+    [payload?.summarySnapshot?.transcript],
   );
   const durationMinutesText = `${Math.floor((payload?.recorderState?.elapsedSeconds ?? 0) / 60)}${tSummary(
     'durationMinuteUnit',
@@ -91,7 +91,10 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
   const riskType = payload?.sessionData?.riskType;
   const hasRecording = false;
   const emotions = payload?.summarySnapshot?.recentEmotionHistory ?? [];
-  const distortions = payload?.summarySnapshot?.recentCognitiveDistortions ?? [];
+  const distortions = useMemo(() => {
+    const distortionType = payload?.summarySnapshot?.insights?.distortionType;
+    return distortionType ? [distortionType] : [];
+  }, [payload?.summarySnapshot?.insights?.distortionType]);
 
   const derivedSummaryText = useMemo(() => {
     const clientTurns = transcriptItems.filter((item) => item.speaker === 'client');
@@ -127,9 +130,26 @@ export function useSessionSummaryPage({ locale, sessionId }: UseSessionSummaryPa
     !isSubmitting;
 
   const bookmarkedMoments = useMemo(() => {
-    const bookmarkedIds = new Set(payload?.runtime?.bookmarkIds ?? []);
-    return transcriptItems.filter((item) => item.id && bookmarkedIds.has(item.id));
-  }, [payload?.runtime?.bookmarkIds, transcriptItems]);
+    const bookmarks = payload?.summarySnapshot?.bookmarks ?? [];
+    if (bookmarks.length === 0) return [];
+
+    const transcriptById = new Map(transcriptItems.map((item) => [item.id, item]));
+    return bookmarks.map((bookmark, index) => {
+      const matched = bookmark.id ? transcriptById.get(bookmark.id) : null;
+      if (matched) return matched;
+
+      const offset = bookmark.timeOffset ?? 0;
+      const hh = String(Math.floor(offset / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((offset % 3600) / 60)).padStart(2, '0');
+      const ss = String(offset % 60).padStart(2, '0');
+      return {
+        id: Number(`${sessionId}${index + 1}`),
+        speaker: 'client' as const,
+        text: bookmark.targetText ?? bookmark.memo ?? '',
+        timestamp: `${hh}:${mm}:${ss}`,
+      };
+    });
+  }, [payload?.summarySnapshot?.bookmarks, sessionId, transcriptItems]);
 
   const missions = useMemo(() => getSummaryMissions(locale), [locale]);
 

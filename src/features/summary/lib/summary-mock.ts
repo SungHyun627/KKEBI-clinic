@@ -38,13 +38,14 @@ function distortionLabelByLocale(distortionType: string, locale: string) {
   return locale === 'en' ? label.en : label.ko;
 }
 
-export function getSessionSummaryMock(sessionId: string, locale: string): SummaryPayload {
-  const sessionPage = getSessionPageMock(sessionId, locale);
-  const seed = hashString(sessionId);
+export function getSessionSummaryMock(sessionId: number, locale: string): SummaryPayload {
+  const idText = String(sessionId);
+  const sessionPage = getSessionPageMock(idText, locale);
+  const seed = hashString(idText);
   const endedAt = new Date(Date.now() - (seed % (1000 * 60 * 60 * 48))).toISOString();
 
   const baseTranscriptItems = sessionPage.autoRecord.transcripts.map((item) => ({
-    id: item.id,
+    id: Number(item.id),
     speaker: item.speaker,
     text: item.text,
     timestamp: item.timestamp,
@@ -55,7 +56,7 @@ export function getSessionSummaryMock(sessionId: string, locale: string): Summar
     const idx = transcriptItems.length % baseTranscriptItems.length;
     const source = baseTranscriptItems[idx];
     transcriptItems.push({
-      id: `${sessionId}-summary-line-${transcriptItems.length + 1}`,
+      id: sessionId * 100 + transcriptItems.length + 1,
       speaker: source.speaker,
       text: source.text,
       timestamp: source.timestamp,
@@ -64,8 +65,8 @@ export function getSessionSummaryMock(sessionId: string, locale: string): Summar
 
   const bookmarkIds = transcriptItems
     .slice(0, 5)
-    .map((item) => item.id ?? '')
-    .filter(Boolean);
+    .map((item) => Number(item.id))
+    .filter((id) => Number.isFinite(id));
 
   const elapsedSeconds = Math.max(600, transcriptItems.length * 180 + (seed % 240));
 
@@ -89,15 +90,19 @@ export function getSessionSummaryMock(sessionId: string, locale: string): Summar
       recentEmotionHistory: sessionPage.insights.emotionHistory.map((item) =>
         emotionLabelByLocale(item.emotion, locale),
       ),
-      recentCognitiveDistortions: [
-        distortionLabelByLocale(sessionPage.insights.distortionType, locale),
-      ],
-      distortionExampleHistory: [sessionPage.insights.distortionExample],
-      additionalMemo: sessionPage.autoRecord.counselorMemo,
-    },
-    runtime: {
-      transcriptItems,
-      bookmarkIds,
+      transcript: transcriptItems.map((item) => ({
+        id: Number(item.id),
+        speaker: item.speaker,
+        text: item.text,
+        timestamp: item.timestamp,
+      })),
+      bookmarks: bookmarkIds.map((id, index) => ({
+        id: Number(id),
+        targetText: transcriptItems[index]?.text ?? '',
+        memo: distortionLabelByLocale(sessionPage.insights.distortionType, locale),
+        timeOffset: 60 * (index + 1),
+      })),
+      autoMemo: sessionPage.autoRecord.counselorMemo,
     },
   };
 }

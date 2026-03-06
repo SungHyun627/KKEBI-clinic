@@ -15,11 +15,11 @@ import {
   DetectedCognitiveDistortionCard,
   BookmarkedMomentsCard,
 } from './components';
-import { useSessionSummaryPage } from '../hooks/useSessionSummaryPage';
+import { useSessionSummary } from '../hooks/useSessionSummary';
 
 interface SessionSummaryContentProps {
   locale: string;
-  sessionId: string;
+  sessionId: number;
   backLabel: string;
 }
 
@@ -67,7 +67,7 @@ export default function SessionSummaryContent({
     handleDownloadAudio,
     handleSubmitSummary,
     payloadExists,
-  } = useSessionSummaryPage({ locale, sessionId });
+  } = useSessionSummary({ locale, sessionId });
 
   if (loading) {
     return (
@@ -80,7 +80,7 @@ export default function SessionSummaryContent({
   if (error || !payloadExists) {
     return (
       <section className="flex min-h-[320px] items-center justify-center body-14 text-status-negative">
-        {error ?? tSummary('loadFailed')}
+        {error ?? tSummary('loadFailed')}``
       </section>
     );
   }

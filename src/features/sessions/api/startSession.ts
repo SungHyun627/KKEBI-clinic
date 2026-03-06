@@ -9,14 +9,14 @@ interface StartSessionRequest {
 interface StartSessionResponseEnvelope {
   success: boolean;
   data?: {
-    sessionId?: string;
+    sessionId?: number;
   };
   message?: string;
 }
 
 interface StartSessionResult {
   success: boolean;
-  sessionId?: string;
+  sessionId?: number;
   message?: string;
 }
 
