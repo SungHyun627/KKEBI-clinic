@@ -58,6 +58,7 @@ export type SummarySubmitFormValues = {
 };
 
 export type SubmitSessionSummaryPayload = {
+  endedAt: string;
   summaryText: string;
   riskEvaluation: RiskEvaluation;
   followUpSessionTiming: FollowUpSessionTiming;

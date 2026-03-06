@@ -187,6 +187,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
 
     setIsSubmitting(true);
     const result = await submitSessionSummary(sessionId, {
+      endedAt: payload?.endedAt ?? new Date().toISOString(),
       summaryText,
       riskEvaluation,
       followUpSessionTiming,
