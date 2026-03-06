@@ -24,6 +24,7 @@ import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation
 import { Toast, toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
+import { ensureAccessToken } from '@/shared/api/http-client';
 
 const navItems = [
   { key: 'dashboard', href: '/', icon: '/icons/dashboard.svg' },
@@ -55,6 +56,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       router.replace('/login');
     }
   }, [authSession, router]);
+
+  useEffect(() => {
+    const latestSession = getAuthSession();
+    if (!latestSession?.authenticated) return;
+    void ensureAccessToken();
+  }, [authSession]);
 
   useEffect(() => {
     return subscribeAuthRequired(() => {
