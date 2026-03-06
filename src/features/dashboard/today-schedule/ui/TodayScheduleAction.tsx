@@ -9,7 +9,7 @@ import { startSession } from '@/features/sessions/api/startSession';
 import { toast } from '@/shared/ui/toast';
 import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
-import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';
+import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 
 interface TodayScheduleActionProps {
   clientId: string;
@@ -61,6 +61,7 @@ export default function TodayScheduleAction({
         size="icon"
         onClick={() => setIsReminderOpen(true)}
         aria-label={tDashboard('todayScheduleSendNotification', { name: clientName })}
+        disabled={!scheduleId}
         className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
       >
         <Image src="/icons/sent.svg" alt="" width={24} height={24} aria-hidden />
@@ -77,6 +78,7 @@ export default function TodayScheduleAction({
       <SessionReminderDrawer
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
+        sessionId={scheduleId ?? ''}
         clientId={clientId}
         clientName={clientName}
         scheduledTime={scheduledTime}

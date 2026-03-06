@@ -8,15 +8,15 @@ import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@
 import { Textarea } from '@/shared/ui/textarea';
 import { cn } from '@/shared/lib/utils';
 import Divider from '@/shared/ui/divider';
-import { sendSessionReminder } from '@/features/notification/api/sendSessionReminder';
+import { sendSessionReminder } from '@/features/sessions/session-reminder/api/sendSessionReminder';
 import { toast } from '@/shared/ui/toast';
-
-type ReminderChannel = 'push' | 'email' | 'sms';
+import type { ReminderChannel } from '../types/session-reminder';
 const MESSAGE_MAX_LENGTH = 1000;
 
 interface SessionReminderDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  sessionId: string;
   clientId: string;
   clientName: string;
   scheduledTime?: string;
@@ -37,6 +37,7 @@ const CHANNELS: Array<{
 const SessionReminderDrawer = ({
   open,
   onOpenChange,
+  sessionId,
   clientId,
   clientName,
   scheduledTime,
@@ -88,14 +89,7 @@ const SessionReminderDrawer = ({
     if (!isSendEnabled || isSubmitting) return;
 
     setIsSubmitting(true);
-    const result = await sendSessionReminder({
-      clientId,
-      clientName,
-      scheduleDate: todayDateKey,
-      scheduleTime: fixedTime,
-      channels,
-      message: resolvedMessage,
-    });
+    const result = await sendSessionReminder(sessionId);
     setIsSubmitting(false);
 
     if (!result.success) {

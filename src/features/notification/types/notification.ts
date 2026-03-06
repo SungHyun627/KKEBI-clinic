@@ -43,24 +43,3 @@ export interface NotificationListResponse {
   data?: NotificationListData;
   message?: string;
 }
-
-export type ReminderChannel = 'push' | 'email' | 'sms';
-
-export interface SessionReminderPayload {
-  clientId: string;
-  clientName: string;
-  scheduleDate: string;
-  scheduleTime: string;
-  channels: ReminderChannel[];
-  message: string;
-}
-
-export interface SessionReminderResponse {
-  success: boolean;
-  data?: {
-    clientId: string;
-    sentAt: string;
-    channels: ReminderChannel[];
-  };
-  message?: string;
-}

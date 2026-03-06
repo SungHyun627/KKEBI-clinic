@@ -13,7 +13,7 @@ import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 import { startSession } from '@/features/sessions/api/startSession';
 import { toast } from '@/shared/ui/toast';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
-import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';
+import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 
 interface ClientDetailHeaderProps {
   client: ClientLookupItem;
@@ -64,6 +64,7 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
             size="icon"
             onClick={() => setIsReminderOpen(true)}
             aria-label={tDashboard('todayScheduleSendNotification', { name: localizedClientName })}
+            disabled
             className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
           >
             <Image src="/icons/sent.svg" alt="" width={24} height={24} aria-hidden />
@@ -82,6 +83,7 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
       <SessionReminderDrawer
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
+        sessionId=""
         clientId={client.clientId}
         clientName={localizedClientName}
       />

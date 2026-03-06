@@ -15,7 +15,7 @@ import { useRouter } from '@/i18n/navigation';
 import { startSession } from '../../api/startSession';
 import { toast } from '@/shared/ui/toast';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
-import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';
+import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 import { cn } from '@/shared/lib/utils';
 
@@ -161,6 +161,7 @@ export default function ScheduledSessionItemCard({
       <SessionReminderDrawer
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
+        sessionId={item.id}
         clientId={item.clientId}
         clientName={localizedClientName}
         scheduledTime={item.scheduledTime}

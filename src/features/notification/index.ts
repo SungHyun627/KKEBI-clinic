@@ -6,11 +6,8 @@ export type {
   NotificationMockSet,
   NotificationType,
   NotificationViewMode,
-  ReminderChannel,
   RiskNotification,
   ScheduleChangeNotification,
-  SessionReminderPayload,
-  SessionReminderResponse,
 } from './types/notification';
 export {
   getAllNotificationsDemo,
@@ -23,4 +20,3 @@ export {
   getRiskNotificationsDemo,
   getRiskNotificationsServer,
 } from './api/getNotifications';
-export { sendSessionReminder, sendSessionReminderMock } from './api/sendSessionReminder';
