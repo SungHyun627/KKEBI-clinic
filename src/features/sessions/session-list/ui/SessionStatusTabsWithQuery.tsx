@@ -5,7 +5,10 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import SessionStatusTabs, { type SessionStatusTab } from './SessionStatusTabs';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 import { ScheduleSessionButton } from '@/features/sessions/schedule-session';
+import { sessionListQueryKey } from '../lib/query-keys';
 
 interface SessionStatusTabsWithQueryProps {
   scheduledLabel: string;
@@ -28,6 +31,8 @@ export default function SessionStatusTabsWithQuery({
   const router = useRouter();
   const searchParams = useSearchParams();
   const tSessions = useTranslations('sessionList');
+  const locale = useLocale();
+  const queryClient = useQueryClient();
 
   const statusParam = searchParams.get('status');
   const selectedTab: SessionStatusTab = isSessionStatusTab(statusParam)
@@ -74,7 +79,9 @@ export default function SessionStatusTabsWithQuery({
             replaceWithParams((params) => {
               params.set('status', 'scheduled');
             });
-            router.refresh();
+            void queryClient.invalidateQueries({
+              queryKey: sessionListQueryKey('scheduled', locale),
+            });
           }}
         />
         <button

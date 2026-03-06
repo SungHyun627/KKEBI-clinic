@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { getSessionList } from '../api/getSessionList';
 import type {
   CompletedSessionGroup,
@@ -9,6 +10,7 @@ import type {
   SessionStatus,
 } from '../types/session-list';
 import type { SessionStatusTab } from '../ui/SessionStatusTabs';
+import { sessionListQueryKey } from '../lib/query-keys';
 
 export type SessionViewFilter = 'list' | 'calendar';
 
@@ -37,10 +39,6 @@ export const useSessionList = ({
   loadFailedMessage,
 }: UseSessionListParams) => {
   const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [scheduledGroups, setScheduledGroups] = useState<ScheduledSessionGroup[]>([]);
-  const [completedGroups, setCompletedGroups] = useState<CompletedSessionGroup[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const statusParam = searchParams.get('status');
@@ -50,33 +48,25 @@ export const useSessionList = ({
     : initialStatus;
   const selectedView: SessionViewFilter = isSessionViewFilter(viewParam) ? viewParam : 'list';
 
-  useEffect(() => {
-    const load = async () => {
-      setIsLoading(true);
-      const result = await getSessionList(selectedStatus, { locale });
+  const sessionListQuery = useQuery({
+    queryKey: sessionListQueryKey(selectedStatus, locale),
+    queryFn: () => getSessionList(selectedStatus, { locale }),
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
 
-      if (!result.success || !result.data) {
-        setErrorMessage(loadFailedMessage);
-        setScheduledGroups([]);
-        setCompletedGroups([]);
-        setIsLoading(false);
-        return;
-      }
-
-      if (selectedStatus === 'scheduled') {
-        setScheduledGroups(result.data as ScheduledSessionGroup[]);
-        setCompletedGroups([]);
-      } else {
-        setCompletedGroups(result.data as CompletedSessionGroup[]);
-        setScheduledGroups([]);
-      }
-
-      setErrorMessage(null);
-      setIsLoading(false);
-    };
-
-    void load();
-  }, [locale, selectedStatus, loadFailedMessage]);
+  const queryResult = sessionListQuery.data;
+  const isQueryInvalid = !queryResult?.success || !queryResult?.data;
+  const scheduledGroups =
+    selectedStatus === 'scheduled' && queryResult?.success && queryResult.data
+      ? (queryResult.data as ScheduledSessionGroup[])
+      : [];
+  const completedGroups =
+    selectedStatus === 'completed' && queryResult?.success && queryResult.data
+      ? (queryResult.data as CompletedSessionGroup[])
+      : [];
+  const errorMessage = sessionListQuery.isError || isQueryInvalid ? loadFailedMessage : null;
+  const isLoading = sessionListQuery.isPending;
 
   const visibleScheduledGroups = useMemo(() => {
     if (selectedView !== 'calendar') return scheduledGroups;
