@@ -20,6 +20,7 @@ type PersistedAutoRecordState = {
   transcriptItems: SessionAutoRecordData['transcripts'];
   bookmarkIds: string[];
   bookmarkIdByTranscriptId: Record<string, number>;
+  activeSpeaker: 'counselor' | 'client';
   micPermission: 'idle' | 'requesting' | 'granted' | 'denied';
   isRecording: boolean;
   isPaused: boolean;
@@ -55,6 +56,7 @@ export default function SessionAutoRecordPanel({
   const locale = useLocale();
   const tSession = useTranslations('sessionList');
   const [streamSummary, setStreamSummary] = useState<{ title: string; body: string } | null>(null);
+  const [activeSpeaker, setActiveSpeaker] = useState<'counselor' | 'client'>('counselor');
   const {
     micPermission,
     isStartingSession,
@@ -99,6 +101,7 @@ export default function SessionAutoRecordPanel({
       transcriptItems,
       bookmarkIds: Array.from(bookmarkIds),
       bookmarkIdByTranscriptId,
+      activeSpeaker,
       micPermission,
       isRecording,
       isPaused,
@@ -110,6 +113,7 @@ export default function SessionAutoRecordPanel({
       audioLevel,
       bookmarkIds,
       bookmarkIdByTranscriptId,
+      activeSpeaker,
       demoIndex,
       elapsedSeconds,
       isPaused,
@@ -124,6 +128,7 @@ export default function SessionAutoRecordPanel({
       setTranscriptItems(parsed.transcriptItems ?? []);
       setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
       setBookmarkIdByTranscriptId(parsed.bookmarkIdByTranscriptId ?? {});
+      setActiveSpeaker(parsed.activeSpeaker ?? 'counselor');
       setMicPermission(parsed.micPermission ?? 'idle');
       setIsRecording(Boolean(parsed.isRecording));
       setIsPaused(Boolean(parsed.isPaused));
@@ -236,9 +241,62 @@ export default function SessionAutoRecordPanel({
     onRegisterPrepareEndSession?.(handlePrepareEndSession);
   }, [handlePrepareEndSession, onRegisterPrepareEndSession]);
 
+  useEffect(() => {
+    if (!isRecording) return;
+
+    // Toggle active speaker whenever Space or Enter is pressed.
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.isComposing) return;
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      const isEditable =
+        tag === 'input' ||
+        tag === 'textarea' ||
+        tag === 'select' ||
+        Boolean(target?.isContentEditable);
+      if (isEditable) return;
+
+      if (event.code !== 'Space' && event.key !== 'Enter') return;
+      event.preventDefault();
+      setActiveSpeaker((prev) => (prev === 'counselor' ? 'client' : 'counselor'));
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isRecording]);
+
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
       <div className="text-[24px] font-semibold">{tSession('recordTitle')}</div>
+      <div className="flex w-full items-center justify-between rounded-[14px] border border-neutral-90 bg-white px-4 py-3">
+        <div className="flex items-center gap-2">
+          <span className="body-14 text-label-alternative">
+            {locale === 'en' ? 'Current speaker' : '현재 발화자'}
+          </span>
+          <span
+            className={`rounded-[10px] px-3 py-1 body-14 font-semibold ${
+              activeSpeaker === 'counselor'
+                ? 'bg-neutral-95 text-label-normal'
+                : 'bg-[#FFE5E5] text-[#FF6363]'
+            }`}
+          >
+            {activeSpeaker === 'counselor'
+              ? locale === 'en'
+                ? 'Counselor'
+                : '상담사'
+              : locale === 'en'
+                ? 'Client'
+                : '내담자'}
+          </span>
+        </div>
+        <span className="body-13 text-label-assistive">
+          {locale === 'en'
+            ? 'Press Space or Enter to switch speaker'
+            : 'Space 또는 Enter 키로 발화자 전환'}
+        </span>
+      </div>
       <div className="flex w-full flex-col items-start gap-4">
         <SessionTranscriptCard
           locale={locale}
