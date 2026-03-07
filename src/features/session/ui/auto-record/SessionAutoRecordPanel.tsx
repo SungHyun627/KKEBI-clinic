@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session-page';
 import { useRecordingController } from '../../hooks/useRecordingController';
@@ -88,9 +88,8 @@ export default function SessionAutoRecordPanel({
     onRiskSignalDetected,
   });
 
-  useSessionPersistence<PersistedAutoRecordState>({
-    storageKey: getSessionAutoRecordStorageKey(sessionId),
-    snapshot: {
+  const snapshot = useMemo<PersistedAutoRecordState>(
+    () => ({
       transcriptItems,
       bookmarkIds: Array.from(bookmarkIds),
       micPermission,
@@ -99,8 +98,21 @@ export default function SessionAutoRecordPanel({
       elapsedSeconds,
       audioLevel,
       demoIndex,
-    },
-    hydrate: (parsed: PersistedAutoRecordState) => {
+    }),
+    [
+      audioLevel,
+      bookmarkIds,
+      demoIndex,
+      elapsedSeconds,
+      isPaused,
+      isRecording,
+      micPermission,
+      transcriptItems,
+    ],
+  );
+
+  const hydrate = useCallback(
+    (parsed: PersistedAutoRecordState) => {
       setTranscriptItems(parsed.transcriptItems ?? []);
       setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
       setMicPermission(parsed.micPermission ?? 'idle');
@@ -110,6 +122,22 @@ export default function SessionAutoRecordPanel({
       setAudioLevel(parsed.audioLevel ?? 0);
       setDemoIndex(parsed.demoIndex ?? 0);
     },
+    [
+      setAudioLevel,
+      setBookmarkIds,
+      setDemoIndex,
+      setElapsedSeconds,
+      setIsPaused,
+      setIsRecording,
+      setMicPermission,
+      setTranscriptItems,
+    ],
+  );
+
+  useSessionPersistence<PersistedAutoRecordState>({
+    storageKey: getSessionAutoRecordStorageKey(sessionId),
+    snapshot,
+    hydrate,
   });
 
   const { liveSummary } = useSessionAnalysis({
