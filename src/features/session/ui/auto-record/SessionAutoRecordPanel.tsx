@@ -7,6 +7,7 @@ import { useRecordingController } from '../../hooks/useRecordingController';
 import { useSessionAnalysis } from '../../hooks/useSessionAnalysis';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
 import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
+import { useAudioChunkUploader } from '../../hooks/useAudioChunkUploader';
 import { formatTimestampToHms } from '../../lib/session-analysis';
 import { useSessionPersistence } from '../../hooks/useSessionPersistence';
 import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
@@ -83,7 +84,6 @@ export default function SessionAutoRecordPanel({
     bookmarkIdByTranscriptId,
     pendingIds,
     toggleBookmark,
-    handleAddDemoDialogue,
     upsertTranscriptFromSse,
     setTranscriptItems,
     setDemoIndex,
@@ -94,6 +94,10 @@ export default function SessionAutoRecordPanel({
     locale,
     elapsedSeconds,
     onRiskSignalDetected,
+  });
+  const { uploadChunk, lastErrorMessage } = useAudioChunkUploader({
+    sessionId,
+    fastApiSessionId: sessionId,
   });
 
   const snapshot = useMemo<PersistedAutoRecordState>(
@@ -242,9 +246,58 @@ export default function SessionAutoRecordPanel({
   }, [handlePrepareEndSession, onRegisterPrepareEndSession]);
 
   useEffect(() => {
+    if (!lastErrorMessage) return;
+    // Non-blocking warning for chunk upload failures.
+    console.error('[audio-chunk][upload-failed]', { sessionId, message: lastErrorMessage });
+  }, [lastErrorMessage, sessionId]);
+
+  const captureAudioChunk = useCallback(async () => {
+    if (!navigator?.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      return null;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const chunks: BlobPart[] = [];
+    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+    const chunk = await new Promise<Blob | null>((resolve) => {
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+      recorder.onerror = () => resolve(null);
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        if (chunks.length === 0) {
+          resolve(null);
+          return;
+        }
+        resolve(new Blob(chunks, { type: 'audio/webm' }));
+      };
+
+      recorder.start();
+      window.setTimeout(() => recorder.stop(), 1200);
+    });
+
+    return chunk;
+  }, []);
+
+  const uploadCurrentSpeakerChunk = useCallback(async () => {
+    if (!isRecording || isPaused) return;
+
+    const realAudioChunk = await captureAudioChunk();
+    if (!realAudioChunk) return;
+    await uploadChunk({
+      speaker: activeSpeaker,
+      audioFile: realAudioChunk,
+    });
+  }, [activeSpeaker, captureAudioChunk, isPaused, isRecording, uploadChunk]);
+
+  useEffect(() => {
     if (!isRecording) return;
 
-    // Toggle active speaker whenever Space or Enter is pressed.
+    // On speaker switch key, upload current speaker chunk then toggle speaker.
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.isComposing) return;
       const target = event.target as HTMLElement | null;
@@ -258,6 +311,7 @@ export default function SessionAutoRecordPanel({
 
       if (event.code !== 'Space' && event.key !== 'Enter') return;
       event.preventDefault();
+      void uploadCurrentSpeakerChunk();
       setActiveSpeaker((prev) => (prev === 'counselor' ? 'client' : 'counselor'));
     };
 
@@ -265,7 +319,7 @@ export default function SessionAutoRecordPanel({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isRecording]);
+  }, [isRecording, uploadCurrentSpeakerChunk]);
 
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
@@ -293,8 +347,8 @@ export default function SessionAutoRecordPanel({
         </div>
         <span className="body-13 text-label-assistive">
           {locale === 'en'
-            ? 'Press Space or Enter to switch speaker'
-            : 'Space 또는 Enter 키로 발화자 전환'}
+            ? 'Press Space or Enter to switch speaker and send chunk'
+            : 'Space 또는 Enter 키로 발화자 전환 + chunk 전송'}
         </span>
       </div>
       <div className="flex w-full flex-col items-start gap-4">
@@ -326,7 +380,9 @@ export default function SessionAutoRecordPanel({
             void handleStartRecording();
           }}
           onPauseResume={handlePauseResume}
-          onAddDemoDialogue={handleAddDemoDialogue}
+          onAddDemoDialogue={() => {
+            void uploadCurrentSpeakerChunk();
+          }}
         />
       </div>
     </section>

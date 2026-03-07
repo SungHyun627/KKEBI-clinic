@@ -154,9 +154,12 @@ export const useTranscriptRuntime = ({
         ? /self-harm|suicide|want to die|give up|hard/i.test(dialogue.text)
         : /자해|자살|죽고 싶다|힘들어|포기/.test(dialogue.text);
 
-    if (!hasRiskSignal) return;
-    addBookmarkLocal(transcriptId);
-    onRiskSignalDetected?.({ text: dialogue.text, timestamp });
+    if (hasRiskSignal) {
+      addBookmarkLocal(transcriptId);
+      onRiskSignalDetected?.({ text: dialogue.text, timestamp });
+    }
+
+    return newItem;
   };
 
   return {
