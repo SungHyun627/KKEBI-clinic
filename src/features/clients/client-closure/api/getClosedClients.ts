@@ -9,6 +9,15 @@ const requestClosedClients = async (url: string): Promise<ClosedClientsResponse>
     });
 
     const data = await response.json().catch(() => null);
+    if (typeof data === 'object' && data !== null && 'code' in data) {
+      const envelope = data as { code?: string; message?: string; data?: unknown };
+      return {
+        success: envelope.code === 'SUCCESS',
+        data: Array.isArray(envelope.data) ? envelope.data : undefined,
+        message: envelope.message,
+      };
+    }
+
     if (typeof data === 'object' && data !== null && 'success' in data) {
       return data as ClosedClientsResponse;
     }
