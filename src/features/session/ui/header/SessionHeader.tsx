@@ -13,6 +13,7 @@ import { Button } from '@/shared/ui/button';
 import { isRiskType, isSessionType } from '../../types/session';
 import type { SessionBasicInfo } from '../../types/session';
 import SessionEndConfirmDialog from './SessionEndConfirmDialog';
+import SessionQuitConfirmDialog from './SessionQuitConfirmDialog';
 import type { SessionEmotionType, SessionInsightsData } from '../../types/session';
 import {
   getSessionAutoRecordStorageKey,
@@ -56,6 +57,7 @@ export default function SessionHeader({
   const searchParams = useSearchParams();
   const [context, setContext] = useState<SessionStartContextValue | null>(null);
   const [isEndDialogOpen, setIsEndDialogOpen] = useState(false);
+  const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
 
   useEffect(() => {
     setContext(getSessionStartContext(sessionId));
@@ -117,7 +119,14 @@ export default function SessionHeader({
 
   return (
     <div className="flex w-full justify-between p-5">
-      <div className="flex items-center gap-13">
+      <div className="flex items-center gap-[22px]">
+        <Button
+          variant="icon"
+          onClick={() => setIsQuitDialogOpen(true)}
+          className="p-0 border-none hover:bg-white h-6 w-6"
+        >
+          <Image src="/icons/back-ward.svg" alt="" width={24} height={24} />
+        </Button>
         <div className="flex items-center gap-4">
           <span className="body-18 font-semibold text-label-normal">
             {clientName}
@@ -182,13 +191,6 @@ export default function SessionHeader({
           >
             {locale === 'en' ? 'End' : '상담 종료'}
           </Button>
-          <Button
-            variant="icon"
-            onClick={handleBackWithLocale}
-            className="p-0 border-none hover:bg-white h-6 w-6"
-          >
-            <Image src="/icons/backward.svg" alt="" width={24} height={24} />
-          </Button>
         </div>
         <LocaleSwitchButton />
       </div>
@@ -198,6 +200,14 @@ export default function SessionHeader({
         totalSessionTime={totalSessionTime}
         onOpenChange={setIsEndDialogOpen}
         onConfirm={handleEndSession}
+      />
+      <SessionQuitConfirmDialog
+        open={isQuitDialogOpen}
+        onOpenChange={setIsQuitDialogOpen}
+        onConfirm={() => {
+          setIsQuitDialogOpen(false);
+          handleBackWithLocale();
+        }}
       />
     </div>
   );
