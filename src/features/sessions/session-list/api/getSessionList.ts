@@ -16,12 +16,11 @@ const requestSessionList = async (
     });
 
     const data = await response.json().catch(() => null);
-    if (typeof data === 'object' && data !== null && 'success' in data) {
-      return data as SessionListResponse;
-    }
-    const mapped = mapBackendSessionListResponse(data, status);
-    if (mapped) {
-      return mapped;
+    if (typeof data === 'object' && data !== null && 'code' in data) {
+      const mapped = mapBackendSessionListResponse(data, status);
+      if (mapped) {
+        return mapped;
+      }
     }
 
     return {
@@ -59,13 +58,13 @@ export const getSessionList = (
       const data = await httpClient.get<unknown>(
         `/api/v1/sessions?${toQueryString(status, options)}`,
       );
-      if (typeof data === 'object' && data !== null && 'success' in data) {
-        return data as SessionListResponse;
+      if (typeof data === 'object' && data !== null && 'code' in data) {
+        const mapped = mapBackendSessionListResponse(data, status);
+        if (mapped) {
+          return mapped;
+        }
       }
-      const mapped = mapBackendSessionListResponse(data, status);
-      if (mapped) {
-        return mapped;
-      }
+
       return {
         success: false,
         status,

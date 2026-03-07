@@ -5,6 +5,8 @@ import type { CompletedSessionGroup, ScheduledSessionGroup } from '../types/sess
 type BackendSessionItem = {
   id?: number;
   scheduledAt?: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
   date?: string;
   clientName?: string;
   sessionNumber?: number;
@@ -39,11 +41,34 @@ const toRiskType = (value?: string): RiskType => {
   return '안정';
 };
 
+const formatToKstDateTime = (value?: string) => {
+  if (!value) return '';
+
+  const hasTimezone = /(?:Z|[+\-]\d{2}:\d{2})$/i.test(value);
+  const normalizedValue = hasTimezone ? value : `${value}Z`;
+  const parsed = new Date(normalizedValue);
+  if (Number.isNaN(parsed.getTime())) return '';
+
+  const formatter = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  // sv-SE => "YYYY-MM-DD HH:mm:ss"
+  return formatter.format(parsed).replace(' ', 'T');
+};
+
 const splitDateTime = (value?: string) => {
   if (!value) return { date: '', time: '10:00' };
-  const [rawDate, rawTime = '10:00:00'] = value.split('T');
-  const time = rawTime.slice(0, 5) || '10:00';
-  return { date: rawDate ?? '', time };
+  const [date, timeWithSec = '10:00:00'] = value.split('T');
+  const time = timeWithSec.slice(0, 5) || '10:00';
+  return { date: date ?? '', time };
 };
 
 export const mapBackendSessionListResponse = (
@@ -68,7 +93,11 @@ export const mapBackendSessionListResponse = (
       : [];
     const groupMap = new Map<string, ScheduledSessionGroup>();
     source.forEach((item, index) => {
-      const { date, time } = splitDateTime(item.scheduledAt);
+      const kstDateTime =
+        item.scheduledDate && item.scheduledTime
+          ? `${item.scheduledDate}T${item.scheduledTime}:00`
+          : formatToKstDateTime(item.scheduledAt);
+      const { date, time } = splitDateTime(kstDateTime);
       if (!date) return;
       const existing = groupMap.get(date);
       const scheduledItem = {
@@ -100,7 +129,8 @@ export const mapBackendSessionListResponse = (
   const source = Array.isArray(backendData.completedSessions) ? backendData.completedSessions : [];
   const groupMap = new Map<string, CompletedSessionGroup>();
   source.forEach((item, index) => {
-    const { date } = splitDateTime(item.date);
+    const kstDateTime = formatToKstDateTime(item.date);
+    const { date } = splitDateTime(kstDateTime);
     if (!date) return;
     const existing = groupMap.get(date);
     const completedItem = {

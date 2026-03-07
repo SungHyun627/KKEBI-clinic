@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
@@ -41,7 +41,32 @@ export default function ScheduledSessionItemCard({
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const localizedClientName = getClientNameByLocale(item.clientId, item.clientName, locale);
+  const dateMatch = scheduledDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const timeMatch = item.scheduledTime.match(/^(\d{2}):(\d{2})$/);
+  const sessionStartUtcMs =
+    dateMatch && timeMatch
+      ? Date.UTC(
+          Number(dateMatch[1]),
+          Number(dateMatch[2]) - 1,
+          Number(dateMatch[3]),
+          Number(timeMatch[1]) - 9,
+          Number(timeMatch[2]),
+          0,
+        )
+      : Number.NaN;
+  const canStartSession =
+    Number.isFinite(sessionStartUtcMs) && nowMs >= sessionStartUtcMs - 30 * 60 * 1000;
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 30_000);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, []);
 
   const handleStart = async () => {
     setIsStarting(true);
@@ -97,7 +122,7 @@ export default function ScheduledSessionItemCard({
             type="button"
             size="md"
             className="w-full max-w-[181px]"
-            disabled={isStarting}
+            disabled={isStarting || !canStartSession}
             onClick={handleStart}
           >
             {tCommon('start')}

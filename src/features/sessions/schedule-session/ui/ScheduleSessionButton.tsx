@@ -44,10 +44,49 @@ const ScheduleSessionButton = ({ onCreated }: ScheduleSessionButtonProps) => {
     );
     if (!scheduledTimeInput) return;
 
-    const normalizedDateInput = scheduledDateInput.includes('T')
-      ? scheduledDateInput
-      : `${scheduledDateInput}T${scheduledTimeInput}:00`;
-    const parsedDate = new Date(normalizedDateInput);
+    const normalizedDate = scheduledDateInput.includes('T')
+      ? scheduledDateInput.slice(0, 10)
+      : scheduledDateInput;
+    const dateMatch = normalizedDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const timeMatch = scheduledTimeInput.match(/^(\d{2}):(\d{2})$/);
+    if (!dateMatch || !timeMatch) {
+      toast(
+        locale === 'en'
+          ? 'Invalid scheduled date/time format.'
+          : '상담 일자/시간 형식이 올바르지 않습니다.',
+      );
+      return;
+    }
+
+    const year = Number(dateMatch[1]);
+    const month = Number(dateMatch[2]);
+    const day = Number(dateMatch[3]);
+    const hour = Number(timeMatch[1]);
+    const minute = Number(timeMatch[2]);
+
+    if (
+      !Number.isInteger(year) ||
+      !Number.isInteger(month) ||
+      !Number.isInteger(day) ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31 ||
+      hour < 0 ||
+      hour > 23 ||
+      minute < 0 ||
+      minute > 59
+    ) {
+      toast(
+        locale === 'en'
+          ? 'Invalid scheduled date/time format.'
+          : '상담 일자/시간 형식이 올바르지 않습니다.',
+      );
+      return;
+    }
+
+    // Interpret input as local time (KST for KR users), then convert to UTC ISO for backend.
+    const parsedDate = new Date(year, month - 1, day, hour, minute, 0);
     if (Number.isNaN(parsedDate.getTime())) {
       toast(
         locale === 'en'
