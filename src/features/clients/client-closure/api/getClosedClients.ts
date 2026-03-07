@@ -1,38 +1,28 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import { toBaseResponse } from '@/shared/api/base-response';
 import type { ClosedClientsResponse } from '@/features/clients/client-closure/types/client-closure';
 
-const requestClosedClients = async (url: string): Promise<ClosedClientsResponse> => {
+const requestClosedClients = async (): Promise<ClosedClientsResponse> => {
   try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-
-    const data = await response.json().catch(() => null);
-    if (typeof data === 'object' && data !== null && 'code' in data) {
-      const envelope = data as { code?: string; message?: string; data?: unknown };
-      return {
-        success: envelope.code === 'SUCCESS',
-        data: Array.isArray(envelope.data) ? envelope.data : undefined,
-        message: envelope.message,
-      };
-    }
-
-    if (typeof data === 'object' && data !== null && 'success' in data) {
-      return data as ClosedClientsResponse;
-    }
-
+    const response = await httpClient.get<unknown>('/api/v1/clients/closed');
+    const base = toBaseResponse<unknown>(response);
     return {
-      success: response.ok,
-      message: response.ok ? undefined : '종결 상담자 목록을 불러오지 못했습니다.',
+      success: base.success,
+      data: Array.isArray(base.data) ? base.data : undefined,
+      message: base.message,
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message:
+        error instanceof ApiError
+          ? error.message || '종결 상담자 목록을 불러오지 못했습니다.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
     };
   }
 };
 
-export const getClosedClients = () => requestClosedClients('/api/v1/clients/closed');
+export const getClosedClients = () => requestClosedClients();
 export const getClosedClientsMock = getClosedClients;

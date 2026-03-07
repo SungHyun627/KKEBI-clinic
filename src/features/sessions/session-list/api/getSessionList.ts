@@ -1,4 +1,5 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
+import { isApiResponse, toBaseResponse } from '@/shared/api/base-response';
 import { mapBackendSessionListResponse } from '../lib/mapSessionListResponse';
 import type { SessionListResponse, SessionStatus } from '../types/session-list';
 
@@ -16,7 +17,15 @@ const requestSessionList = async (
     });
 
     const data = await response.json().catch(() => null);
-    if (typeof data === 'object' && data !== null && 'code' in data) {
+    if (isApiResponse(data)) {
+      const base = toBaseResponse(data);
+      if (!base.success) {
+        return {
+          success: false,
+          status,
+          message: base.message ?? '상담 세션 목록을 불러오지 못했습니다.',
+        };
+      }
       const mapped = mapBackendSessionListResponse(data, status);
       if (mapped) {
         return mapped;
@@ -58,7 +67,15 @@ export const getSessionList = (
       const data = await httpClient.get<unknown>(
         `/api/v1/sessions?${toQueryString(status, options)}`,
       );
-      if (typeof data === 'object' && data !== null && 'code' in data) {
+      if (isApiResponse(data)) {
+        const base = toBaseResponse(data);
+        if (!base.success) {
+          return {
+            success: false,
+            status,
+            message: base.message ?? '상담 세션 목록을 불러오지 못했습니다.',
+          };
+        }
         const mapped = mapBackendSessionListResponse(data, status);
         if (mapped) {
           return mapped;
