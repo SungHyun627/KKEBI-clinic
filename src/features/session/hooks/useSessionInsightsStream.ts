@@ -45,6 +45,12 @@ export const useSessionInsightsStream = ({
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef<number | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const onEventRef = useRef<typeof onEvent>(onEvent);
+
+  // Keep latest callback without re-subscribing SSE connection.
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  }, [onEvent]);
 
   useEffect(() => {
     if (!enabled) {
@@ -84,14 +90,14 @@ export const useSessionInsightsStream = ({
 
       // Default "message" event
       source.onmessage = (event) => {
-        onEvent?.(normalizeEvent('message', event.data));
+        onEventRef.current?.(normalizeEvent('message', event.data));
       };
 
       // Backend custom event names (if event: <type> is used)
       CUSTOM_EVENT_TYPES.forEach((eventType) => {
         source.addEventListener(eventType, (event) => {
           const data = (event as MessageEvent<string>).data;
-          onEvent?.(normalizeEvent(eventType, data));
+          onEventRef.current?.(normalizeEvent(eventType, data));
         });
       });
 
@@ -127,7 +133,7 @@ export const useSessionInsightsStream = ({
       eventSourceRef.current?.close();
       eventSourceRef.current = null;
     };
-  }, [enabled, onEvent, sessionId]);
+  }, [enabled, sessionId]);
 
   // Derive public state for disabled mode without synchronously setting state in effect
   const derivedStatus: SessionInsightsStreamStatus = enabled ? status : 'idle';
