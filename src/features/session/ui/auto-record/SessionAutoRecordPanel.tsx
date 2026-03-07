@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session-page';
+import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session';
 import { useRecordingController } from '../../hooks/useRecordingController';
 import { useSessionAnalysis } from '../../hooks/useSessionAnalysis';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
@@ -18,6 +18,7 @@ import SessionAudioControls from './SessionAudioControls';
 type PersistedAutoRecordState = {
   transcriptItems: SessionAutoRecordData['transcripts'];
   bookmarkIds: string[];
+  bookmarkIdByTranscriptId: Record<string, number>;
   micPermission: 'idle' | 'requesting' | 'granted' | 'denied';
   isRecording: boolean;
   isPaused: boolean;
@@ -75,12 +76,14 @@ export default function SessionAutoRecordPanel({
     transcriptItems,
     demoIndex,
     bookmarkIds,
+    bookmarkIdByTranscriptId,
     pendingIds,
     toggleBookmark,
     handleAddDemoDialogue,
     setTranscriptItems,
     setDemoIndex,
     setBookmarkIds,
+    setBookmarkIdByTranscriptId,
   } = useTranscriptRuntime({
     sessionId,
     locale,
@@ -92,6 +95,7 @@ export default function SessionAutoRecordPanel({
     () => ({
       transcriptItems,
       bookmarkIds: Array.from(bookmarkIds),
+      bookmarkIdByTranscriptId,
       micPermission,
       isRecording,
       isPaused,
@@ -102,6 +106,7 @@ export default function SessionAutoRecordPanel({
     [
       audioLevel,
       bookmarkIds,
+      bookmarkIdByTranscriptId,
       demoIndex,
       elapsedSeconds,
       isPaused,
@@ -115,6 +120,7 @@ export default function SessionAutoRecordPanel({
     (parsed: PersistedAutoRecordState) => {
       setTranscriptItems(parsed.transcriptItems ?? []);
       setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
+      setBookmarkIdByTranscriptId(parsed.bookmarkIdByTranscriptId ?? {});
       setMicPermission(parsed.micPermission ?? 'idle');
       setIsRecording(Boolean(parsed.isRecording));
       setIsPaused(Boolean(parsed.isPaused));
@@ -125,6 +131,7 @@ export default function SessionAutoRecordPanel({
     [
       setAudioLevel,
       setBookmarkIds,
+      setBookmarkIdByTranscriptId,
       setDemoIndex,
       setElapsedSeconds,
       setIsPaused,

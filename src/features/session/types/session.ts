@@ -27,6 +27,8 @@ export interface SessionInsightsData {
 
 export interface SessionTranscriptItem {
   id: string;
+  transcriptId?: number;
+  bookmarkId?: number;
   speaker: 'counselor' | 'client';
   text: string;
   timestamp: string;

@@ -8,7 +8,7 @@ import type {
   CognitiveDistortionType,
   SessionEmotionType,
   SessionInsightsData,
-} from '../../types/session-page';
+} from '../../types/session';
 
 interface SessionInsightsPanelProps {
   insights: SessionInsightsData;

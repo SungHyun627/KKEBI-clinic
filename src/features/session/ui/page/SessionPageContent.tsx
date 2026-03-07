@@ -6,8 +6,8 @@ import { getSessionPageMock } from '@/shared/mock/session-page';
 import SessionHeader from '../header/SessionHeader';
 import SessionInsightsPanel from '../insights/SessionInsightsPanel';
 import SessionAutoRecordPanel from '../auto-record/SessionAutoRecordPanel';
-import type { SessionEmotionType, SessionInsightsData } from '../../types/session-page';
-import { isRiskType, isSessionType } from '../../types/session-page';
+import type { SessionEmotionType, SessionInsightsData } from '../../types/session';
+import { isRiskType, isSessionType } from '../../types/session';
 import { useSessionInfo } from '../../hooks/useSessionInfo';
 
 interface SessionPageContentProps {

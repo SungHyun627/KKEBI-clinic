@@ -1,41 +1,24 @@
 import { NextResponse } from 'next/server';
+import { proxyToBackend } from '@/shared/server/backend-proxy';
 
-interface BookmarkRequestBody {
-  transcriptId?: string;
-}
+export const POST = async (
+  request: Request,
+  { params }: { params: Promise<{ sessionId: string }> },
+) => {
+  const { sessionId } = await params;
 
-export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as BookmarkRequestBody | null;
-  if (!body?.transcriptId) {
+  try {
+    return await proxyToBackend(request, {
+      method: 'POST',
+      path: `/api/v1/sessions/${encodeURIComponent(sessionId)}/bookmarks`,
+    });
+  } catch {
     return NextResponse.json(
-      { success: false, message: 'transcriptId is required' },
-      { status: 400 },
+      {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: '북마크 추가 중 오류가 발생했습니다.',
+      },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      transcriptId: body.transcriptId,
-      bookmarked: true,
-    },
-  });
-}
-
-export async function DELETE(request: Request) {
-  const body = (await request.json().catch(() => null)) as BookmarkRequestBody | null;
-  if (!body?.transcriptId) {
-    return NextResponse.json(
-      { success: false, message: 'transcriptId is required' },
-      { status: 400 },
-    );
-  }
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      transcriptId: body.transcriptId,
-      bookmarked: false,
-    },
-  });
-}
+};

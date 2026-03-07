@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { SessionAutoRecordData } from '../types/session-page';
+import type { SessionAutoRecordData } from '../types/session';
 import { getDemoConversation } from '../lib/demo-conversations';
 import { formatElapsedToTimestamp } from '../lib/session-analysis';
 import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
@@ -22,6 +22,9 @@ export const useTranscriptRuntime = ({
   const [transcriptItems, setTranscriptItems] = useState<SessionAutoRecordData['transcripts']>([]);
   const [demoIndex, setDemoIndex] = useState(0);
   const [bookmarkIds, setBookmarkIds] = useState<Set<string>>(() => new Set());
+  const [bookmarkIdByTranscriptId, setBookmarkIdByTranscriptId] = useState<Record<string, number>>(
+    {},
+  );
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
 
@@ -45,7 +48,10 @@ export const useTranscriptRuntime = ({
     });
 
     const result = isBookmarked
-      ? await removeTranscriptBookmark(sessionId, transcriptId)
+      ? await removeTranscriptBookmark({
+          sessionId,
+          bookmarkId: bookmarkIdByTranscriptId[transcriptId],
+        })
       : await addTranscriptBookmark(sessionId, transcriptId);
 
     if (!result.success) {
@@ -58,6 +64,17 @@ export const useTranscriptRuntime = ({
         }
         return next;
       });
+    } else if (isBookmarked) {
+      setBookmarkIdByTranscriptId((prev) => {
+        const next = { ...prev };
+        delete next[transcriptId];
+        return next;
+      });
+    } else if (result.bookmarkId) {
+      setBookmarkIdByTranscriptId((prev) => ({
+        ...prev,
+        [transcriptId]: result.bookmarkId as number,
+      }));
     }
 
     setPendingIds((prev) => {
@@ -76,6 +93,7 @@ export const useTranscriptRuntime = ({
     const timestamp = formatElapsedToTimestamp(elapsedSeconds);
     const newItem: SessionAutoRecordData['transcripts'][number] = {
       id: transcriptId,
+      transcriptId: Number.isFinite(Number(transcriptId)) ? Number(transcriptId) : undefined,
       speaker: dialogue.speaker,
       text: dialogue.text,
       timestamp,
@@ -98,11 +116,13 @@ export const useTranscriptRuntime = ({
     transcriptItems,
     demoIndex,
     bookmarkIds,
+    bookmarkIdByTranscriptId,
     pendingIds,
     toggleBookmark,
     handleAddDemoDialogue,
     setTranscriptItems,
     setDemoIndex,
     setBookmarkIds,
+    setBookmarkIdByTranscriptId,
   };
 };

@@ -10,10 +10,10 @@ import SessionTypeChip from '@/features/dashboard/today-schedule/ui/SessionTypeC
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
-import { isRiskType, isSessionType } from '../../types/session-page';
-import type { SessionBasicInfo } from '../../types/session-page';
+import { isRiskType, isSessionType } from '../../types/session';
+import type { SessionBasicInfo } from '../../types/session';
 import SessionEndConfirmDialog from './SessionEndConfirmDialog';
-import type { SessionEmotionType, SessionInsightsData } from '../../types/session-page';
+import type { SessionEmotionType, SessionInsightsData } from '../../types/session';
 import {
   getSessionAutoRecordStorageKey,
   getSessionSummaryStorageKey,
