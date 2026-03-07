@@ -26,6 +26,38 @@ const toDateKey = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
+const toUtcIsoFromLocal = (dateKey: string, time: string) => {
+  const dateMatch = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const timeMatch = time.match(/^(\d{2}):(\d{2})$/);
+  if (!dateMatch || !timeMatch) return null;
+
+  const year = Number(dateMatch[1]);
+  const month = Number(dateMatch[2]);
+  const day = Number(dateMatch[3]);
+  const hour = Number(timeMatch[1]);
+  const minute = Number(timeMatch[2]);
+
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(month) ||
+    !Number.isInteger(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31 ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return null;
+  }
+
+  const localDate = new Date(year, month - 1, day, hour, minute, 0);
+  if (Number.isNaN(localDate.getTime())) return null;
+  return localDate.toISOString();
+};
+
 const getNextTime = (value: string) => {
   const [hourRaw, minuteRaw] = value.split(':');
   const hour = Number(hourRaw);
@@ -107,7 +139,10 @@ export const useRescheduleSessionDialog = ({
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      const nextScheduledAt = `${toDateKey(selectedDate)}T${startTime}:00`;
+      const nextScheduledAt = toUtcIsoFromLocal(toDateKey(selectedDate), startTime);
+      if (!nextScheduledAt) {
+        throw new Error('Invalid schedule date/time');
+      }
       await rescheduleSession(sessionId, { newScheduledAt: nextScheduledAt });
       await queryClient.invalidateQueries({
         queryKey: sessionListQueryKey('scheduled', locale),
