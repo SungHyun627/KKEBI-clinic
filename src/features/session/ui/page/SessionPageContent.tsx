@@ -30,6 +30,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
   const [keyConcernHistory, setKeyConcernHistory] = useState<string[]>([]);
   const [distortionExampleHistory, setDistortionExampleHistory] = useState<string[]>([]);
   const prepareEndSessionRef = useRef<(() => void) | null>(null);
+  const uploadFullAudioRef = useRef<(() => Promise<boolean>) | null>(null);
 
   const handleRiskSignalDetected = useCallback((payload: { text: string; timestamp: string }) => {
     setRiskBanner(payload);
@@ -62,10 +63,16 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
   const handleRegisterPrepareEndSession = useCallback((handler: () => void) => {
     prepareEndSessionRef.current = handler;
   }, []);
+  const handleRegisterUploadFullAudio = useCallback((handler: () => Promise<boolean>) => {
+    uploadFullAudioRef.current = handler;
+  }, []);
 
   const handleBeforeOpenEndDialog = useCallback(async () => {
     prepareEndSessionRef.current?.();
     await new Promise((resolve) => setTimeout(resolve, 0));
+  }, []);
+  const handleBeforeEndSession = useCallback(async () => {
+    return (await uploadFullAudioRef.current?.()) ?? true;
   }, []);
 
   return (
@@ -93,6 +100,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             : undefined
         }
         onBeforeOpenEndDialog={handleBeforeOpenEndDialog}
+        onBeforeEndSession={handleBeforeEndSession}
       />
       {riskBanner ? (
         <div className="flex items-center justify-between gap-4 rounded-[14px] bg-[#FFE5E5] px-4 py-3">
@@ -143,6 +151,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             onRiskSignalDetected={handleRiskSignalDetected}
             onAnalysisChange={handleAnalysisChange}
             onRegisterPrepareEndSession={handleRegisterPrepareEndSession}
+            onRegisterUploadFullAudio={handleRegisterUploadFullAudio}
           />
         </div>
       )}

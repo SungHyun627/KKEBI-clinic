@@ -36,6 +36,7 @@ interface SessionHeaderProps {
     distortionExampleHistory: string[];
   };
   onBeforeOpenEndDialog?: () => Promise<void> | void;
+  onBeforeEndSession?: () => Promise<boolean> | boolean;
 }
 
 function formatElapsed(seconds: number): string {
@@ -50,6 +51,7 @@ export default function SessionHeader({
   recorderState,
   summarySnapshot,
   onBeforeOpenEndDialog,
+  onBeforeEndSession,
 }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -92,7 +94,10 @@ export default function SessionHeader({
     router.push(safeReturnTo ?? `/${locale}/sessions`);
   };
 
-  const handleEndSession = () => {
+  const handleEndSession = async () => {
+    const canProceed = (await onBeforeEndSession?.()) ?? true;
+    if (!canProceed) return;
+
     if (typeof window !== 'undefined') {
       const runtimeKey = getSessionAutoRecordStorageKey(sessionId);
       const summaryKey = getSessionSummaryStorageKey(sessionId);

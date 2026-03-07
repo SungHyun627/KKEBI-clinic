@@ -9,7 +9,7 @@ interface SessionEndConfirmDialogProps {
   open: boolean;
   totalSessionTime: string;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void> | void;
 }
 
 export default function SessionEndConfirmDialog({
@@ -44,7 +44,13 @@ export default function SessionEndConfirmDialog({
           >
             {locale === 'en' ? 'Cancel' : '취소'}
           </Button>
-          <Button type="button" className="h-[58px] flex-[11] rounded-[16px]" onClick={onConfirm}>
+          <Button
+            type="button"
+            className="h-[58px] flex-[11] rounded-[16px]"
+            onClick={() => {
+              void onConfirm();
+            }}
+          >
             {locale === 'en' ? 'End & Save' : '종료 및 저장'}
           </Button>
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session';
 import { useRecordingController } from '../../hooks/useRecordingController';
@@ -8,6 +8,7 @@ import { useSessionAnalysis } from '../../hooks/useSessionAnalysis';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
 import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
 import { useAudioChunkUploader } from '../../hooks/useAudioChunkUploader';
+import { uploadFullAudioFile } from '../../api/uploadFullAudioFile';
 import { formatTimestampToHms } from '../../lib/session-analysis';
 import { useSessionPersistence } from '../../hooks/useSessionPersistence';
 import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
@@ -43,6 +44,7 @@ interface SessionAutoRecordPanelProps {
   onRiskSignalDetected?: (payload: { text: string; timestamp: string }) => void;
   onAnalysisChange?: (insights: SessionInsightsData | null) => void;
   onRegisterPrepareEndSession?: (handler: () => void) => void;
+  onRegisterUploadFullAudio?: (handler: () => Promise<boolean>) => void;
 }
 
 export default function SessionAutoRecordPanel({
@@ -53,11 +55,13 @@ export default function SessionAutoRecordPanel({
   onRiskSignalDetected,
   onAnalysisChange,
   onRegisterPrepareEndSession,
+  onRegisterUploadFullAudio,
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const tSession = useTranslations('sessionList');
   const [streamSummary, setStreamSummary] = useState<{ title: string; body: string } | null>(null);
   const [activeSpeaker, setActiveSpeaker] = useState<'counselor' | 'client'>('counselor');
+  const recordedAudioChunksRef = useRef<Blob[]>([]);
   const {
     micPermission,
     isStartingSession,
@@ -288,11 +292,30 @@ export default function SessionAutoRecordPanel({
 
     const realAudioChunk = await captureAudioChunk();
     if (!realAudioChunk) return;
+    recordedAudioChunksRef.current.push(realAudioChunk);
     await uploadChunk({
       speaker: activeSpeaker,
       audioFile: realAudioChunk,
     });
   }, [activeSpeaker, captureAudioChunk, isPaused, isRecording, uploadChunk]);
+
+  const handleUploadFullAudio = useCallback(async () => {
+    const chunks = recordedAudioChunksRef.current;
+    if (chunks.length === 0) return true;
+
+    const fullAudio = new Blob(chunks, { type: 'audio/webm' });
+    const result = await uploadFullAudioFile({
+      sessionId,
+      audioFile: fullAudio,
+    });
+    if (!result.success) {
+      console.error('[audio-file][upload-failed]', { sessionId, message: result.message });
+      return false;
+    }
+
+    recordedAudioChunksRef.current = [];
+    return true;
+  }, [sessionId]);
 
   useEffect(() => {
     if (!isRecording) return;
@@ -320,6 +343,10 @@ export default function SessionAutoRecordPanel({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isRecording, uploadCurrentSpeakerChunk]);
+
+  useEffect(() => {
+    onRegisterUploadFullAudio?.(handleUploadFullAudio);
+  }, [handleUploadFullAudio, onRegisterUploadFullAudio]);
 
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
