@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useForm, useWatch } from 'react-hook-form';
@@ -13,6 +13,7 @@ import {
 import { formatSummaryDate } from '@/features/summary/lib/formatSummaryDate';
 import { getSummaryMissions } from '@/features/summary/lib/summaryMissions';
 import { toast } from '@/shared/ui/toast';
+import { getSessionAudioPreviewUrl } from '@/shared/lib/session-audio-preview-cache';
 import type {
   FollowUpSessionTiming,
   RiskEvaluation,
@@ -36,6 +37,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
   const [isPlaying, setIsPlaying] = useState(false);
   const [summaryTextOverride, setSummaryTextOverride] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { setValue, control } = useForm<SummarySubmitFormValues>({
     mode: 'onChange',
@@ -89,7 +91,9 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
   const profileSuffix = tCommon('profileSuffix');
   const sessionType = payload?.sessionData?.sessionType;
   const riskType = payload?.sessionData?.riskType;
-  const hasRecording = false;
+  const recordingPreviewUrl = getSessionAudioPreviewUrl(String(sessionId));
+  const hasRecording = Boolean(recordingPreviewUrl);
+  const effectiveIsPlaying = hasRecording && isPlaying;
   const emotions = payload?.summarySnapshot?.recentEmotionHistory ?? [];
   const distortions = useMemo(() => {
     const distortionType = payload?.summarySnapshot?.insights?.distortionType;
@@ -212,6 +216,33 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     router.push(`/${locale}`);
   };
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!hasRecording) {
+      return;
+    }
+
+    if (effectiveIsPlaying) {
+      void audio.play().catch(() => {
+        setIsPlaying(false);
+      });
+      return;
+    }
+
+    audio.pause();
+  }, [effectiveIsPlaying, hasRecording]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const handleEnded = () => setIsPlaying(false);
+    audio.addEventListener('ended', handleEnded);
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, []);
+
   return {
     loading,
     error,
@@ -255,6 +286,8 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     handleDownloadTxt,
     handleDownloadAudio,
     handleSubmitSummary,
+    audioRef,
+    recordingPreviewUrl,
     payloadExists: Boolean(payload),
   };
 }

@@ -66,6 +66,8 @@ export default function SessionSummaryContent({
     handleDownloadTxt,
     handleDownloadAudio,
     handleSubmitSummary,
+    audioRef,
+    recordingPreviewUrl,
     payloadExists,
   } = useSessionSummary({ locale, sessionId });
 
@@ -87,6 +89,7 @@ export default function SessionSummaryContent({
 
   return (
     <section className="flex w-full flex-col gap-[62px] pb-5">
+      <audio ref={audioRef} src={recordingPreviewUrl ?? undefined} preload="metadata" />
       <SummaryTopBar
         locale={locale}
         backLabel={backLabel}

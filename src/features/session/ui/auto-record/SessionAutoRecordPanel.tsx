@@ -9,6 +9,7 @@ import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
 import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
 import { useAudioChunkUploader } from '../../hooks/useAudioChunkUploader';
 import { uploadFullAudioFile } from '../../api/uploadFullAudioFile';
+import { setSessionAudioPreviewUrl } from '@/shared/lib/session-audio-preview-cache';
 import { formatTimestampToHms } from '../../lib/session-analysis';
 import { useSessionPersistence } from '../../hooks/useSessionPersistence';
 import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
@@ -62,6 +63,10 @@ export default function SessionAutoRecordPanel({
   const [streamSummary, setStreamSummary] = useState<{ title: string; body: string } | null>(null);
   const [activeSpeaker, setActiveSpeaker] = useState<'counselor' | 'client'>('counselor');
   const recordedAudioChunksRef = useRef<Blob[]>([]);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const segmentRecorderRef = useRef<MediaRecorder | null>(null);
+  const segmentChunksRef = useRef<BlobPart[]>([]);
+  const isSwitchingSpeakerRef = useRef(false);
   const {
     micPermission,
     isStartingSession,
@@ -255,55 +260,97 @@ export default function SessionAutoRecordPanel({
     console.error('[audio-chunk][upload-failed]', { sessionId, message: lastErrorMessage });
   }, [lastErrorMessage, sessionId]);
 
-  const captureAudioChunk = useCallback(async () => {
-    if (!navigator?.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      return null;
+  const stopSegmentRecorder = useCallback(async (): Promise<Blob | null> => {
+    const recorder = segmentRecorderRef.current;
+    if (!recorder) return null;
+
+    if (recorder.state === 'inactive') {
+      segmentRecorderRef.current = null;
+      const parts = segmentChunksRef.current;
+      segmentChunksRef.current = [];
+      if (parts.length === 0) return null;
+      return new Blob(parts, { type: 'audio/webm' });
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const chunks: BlobPart[] = [];
-    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-
-    const chunk = await new Promise<Blob | null>((resolve) => {
-      recorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          chunks.push(event.data);
-        }
-      };
-      recorder.onerror = () => resolve(null);
+    return new Promise<Blob | null>((resolve) => {
       recorder.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
-        if (chunks.length === 0) {
+        segmentRecorderRef.current = null;
+        const parts = segmentChunksRef.current;
+        segmentChunksRef.current = [];
+        if (parts.length === 0) {
           resolve(null);
           return;
         }
-        resolve(new Blob(chunks, { type: 'audio/webm' }));
+        resolve(new Blob(parts, { type: 'audio/webm' }));
       };
-
-      recorder.start();
-      window.setTimeout(() => recorder.stop(), 1200);
+      recorder.onerror = () => {
+        segmentRecorderRef.current = null;
+        segmentChunksRef.current = [];
+        resolve(null);
+      };
+      recorder.stop();
     });
-
-    return chunk;
   }, []);
 
-  const uploadCurrentSpeakerChunk = useCallback(async () => {
-    if (!isRecording || isPaused) return;
+  const startSegmentRecorder = useCallback(() => {
+    const stream = mediaStreamRef.current;
+    if (!stream) return;
+    if (segmentRecorderRef.current?.state && segmentRecorderRef.current.state !== 'inactive') {
+      return;
+    }
 
-    const realAudioChunk = await captureAudioChunk();
-    if (!realAudioChunk) return;
-    recordedAudioChunksRef.current.push(realAudioChunk);
-    await uploadChunk({
-      speaker: activeSpeaker,
-      audioFile: realAudioChunk,
-    });
-  }, [activeSpeaker, captureAudioChunk, isPaused, isRecording, uploadChunk]);
+    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    segmentChunksRef.current = [];
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        segmentChunksRef.current.push(event.data);
+      }
+    };
+    recorder.start();
+    segmentRecorderRef.current = recorder;
+  }, []);
+
+  const flushCurrentSpeakerChunk = useCallback(
+    async (speaker: 'counselor' | 'client', shouldUpload: boolean) => {
+      const segmentBlob = await stopSegmentRecorder();
+      if (!segmentBlob) return;
+
+      recordedAudioChunksRef.current.push(segmentBlob);
+      if (!shouldUpload) return;
+
+      await uploadChunk({
+        speaker,
+        audioFile: segmentBlob,
+      });
+    },
+    [stopSegmentRecorder, uploadChunk],
+  );
+
+  const handleSpeakerSwitch = useCallback(async () => {
+    if (!isRecording || isPaused || isSwitchingSpeakerRef.current) return;
+
+    isSwitchingSpeakerRef.current = true;
+    const prevSpeaker = activeSpeaker;
+
+    try {
+      await flushCurrentSpeakerChunk(prevSpeaker, true);
+      setActiveSpeaker((prev) => (prev === 'counselor' ? 'client' : 'counselor'));
+      startSegmentRecorder();
+    } finally {
+      isSwitchingSpeakerRef.current = false;
+    }
+  }, [activeSpeaker, flushCurrentSpeakerChunk, isPaused, isRecording, startSegmentRecorder]);
 
   const handleUploadFullAudio = useCallback(async () => {
+    await flushCurrentSpeakerChunk(activeSpeaker, false);
+
     const chunks = recordedAudioChunksRef.current;
     if (chunks.length === 0) return true;
 
     const fullAudio = new Blob(chunks, { type: 'audio/webm' });
+    const previewUrl = URL.createObjectURL(fullAudio);
+    setSessionAudioPreviewUrl(sessionId, previewUrl);
+
     const result = await uploadFullAudioFile({
       sessionId,
       audioFile: fullAudio,
@@ -315,7 +362,71 @@ export default function SessionAutoRecordPanel({
 
     recordedAudioChunksRef.current = [];
     return true;
-  }, [sessionId]);
+  }, [activeSpeaker, flushCurrentSpeakerChunk, sessionId]);
+
+  useEffect(() => {
+    if (!isRecording) {
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const setupStreamAndRecorder = async () => {
+      if (!mediaStreamRef.current) {
+        try {
+          mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch {
+          console.error('[audio-chunk][record-init-failed]', { sessionId });
+          return;
+        }
+      }
+
+      if (cancelled || isPaused) return;
+      if (!segmentRecorderRef.current) {
+        startSegmentRecorder();
+      }
+    };
+
+    void setupStreamAndRecorder();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isPaused, isRecording, sessionId, startSegmentRecorder]);
+
+  useEffect(() => {
+    const recorder = segmentRecorderRef.current;
+    if (!recorder) return;
+
+    if (isPaused && recorder.state === 'recording') {
+      recorder.pause();
+      return;
+    }
+
+    if (!isPaused && recorder.state === 'paused') {
+      recorder.resume();
+    }
+  }, [isPaused]);
+
+  useEffect(() => {
+    if (isRecording) return;
+
+    const recorder = segmentRecorderRef.current;
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.stop();
+    }
+    segmentRecorderRef.current = null;
+    segmentChunksRef.current = [];
+
+    const stream = mediaStreamRef.current;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+  }, [isRecording]);
 
   useEffect(() => {
     if (!isRecording) return;
@@ -334,15 +445,27 @@ export default function SessionAutoRecordPanel({
 
       if (event.code !== 'Space' && event.key !== 'Enter') return;
       event.preventDefault();
-      void uploadCurrentSpeakerChunk();
-      setActiveSpeaker((prev) => (prev === 'counselor' ? 'client' : 'counselor'));
+      void handleSpeakerSwitch();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isRecording, uploadCurrentSpeakerChunk]);
+  }, [handleSpeakerSwitch, isRecording]);
+
+  useEffect(() => {
+    return () => {
+      const recorder = segmentRecorderRef.current;
+      if (recorder && recorder.state !== 'inactive') {
+        recorder.stop();
+      }
+      const stream = mediaStreamRef.current;
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   useEffect(() => {
     onRegisterUploadFullAudio?.(handleUploadFullAudio);
@@ -408,7 +531,7 @@ export default function SessionAutoRecordPanel({
           }}
           onPauseResume={handlePauseResume}
           onAddDemoDialogue={() => {
-            void uploadCurrentSpeakerChunk();
+            void handleSpeakerSwitch();
           }}
         />
       </div>
