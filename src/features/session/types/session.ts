@@ -64,6 +64,14 @@ export interface SessionPageViewData {
   autoRecord: SessionAutoRecordData;
 }
 
+export type SessionInsightsStreamStatus = 'idle' | 'connecting' | 'open' | 'error';
+
+export interface SessionInsightsStreamEvent {
+  type: string;
+  data: unknown;
+  raw: string;
+}
+
 export interface SessionInfoResponse {
   code: string;
   message: string;

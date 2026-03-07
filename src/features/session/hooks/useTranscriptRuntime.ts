@@ -13,6 +13,13 @@ interface UseTranscriptRuntimeParams {
   onRiskSignalDetected?: (payload: { text: string; timestamp: string }) => void;
 }
 
+interface TranscriptSsePayload {
+  transcriptId?: number;
+  speaker?: 'counselor' | 'client';
+  text?: string;
+  timestamp?: string;
+}
+
 export const useTranscriptRuntime = ({
   sessionId,
   locale,
@@ -27,6 +34,46 @@ export const useTranscriptRuntime = ({
   );
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
+
+  // Merge transcript item from SSE payload (append or patch existing item)
+  const upsertTranscriptFromSse = (payload: TranscriptSsePayload) => {
+    if (!payload.transcriptId) return;
+    const text = payload.text;
+    if (typeof text !== 'string') return;
+    const id = String(payload.transcriptId);
+    const speaker =
+      payload.speaker === 'counselor' || payload.speaker === 'client' ? payload.speaker : 'client';
+    const timestamp = payload.timestamp ?? formatElapsedToTimestamp(elapsedSeconds);
+
+    setTranscriptItems((prev) => {
+      const existingIndex = prev.findIndex((item) => item.id === id);
+      if (existingIndex === -1) {
+        return [
+          ...prev,
+          {
+            id,
+            transcriptId: payload.transcriptId,
+            speaker,
+            text,
+            timestamp,
+            bookmarked: bookmarkIds.has(id),
+            bookmarkId: bookmarkIdByTranscriptId[id],
+          },
+        ];
+      }
+
+      const next = [...prev];
+      next[existingIndex] = {
+        ...next[existingIndex],
+        transcriptId: payload.transcriptId,
+        speaker,
+        text,
+        timestamp,
+        bookmarkId: bookmarkIdByTranscriptId[id],
+      };
+      return next;
+    });
+  };
 
   const addBookmarkLocal = (transcriptId: string) => {
     setBookmarkIds((prev) => new Set(prev).add(transcriptId));
@@ -120,6 +167,7 @@ export const useTranscriptRuntime = ({
     pendingIds,
     toggleBookmark,
     handleAddDemoDialogue,
+    upsertTranscriptFromSse,
     setTranscriptItems,
     setDemoIndex,
     setBookmarkIds,

@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session';
 import { useRecordingController } from '../../hooks/useRecordingController';
 import { useSessionAnalysis } from '../../hooks/useSessionAnalysis';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
+import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
 import { formatTimestampToHms } from '../../lib/session-analysis';
 import { useSessionPersistence } from '../../hooks/useSessionPersistence';
 import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
@@ -53,6 +54,7 @@ export default function SessionAutoRecordPanel({
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const tSession = useTranslations('sessionList');
+  const [streamSummary, setStreamSummary] = useState<{ title: string; body: string } | null>(null);
   const {
     micPermission,
     isStartingSession,
@@ -80,6 +82,7 @@ export default function SessionAutoRecordPanel({
     pendingIds,
     toggleBookmark,
     handleAddDemoDialogue,
+    upsertTranscriptFromSse,
     setTranscriptItems,
     setDemoIndex,
     setBookmarkIds,
@@ -156,6 +159,70 @@ export default function SessionAutoRecordPanel({
     onAnalysisChange,
   });
 
+  // Extract nested data envelope if SSE payload shape is { code, message, data }
+  const unwrapStreamData = useCallback((input: unknown) => {
+    if (typeof input === 'object' && input && 'data' in input) {
+      return (input as { data?: unknown }).data ?? input;
+    }
+    return input;
+  }, []);
+
+  // Parse SSE events to transcript/summary/insights targets
+  const handleStreamEvent = useCallback(
+    (event: { type: string; data: unknown }) => {
+      const payload = unwrapStreamData(event.data);
+      if (!payload || typeof payload !== 'object') return;
+      const obj = payload as Record<string, unknown>;
+
+      // Transcript event: append or patch transcript row
+      if (typeof obj.transcriptId === 'number' && typeof obj.text === 'string') {
+        upsertTranscriptFromSse({
+          transcriptId: obj.transcriptId,
+          text: obj.text,
+          speaker:
+            obj.speaker === 'counselor' || obj.speaker === 'client' ? obj.speaker : undefined,
+          timestamp: typeof obj.timestamp === 'string' ? obj.timestamp : undefined,
+        });
+      }
+
+      // Summary event: prefer stream-provided summary over local mock analyzer output
+      const body = typeof obj.summaryText === 'string' ? obj.summaryText : undefined;
+      const title =
+        typeof obj.summaryTitle === 'string'
+          ? obj.summaryTitle
+          : locale === 'en'
+            ? 'AI Summary'
+            : 'AI 자동 요약';
+      if (body) {
+        setStreamSummary({ title, body });
+      }
+
+      // Insights event: forward when full shape is available
+      if (
+        typeof obj.currentEmotion === 'string' &&
+        typeof obj.confidence === 'number' &&
+        Array.isArray(obj.emotionHistory) &&
+        typeof obj.phq9Score === 'number' &&
+        typeof obj.riskType === 'string' &&
+        typeof obj.recentEmotionPattern === 'string' &&
+        Array.isArray(obj.keyConcerns) &&
+        typeof obj.distortionType === 'string' &&
+        typeof obj.distortionExample === 'string'
+      ) {
+        onAnalysisChange?.(obj as unknown as SessionInsightsData);
+      }
+    },
+    [locale, onAnalysisChange, unwrapStreamData, upsertTranscriptFromSse],
+  );
+
+  // Subscribe to SSE after recording starts
+  useSessionInsightsStream({
+    sessionId,
+    enabled: isRecording,
+    onEvent: handleStreamEvent,
+  });
+  const activeStreamSummary = isRecording ? streamSummary : null;
+
   useEffect(() => {
     onRecorderStateChange?.({
       isRecording,
@@ -184,7 +251,11 @@ export default function SessionAutoRecordPanel({
           formatTimestampToHms={formatTimestampToHms}
           renderHighlightedText={renderHighlightedText}
         />
-        <SessionLiveSummaryCard locale={locale} title={liveSummary.title} body={liveSummary.body} />
+        <SessionLiveSummaryCard
+          locale={locale}
+          title={activeStreamSummary?.title ?? liveSummary.title}
+          body={activeStreamSummary?.body ?? liveSummary.body}
+        />
         <SessionCounselorMemoCard locale={locale} defaultValue="" />
       </div>
       <div className="fixed bottom-[30px] left-[40%] right-0 z-30 flex justify-center px-8 max-[1200px]:left-0 max-[1200px]:right-0 max-[1200px]:px-6 max-[900px]:px-4">
