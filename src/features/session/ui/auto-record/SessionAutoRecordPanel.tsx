@@ -2,15 +2,29 @@
 
 import { useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import type { SessionAutoRecordData, SessionInsightsData } from '../types/session-page';
-import { useSessionAutoRecordRuntime } from '../hooks/useSessionAutoRecordRuntime';
-import { useSessionAnalysis } from '../hooks/useSessionAnalysis';
-import { formatTimestampToHms } from '../lib/session-analysis';
+import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session-page';
+import { useRecordingController } from '../../hooks/useRecordingController';
+import { useSessionAnalysis } from '../../hooks/useSessionAnalysis';
+import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
+import { formatTimestampToHms } from '../../lib/session-analysis';
+import { useSessionPersistence } from '../../hooks/useSessionPersistence';
+import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
 import { renderHighlightedText } from './session-transcript-highlight';
 import SessionTranscriptCard from './SessionTranscriptCard';
 import SessionLiveSummaryCard from './SessionLiveSummaryCard';
 import SessionCounselorMemoCard from './SessionCounselorMemoCard';
 import SessionAudioControls from './SessionAudioControls';
+
+type PersistedAutoRecordState = {
+  transcriptItems: SessionAutoRecordData['transcripts'];
+  bookmarkIds: string[];
+  micPermission: 'idle' | 'requesting' | 'granted' | 'denied';
+  isRecording: boolean;
+  isPaused: boolean;
+  elapsedSeconds: number;
+  audioLevel: number;
+  demoIndex: number;
+};
 
 interface SessionAutoRecordPanelProps {
   sessionId: string;
@@ -39,25 +53,65 @@ export default function SessionAutoRecordPanel({
   const locale = useLocale();
   const tSession = useTranslations('sessionList');
   const {
-    transcriptItems,
-    bookmarkIds,
-    pendingIds,
     micPermission,
     isStartingSession,
     isRecording,
     isPaused,
     elapsedSeconds,
+    audioLevel,
     visibleAudioLevel,
-    toggleBookmark,
     handleStartRecording,
     handlePauseResume,
     handlePrepareEndSession,
+    setMicPermission,
+    setIsRecording,
+    setIsPaused,
+    setElapsedSeconds,
+    setAudioLevel,
+  } = useRecordingController({
+    sessionId,
+  });
+  const {
+    transcriptItems,
+    demoIndex,
+    bookmarkIds,
+    pendingIds,
+    toggleBookmark,
     handleAddDemoDialogue,
-  } = useSessionAutoRecordRuntime({
+    setTranscriptItems,
+    setDemoIndex,
+    setBookmarkIds,
+  } = useTranscriptRuntime({
     sessionId,
     locale,
+    elapsedSeconds,
     onRiskSignalDetected,
   });
+
+  useSessionPersistence<PersistedAutoRecordState>({
+    storageKey: getSessionAutoRecordStorageKey(sessionId),
+    snapshot: {
+      transcriptItems,
+      bookmarkIds: Array.from(bookmarkIds),
+      micPermission,
+      isRecording,
+      isPaused,
+      elapsedSeconds,
+      audioLevel,
+      demoIndex,
+    },
+    hydrate: (parsed: PersistedAutoRecordState) => {
+      setTranscriptItems(parsed.transcriptItems ?? []);
+      setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
+      setMicPermission(parsed.micPermission ?? 'idle');
+      setIsRecording(Boolean(parsed.isRecording));
+      setIsPaused(Boolean(parsed.isPaused));
+      setElapsedSeconds(parsed.elapsedSeconds ?? 0);
+      setAudioLevel(parsed.audioLevel ?? 0);
+      setDemoIndex(parsed.demoIndex ?? 0);
+    },
+  });
+
   const { liveSummary } = useSessionAnalysis({
     locale,
     isRecording,

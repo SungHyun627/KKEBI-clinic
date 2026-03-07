@@ -1,6 +1,6 @@
 'use client';
 
-import type { SessionTranscriptItem } from '../types/session-page';
+import type { SessionTranscriptItem } from '../../types/session-page';
 
 interface SessionTranscriptCardProps {
   locale: string;

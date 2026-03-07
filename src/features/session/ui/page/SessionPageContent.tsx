@@ -3,12 +3,12 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { getSessionPageMock } from '@/shared/mock/session-page';
-import SessionHeader from './SessionHeader';
-import SessionInsightsPanel from './SessionInsightsPanel';
-import SessionAutoRecordPanel from './SessionAutoRecordPanel';
-import type { SessionEmotionType, SessionInsightsData } from '../types/session-page';
-import { isRiskType, isSessionType } from '../types/session-page';
-import { useSessionInfo } from '../hooks/useSessionInfo';
+import SessionHeader from '../header/SessionHeader';
+import SessionInsightsPanel from '../insights/SessionInsightsPanel';
+import SessionAutoRecordPanel from '../auto-record/SessionAutoRecordPanel';
+import type { SessionEmotionType, SessionInsightsData } from '../../types/session-page';
+import { isRiskType, isSessionType } from '../../types/session-page';
+import { useSessionInfo } from '../../hooks/useSessionInfo';
 
 interface SessionPageContentProps {
   sessionId: string;
