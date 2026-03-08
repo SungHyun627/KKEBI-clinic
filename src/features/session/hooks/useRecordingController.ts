@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { startSessionById } from '../api/startSessionById';
 import { toast } from '@/shared/ui/toast';
@@ -86,6 +86,7 @@ const recordingReducer = (state: RecordingState, action: RecordingAction): Recor
 
 export const useRecordingController = ({ sessionId }: UseRecordingControllerParams) => {
   const tSession = useTranslations('sessionList');
+  const startRequestInFlightRef = useRef(false);
 
   // State reducers
   const [sessionStartState, dispatchSessionStart] = useReducer(
@@ -116,12 +117,17 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
 
   // Action: start recording (mic permission + start-session API)
   const handleStartRecording = async () => {
-    if (isRecording || isStartingSession) return;
+    if (isRecording || isStartingSession || startRequestInFlightRef.current) return;
     if (!navigator?.mediaDevices?.getUserMedia) {
       toast(tSession('toastMicUnsupported'));
       return;
     }
+    if (!/^\d+$/.test(sessionId.trim())) {
+      toast(tSession('loadFailed'));
+      return;
+    }
 
+    startRequestInFlightRef.current = true;
     dispatchSessionStart({ type: 'setMicPermission', payload: 'requesting' });
     dispatchSessionStart({ type: 'setIsStartingSession', payload: true });
     try {
@@ -143,6 +149,7 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
       toast(tSession('toastMicPermissionDenied'));
     } finally {
       dispatchSessionStart({ type: 'setIsStartingSession', payload: false });
+      startRequestInFlightRef.current = false;
     }
   };
 
