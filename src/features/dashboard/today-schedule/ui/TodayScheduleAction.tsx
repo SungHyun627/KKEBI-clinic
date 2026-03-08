@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/shared/ui/button';
-import { startSession } from '@/features/sessions/api/startSession';
 import { toast } from '@/shared/ui/toast';
 import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
@@ -32,25 +31,20 @@ export default function TodayScheduleAction({
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
-  const [isStarting, setIsStarting] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
 
-  const handleStart = async () => {
-    setIsStarting(true);
-    const result = await startSession({ clientId, scheduleId, source: 'dashboard' });
-    setIsStarting(false);
-
-    if (!result.success || !result.sessionId) {
-      toast(result.message || tDashboard('todayScheduleLoadFailed'));
+  const handleStart = () => {
+    if (!scheduleId) {
+      toast(tDashboard('todayScheduleLoadFailed'));
       return;
     }
 
-    setSessionStartContext(result.sessionId, {
+    setSessionStartContext(scheduleId, {
       name: clientName,
       sessionType: sessionType,
       riskType: riskType,
     });
-    router.push(`/session/${result.sessionId}?returnTo=${encodeURIComponent(`/${locale}`)}`);
+    router.push(`/session/${scheduleId}?returnTo=${encodeURIComponent(`/${locale}`)}`);
   };
 
   return (
@@ -70,7 +64,7 @@ export default function TodayScheduleAction({
         type="button"
         size="md"
         className="w-full"
-        disabled={isStarting}
+        disabled={!scheduleId}
         onClick={handleStart}
       >
         {tCommon('start')}

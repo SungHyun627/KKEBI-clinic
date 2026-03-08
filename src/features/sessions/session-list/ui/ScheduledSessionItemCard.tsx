@@ -12,8 +12,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { ScheduledSessionItem } from '../types/session-list';
 import RescheduleSessionDialog from './RescheduleSessionDialog';
 import { useRouter } from '@/i18n/navigation';
-import { startSession } from '../../api/startSession';
-import { toast } from '@/shared/ui/toast';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
 import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
@@ -40,7 +38,6 @@ export default function ScheduledSessionItemCard({
   const tSessions = useTranslations('sessionList');
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
-  const [isStarting, setIsStarting] = useState(false);
   const [nowMs, setNowMs] = useState(() => Date.now());
   const localizedClientName = getClientNameByLocale(item.clientId, item.clientName, locale);
   const dateMatch = scheduledDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -68,28 +65,13 @@ export default function ScheduledSessionItemCard({
     };
   }, []);
 
-  const handleStart = async () => {
-    setIsStarting(true);
-    const result = await startSession({
-      clientId: item.clientId,
-      scheduleId: item.id,
-      source: 'sessions',
-    });
-    setIsStarting(false);
-
-    if (!result.success || !result.sessionId) {
-      toast(result.message || tSessions('loadFailed'));
-      return;
-    }
-
-    setSessionStartContext(result.sessionId, {
+  const handleStart = () => {
+    setSessionStartContext(item.id, {
       name: localizedClientName,
       sessionType: item.sessionType,
       riskType: item.riskType,
     });
-    router.push(
-      `/session/${result.sessionId}?returnTo=${encodeURIComponent(`/${locale}/sessions`)}`,
-    );
+    router.push(`/session/${item.id}?returnTo=${encodeURIComponent(`/${locale}/sessions`)}`);
   };
 
   return (
@@ -122,7 +104,7 @@ export default function ScheduledSessionItemCard({
             type="button"
             size="md"
             className="w-full max-w-[181px]"
-            disabled={isStarting || !canStartSession}
+            disabled={!canStartSession}
             onClick={handleStart}
           >
             {tCommon('start')}

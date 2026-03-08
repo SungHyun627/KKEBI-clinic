@@ -10,8 +10,6 @@ import { DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import type { ClientLookupItem } from '@/features/clients/types/common';
 import { useLocale, useTranslations } from 'next-intl';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
-import { startSession } from '@/features/sessions/api/startSession';
-import { toast } from '@/shared/ui/toast';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
 import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 
@@ -25,26 +23,14 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
   const tCommon = useTranslations('common');
   const tDashboard = useTranslations('dashboard');
   const localizedClientName = getClientNameByLocale(client.clientId, client.clientName, locale);
-  const [isStarting, setIsStarting] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
 
-  const handleStart = async () => {
-    setIsStarting(true);
-    const result = await startSession({ clientId: client.clientId, source: 'client-detail' });
-    setIsStarting(false);
-
-    if (!result.success || !result.sessionId) {
-      toast(result.message || tCommon('underConstruction'));
-      return;
-    }
-
-    setSessionStartContext(result.sessionId, {
+  const handleStart = () => {
+    setSessionStartContext(client.clientId, {
       name: localizedClientName,
       riskType: client.riskType,
     });
-    router.push(
-      `/session/${result.sessionId}?returnTo=${encodeURIComponent(`/${locale}/clients`)}`,
-    );
+    router.push(`/session/${client.clientId}?returnTo=${encodeURIComponent(`/${locale}/clients`)}`);
   };
 
   return (
@@ -69,13 +55,7 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
           >
             <Image src="/icons/sent.svg" alt="" width={24} height={24} aria-hidden />
           </Button>
-          <Button
-            type="button"
-            size="md"
-            className="w-full"
-            disabled={isStarting}
-            onClick={handleStart}
-          >
+          <Button type="button" size="md" className="w-full" onClick={handleStart}>
             {tCommon('start')}
           </Button>
         </div>
