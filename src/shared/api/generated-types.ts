@@ -196,7 +196,7 @@ export interface paths {
     put?: never;
     /**
      * 상담 시작
-     * @description 해당 상담 세션을 IN_PROGRESS 상태로 변경하고 세션 식별자를 반환합니다.
+     * @description 해당 상담 세션을 IN_PROGRESS 상태로 변경하고 세션 식별자와 FastAPI 세션 ID를 반환합니다.
      */
     post: operations['startSession'];
     delete?: never;
@@ -279,26 +279,6 @@ export interface paths {
      * @description 스페이스바로 녹음한 오디오 조각을 전송합니다. S3 저장 → FastAPI STT/SER → DB 저장 → LLM 2차 분석(비동기) → SSE 발행 파이프라인을 실행합니다.
      */
     post: operations['processAudioChunk'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/api/v1/sessions/instant-start': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * 상담 세션 즉시 시작 생성
-     * @description 내담자를 지정하여 즉시 상담 세션을 생성하고 IN_PROGRESS 상태로 시작합니다.
-     */
-    post: operations['createAndStartInstantSession'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1248,6 +1228,38 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/counselors/inquiries/{id}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['reject'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/counselors/inquiries/{id}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations['approve'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/counselors/inquiries/admin': {
     parameters: {
       query?: never;
@@ -1663,6 +1675,16 @@ export interface components {
        */
       source?: string;
     };
+    ApiResponseSessionStartResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['SessionStartResponse'];
+    };
+    SessionStartResponse: {
+      /** Format: int64 */
+      sessionId?: number;
+      fastApiSessionId?: string;
+    };
     /** @description 상담 북마크 추가 요청 DTO */
     BookmarkAddRequest: {
       /**
@@ -1691,20 +1713,6 @@ export interface components {
       emotionProbs?: {
         [key: string]: number;
       };
-    };
-    /** @description 상담 세션 즉시 시작 생성 요청 DTO */
-    InstantSessionStartRequest: {
-      /**
-       * Format: int64
-       * @description 내담자 ID
-       * @example 1
-       */
-      clientId: number;
-      /**
-       * @description 진입 경로 (APP/WEB 등)
-       * @example WEB
-       */
-      source?: string;
     };
     ApiResponseEmotionReportResponse: {
       code?: string;
@@ -2435,6 +2443,14 @@ export interface components {
       keyConcerns?: string[];
       distortionType?: string;
     };
+    MissionDto: {
+      /** Format: int64 */
+      id?: number;
+      title?: string;
+      description?: string;
+      /** Format: int32 */
+      duration?: number;
+    };
     RecorderState: {
       /** Format: int32 */
       elapsedSeconds?: number;
@@ -2462,7 +2478,8 @@ export interface components {
       recentEmotionHistory?: string[];
       transcript?: components['schemas']['TranscriptView'][];
       bookmarks?: components['schemas']['BookmarkView'][];
-      autoMemo?: string;
+      summaryText?: string;
+      recommendedMissions?: components['schemas']['MissionDto'][];
     };
     TranscriptView: {
       /** Format: int64 */
@@ -2498,11 +2515,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      last?: boolean;
-      pageable?: components['schemas']['PageableObject'];
+      first?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      first?: boolean;
+      last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['RecordDto'][];
@@ -2512,12 +2529,12 @@ export interface components {
       empty?: boolean;
     };
     PageableObject: {
+      paged?: boolean;
+      unpaged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
       /** Format: int32 */
       pageSize?: number;
-      paged?: boolean;
-      unpaged?: boolean;
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
@@ -2534,8 +2551,8 @@ export interface components {
       notes?: string;
     };
     SortObject: {
-      sorted?: boolean;
       unsorted?: boolean;
+      sorted?: boolean;
       empty?: boolean;
     };
     ApiResponseListNotificationResponse: {
@@ -2587,17 +2604,6 @@ export interface components {
       code?: string;
       message?: string;
       data?: components['schemas']['MissionResponse'];
-    };
-    MissionDto: {
-      /** Format: int64 */
-      id?: number;
-      category?: string;
-      title?: string;
-      difficulty?: string;
-      duration?: string;
-      /** Format: int32 */
-      points?: number;
-      completed?: boolean;
     };
     MissionHistoryDto: {
       /** Format: int64 */
@@ -2755,11 +2761,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      last?: boolean;
-      pageable?: components['schemas']['PageableObject'];
+      first?: boolean;
       /** Format: int32 */
       numberOfElements?: number;
-      first?: boolean;
+      last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['ClientSummaryResponse'][];
@@ -3214,7 +3220,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          '*/*': components['schemas']['ApiResponseLong'];
+          '*/*': components['schemas']['ApiResponseSessionStartResponse'];
         };
       };
     };
@@ -3325,30 +3331,6 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseAudioChunkResponse'];
-        };
-      };
-    };
-  };
-  createAndStartInstantSession: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['InstantSessionStartRequest'];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          '*/*': components['schemas']['ApiResponseLong'];
         };
       };
     };
@@ -3849,7 +3831,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 비밀번호 정책 위반 */
+      /** @description 유효하지 않은/만료된 토큰 */
       400: {
         headers: {
           [name: string]: unknown;
@@ -3958,7 +3940,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 잘못된 OTP */
+      /** @description 만료된 챌린지 */
       400: {
         headers: {
           [name: string]: unknown;
@@ -4903,6 +4885,50 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseMissionResponse'];
+        };
+      };
+    };
+  };
+  reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': string;
+        };
+      };
+    };
+  };
+  approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': string;
         };
       };
     };
