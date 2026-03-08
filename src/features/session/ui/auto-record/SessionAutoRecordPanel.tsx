@@ -434,6 +434,7 @@ export default function SessionAutoRecordPanel({
     // On speaker switch key, upload current speaker chunk then toggle speaker.
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.isComposing) return;
+      if (event.repeat) return;
       const target = event.target as HTMLElement | null;
       const tag = target?.tagName?.toLowerCase();
       const isEditable =
@@ -473,32 +474,30 @@ export default function SessionAutoRecordPanel({
 
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
-      <div className="text-[24px] font-semibold">{tSession('recordTitle')}</div>
-      <div className="flex w-full items-center justify-between rounded-[14px] border border-neutral-90 bg-white px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="body-14 text-label-alternative">
-            {locale === 'en' ? 'Current speaker' : '현재 발화자'}
-          </span>
-          <span
-            className={`rounded-[10px] px-3 py-1 body-14 font-semibold ${
-              activeSpeaker === 'counselor'
-                ? 'bg-neutral-95 text-label-normal'
-                : 'bg-[#FFE5E5] text-[#FF6363]'
-            }`}
-          >
-            {activeSpeaker === 'counselor'
-              ? locale === 'en'
-                ? 'Counselor'
-                : '상담사'
-              : locale === 'en'
-                ? 'Client'
-                : '내담자'}
-          </span>
-        </div>
-        <span className="body-13 text-label-assistive">
+      <div className="flex items-center gap-2">
+        <div className="text-[24px] font-semibold">{tSession('recordTitle')}</div>
+        <span
+          className={`rounded-[10px] px-3 py-1 body-14 font-semibold ${
+            activeSpeaker === 'counselor'
+              ? 'bg-neutral-95 text-label-normal'
+              : 'bg-[#FFE5E5] text-[#FF6363]'
+          }`}
+        >
+          {activeSpeaker === 'counselor'
+            ? locale === 'en'
+              ? 'Counselor'
+              : '상담사'
+            : locale === 'en'
+              ? 'Client'
+              : '내담자'}
+        </span>
+        <span className="ml-auto hidden body-13 text-label-assistive sm:inline">
           {locale === 'en'
-            ? 'Press Space or Enter to switch speaker and send chunk'
-            : 'Space 또는 Enter 키로 발화자 전환 + chunk 전송'}
+            ? 'Press Enter or Space to switch speaker'
+            : 'Enter 또는 Space로 발화자 전환'}
+        </span>
+        <span className="ml-auto body-13 text-label-assistive sm:hidden">
+          {locale === 'en' ? 'Enter/Space' : 'Enter/Space 전환'}
         </span>
       </div>
       <div className="flex w-full flex-col items-start gap-4">
@@ -530,7 +529,7 @@ export default function SessionAutoRecordPanel({
             void handleStartRecording();
           }}
           onPauseResume={handlePauseResume}
-          onAddDemoDialogue={() => {
+          onSwitchSpeaker={() => {
             void handleSpeakerSwitch();
           }}
         />

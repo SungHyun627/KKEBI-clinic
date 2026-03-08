@@ -10,7 +10,7 @@ interface SessionAudioControlsProps {
   isPauseDisabled: boolean;
   onStart: () => void;
   onPauseResume: () => void;
-  onAddDemoDialogue: () => void;
+  onSwitchSpeaker: () => void;
 }
 
 export default function SessionAudioControls({
@@ -20,7 +20,7 @@ export default function SessionAudioControls({
   isPauseDisabled,
   onStart,
   onPauseResume,
-  onAddDemoDialogue,
+  onSwitchSpeaker,
 }: SessionAudioControlsProps) {
   return (
     <div className="flex w-full max-w-[638px] h-[155px] items-center justify-center rounded-[24px] border border-neutral-95 bg-fill-alternative px-[clamp(16px,12vw,216px)] py-5 backdrop-blur-[11.5px]">
@@ -55,9 +55,9 @@ export default function SessionAudioControls({
               type="button"
               size="sm"
               className="w-[104px] h-[104px] rounded-full bg-white border border-neutral-95 hover:bg-white"
-              onClick={onAddDemoDialogue}
+              onClick={onSwitchSpeaker}
             >
-              <Image src="/icons/waveform.svg" alt="Add demo dialogue" width={50} height={50} />
+              <Image src="/icons/waveform.svg" alt="Switch speaker" width={50} height={50} />
             </Button>
           </>
         )}
