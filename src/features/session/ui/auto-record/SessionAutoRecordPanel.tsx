@@ -18,6 +18,7 @@ import SessionTranscriptCard from './SessionTranscriptCard';
 import SessionLiveSummaryCard from './SessionLiveSummaryCard';
 import SessionCounselorMemoCard from './SessionCounselorMemoCard';
 import SessionAudioControls from './SessionAudioControls';
+import { toast } from '@/shared/ui/toast';
 
 type PersistedAutoRecordState = {
   transcriptItems: SessionAutoRecordData['transcripts'];
@@ -69,6 +70,7 @@ export default function SessionAutoRecordPanel({
   const isSwitchingSpeakerRef = useRef(false);
   const {
     micPermission,
+    fastApiSessionId,
     isStartingSession,
     isRecording,
     isPaused,
@@ -106,7 +108,7 @@ export default function SessionAutoRecordPanel({
   });
   const { uploadChunk, lastErrorMessage } = useAudioChunkUploader({
     sessionId,
-    fastApiSessionId: sessionId,
+    fastApiSessionId: fastApiSessionId ?? sessionId,
   });
 
   const snapshot = useMemo<PersistedAutoRecordState>(
@@ -256,9 +258,13 @@ export default function SessionAutoRecordPanel({
 
   useEffect(() => {
     if (!lastErrorMessage) return;
-    // Non-blocking warning for chunk upload failures.
+    toast(
+      locale === 'en'
+        ? 'Failed to upload an audio chunk. Please try speaker switch again.'
+        : '오디오 청크 업로드에 실패했습니다. 발화자 전환을 다시 시도해 주세요.',
+    );
     console.error('[audio-chunk][upload-failed]', { sessionId, message: lastErrorMessage });
-  }, [lastErrorMessage, sessionId]);
+  }, [lastErrorMessage, locale, sessionId]);
 
   const stopSegmentRecorder = useCallback(async (): Promise<Blob | null> => {
     const recorder = segmentRecorderRef.current;
@@ -321,6 +327,7 @@ export default function SessionAutoRecordPanel({
       await uploadChunk({
         speaker,
         audioFile: segmentBlob,
+        timestamp: String(Date.now()),
       });
     },
     [stopSegmentRecorder, uploadChunk],

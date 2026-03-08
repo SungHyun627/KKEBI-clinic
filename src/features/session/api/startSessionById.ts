@@ -5,15 +5,20 @@ interface StartSessionByIdRequest {
   source?: string;
 }
 
-interface ApiResponseLong {
+interface SessionStartResponse {
+  sessionId?: number;
+  fastApiSessionId?: string;
+}
+
+interface ApiResponseSessionStartResponse {
   code?: string;
   message?: string;
-  data?: number;
+  data?: SessionStartResponse;
 }
 
 interface StartSessionByIdResult {
   success: boolean;
-  data?: number;
+  data?: SessionStartResponse;
   message?: string;
 }
 
@@ -22,7 +27,7 @@ export const startSessionById = async ({
   source = 'WEB',
 }: StartSessionByIdRequest): Promise<StartSessionByIdResult> => {
   try {
-    const response = await httpClient.post<ApiResponseLong>(
+    const response = await httpClient.post<ApiResponseSessionStartResponse>(
       `/api/v1/sessions/${encodeURIComponent(sessionId)}/start`,
       { source },
     );

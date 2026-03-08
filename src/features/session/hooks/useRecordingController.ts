@@ -15,11 +15,13 @@ interface UseRecordingControllerParams {
 interface SessionStartState {
   micPermission: MicPermissionState;
   isStartingSession: boolean;
+  fastApiSessionId: string | null;
 }
 
 type SessionStartAction =
   | { type: 'setMicPermission'; payload: MicPermissionState }
-  | { type: 'setIsStartingSession'; payload: boolean };
+  | { type: 'setIsStartingSession'; payload: boolean }
+  | { type: 'setFastApiSessionId'; payload: string | null };
 
 // Runtime recording state (recording/pause/timer/level)
 interface RecordingState {
@@ -40,6 +42,7 @@ type RecordingAction =
 const initialSessionStartState: SessionStartState = {
   micPermission: 'idle',
   isStartingSession: false,
+  fastApiSessionId: null,
 };
 
 const initialRecordingState: RecordingState = {
@@ -59,6 +62,8 @@ const sessionStartReducer = (
       return { ...state, micPermission: action.payload };
     case 'setIsStartingSession':
       return { ...state, isStartingSession: action.payload };
+    case 'setFastApiSessionId':
+      return { ...state, fastApiSessionId: action.payload };
     default:
       return state;
   }
@@ -94,7 +99,7 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
     initialSessionStartState,
   );
   const [recordingState, dispatchRecording] = useReducer(recordingReducer, initialRecordingState);
-  const { micPermission, isStartingSession } = sessionStartState;
+  const { micPermission, isStartingSession, fastApiSessionId } = sessionStartState;
   const { isRecording, isPaused, elapsedSeconds, audioLevel } = recordingState;
 
   // Effects: elapsed time tick while recording
@@ -128,6 +133,7 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
     }
 
     startRequestInFlightRef.current = true;
+    dispatchSessionStart({ type: 'setFastApiSessionId', payload: null });
     dispatchSessionStart({ type: 'setMicPermission', payload: 'requesting' });
     dispatchSessionStart({ type: 'setIsStartingSession', payload: true });
     try {
@@ -141,6 +147,10 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
         return;
       }
 
+      dispatchSessionStart({
+        type: 'setFastApiSessionId',
+        payload: startResult.data?.fastApiSessionId ?? null,
+      });
       dispatchSessionStart({ type: 'setMicPermission', payload: 'granted' });
       dispatchRecording({ type: 'setIsRecording', payload: true });
       dispatchRecording({ type: 'setIsPaused', payload: false });
@@ -169,6 +179,7 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
   // Public API for UI + persistence hydration
   return {
     micPermission,
+    fastApiSessionId,
     isRecording,
     isStartingSession,
     isPaused,
