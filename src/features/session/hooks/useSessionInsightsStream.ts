@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { SessionInsightsStreamEvent, SessionInsightsStreamStatus } from '../types/session';
 import { ensureAccessToken } from '@/shared/api/http-client';
-import { getAccessToken } from '@/shared/api/token-store';
+import { clearAccessToken, getAccessToken } from '@/shared/api/token-store';
 
 interface UseSessionInsightsStreamParams {
   sessionId: string;
@@ -133,6 +133,8 @@ export const useSessionInsightsStream = ({
         if (isUnmounted) return;
         setStatus('error');
         setErrorMessage('Failed to subscribe to insights stream');
+        // Force next reconnect attempt to refresh token instead of reusing a stale one.
+        clearAccessToken();
 
         source.close();
         if (eventSourceRef.current === source) {
