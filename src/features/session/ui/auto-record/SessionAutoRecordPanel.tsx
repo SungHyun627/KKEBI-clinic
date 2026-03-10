@@ -34,6 +34,17 @@ type PersistedAutoRecordState = {
   demoIndex: number;
 };
 
+const formatNowAsLocalDateTime = () => {
+  const now = new Date();
+  const yyyy = String(now.getFullYear());
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mi = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
+};
+
 interface SessionAutoRecordPanelProps {
   sessionId: string;
   autoRecord: SessionAutoRecordData;
@@ -200,14 +211,14 @@ export default function SessionAutoRecordPanel({
       const payload = unwrapStreamData(event.data);
       if (!payload || typeof payload !== 'object') return;
       const obj = payload as Record<string, unknown>;
+      const rawSpeaker = typeof obj.speaker === 'string' ? obj.speaker.toLowerCase() : undefined;
 
       // Transcript event: append or patch transcript row
       if (typeof obj.transcriptId === 'number' && typeof obj.text === 'string') {
         upsertTranscriptFromSse({
           transcriptId: obj.transcriptId,
           text: obj.text,
-          speaker:
-            obj.speaker === 'counselor' || obj.speaker === 'client' ? obj.speaker : undefined,
+          speaker: rawSpeaker === 'counselor' || rawSpeaker === 'client' ? rawSpeaker : undefined,
           timestamp: typeof obj.timestamp === 'string' ? obj.timestamp : undefined,
         });
       }
@@ -334,7 +345,7 @@ export default function SessionAutoRecordPanel({
       await uploadChunk({
         speaker,
         audioFile: segmentBlob,
-        timestamp: new Date().toISOString(),
+        timestamp: formatNowAsLocalDateTime(),
       });
     },
     [stopSegmentRecorder, uploadChunk],

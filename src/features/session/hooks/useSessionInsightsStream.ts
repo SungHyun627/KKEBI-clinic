@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { SessionInsightsStreamEvent, SessionInsightsStreamStatus } from '../types/session';
+import { ensureAccessToken } from '@/shared/api/http-client';
 import { getAccessToken } from '@/shared/api/token-store';
 
 interface UseSessionInsightsStreamParams {
@@ -66,8 +67,24 @@ export const useSessionInsightsStream = ({
 
     let isUnmounted = false;
 
-    const connect = () => {
+    const connect = async () => {
       if (isUnmounted) return;
+
+      const hasAccessToken = await ensureAccessToken();
+      if (!hasAccessToken || isUnmounted) {
+        setStatus('error');
+        setErrorMessage('Failed to subscribe to insights stream');
+        retryCountRef.current += 1;
+        setRetryCount(retryCountRef.current);
+        const delay = Math.min(
+          BASE_RETRY_DELAY_MS * 2 ** (retryCountRef.current - 1),
+          MAX_RETRY_DELAY_MS,
+        );
+        retryTimerRef.current = window.setTimeout(() => {
+          void connect();
+        }, delay);
+        return;
+      }
 
       const params = new URLSearchParams();
       // EventSource cannot send Authorization header, so forward token via BFF query
@@ -117,11 +134,13 @@ export const useSessionInsightsStream = ({
           BASE_RETRY_DELAY_MS * 2 ** (retryCountRef.current - 1),
           MAX_RETRY_DELAY_MS,
         );
-        retryTimerRef.current = window.setTimeout(connect, delay);
+        retryTimerRef.current = window.setTimeout(() => {
+          void connect();
+        }, delay);
       };
     };
 
-    connect();
+    void connect();
 
     // Cleanup on unmount / dependency change
     return () => {

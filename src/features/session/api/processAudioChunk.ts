@@ -28,6 +28,11 @@ interface ProcessAudioChunkResult {
   data?: AudioChunkResponse;
 }
 
+const toApiSpeaker = (speaker: ProcessAudioChunkParams['speaker']) =>
+  speaker === 'counselor' ? 'COUNSELOR' : 'CLIENT';
+
+const SPRING_LOCAL_DATE_TIME_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?$/;
+
 const normalizeTimestampParam = (value?: string) => {
   if (!value) return null;
   const formatLocalDateTime = (date: Date) => {
@@ -39,6 +44,8 @@ const normalizeTimestampParam = (value?: string) => {
     const ss = String(date.getSeconds()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
   };
+
+  if (SPRING_LOCAL_DATE_TIME_PATTERN.test(value)) return value;
 
   if (/^\d+$/.test(value)) {
     const parsedEpoch = Number(value);
@@ -59,7 +66,7 @@ export const processAudioChunk = async ({
 }: ProcessAudioChunkParams): Promise<ProcessAudioChunkResult> => {
   try {
     const query = new URLSearchParams({
-      speaker,
+      speaker: toApiSpeaker(speaker),
       fastApiSessionId,
     });
     const normalizedTimestamp = normalizeTimestampParam(timestamp);
