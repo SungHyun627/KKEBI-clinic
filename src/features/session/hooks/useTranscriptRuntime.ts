@@ -47,6 +47,14 @@ export const useTranscriptRuntime = ({
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const pendingMap = useMemo(() => pendingIds, [pendingIds]);
 
+  const normalizeTranscriptTimestamp = (value?: string) => {
+    if (typeof value !== 'string' || value.length === 0) {
+      return formatElapsedToTimestamp(elapsedSeconds);
+    }
+    if (/^\d{2}:\d{2}:\d{2}$/.test(value)) return value;
+    return formatElapsedToTimestamp(elapsedSeconds);
+  };
+
   // Merge transcript item from SSE payload (append or patch existing item)
   const upsertTranscriptFromSse = (payload: TranscriptSsePayload) => {
     if (!payload.transcriptId) return;
@@ -55,7 +63,7 @@ export const useTranscriptRuntime = ({
     const id = String(payload.transcriptId);
     const speaker =
       payload.speaker === 'counselor' || payload.speaker === 'client' ? payload.speaker : 'client';
-    const timestamp = payload.timestamp ?? formatElapsedToTimestamp(elapsedSeconds);
+    const timestamp = normalizeTranscriptTimestamp(payload.timestamp);
 
     setTranscriptItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.id === id);

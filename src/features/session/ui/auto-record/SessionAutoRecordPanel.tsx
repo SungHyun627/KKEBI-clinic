@@ -11,7 +11,7 @@ import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
 import { useAudioChunkUploader } from '../../hooks/useAudioChunkUploader';
 import { uploadFullAudioFile } from '../../api/uploadFullAudioFile';
 import { setSessionAudioPreviewUrl } from '@/shared/lib/session-audio-preview-cache';
-import { formatTimestampToHms } from '../../lib/session-analysis';
+import { formatElapsedToTimestamp, formatTimestampToHms } from '../../lib/session-analysis';
 import { useSessionPersistence } from '../../hooks/useSessionPersistence';
 import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
 import { renderHighlightedText } from './session-transcript-highlight';
@@ -503,9 +503,10 @@ export default function SessionAutoRecordPanel({
     try {
       const segmentBlob = await captureCurrentSegment();
       const chunkTimestamp = formatNowAsLocalDateTime();
+      const chunkDisplayTimestamp = formatElapsedToTimestamp(elapsedSeconds);
       const pendingTranscriptId = addPendingTranscript({
         speaker: prevSpeaker,
-        timestamp: chunkTimestamp,
+        timestamp: chunkDisplayTimestamp,
         text: getPendingTranscriptMessage(prevSpeaker),
       });
 
@@ -529,6 +530,7 @@ export default function SessionAutoRecordPanel({
     activeSpeaker,
     addPendingTranscript,
     captureCurrentSegment,
+    elapsedSeconds,
     getPendingTranscriptMessage,
     isPaused,
     isRecording,
