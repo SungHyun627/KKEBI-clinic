@@ -13,7 +13,18 @@ interface UseSessionInsightsStreamParams {
 
 const MAX_RETRY_DELAY_MS = 30_000;
 const BASE_RETRY_DELAY_MS = 1_000;
-const CUSTOM_EVENT_TYPES = ['insight', 'insights', 'analysis', 'transcript', 'summary'] as const;
+const CUSTOM_EVENT_TYPES = [
+  'insight',
+  'INSIGHT',
+  'insights',
+  'INSIGHTS',
+  'analysis',
+  'ANALYSIS',
+  'transcript',
+  'TRANSCRIPT',
+  'summary',
+  'SUMMARY',
+] as const;
 
 const parseJsonSafely = (value: string) => {
   try {

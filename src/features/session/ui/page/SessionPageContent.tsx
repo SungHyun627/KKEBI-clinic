@@ -6,7 +6,11 @@ import { getSessionPageMock } from '@/shared/mock/session-page';
 import SessionHeader from '../header/SessionHeader';
 import SessionInsightsPanel from '../insights/SessionInsightsPanel';
 import SessionAutoRecordPanel from '../auto-record/SessionAutoRecordPanel';
-import type { SessionEmotionType, SessionInsightsData } from '../../types/session';
+import type {
+  SessionEmotionType,
+  SessionInsightsData,
+  SessionInsightsSsePatch,
+} from '../../types/session';
 import { isRiskType, isSessionType } from '../../types/session';
 import { useSessionInfo } from '../../hooks/useSessionInfo';
 
@@ -25,9 +29,8 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     visibleAudioLevel: 0,
   });
   const [riskBanner, setRiskBanner] = useState<{ text: string; timestamp: string } | null>(null);
-  const [analysisInsights, setAnalysisInsights] = useState<SessionInsightsData | null>(null);
+  const [analysisSsePatch, setAnalysisSsePatch] = useState<SessionInsightsSsePatch | null>(null);
   const [recentEmotionHistory, setRecentEmotionHistory] = useState<SessionEmotionType[]>([]);
-  const [keyConcernHistory, setKeyConcernHistory] = useState<string[]>([]);
   const [distortionExampleHistory, setDistortionExampleHistory] = useState<string[]>([]);
   const prepareEndSessionRef = useRef<(() => void) | null>(null);
   const uploadFullAudioRef = useRef<(() => Promise<boolean>) | null>(null);
@@ -36,29 +39,41 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     setRiskBanner(payload);
   }, []);
 
-  const handleAnalysisChange = useCallback((nextInsights: SessionInsightsData | null) => {
+  const handleAnalysisChange = useCallback((nextInsights: SessionInsightsSsePatch | null) => {
     if (!nextInsights) return;
-    setAnalysisInsights(nextInsights);
+    setAnalysisSsePatch((prev) => ({
+      ...prev,
+      ...nextInsights,
+    }));
 
-    setRecentEmotionHistory((prev) => {
-      if (prev[0] === nextInsights.currentEmotion) return prev;
-      return [nextInsights.currentEmotion, ...prev].slice(0, 6);
-    });
+    if (nextInsights.currentEmotion) {
+      setRecentEmotionHistory((prev) => {
+        if (prev[0] === nextInsights.currentEmotion) return prev;
+        return [nextInsights.currentEmotion, ...prev].slice(0, 6);
+      });
+    }
 
-    setKeyConcernHistory((prev) => {
-      const merged = [...nextInsights.keyConcerns, ...prev];
-      const deduped = merged.filter((item, index) => merged.indexOf(item) === index);
-      return deduped.slice(0, 8);
-    });
-
-    setDistortionExampleHistory((prev) => {
-      const next = [
-        nextInsights.distortionExample,
-        ...prev.filter((item) => item !== nextInsights.distortionExample),
-      ];
-      return next.slice(0, 6);
-    });
+    if (nextInsights.distortionExample) {
+      setDistortionExampleHistory((prev) => {
+        const next = [
+          nextInsights.distortionExample as string,
+          ...prev.filter((item) => item !== nextInsights.distortionExample),
+        ];
+        return next.slice(0, 6);
+      });
+    }
   }, []);
+
+  const mergedInsights: SessionInsightsData = useMemo(() => {
+    return {
+      ...pageMock.insights,
+      currentEmotion: analysisSsePatch?.currentEmotion ?? pageMock.insights.currentEmotion,
+      confidence: analysisSsePatch?.confidence ?? pageMock.insights.confidence,
+      emotionHistory: analysisSsePatch?.emotionHistory ?? pageMock.insights.emotionHistory,
+      distortionType: analysisSsePatch?.distortionType ?? pageMock.insights.distortionType,
+      distortionExample: analysisSsePatch?.distortionExample ?? pageMock.insights.distortionExample,
+    };
+  }, [analysisSsePatch, pageMock.insights]);
 
   const handleRegisterPrepareEndSession = useCallback((handler: () => void) => {
     prepareEndSessionRef.current = handler;
@@ -92,10 +107,10 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
         summarySnapshot={
           data
             ? {
-                insights: analysisInsights ?? pageMock.insights,
+                insights: mergedInsights,
                 recentEmotionHistory,
-                keyConcernHistory,
                 distortionExampleHistory,
+                keyConcernHistory: [],
               }
             : undefined
         }
@@ -137,10 +152,11 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ) : (
         <div className="grid w-full flex-1 grid-cols-[1fr_1.5fr] gap-[34px]">
           <SessionInsightsPanel
-            insights={analysisInsights ?? pageMock.insights}
-            isRecording={Boolean(analysisInsights)}
+            insights={mergedInsights}
+            hasEmotionData={Boolean(analysisSsePatch?.currentEmotion)}
+            hasDistortionData={Boolean(analysisSsePatch?.distortionType)}
             recentEmotionHistory={recentEmotionHistory}
-            keyConcernHistory={keyConcernHistory}
+            keyConcernHistory={[]}
             distortionExampleHistory={distortionExampleHistory}
           />
           <SessionAutoRecordPanel

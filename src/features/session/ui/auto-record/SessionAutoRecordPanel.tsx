@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session';
+import type { SessionInsightsSsePatch } from '../../types/session';
 import { useRecordingController } from '../../hooks/useRecordingController';
 import { useSessionAnalysis } from '../../hooks/useSessionAnalysis';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
@@ -45,6 +46,46 @@ const formatNowAsLocalDateTime = () => {
   return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
 };
 
+const parseJsonObject = (value: unknown): Record<string, unknown> | null => {
+  if (typeof value === 'object' && value) return value as Record<string, unknown>;
+  if (typeof value !== 'string') return null;
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return typeof parsed === 'object' && parsed ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+};
+
+const mapEmotionKeyToSessionEmotion = (
+  key: string,
+): SessionInsightsData['currentEmotion'] | undefined => {
+  const normalized = key.toLowerCase();
+  if (normalized === 'happy') return 'happy';
+  if (normalized === 'sad') return 'sad';
+  if (normalized === 'angry' || normalized === 'disgust') return 'angry';
+  if (normalized === 'fear') return 'fearful';
+  if (normalized === 'neutral') return 'calm';
+  if (normalized === 'surprise') return 'anxious';
+  return undefined;
+};
+
+const mapDistortionToType = (value: string): SessionInsightsData['distortionType'] | undefined => {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'black_and_white' || normalized === '흑백논리') return 'black_and_white';
+  if (normalized === 'overgeneralization' || normalized === '과잉일반화')
+    return 'overgeneralization';
+  if (normalized === 'catastrophizing' || normalized === '파국화') return 'catastrophizing';
+  if (
+    normalized === 'should_statement' ||
+    normalized === '당위적 사고' ||
+    normalized === '당위적사고'
+  ) {
+    return 'should_statement';
+  }
+  return undefined;
+};
+
 interface SessionAutoRecordPanelProps {
   sessionId: string;
   autoRecord: SessionAutoRecordData;
@@ -56,7 +97,7 @@ interface SessionAutoRecordPanelProps {
     visibleAudioLevel: number;
   }) => void;
   onRiskSignalDetected?: (payload: { text: string; timestamp: string }) => void;
-  onAnalysisChange?: (insights: SessionInsightsData | null) => void;
+  onAnalysisChange?: (insights: SessionInsightsSsePatch | null) => void;
   onRegisterPrepareEndSession?: (handler: () => void) => void;
   onRegisterUploadFullAudio?: (handler: () => Promise<boolean>) => void;
 }
@@ -194,7 +235,6 @@ export default function SessionAutoRecordPanel({
     transcriptItems,
     autoRecord,
     baseInsights,
-    onAnalysisChange,
   });
 
   // Extract nested data envelope if SSE payload shape is { code, message, data }
@@ -235,19 +275,81 @@ export default function SessionAutoRecordPanel({
         setStreamSummary({ title, body });
       }
 
-      // Insights event: forward when full shape is available
-      if (
-        typeof obj.currentEmotion === 'string' &&
-        typeof obj.confidence === 'number' &&
-        Array.isArray(obj.emotionHistory) &&
-        typeof obj.phq9Score === 'number' &&
-        typeof obj.riskType === 'string' &&
-        typeof obj.recentEmotionPattern === 'string' &&
-        Array.isArray(obj.keyConcerns) &&
-        typeof obj.distortionType === 'string' &&
-        typeof obj.distortionExample === 'string'
-      ) {
-        onAnalysisChange?.(obj as unknown as SessionInsightsData);
+      // Insights event: only reflect currently provided SSE fields.
+      const emotionPayload = parseJsonObject(obj.emotion);
+      const distortionPayload = parseJsonObject(obj.distortion);
+
+      const emotionEntries = emotionPayload
+        ? Object.entries(emotionPayload).filter((entry): entry is [string, number] => {
+            const [, score] = entry;
+            return typeof score === 'number';
+          })
+        : [];
+      const topEmotionEntry =
+        emotionEntries.length > 0
+          ? emotionEntries.reduce((prev, curr) => (curr[1] > prev[1] ? curr : prev))
+          : null;
+      const mappedEmotionFromPayload = topEmotionEntry
+        ? mapEmotionKeyToSessionEmotion(topEmotionEntry[0])
+        : undefined;
+
+      const distortionValue =
+        distortionPayload && typeof distortionPayload.distortion === 'string'
+          ? distortionPayload.distortion
+          : undefined;
+      const mappedDistortionFromPayload = distortionValue
+        ? mapDistortionToType(distortionValue)
+        : undefined;
+
+      const normalizedEmotion =
+        typeof obj.currentEmotion === 'string'
+          ? obj.currentEmotion.toLowerCase()
+          : mappedEmotionFromPayload;
+      const normalizedDistortion =
+        typeof obj.distortionType === 'string'
+          ? obj.distortionType.toLowerCase()
+          : mappedDistortionFromPayload;
+
+      const confidence =
+        typeof obj.confidence === 'number'
+          ? obj.confidence
+          : topEmotionEntry
+            ? Math.round(topEmotionEntry[1] * 100)
+            : undefined;
+
+      const hasEmotion =
+        (normalizedEmotion === 'anxious' ||
+          normalizedEmotion === 'sad' ||
+          normalizedEmotion === 'angry' ||
+          normalizedEmotion === 'happy' ||
+          normalizedEmotion === 'calm' ||
+          normalizedEmotion === 'fearful') &&
+        typeof confidence === 'number';
+      const hasDistortion =
+        (normalizedDistortion === 'black_and_white' ||
+          normalizedDistortion === 'overgeneralization' ||
+          normalizedDistortion === 'catastrophizing' ||
+          normalizedDistortion === 'should_statement') &&
+        (typeof obj.distortionExample === 'string' || Boolean(distortionValue));
+
+      if (hasEmotion || hasDistortion) {
+        onAnalysisChange?.({
+          currentEmotion: hasEmotion
+            ? (normalizedEmotion as SessionInsightsData['currentEmotion'])
+            : undefined,
+          confidence: hasEmotion ? confidence : undefined,
+          emotionHistory: Array.isArray(obj.emotionHistory)
+            ? (obj.emotionHistory as SessionInsightsData['emotionHistory'])
+            : undefined,
+          distortionType: hasDistortion
+            ? (normalizedDistortion as SessionInsightsData['distortionType'])
+            : undefined,
+          distortionExample: hasDistortion
+            ? typeof obj.distortionExample === 'string'
+              ? (obj.distortionExample as string)
+              : distortionValue
+            : undefined,
+        });
       }
     },
     [locale, onAnalysisChange, unwrapStreamData, upsertTranscriptFromSse],
@@ -256,7 +358,7 @@ export default function SessionAutoRecordPanel({
   // Subscribe to SSE after recording starts
   useSessionInsightsStream({
     sessionId,
-    enabled: isRecording,
+    enabled: isRecording && !isPaused,
     onEvent: handleStreamEvent,
   });
   const activeStreamSummary = isRecording ? streamSummary : null;
@@ -342,13 +444,27 @@ export default function SessionAutoRecordPanel({
       recordedAudioChunksRef.current.push(segmentBlob);
       if (!shouldUpload) return;
 
-      await uploadChunk({
+      const chunkTimestamp = formatNowAsLocalDateTime();
+      const uploadResult = await uploadChunk({
         speaker,
         audioFile: segmentBlob,
-        timestamp: formatNowAsLocalDateTime(),
+        timestamp: chunkTimestamp,
       });
+
+      if (
+        uploadResult?.success &&
+        typeof uploadResult.data?.transcriptId === 'number' &&
+        typeof uploadResult.data?.text === 'string'
+      ) {
+        upsertTranscriptFromSse({
+          transcriptId: uploadResult.data.transcriptId,
+          text: uploadResult.data.text,
+          speaker,
+          timestamp: chunkTimestamp,
+        });
+      }
     },
-    [stopSegmentRecorder, uploadChunk],
+    [stopSegmentRecorder, uploadChunk, upsertTranscriptFromSse],
   );
 
   const handleSpeakerSwitch = useCallback(async () => {

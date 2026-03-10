@@ -25,6 +25,14 @@ export interface SessionInsightsData {
   distortionExample: string;
 }
 
+export interface SessionInsightsSsePatch {
+  currentEmotion?: SessionEmotionType;
+  confidence?: number;
+  emotionHistory?: SessionEmotionHistoryItem[];
+  distortionType?: CognitiveDistortionType;
+  distortionExample?: string;
+}
+
 export interface SessionTranscriptItem {
   id: string;
   transcriptId?: number;

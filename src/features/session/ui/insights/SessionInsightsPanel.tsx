@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { useLocale } from 'next-intl';
-import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import SessionInsightCard from './SessionInsightCard';
 import type {
   CognitiveDistortionType,
@@ -12,7 +11,8 @@ import type {
 
 interface SessionInsightsPanelProps {
   insights: SessionInsightsData;
-  isRecording: boolean;
+  hasEmotionData: boolean;
+  hasDistortionData: boolean;
   recentEmotionHistory: SessionEmotionType[];
   keyConcernHistory: string[];
   distortionExampleHistory: string[];
@@ -42,7 +42,8 @@ const distortionLabel = (type: CognitiveDistortionType, locale: string) => {
 
 export default function SessionInsightsPanel({
   insights,
-  isRecording,
+  hasEmotionData,
+  hasDistortionData,
   recentEmotionHistory,
   keyConcernHistory,
   distortionExampleHistory,
@@ -76,7 +77,7 @@ export default function SessionInsightsPanel({
           title={locale === 'en' ? 'Real-time emotion analysis' : '실시간 감정 분석'}
           iconSrc="/icons/analyze.svg"
           mainContent={
-            isRecording ? (
+            hasEmotionData ? (
               <div className="flex items-center gap-[6px]">
                 <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
                   {emotionLabel(insights.currentEmotion, locale)}
@@ -95,7 +96,7 @@ export default function SessionInsightsPanel({
             )
           }
           subContent={
-            isRecording ? (
+            hasEmotionData ? (
               <>
                 <span className="body-16 text-label-alternative">
                   {locale === 'en' ? 'Confidence' : '신뢰도'}
@@ -116,7 +117,7 @@ export default function SessionInsightsPanel({
               <span className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 text-label-alternative whitespace-nowrap">
                 {locale === 'en' ? 'Emotion history' : '최근 감정'}
               </span>
-              {isRecording ? (
+              {hasEmotionData ? (
                 <div className="flex w-full body-14">
                   {insights.emotionHistory
                     .slice()
@@ -137,31 +138,14 @@ export default function SessionInsightsPanel({
           title={locale === 'en' ? 'KKEBI data summary' : 'KKEBI 데이터 요약'}
           iconSrc="/icons/clipboard.svg"
           mainContent={
-            isRecording ? (
-              <div className="flex items-center gap-2">
-                <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
-                  {locale === 'en' ? `${insights.phq9Score}` : `${insights.phq9Score}점`}
-                </span>
-              </div>
-            ) : (
-              <div className="flex min-h-[34px] items-center">
-                <span className="body-14 text-label-disable">{summaryWaitingMessage}</span>
-              </div>
-            )
+            <div className="flex min-h-[34px] items-center">
+              <span className="body-14 text-label-disable">{summaryWaitingMessage}</span>
+            </div>
           }
           subContent={
-            isRecording ? (
-              <>
-                <span className="body-16 text-label-alternative">
-                  {locale === 'en' ? 'Risk' : '위험도'}
-                </span>
-                <RiskTypeChip value={insights.riskType} />
-              </>
-            ) : (
-              <span className="body-16 text-label-disable">
-                {locale === 'en' ? 'Risk level pending' : '위험도 분석 대기'}
-              </span>
-            )
+            <span className="body-16 text-label-disable">
+              {locale === 'en' ? 'Risk level pending' : '위험도 분석 대기'}
+            </span>
           }
         >
           <div className="flex w-full flex-col items-start gap-[18px]">
@@ -200,7 +184,7 @@ export default function SessionInsightsPanel({
           title={locale === 'en' ? 'Detected cognitive distortion' : '감지된 인지적 왜곡'}
           iconSrc="/icons/brain.svg"
           mainContent={
-            isRecording ? (
+            hasDistortionData ? (
               <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
                 {distortionLabel(insights.distortionType, locale)}
               </span>
