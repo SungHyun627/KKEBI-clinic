@@ -22,7 +22,7 @@ interface ProcessAudioChunkParams {
   audioFile: Blob;
 }
 
-interface ProcessAudioChunkResult {
+export interface ProcessAudioChunkResult {
   success: boolean;
   message?: string;
   data?: AudioChunkResponse;
