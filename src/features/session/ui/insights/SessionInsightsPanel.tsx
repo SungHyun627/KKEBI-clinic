@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import SessionInsightCard from './SessionInsightCard';
@@ -25,10 +24,26 @@ const emotionLabel = (emotion: SessionEmotionType, locale: string) => {
     sad: { ko: '슬픔', en: 'Sad' },
     angry: { ko: '분노', en: 'Angry' },
     happy: { ko: '기쁨', en: 'Happy' },
+    surprise: { ko: '놀람', en: 'Surprise' },
     calm: { ko: '평온', en: 'Calm' },
     fearful: { ko: '두려움', en: 'Fearful' },
+    disgust: { ko: '혐오', en: 'Disgust' },
   } satisfies Record<SessionEmotionType, { ko: string; en: string }>;
   return locale === 'en' ? map[emotion].en : map[emotion].ko;
+};
+
+const emotionEmoji = (emotion: SessionEmotionType) => {
+  const map = {
+    anxious: '😨',
+    sad: '😢',
+    angry: '😡',
+    happy: '☺️',
+    surprise: '😲',
+    calm: '😐',
+    fearful: '😨',
+    disgust: '🤢',
+  } satisfies Record<SessionEmotionType, string>;
+  return map[emotion];
 };
 
 const distortionLabel = (type: CognitiveDistortionType, locale: string) => {
@@ -83,12 +98,9 @@ export default function SessionInsightsPanel({
                 <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
                   {emotionLabel(insights.currentEmotion, locale)}
                 </span>
-                <Image
-                  src="/icons/kkebi-character.svg"
-                  alt="KKEBI Character"
-                  width={28}
-                  height={28}
-                />
+                <span className="text-[28px]" aria-label="emotion emoji">
+                  {emotionEmoji(insights.currentEmotion)}
+                </span>
               </div>
             ) : (
               <div className="flex min-h-[34px] items-center">

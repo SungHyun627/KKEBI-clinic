@@ -63,10 +63,11 @@ const mapEmotionKeyToSessionEmotion = (
   const normalized = key.toLowerCase();
   if (normalized === 'happy') return 'happy';
   if (normalized === 'sad') return 'sad';
-  if (normalized === 'angry' || normalized === 'disgust') return 'angry';
-  if (normalized === 'fear') return 'fearful';
+  if (normalized === 'angry') return 'angry';
+  if (normalized === 'disgust') return 'disgust';
+  if (normalized === 'fear' || normalized === 'feaer' || normalized === 'fearful') return 'fearful';
   if (normalized === 'neutral') return 'calm';
-  if (normalized === 'surprise') return 'anxious';
+  if (normalized === 'surprise') return 'surprise';
   return undefined;
 };
 
@@ -305,7 +306,7 @@ export default function SessionAutoRecordPanel({
 
       const normalizedEmotion =
         typeof obj.currentEmotion === 'string'
-          ? obj.currentEmotion.toLowerCase()
+          ? mapEmotionKeyToSessionEmotion(obj.currentEmotion)
           : mappedEmotionFromPayload;
       const normalizedDistortion =
         typeof obj.distortionType === 'string'
@@ -324,8 +325,10 @@ export default function SessionAutoRecordPanel({
           normalizedEmotion === 'sad' ||
           normalizedEmotion === 'angry' ||
           normalizedEmotion === 'happy' ||
+          normalizedEmotion === 'surprise' ||
           normalizedEmotion === 'calm' ||
-          normalizedEmotion === 'fearful') &&
+          normalizedEmotion === 'fearful' ||
+          normalizedEmotion === 'disgust') &&
         typeof confidence === 'number';
       const hasDistortion =
         (normalizedDistortion === 'black_and_white' ||

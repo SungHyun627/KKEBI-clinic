@@ -1,6 +1,14 @@
 import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
 
-export type SessionEmotionType = 'anxious' | 'sad' | 'angry' | 'happy' | 'calm' | 'fearful';
+export type SessionEmotionType =
+  | 'anxious'
+  | 'sad'
+  | 'angry'
+  | 'happy'
+  | 'calm'
+  | 'fearful'
+  | 'disgust'
+  | 'surprise';
 
 export type CognitiveDistortionType =
   | 'black_and_white'
