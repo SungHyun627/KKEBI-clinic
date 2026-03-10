@@ -46,12 +46,31 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ...nextInsights,
     }));
 
-    if (nextInsights.currentEmotion) {
-      setRecentEmotionHistory((prev) => {
-        if (prev[0] === nextInsights.currentEmotion) return prev;
-        return [nextInsights.currentEmotion, ...prev].slice(0, 6);
-      });
-    }
+    setRecentEmotionHistory((prev) => {
+      const nextList = [...prev];
+
+      const pushEmotion = (emotion: SessionEmotionType) => {
+        if (nextList[0] === emotion) return;
+        nextList.unshift(emotion);
+      };
+
+      if (nextInsights.currentEmotion) {
+        pushEmotion(nextInsights.currentEmotion);
+      }
+
+      if (Array.isArray(nextInsights.emotionHistory)) {
+        nextInsights.emotionHistory
+          .slice()
+          .reverse()
+          .forEach((item) => {
+            if (item?.emotion) {
+              pushEmotion(item.emotion);
+            }
+          });
+      }
+
+      return nextList.slice(0, 6);
+    });
 
     if (nextInsights.distortionExample) {
       setDistortionExampleHistory((prev) => {
@@ -67,13 +86,14 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
   const mergedInsights: SessionInsightsData = useMemo(() => {
     return {
       ...pageMock.insights,
+      riskType: data && isRiskType(data.riskType) ? data.riskType : pageMock.insights.riskType,
       currentEmotion: analysisSsePatch?.currentEmotion ?? pageMock.insights.currentEmotion,
       confidence: analysisSsePatch?.confidence ?? pageMock.insights.confidence,
       emotionHistory: analysisSsePatch?.emotionHistory ?? pageMock.insights.emotionHistory,
       distortionType: analysisSsePatch?.distortionType ?? pageMock.insights.distortionType,
       distortionExample: analysisSsePatch?.distortionExample ?? pageMock.insights.distortionExample,
     };
-  }, [analysisSsePatch, pageMock.insights]);
+  }, [analysisSsePatch, data, pageMock.insights]);
 
   const handleRegisterPrepareEndSession = useCallback((handler: () => void) => {
     prepareEndSessionRef.current = handler;

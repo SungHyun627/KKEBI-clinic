@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useLocale } from 'next-intl';
+import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import SessionInsightCard from './SessionInsightCard';
 import type {
   CognitiveDistortionType,
@@ -56,8 +57,8 @@ export default function SessionInsightsPanel({
       : '녹음 중 감정과 신뢰도가 표시됩니다';
   const summaryWaitingMessage =
     locale === 'en'
-      ? 'PHQ-9 and risk level will update during recording'
-      : '녹음 중 PHQ-9 점수와 위험도가 업데이트됩니다';
+      ? 'PHQ-9 scoring during recording is not implemented yet'
+      : '녹음 중 PHQ-9 점수가 업데이트 됩니다.';
   const distortionWaitingMessage =
     locale === 'en'
       ? 'Detected distortion type will appear during recording'
@@ -117,13 +118,9 @@ export default function SessionInsightsPanel({
               <span className="rounded-[100px] border border-neutral-95 bg-white px-3 py-[3px] body-14 text-label-alternative whitespace-nowrap">
                 {locale === 'en' ? 'Emotion history' : '최근 감정'}
               </span>
-              {hasEmotionData ? (
+              {hasEmotionData && recentEmotionHistory.length > 0 ? (
                 <div className="flex w-full body-14">
-                  {insights.emotionHistory
-                    .slice()
-                    .reverse()
-                    .map((item) => emotionLabel(item.emotion, locale))
-                    .join(', ')}
+                  {recentEmotionHistory.map((item) => emotionLabel(item, locale)).join(', ')}
                 </div>
               ) : (
                 <div className="flex w-full body-14 text-label-disable">
@@ -143,9 +140,12 @@ export default function SessionInsightsPanel({
             </div>
           }
           subContent={
-            <span className="body-16 text-label-disable">
-              {locale === 'en' ? 'Risk level pending' : '위험도 분석 대기'}
-            </span>
+            <>
+              <span className="body-16 text-label-alternative">
+                {locale === 'en' ? 'Risk' : '위험도'}
+              </span>
+              <RiskTypeChip value={insights.riskType} />
+            </>
           }
         >
           <div className="flex w-full flex-col items-start gap-[18px]">
