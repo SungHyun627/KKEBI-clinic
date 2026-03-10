@@ -148,6 +148,8 @@ export default function SessionAutoRecordPanel({
     bookmarkIds,
     bookmarkIdByTranscriptId,
     pendingIds,
+    addPendingTranscript,
+    resolvePendingTranscript,
     toggleBookmark,
     upsertTranscriptFromSse,
     setTranscriptItems,
@@ -436,15 +438,20 @@ export default function SessionAutoRecordPanel({
     segmentRecorderRef.current = recorder;
   }, []);
 
-  const flushCurrentSpeakerChunk = useCallback(
-    async (speaker: 'counselor' | 'client', shouldUpload: boolean) => {
-      const segmentBlob = await stopSegmentRecorder();
-      if (!segmentBlob) return;
+  const captureCurrentSegment = useCallback(async () => {
+    const segmentBlob = await stopSegmentRecorder();
+    if (!segmentBlob) return null;
+    recordedAudioChunksRef.current.push(segmentBlob);
+    return segmentBlob;
+  }, [stopSegmentRecorder]);
 
-      recordedAudioChunksRef.current.push(segmentBlob);
-      if (!shouldUpload) return;
-
-      const chunkTimestamp = formatNowAsLocalDateTime();
+  const uploadCapturedSegment = useCallback(
+    async (
+      speaker: 'counselor' | 'client',
+      segmentBlob: Blob,
+      chunkTimestamp: string,
+      pendingTranscriptId: string,
+    ) => {
       const uploadResult = await uploadChunk({
         speaker,
         audioFile: segmentBlob,
@@ -456,15 +463,35 @@ export default function SessionAutoRecordPanel({
         typeof uploadResult.data?.transcriptId === 'number' &&
         typeof uploadResult.data?.text === 'string'
       ) {
-        upsertTranscriptFromSse({
+        resolvePendingTranscript({
+          pendingId: pendingTranscriptId,
           transcriptId: uploadResult.data.transcriptId,
           text: uploadResult.data.text,
-          speaker,
-          timestamp: chunkTimestamp,
         });
+        return;
       }
+
+      resolvePendingTranscript({
+        pendingId: pendingTranscriptId,
+        text:
+          locale === 'en'
+            ? 'Transcription failed. Please switch speaker again.'
+            : '음성 분석이 일시적으로 실패했어요. 다시 시도해 주세요.',
+      });
     },
-    [stopSegmentRecorder, uploadChunk, upsertTranscriptFromSse],
+    [locale, resolvePendingTranscript, uploadChunk],
+  );
+
+  const getPendingTranscriptMessage = useCallback(
+    (speaker: 'counselor' | 'client') => {
+      if (locale === 'en') {
+        return speaker === 'counselor'
+          ? 'Analyzing counselor speech...'
+          : 'Analyzing client speech...';
+      }
+      return speaker === 'counselor' ? '상담사 발화를 분석 중...' : '내담자 발화를 분석 중...';
+    },
+    [locale],
   );
 
   const handleSpeakerSwitch = useCallback(async () => {
@@ -474,16 +501,45 @@ export default function SessionAutoRecordPanel({
     const prevSpeaker = activeSpeaker;
 
     try {
-      await flushCurrentSpeakerChunk(prevSpeaker, true);
+      const segmentBlob = await captureCurrentSegment();
+      const chunkTimestamp = formatNowAsLocalDateTime();
+      const pendingTranscriptId = addPendingTranscript({
+        speaker: prevSpeaker,
+        timestamp: chunkTimestamp,
+        text: getPendingTranscriptMessage(prevSpeaker),
+      });
+
       setActiveSpeaker((prev) => (prev === 'counselor' ? 'client' : 'counselor'));
       startSegmentRecorder();
+      if (segmentBlob) {
+        void uploadCapturedSegment(prevSpeaker, segmentBlob, chunkTimestamp, pendingTranscriptId);
+      } else {
+        resolvePendingTranscript({
+          pendingId: pendingTranscriptId,
+          text:
+            locale === 'en'
+              ? 'No audio captured. Please try speaker switch again.'
+              : '녹음된 음성이 없습니다. 발화자 전환을 다시 시도해 주세요.',
+        });
+      }
     } finally {
       isSwitchingSpeakerRef.current = false;
     }
-  }, [activeSpeaker, flushCurrentSpeakerChunk, isPaused, isRecording, startSegmentRecorder]);
+  }, [
+    activeSpeaker,
+    addPendingTranscript,
+    captureCurrentSegment,
+    getPendingTranscriptMessage,
+    isPaused,
+    isRecording,
+    locale,
+    resolvePendingTranscript,
+    startSegmentRecorder,
+    uploadCapturedSegment,
+  ]);
 
   const handleUploadFullAudio = useCallback(async () => {
-    await flushCurrentSpeakerChunk(activeSpeaker, false);
+    await captureCurrentSegment();
 
     const chunks = recordedAudioChunksRef.current;
     if (chunks.length === 0) return true;
@@ -503,7 +559,7 @@ export default function SessionAutoRecordPanel({
 
     recordedAudioChunksRef.current = [];
     return true;
-  }, [activeSpeaker, flushCurrentSpeakerChunk, sessionId]);
+  }, [captureCurrentSegment, sessionId]);
 
   useEffect(() => {
     if (!isRecording) {

@@ -49,7 +49,11 @@ export default function SessionTranscriptCard({
                       : '내담자'}
                 </span>
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div className="body-14 min-w-0 flex-1 text-label-normal">
+                  <div
+                    className={`body-14 min-w-0 flex-1 ${
+                      item.isPendingTranscription ? 'text-label-assistive' : 'text-label-normal'
+                    }`}
+                  >
                     {renderHighlightedText(item.text, locale)}
                   </div>
                   <div className="flex items-center gap-[6px]">
@@ -58,7 +62,7 @@ export default function SessionTranscriptCard({
                     </span>
                     <button
                       type="button"
-                      disabled={pendingIds.has(item.id)}
+                      disabled={pendingIds.has(item.id) || item.isPendingTranscription}
                       onClick={() => onToggleBookmark(item.id)}
                       className={`inline-flex h-6 w-6 items-center justify-center rounded-[6px] hover:cursor-pointer ${
                         bookmarkIds.has(item.id) ? 'text-label-normal' : 'text-label-assistive'

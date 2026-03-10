@@ -41,6 +41,7 @@ export interface SessionTranscriptItem {
   text: string;
   timestamp: string;
   bookmarked?: boolean;
+  isPendingTranscription?: boolean;
 }
 
 export interface SessionAutoRecordData {

@@ -20,6 +20,18 @@ interface TranscriptSsePayload {
   timestamp?: string;
 }
 
+interface PendingTranscriptPayload {
+  speaker: 'counselor' | 'client';
+  timestamp: string;
+  text: string;
+}
+
+interface ResolvePendingTranscriptPayload {
+  pendingId: string;
+  transcriptId?: number;
+  text: string;
+}
+
 export const useTranscriptRuntime = ({
   sessionId,
   locale,
@@ -77,6 +89,60 @@ export const useTranscriptRuntime = ({
 
   const addBookmarkLocal = (transcriptId: string) => {
     setBookmarkIds((prev) => new Set(prev).add(transcriptId));
+  };
+
+  const addPendingTranscript = ({ speaker, timestamp, text }: PendingTranscriptPayload) => {
+    const pendingId = `${sessionId}-pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setTranscriptItems((prev) => [
+      ...prev,
+      {
+        id: pendingId,
+        speaker,
+        text,
+        timestamp,
+        bookmarked: false,
+        isPendingTranscription: true,
+      },
+    ]);
+    return pendingId;
+  };
+
+  const resolvePendingTranscript = ({
+    pendingId,
+    transcriptId,
+    text,
+  }: ResolvePendingTranscriptPayload) => {
+    setTranscriptItems((prev) => {
+      const pendingIndex = prev.findIndex((item) => item.id === pendingId);
+      if (pendingIndex === -1) return prev;
+
+      const next = [...prev];
+      const resolvedId = typeof transcriptId === 'number' ? String(transcriptId) : null;
+      const resolvedIndex =
+        resolvedId !== null ? next.findIndex((item) => item.id === resolvedId) : -1;
+
+      if (resolvedIndex >= 0) {
+        next[resolvedIndex] = {
+          ...next[resolvedIndex],
+          text,
+          isPendingTranscription: false,
+        };
+        next.splice(pendingIndex, 1);
+        return next;
+      }
+
+      next[pendingIndex] = {
+        ...next[pendingIndex],
+        id: resolvedId ?? next[pendingIndex].id,
+        transcriptId,
+        text,
+        bookmarkId: resolvedId
+          ? bookmarkIdByTranscriptId[resolvedId]
+          : next[pendingIndex].bookmarkId,
+        isPendingTranscription: false,
+      };
+      return next;
+    });
   };
 
   const toggleBookmark = async (transcriptId: string) => {
@@ -168,6 +234,8 @@ export const useTranscriptRuntime = ({
     bookmarkIds,
     bookmarkIdByTranscriptId,
     pendingIds,
+    addPendingTranscript,
+    resolvePendingTranscript,
     toggleBookmark,
     handleAddDemoDialogue,
     upsertTranscriptFromSse,
