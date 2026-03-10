@@ -133,23 +133,32 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
     }
 
     startRequestInFlightRef.current = true;
-    dispatchSessionStart({ type: 'setFastApiSessionId', payload: null });
     dispatchSessionStart({ type: 'setMicPermission', payload: 'requesting' });
     dispatchSessionStart({ type: 'setIsStartingSession', payload: true });
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
 
-      const startResult = await startSessionById({ sessionId, source: 'WEB' });
-      if (!startResult.success) {
+      let nextFastApiSessionId = fastApiSessionId;
+      if (!nextFastApiSessionId) {
+        const startResult = await startSessionById({ sessionId, source: 'WEB' });
+        if (!startResult.success) {
+          dispatchSessionStart({ type: 'setMicPermission', payload: 'idle' });
+          toast(startResult.message || tSession('loadFailed'));
+          return;
+        }
+        nextFastApiSessionId = startResult.data?.fastApiSessionId ?? null;
+      }
+
+      if (!nextFastApiSessionId) {
         dispatchSessionStart({ type: 'setMicPermission', payload: 'idle' });
-        toast(startResult.message || tSession('loadFailed'));
+        toast(tSession('loadFailed'));
         return;
       }
 
       dispatchSessionStart({
         type: 'setFastApiSessionId',
-        payload: startResult.data?.fastApiSessionId ?? null,
+        payload: nextFastApiSessionId,
       });
       dispatchSessionStart({ type: 'setMicPermission', payload: 'granted' });
       dispatchRecording({ type: 'setIsRecording', payload: true });
@@ -191,6 +200,8 @@ export const useRecordingController = ({ sessionId }: UseRecordingControllerPara
     handlePrepareEndSession,
     setMicPermission: (value: MicPermissionState) =>
       dispatchSessionStart({ type: 'setMicPermission', payload: value }),
+    setFastApiSessionId: (value: string | null) =>
+      dispatchSessionStart({ type: 'setFastApiSessionId', payload: value }),
     setIsRecording: (value: boolean) =>
       dispatchRecording({ type: 'setIsRecording', payload: value }),
     setIsPaused: (value: boolean) => dispatchRecording({ type: 'setIsPaused', payload: value }),

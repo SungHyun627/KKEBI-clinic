@@ -11,7 +11,7 @@ interface UploadChunkParams {
 
 interface UseAudioChunkUploaderParams {
   sessionId: string;
-  fastApiSessionId: string;
+  fastApiSessionId: string | null;
 }
 
 export const useAudioChunkUploader = ({
@@ -26,6 +26,11 @@ export const useAudioChunkUploader = ({
   // Serialize chunk uploads to avoid race conditions in transcript ordering.
   const uploadChunk = async ({ speaker, audioFile, timestamp }: UploadChunkParams) => {
     const task = async () => {
+      if (!fastApiSessionId) {
+        setLastErrorMessage('fastApiSessionId is missing');
+        return;
+      }
+
       setIsUploading(true);
       setLastErrorMessage(null);
       const result = await processAudioChunk({

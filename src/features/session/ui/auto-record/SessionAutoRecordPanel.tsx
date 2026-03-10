@@ -25,6 +25,7 @@ type PersistedAutoRecordState = {
   bookmarkIds: string[];
   bookmarkIdByTranscriptId: Record<string, number>;
   activeSpeaker: 'counselor' | 'client';
+  fastApiSessionId: string | null;
   micPermission: 'idle' | 'requesting' | 'granted' | 'denied';
   isRecording: boolean;
   isPaused: boolean;
@@ -81,6 +82,7 @@ export default function SessionAutoRecordPanel({
     handlePauseResume,
     handlePrepareEndSession,
     setMicPermission,
+    setFastApiSessionId,
     setIsRecording,
     setIsPaused,
     setElapsedSeconds,
@@ -108,7 +110,7 @@ export default function SessionAutoRecordPanel({
   });
   const { uploadChunk, lastErrorMessage } = useAudioChunkUploader({
     sessionId,
-    fastApiSessionId: fastApiSessionId ?? sessionId,
+    fastApiSessionId,
   });
 
   const snapshot = useMemo<PersistedAutoRecordState>(
@@ -117,6 +119,7 @@ export default function SessionAutoRecordPanel({
       bookmarkIds: Array.from(bookmarkIds),
       bookmarkIdByTranscriptId,
       activeSpeaker,
+      fastApiSessionId,
       micPermission,
       isRecording,
       isPaused,
@@ -131,6 +134,7 @@ export default function SessionAutoRecordPanel({
       activeSpeaker,
       demoIndex,
       elapsedSeconds,
+      fastApiSessionId,
       isPaused,
       isRecording,
       micPermission,
@@ -144,9 +148,11 @@ export default function SessionAutoRecordPanel({
       setBookmarkIds(new Set(parsed.bookmarkIds ?? []));
       setBookmarkIdByTranscriptId(parsed.bookmarkIdByTranscriptId ?? {});
       setActiveSpeaker(parsed.activeSpeaker ?? 'counselor');
+      const restoredFastApiSessionId = parsed.fastApiSessionId ?? null;
+      setFastApiSessionId(restoredFastApiSessionId);
       setMicPermission(parsed.micPermission ?? 'idle');
-      setIsRecording(Boolean(parsed.isRecording));
-      setIsPaused(Boolean(parsed.isPaused));
+      setIsRecording(Boolean(parsed.isRecording) && Boolean(restoredFastApiSessionId));
+      setIsPaused(Boolean(parsed.isPaused) && Boolean(restoredFastApiSessionId));
       setElapsedSeconds(parsed.elapsedSeconds ?? 0);
       setAudioLevel(parsed.audioLevel ?? 0);
       setDemoIndex(parsed.demoIndex ?? 0);
@@ -157,6 +163,7 @@ export default function SessionAutoRecordPanel({
       setBookmarkIdByTranscriptId,
       setDemoIndex,
       setElapsedSeconds,
+      setFastApiSessionId,
       setIsPaused,
       setIsRecording,
       setMicPermission,
@@ -327,7 +334,7 @@ export default function SessionAutoRecordPanel({
       await uploadChunk({
         speaker,
         audioFile: segmentBlob,
-        timestamp: String(Date.now()),
+        timestamp: new Date().toISOString(),
       });
     },
     [stopSegmentRecorder, uploadChunk],

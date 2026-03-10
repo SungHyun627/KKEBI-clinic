@@ -30,10 +30,24 @@ interface ProcessAudioChunkResult {
 
 const normalizeTimestampParam = (value?: string) => {
   if (!value) return null;
-  if (/^\d+$/.test(value)) return value;
-  const parsed = Date.parse(value);
-  if (Number.isNaN(parsed)) return null;
-  return String(parsed);
+  const formatLocalDateTime = (date: Date) => {
+    const yyyy = String(date.getFullYear());
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
+  };
+
+  if (/^\d+$/.test(value)) {
+    const parsedEpoch = Number(value);
+    if (!Number.isFinite(parsedEpoch)) return null;
+    return formatLocalDateTime(new Date(parsedEpoch));
+  }
+  const parsedDate = Date.parse(value);
+  if (Number.isNaN(parsedDate)) return null;
+  return formatLocalDateTime(new Date(parsedDate));
 };
 
 export const processAudioChunk = async ({
