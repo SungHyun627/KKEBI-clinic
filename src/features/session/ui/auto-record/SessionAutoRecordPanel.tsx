@@ -456,7 +456,9 @@ export default function SessionAutoRecordPanel({
   useEffect(() => {
     if (!isRecording) return;
 
-    // On speaker switch key, upload current speaker chunk then toggle speaker.
+    // Keyboard shortcuts:
+    // - Space: upload current speaker chunk then toggle speaker
+    // - Enter: pause/resume recording
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.isComposing) return;
       if (event.repeat) return;
@@ -469,16 +471,23 @@ export default function SessionAutoRecordPanel({
         Boolean(target?.isContentEditable);
       if (isEditable) return;
 
-      if (event.code !== 'Space' && event.key !== 'Enter') return;
-      event.preventDefault();
-      void handleSpeakerSwitch();
+      if (event.code === 'Space') {
+        event.preventDefault();
+        void handleSpeakerSwitch();
+        return;
+      }
+
+      if (event.code === 'Enter' || event.key === 'Enter') {
+        event.preventDefault();
+        handlePauseResume();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleSpeakerSwitch, isRecording]);
+  }, [handlePauseResume, handleSpeakerSwitch, isRecording]);
 
   useEffect(() => {
     return () => {
@@ -518,11 +527,11 @@ export default function SessionAutoRecordPanel({
         </span>
         <span className="ml-auto hidden body-13 text-label-assistive sm:inline">
           {locale === 'en'
-            ? 'Press Enter or Space to switch speaker'
-            : 'Enter 또는 Space로 발화자 전환'}
+            ? 'Space: switch speaker · Enter: pause/resume'
+            : 'Space: 발화자 전환 · Enter: 일시정지/재개'}
         </span>
         <span className="ml-auto body-13 text-label-assistive sm:hidden">
-          {locale === 'en' ? 'Enter/Space' : 'Enter/Space 전환'}
+          {locale === 'en' ? 'Space switch · Enter pause' : 'Space 전환 · Enter 정지/재개'}
         </span>
       </div>
       <div className="flex w-full flex-col items-start gap-4">
