@@ -1,3 +1,4 @@
+import { ensureAccessToken } from '@/shared/api/http-client';
 import { getAccessToken } from '@/shared/api/token-store';
 
 interface ApiResponseVoid {
@@ -20,6 +21,14 @@ export const uploadFullAudioFile = async ({
   audioFile,
 }: UploadFullAudioFileParams): Promise<UploadFullAudioFileResult> => {
   try {
+    const hasAccessToken = await ensureAccessToken();
+    if (!hasAccessToken) {
+      return {
+        success: false,
+        message: 'Unauthorized',
+      };
+    }
+
     const formData = new FormData();
     formData.append('audioFile', audioFile, `session-${sessionId}-${Date.now()}.webm`);
 
