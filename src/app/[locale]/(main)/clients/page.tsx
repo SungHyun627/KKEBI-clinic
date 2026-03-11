@@ -9,6 +9,9 @@ import ClientDetailDrawer from '@/features/clients/client-detail/ui/ClientDetail
 import type { ClientLookupItem } from '@/features/clients/types/common';
 import ClientListFilters from '@/features/clients/client-list/ui/ClientListFilters';
 import ClientListTableSection from '@/features/clients/client-list/ui/ClientListTableSection';
+import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
+
+const PAGE_SIZE = 10;
 
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
@@ -23,27 +26,23 @@ export default function ClientsPage() {
     () => [tClients('concernsDepression'), tClients('concernsStress'), tClients('concernsSleep')],
     [tClients],
   );
-  const {
-    clients,
-    filteredClients,
-    isLoading,
-    errorMessage,
-    searchKeyword,
-    setSearchKeyword,
-    riskFilter,
-    setRiskFilter,
-    isRiskFilterInteracted,
-    setIsRiskFilterInteracted,
-    removeClient,
-  } = useClientList({
-    locale,
-    listLoadFailedMessage: tClients('listLoadFailed'),
-    fallbackConcerns,
-  });
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
+  const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
+  const [page, setPage] = useState(1);
+  const { clients, isLoading, errorMessage, totalElements, totalPages, removeClient } =
+    useClientList({
+      locale,
+      listLoadFailedMessage: tClients('listLoadFailed'),
+      fallbackConcerns,
+      page,
+      pageSize: PAGE_SIZE,
+      searchKeyword,
+      riskFilter,
+    });
   const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [dismissedQueryKey, setDismissedQueryKey] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (!targetClientId || clients.length === 0) return;
@@ -63,13 +62,8 @@ export default function ClientsPage() {
     targetClientId && selectedClientFromQuery && targetQueryKey !== dismissedQueryKey,
   );
 
-  const pageSize = 10;
-  const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const pagedClients = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredClients.slice(start, start + pageSize);
-  }, [filteredClients, currentPage]);
+  const normalizedTotalPages = Math.max(1, totalPages || 1);
+  const currentPage = Math.min(page, normalizedTotalPages);
 
   return (
     <section className="flex w-full flex-col items-start gap-7">
@@ -96,20 +90,20 @@ export default function ClientsPage() {
         onFilterChanged={() => setPage(1)}
       />
       <ClientListTableSection
-        filteredCount={filteredClients.length}
-        pagedClients={pagedClients}
+        filteredCount={totalElements}
+        pagedClients={clients}
         isLoading={isLoading}
         errorMessage={errorMessage}
         currentPage={currentPage}
-        totalPages={totalPages}
+        totalPages={normalizedTotalPages}
         onPreviousPage={() => setPage((prev) => Math.max(1, prev - 1))}
-        onNextPage={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+        onNextPage={() => setPage((prev) => Math.min(normalizedTotalPages, prev + 1))}
         onSelectClient={(client) => {
           setSelectedClient(client);
           setIsDrawerOpen(true);
         }}
         labels={{
-          totalCount: tClients('listTotalCount', { count: filteredClients.length }),
+          totalCount: tClients('listTotalCount', { count: totalElements }),
           previous10: tClients('listPrevious10'),
           next10: tClients('listNext10'),
           time: tClients('listTime'),

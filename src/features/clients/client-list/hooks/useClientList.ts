@@ -1,93 +1,95 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ClientLookupItem } from '@/features/clients/types/common';
 import { getClientList } from '@/features/clients/client-list/api/getClientList';
 import { mapClientSummariesToClients } from '@/features/clients/client-list/lib/mapClientSummariesToClients';
 import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
+import type { components } from '@/shared/api/generated-types';
 
 interface UseClientListParams {
   locale: string;
   listLoadFailedMessage: string;
   fallbackConcerns: string[];
+  page: number;
+  pageSize: number;
+  searchKeyword: string;
+  riskFilter: RiskFilter;
 }
 
 interface UseClientListResult {
   clients: ClientLookupItem[];
-  filteredClients: ClientLookupItem[];
   isLoading: boolean;
   errorMessage: string | null;
-  searchKeyword: string;
-  setSearchKeyword: (value: string) => void;
-  riskFilter: RiskFilter;
-  setRiskFilter: (value: RiskFilter) => void;
-  isRiskFilterInteracted: boolean;
-  setIsRiskFilterInteracted: (value: boolean) => void;
+  totalElements: number;
+  totalPages: number;
   removeClient: (clientId: string) => void;
 }
 
-const DEFAULT_PAGE_SIZE = 200;
+type RiskLevel = NonNullable<components['schemas']['ClientSummaryResponse']['riskLevel']>;
 
-const normalizeKeyword = (value: string) => value.trim().toLowerCase();
-
-const matchesFilter = (client: ClientLookupItem, riskFilter: RiskFilter, keyword: string) => {
-  const matchesRisk = riskFilter === 'all' ? true : client.riskType === riskFilter;
-  const matchesName = keyword ? client.clientName.toLowerCase().includes(keyword) : true;
-  return matchesRisk && matchesName;
+const mapRiskFilterToRiskLevel = (riskFilter: RiskFilter): RiskLevel | undefined => {
+  if (riskFilter === '안정') return 'STABLE';
+  if (riskFilter === '주의') return 'CAUTION';
+  if (riskFilter === '위험') return 'RISK';
+  return undefined;
 };
 
 const useClientList = ({
   locale,
   listLoadFailedMessage,
   fallbackConcerns,
+  page,
+  pageSize,
+  searchKeyword,
+  riskFilter,
 }: UseClientListParams): UseClientListResult => {
   const [clients, setClients] = useState<ClientLookupItem[]>([]);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
-  const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     const loadClients = async () => {
       setIsLoading(true);
-      const result = await getClientList({ page: 0, size: DEFAULT_PAGE_SIZE });
+      const result = await getClientList({
+        page: Math.max(0, page - 1),
+        size: pageSize,
+        name: searchKeyword.trim() || undefined,
+        riskLevel: mapRiskFilterToRiskLevel(riskFilter),
+      });
 
       if (!result.success || !result.data) {
         setClients([]);
+        setTotalElements(0);
+        setTotalPages(0);
         setErrorMessage(listLoadFailedMessage);
         setIsLoading(false);
         return;
       }
 
       setClients(mapClientSummariesToClients(result.data, locale, fallbackConcerns));
+      setTotalElements(result.totalElements ?? 0);
+      setTotalPages(result.totalPages ?? 0);
       setErrorMessage(null);
       setIsLoading(false);
     };
 
     void loadClients();
-  }, [fallbackConcerns, listLoadFailedMessage, locale]);
-
-  const filteredClients = useMemo(() => {
-    const keyword = normalizeKeyword(searchKeyword);
-    return clients.filter((client) => matchesFilter(client, riskFilter, keyword));
-  }, [clients, riskFilter, searchKeyword]);
+  }, [fallbackConcerns, listLoadFailedMessage, locale, page, pageSize, riskFilter, searchKeyword]);
 
   const removeClient = (clientId: string) => {
     setClients((prev) => prev.filter((client) => client.clientId !== clientId));
+    setTotalElements((prev) => Math.max(0, prev - 1));
   };
 
   return {
     clients,
-    filteredClients,
     isLoading,
     errorMessage,
-    searchKeyword,
-    setSearchKeyword,
-    riskFilter,
-    setRiskFilter,
-    isRiskFilterInteracted,
-    setIsRiskFilterInteracted,
+    totalElements,
+    totalPages,
     removeClient,
   };
 };
