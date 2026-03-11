@@ -169,7 +169,6 @@ export default function ScheduledSessionItemCard({
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
         sessionId={item.id}
-        clientId={item.clientId}
         clientName={localizedClientName}
         scheduledTime={item.scheduledTime}
       />

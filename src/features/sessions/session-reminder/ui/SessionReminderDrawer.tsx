@@ -10,14 +10,13 @@ import { cn } from '@/shared/lib/utils';
 import Divider from '@/shared/ui/divider';
 import { sendSessionReminder } from '@/features/sessions/session-reminder/api/sendSessionReminder';
 import { toast } from '@/shared/ui/toast';
-import type { ReminderChannel } from '../types/session-reminder';
+import type { ReminderApiChannel, ReminderChannel } from '../types/session-reminder';
 const MESSAGE_MAX_LENGTH = 1000;
 
 interface SessionReminderDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   sessionId: string;
-  clientId: string;
   clientName: string;
   scheduledTime?: string;
 }
@@ -38,7 +37,6 @@ const SessionReminderDrawer = ({
   open,
   onOpenChange,
   sessionId,
-  clientId,
   clientName,
   scheduledTime,
 }: SessionReminderDrawerProps) => {
@@ -85,11 +83,24 @@ const SessionReminderDrawer = ({
     });
   };
 
+  const mapReminderChannel = (channel: ReminderChannel): ReminderApiChannel => {
+    if (channel === 'email') return 'EMAIL';
+    if (channel === 'sms') return 'SMS';
+    return 'PUSH';
+  };
+
   const handleSend = async () => {
     if (!isSendEnabled || isSubmitting) return;
 
+    const selectedChannel = channels[0];
+    if (!selectedChannel) return;
+
     setIsSubmitting(true);
-    const result = await sendSessionReminder(sessionId);
+    const result = await sendSessionReminder({
+      sessionId,
+      channel: mapReminderChannel(selectedChannel),
+      customMessage: resolvedMessage,
+    });
     setIsSubmitting(false);
 
     if (!result.success) {

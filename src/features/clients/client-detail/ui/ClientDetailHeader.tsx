@@ -73,7 +73,6 @@ export default function ClientDetailHeader({ client, sessionId }: ClientDetailHe
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
         sessionId=""
-        clientId={client.clientId}
         clientName={localizedClientName}
       />
     </>

@@ -1,11 +1,13 @@
-import type { SessionReminderResponse } from '../types/session-reminder';
+import type {
+  SessionReminderRequestPayload,
+  SessionReminderResponse,
+} from '../types/session-reminder';
 import { ApiError, httpClient } from '@/shared/api/http-client';
 
 const requestSendSessionReminder = async (
-  sessionIdValue: string,
+  payload: SessionReminderRequestPayload,
 ): Promise<SessionReminderResponse> => {
-  /** 임시로 sessionId 1 지정 */
-  const normalizedSessionId = sessionIdValue?.trim() ? sessionIdValue : '1';
+  const normalizedSessionId = payload.sessionId?.trim();
   const sessionId = Number(normalizedSessionId);
   if (!Number.isFinite(sessionId) || sessionId <= 0) {
     return {
@@ -15,7 +17,11 @@ const requestSendSessionReminder = async (
   }
 
   try {
-    await httpClient.post(`/api/v1/sessions/${sessionId}/reminder`, undefined);
+    await httpClient.post(`/api/v1/sessions/${sessionId}/reminder`, {
+      sessionId,
+      channel: payload.channel,
+      customMessage: payload.customMessage,
+    });
     return {
       success: true,
     };
@@ -33,5 +39,6 @@ const requestSendSessionReminder = async (
   }
 };
 
-export const sendSessionReminder = (sessionId: string) => requestSendSessionReminder(sessionId);
+export const sendSessionReminder = (payload: SessionReminderRequestPayload) =>
+  requestSendSessionReminder(payload);
 export const sendSessionReminderMock = sendSessionReminder;

@@ -11,7 +11,6 @@ import { setSessionStartContext } from '@/shared/lib/session-start-context';
 import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 
 interface TodayScheduleActionProps {
-  clientId: string;
   scheduleId?: string;
   clientName: string;
   scheduledTime?: string;
@@ -20,7 +19,6 @@ interface TodayScheduleActionProps {
 }
 
 export default function TodayScheduleAction({
-  clientId,
   scheduleId,
   clientName,
   scheduledTime,
@@ -73,7 +71,6 @@ export default function TodayScheduleAction({
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
         sessionId={scheduleId ?? ''}
-        clientId={clientId}
         clientName={clientName}
         scheduledTime={scheduledTime}
       />
