@@ -450,11 +450,16 @@
       "title": "상담 정보",
       "fields": {
         "counselingStartDate": "상담 시작 일자",
+        "counselingTime": "상담 시간",
+        "counselingStartTime": "상담 시작 시간",
+        "counselingEndTime": "상담 종료 시간",
         "chiefConcern": "주 호소 문제",
         "referralPath": "유입 경로"
       },
       "placeholders": {
         "counselingStartDate": "상담 시작 일자를 선택해 주세요",
+        "counselingStartTime": "상담 시작 시간을 선택해 주세요",
+        "counselingEndTime": "상담 종료 시간을 선택해 주세요",
         "chiefConcern": "주 호소 문제를 입력해 주세요",
         "referralPath": "유입 경로-검색/지인 추천/병원 의뢰/KKEBI앱/기타"
       },

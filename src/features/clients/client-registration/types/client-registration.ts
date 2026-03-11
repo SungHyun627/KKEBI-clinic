@@ -13,6 +13,8 @@ export interface BasicInfoFormValues {
 
 export interface CounselingInfoFormValues {
   counselingStartDate: string;
+  counselingStartTime: string;
+  counselingEndTime: string;
   chiefConcern: string;
   referralPath: string;
 }

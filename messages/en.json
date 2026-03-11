@@ -450,11 +450,16 @@
       "title": "Counseling Information",
       "fields": {
         "counselingStartDate": "Counseling start date",
+        "counselingTime": "Counseling time",
+        "counselingStartTime": "Counseling start time",
+        "counselingEndTime": "Counseling end time",
         "chiefConcern": "Chief concern",
         "referralPath": "Referral source"
       },
       "placeholders": {
         "counselingStartDate": "Select counseling start date",
+        "counselingStartTime": "Select counseling start time",
+        "counselingEndTime": "Select counseling end time",
         "chiefConcern": "Enter chief concern",
         "referralPath": "Referral source - Search/Referral/Hospital referral/KKEBI app/Other"
       },

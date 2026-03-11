@@ -72,6 +72,8 @@ const NewClientPage = () => {
     mode: 'onSubmit',
     defaultValues: {
       counselingStartDate: getTodayDateKey(),
+      counselingStartTime: '09:00',
+      counselingEndTime: '10:00',
       chiefConcern: '',
       referralPath: '',
     },
