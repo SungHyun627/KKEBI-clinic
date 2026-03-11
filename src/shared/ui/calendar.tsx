@@ -20,7 +20,7 @@ const Calendar = ({
 }: React.ComponentProps<typeof DayPicker>) => {
   const locale = useLocale();
   const [internalMonth, setInternalMonth] = React.useState<Date>(defaultMonth ?? new Date());
-  const [isMonthPickerOpen, setIsMonthPickerOpen] = React.useState(false);
+  const [pickerMode, setPickerMode] = React.useState<'month' | 'year' | null>(null);
   const [pickerYear, setPickerYear] = React.useState<number>(
     (month ?? defaultMonth ?? new Date()).getFullYear(),
   );
@@ -43,19 +43,25 @@ const Calendar = ({
         : ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
     [locale],
   );
+  const yearGridStart = Math.floor(pickerYear / 12) * 12;
+  const yearOptions = React.useMemo(
+    () => Array.from({ length: 12 }, (_, index) => yearGridStart + index),
+    [yearGridStart],
+  );
+
   const defaultClassNames = getDefaultClassNames();
   const mergedClassNames = {
     ...defaultClassNames,
     root: cn('relative w-fit'),
     months: cn('flex flex-col'),
-    month: cn('space-y-7', isMonthPickerOpen && 'space-y-0'),
+    month: cn('space-y-7', pickerMode !== null && 'space-y-0'),
     month_caption: cn(
       'relative flex items-center justify-center pt-1',
-      isMonthPickerOpen && 'h-0 min-h-0 overflow-hidden p-0',
+      pickerMode !== null && 'h-0 min-h-0 overflow-hidden p-0',
     ),
     caption_label: cn(
       'body-14 text-netural-30 absolute left-1/2 -translate-x-1/2 font-medium text-center pt-3',
-      isMonthPickerOpen && 'invisible pointer-events-none',
+      pickerMode !== null && 'invisible pointer-events-none',
     ),
     nav: cn('absolute inset-x-0  flex h-[21.334px] items-center justify-between px-1'),
     button_previous: cn(
@@ -66,8 +72,8 @@ const Calendar = ({
       buttonVariants({ variant: 'icon', size: 'icon' }),
       'h-6 w-6 rounded-md border-0 p-0 hover:bg-white',
     ),
-    month_grid: cn('w-full border-collapse', isMonthPickerOpen && 'hidden'),
-    weekdays: cn('grid w-full grid-cols-7 gap-x-[3px]', isMonthPickerOpen && 'hidden'),
+    month_grid: cn('w-full border-collapse', pickerMode !== null && 'hidden'),
+    weekdays: cn('grid w-full grid-cols-7 gap-x-[3px]', pickerMode !== null && 'hidden'),
     weekday: cn(
       'body-14 flex h-[47.6px] w-[33.3px] items-center justify-center px-0 pt-1 pb-[3px] font-normal text-neutral-50',
     ),
@@ -117,7 +123,7 @@ const Calendar = ({
           )}
           onClick={() => {
             setPickerYear(currentMonth.getFullYear());
-            setIsMonthPickerOpen((prev) => !prev);
+            setPickerMode((prev) => (prev === null ? 'month' : null));
           }}
           {...captionProps}
         >
@@ -150,51 +156,86 @@ const Calendar = ({
         components={mergedComponents}
         {...props}
       />
-      {isMonthPickerOpen ? (
+      {pickerMode !== null ? (
         <div className="mx-auto inline-flex w-[252px] flex-col rounded-lg border border-neutral-95 bg-white p-3">
           <div className="mb-3 flex items-center justify-between">
             <button
               type="button"
               className="h-6 w-6 rounded-md hover:bg-neutral-95"
-              onClick={() => setPickerYear((prev) => prev - 1)}
+              onClick={() => setPickerYear((prev) => prev - (pickerMode === 'year' ? 12 : 1))}
               aria-label="Previous year"
             >
               <Image src="/icons/big-left.svg" alt="" width={20} height={20} aria-hidden />
             </button>
-            <span className="body-14 font-medium text-label-normal">{pickerYear}</span>
+            {pickerMode === 'month' ? (
+              <button
+                type="button"
+                className="body-14 rounded-md px-2 py-1 font-medium text-label-normal hover:bg-neutral-95 hover:cursor-pointer"
+                onClick={() => setPickerMode('year')}
+              >
+                {pickerYear}
+              </button>
+            ) : (
+              <span className="body-14 font-medium text-label-normal">
+                {yearOptions[0]} - {yearOptions[yearOptions.length - 1]}
+              </span>
+            )}
             <button
               type="button"
               className="h-6 w-6 rounded-md hover:bg-neutral-95"
-              onClick={() => setPickerYear((prev) => prev + 1)}
+              onClick={() => setPickerYear((prev) => prev + (pickerMode === 'year' ? 12 : 1))}
               aria-label="Next year"
             >
               <Image src="/icons/big-right.svg" alt="" width={20} height={20} aria-hidden />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {monthLabels.map((label, monthIndex) => (
-              <button
-                key={`${label}-${monthIndex}`}
-                type="button"
-                className={cn(
-                  'h-8 w-full rounded-md body-12 hover:bg-neutral-95',
-                  currentMonth.getFullYear() === pickerYear &&
-                    currentMonth.getMonth() === monthIndex
-                    ? 'bg-neutral-95 text-label-normal'
-                    : '',
-                )}
-                onClick={() => {
-                  const nextMonth = new Date(currentMonth);
-                  nextMonth.setFullYear(pickerYear);
-                  nextMonth.setMonth(monthIndex);
-                  handleMonthChange(nextMonth);
-                  setIsMonthPickerOpen(false);
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {pickerMode === 'month' ? (
+            <div className="grid grid-cols-3 gap-2">
+              {monthLabels.map((label, monthIndex) => (
+                <button
+                  key={`${label}-${monthIndex}`}
+                  type="button"
+                  className={cn(
+                    'h-8 w-full rounded-md body-12 hover:bg-neutral-95',
+                    currentMonth.getFullYear() === pickerYear &&
+                      currentMonth.getMonth() === monthIndex
+                      ? 'bg-neutral-95 text-label-normal'
+                      : '',
+                  )}
+                  onClick={() => {
+                    const nextMonth = new Date(currentMonth);
+                    nextMonth.setFullYear(pickerYear);
+                    nextMonth.setMonth(monthIndex);
+                    handleMonthChange(nextMonth);
+                    setPickerMode(null);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              {yearOptions.map((yearValue) => (
+                <button
+                  key={yearValue}
+                  type="button"
+                  className={cn(
+                    'h-8 w-full rounded-md body-12 hover:bg-neutral-95',
+                    currentMonth.getFullYear() === yearValue
+                      ? 'bg-neutral-95 text-label-normal'
+                      : '',
+                  )}
+                  onClick={() => {
+                    setPickerYear(yearValue);
+                    setPickerMode('month');
+                  }}
+                >
+                  {yearValue}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       ) : null}
     </div>
