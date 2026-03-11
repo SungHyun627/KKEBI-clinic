@@ -11,8 +11,6 @@ import AssessmentResultsSection from './AssessmentResultsSection';
 import ClientDetailHeader from './ClientDetailHeader';
 import ClientOverviewSection from './ClientOverviewSection';
 import type {
-  ClientCheckinRecord,
-  ClientCounselingRecord,
   ClientDetailData,
   ClientDetailUpdatePayload,
 } from '@/features/clients/client-detail/types/client-detail';
@@ -38,32 +36,6 @@ interface ClientDetailDrawerBodyProps {
 }
 
 const DRAWER_BODY_CLASSNAME = 'flex w-full flex-col gap-[42px]';
-const MOCK_CHECKIN_HISTORY: ClientCheckinRecord[] = [
-  {
-    date: '2026-03-01',
-    time: '21:20',
-    moodScore: 3,
-    stressScore: 4,
-    energyScore: 3,
-    sleepScore: 2,
-  },
-];
-const MOCK_COUNSELING_HISTORY: ClientCounselingRecord[] = [
-  {
-    dateTime: '2026-02-27 10:30',
-    chiefConcern: '직장',
-    taskName: '감정 기록 3회 작성',
-    taskStatus: '진행중',
-    paymentStatus: '납부',
-  },
-  {
-    dateTime: '2026-02-20 11:00',
-    chiefConcern: '건강',
-    taskName: '수면 루틴 체크',
-    taskStatus: '완수',
-    paymentStatus: '미납',
-  },
-];
 
 export default function ClientDetailDrawer({
   open,
@@ -203,14 +175,8 @@ function ClientDetailDrawerBody({
     return <div className={DRAWER_BODY_CLASSNAME} />;
   }
 
-  const checkinRecords =
-    detail?.recentCheckins && detail.recentCheckins.length > 0
-      ? detail.recentCheckins
-      : MOCK_CHECKIN_HISTORY;
-  const counselingRecords =
-    detail?.counselingHistory && detail.counselingHistory.length > 0
-      ? detail.counselingHistory
-      : MOCK_COUNSELING_HISTORY;
+  const checkinRecords = detail?.recentCheckins ?? [];
+  const counselingRecords = detail?.counselingHistory ?? [];
 
   return (
     <div className={DRAWER_BODY_CLASSNAME}>
