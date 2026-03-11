@@ -12,6 +12,7 @@ import ClientListTableSection from '@/features/clients/client-list/ui/ClientList
 import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
 
 const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
@@ -26,6 +27,7 @@ export default function ClientsPage() {
     () => [tClients('concernsDepression'), tClients('concernsStress'), tClients('concernsSleep')],
     [tClients],
   );
+  const [searchInput, setSearchInput] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
   const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
@@ -65,11 +67,21 @@ export default function ClientsPage() {
   const normalizedTotalPages = Math.max(1, totalPages || 1);
   const currentPage = Math.min(page, normalizedTotalPages);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearchKeyword(searchInput);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [searchInput]);
+
   return (
     <section className="flex w-full flex-col items-start gap-7">
       <ClientListFilters
-        searchKeyword={searchKeyword}
-        setSearchKeyword={setSearchKeyword}
+        searchKeyword={searchInput}
+        setSearchKeyword={setSearchInput}
         riskFilter={riskFilter}
         setRiskFilter={setRiskFilter}
         isRiskFilterInteracted={isRiskFilterInteracted}

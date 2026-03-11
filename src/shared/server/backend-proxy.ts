@@ -17,7 +17,9 @@ export async function proxyToBackend(request: Request, options: ProxyOptions) {
     );
   }
 
-  const upstreamUrl = `${BACKEND_BASE_URL}${options.path}`;
+  const requestUrl = new URL(request.url);
+  const queryString = requestUrl.search;
+  const upstreamUrl = `${BACKEND_BASE_URL}${options.path}${queryString}`;
   const requestHeaders = new Headers();
   const contentType = request.headers.get('content-type');
   const authorization = request.headers.get('authorization');
