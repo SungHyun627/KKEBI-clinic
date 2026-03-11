@@ -50,9 +50,10 @@ export default function SessionTranscriptCard({
                 </span>
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div
-                    className={`body-14 min-w-0 flex-1 ${
+                    className={`body-14 min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap ${
                       item.isPendingTranscription ? 'text-label-assistive' : 'text-label-normal'
                     }`}
+                    title={item.text}
                   >
                     {renderHighlightedText(item.text, locale)}
                   </div>
