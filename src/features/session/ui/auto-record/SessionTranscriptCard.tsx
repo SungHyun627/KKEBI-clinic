@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { SessionTranscriptItem } from '../../types/session';
 
 interface SessionTranscriptCardProps {
@@ -21,12 +22,22 @@ export default function SessionTranscriptCard({
   formatTimestampToHms,
   renderHighlightedText,
 }: SessionTranscriptCardProps) {
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const emptyMessage =
     locale === 'en' ? 'Transcript will appear when recording starts' : '녹음 중인 상담이 없습니다';
 
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+  }, [transcriptItems]);
+
   return (
     <div className="flex flex-col w-full justify-center p-[26px] rounded-[24px] bg-white">
-      <div className="session-transcript-scroll flex h-[300px] w-full flex-col divide-y divide-neutral-95 overflow-y-auto pr-2">
+      <div
+        ref={scrollContainerRef}
+        className="session-transcript-scroll flex h-[300px] w-full flex-col divide-y divide-neutral-95 overflow-y-auto pr-2"
+      >
         {transcriptItems.length === 0 ? (
           <div className="flex h-full w-full items-center justify-center">
             <span className="body-14 text-label-disable">{emptyMessage}</span>
