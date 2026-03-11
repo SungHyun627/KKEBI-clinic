@@ -216,7 +216,7 @@ export interface paths {
     put?: never;
     /**
      * 세션 리마인더 알림 발송
-     * @description 내담자에게 상담 일정을 다시 한번 안내하는 알림(FCM/SMS 등)을 발송합니다.
+     * @description 내담자에게 상담 일정을 다시 한번 안내하는 알림(이메일 등)을 발송합니다.
      */
     post: operations['sendReminder'];
     delete?: never;
@@ -633,6 +633,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/clients/{clientId}/reminders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * 세션 리마인더 알림 발송
+     * @description 내담자에게 다가오는 상담 세션에 대한 알림을 수동 발송합니다.
+     */
+    post: operations['sendSessionReminder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/clients/{clientId}/intake-analysis': {
     parameters: {
       query?: never;
@@ -831,6 +851,46 @@ export interface paths {
     patch: operations['updateSchedule'];
     trace?: never;
   };
+  '/api/v1/clients/{clientId}/terminate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * 상담 종결 처리
+     * @description 내담자의 상담 상태를 종결(TERMINATED)로 변경하고 사유를 기록합니다.
+     */
+    patch: operations['terminateClient'];
+    trace?: never;
+  };
+  '/api/v1/clients/{clientId}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * 상담 종결 취소 (복구)
+     * @description 종결된 내담자를 다시 활성(ACTIVE) 상태로 복구합니다.
+     */
+    patch: operations['restoreClient'];
+    trace?: never;
+  };
   '/api/v1/clients/{clientId}/email': {
     parameters: {
       query?: never;
@@ -922,7 +982,11 @@ export interface paths {
     get: operations['getMyInfo'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * 회원 탈퇴
+     * @description 로그인한 사용자의 계정을 탈퇴 처리(소프트 삭제)합니다.
+     */
+    delete: operations['withdraw'];
     options?: never;
     head?: never;
     patch?: never;
@@ -1040,6 +1104,26 @@ export interface paths {
      * @description 상담 세션의 리포트(TXT, PDF) 및 녹음 파일을 다운로드합니다.
      */
     get: operations['downloadReport'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/sessions/{sessionId}/reminders/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 세션 리마인더 발송 이력 조회
+     * @description 해당 세션에 대해 발송된 알림 기록을 최신순으로 조회합니다.
+     */
+    get: operations['getReminderHistory'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1403,6 +1487,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/clients/terminated': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 종결 상담 목록 조회
+     * @description 종결된 내담자 목록을 페이지네이션으로 조회합니다.
+     */
+    get: operations['getTerminatedClients'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/admin/intake-analyses': {
     parameters: {
       query?: never;
@@ -1684,6 +1788,25 @@ export interface components {
       /** Format: int64 */
       sessionId?: number;
       fastApiSessionId?: string;
+    };
+    /** @description 세션 알림 수동 발송 요청 DTO */
+    SessionReminderRequest: {
+      /**
+       * Format: int64
+       * @description 대상 세션 ID
+       * @example 10
+       */
+      sessionId: number;
+      /**
+       * @description 발송 채널 (EMAIL, SMS, PUSH)
+       * @example EMAIL
+       */
+      channel?: string;
+      /**
+       * @description 추가 안내 메시지
+       * @example 예약 시간에 늦지 않게 와주세요~
+       */
+      customMessage?: string;
     };
     /** @description 상담 북마크 추가 요청 DTO */
     BookmarkAddRequest: {
@@ -2196,6 +2319,14 @@ export interface components {
        */
       newScheduledAt: string;
     };
+    /** @description 상담 종결 요청 DTO */
+    ClientTerminateRequest: {
+      /**
+       * @description 종결 사유
+       * @example 상담 목표 전면 달성
+       */
+      terminationReason?: string;
+    };
     ApiResponseVoiceBaselinePromptsResponse: {
       code?: string;
       message?: string;
@@ -2238,6 +2369,7 @@ export interface components {
       points?: number;
       /** Format: int32 */
       streak?: number;
+      isDeleted?: boolean;
     };
     ApiResponseUserResponse: {
       code?: string;
@@ -2286,6 +2418,7 @@ export interface components {
       phq9?: components['schemas']['AssessmentResult'];
       pss10?: components['schemas']['AssessmentResult'];
       mbi?: components['schemas']['MbiResult'];
+      isDeleted?: boolean;
     };
     ApiResponseOnboardingResponse: {
       code?: string;
@@ -2489,6 +2622,40 @@ export interface components {
       timestamp?: string;
       isDanger?: boolean;
     };
+    ApiResponseListSessionReminderLogResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['SessionReminderLogResponse'][];
+    };
+    /** @description 세션 리마인더 발송 이력 DTO */
+    SessionReminderLogResponse: {
+      /**
+       * Format: int64
+       * @description 로그 ID
+       * @example 1
+       */
+      id?: number;
+      /**
+       * @description 발송 채널
+       * @example EMAIL
+       */
+      channel?: string;
+      /**
+       * @description 발송 메시지
+       * @example 안녕하세요...
+       */
+      message?: string;
+      /**
+       * @description 성공 여부
+       * @example true
+       */
+      isSuccess?: boolean;
+      /**
+       * Format: date-time
+       * @description 발송 일시
+       */
+      sentAt?: string;
+    };
     SseEmitter: {
       /** Format: int64 */
       timeout?: number;
@@ -2516,10 +2683,10 @@ export interface components {
       /** Format: int64 */
       totalElements?: number;
       first?: boolean;
-      /** Format: int32 */
-      numberOfElements?: number;
       last?: boolean;
       pageable?: components['schemas']['PageableObject'];
+      /** Format: int32 */
+      numberOfElements?: number;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['RecordDto'][];
@@ -2762,10 +2929,10 @@ export interface components {
       /** Format: int64 */
       totalElements?: number;
       first?: boolean;
-      /** Format: int32 */
-      numberOfElements?: number;
       last?: boolean;
       pageable?: components['schemas']['PageableObject'];
+      /** Format: int32 */
+      numberOfElements?: number;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['ClientSummaryResponse'][];
@@ -2788,8 +2955,18 @@ export interface components {
       email?: string;
       /** Format: date */
       birthDate?: string;
+      /** Format: int32 */
+      age?: number;
       /** @enum {string} */
       gender?: 'MALE' | 'FEMALE' | 'NON_BINARY';
+      /** @enum {string} */
+      riskLevel?: 'STABLE' | 'CAUTION' | 'RISK';
+      /** Format: int32 */
+      streak?: number;
+      /** Format: int32 */
+      currentSessionCount?: number;
+      /** Format: int32 */
+      totalSessionCount?: number;
       /** @enum {string} */
       paymentType?: 'SELF' | 'INSURANCE';
       /** Format: date */
@@ -2798,6 +2975,10 @@ export interface components {
       referralSource?: string;
       profileImageUrl?: string;
       insuranceCompany?: string;
+      status?: string;
+      nextSession?: components['schemas']['ClientNextSessionDto'];
+      recentCheckIns?: components['schemas']['ClientRecentCheckInDto'][];
+      counselingHistory?: components['schemas']['ClientSessionHistoryDto'][];
       intake?: components['schemas']['ClientIntakeResponse'];
       testResults?: components['schemas']['ClientTestResultResponse'][];
       /** Format: date-time */
@@ -2826,6 +3007,65 @@ export interface components {
       familyBondReason?: string;
       selfDescription?: string;
       imageUrls?: string[];
+    };
+    /** @description 다음 상담 세션 정보 DTO */
+    ClientNextSessionDto: {
+      /**
+       * Format: int64
+       * @description 세션 ID
+       * @example 2
+       */
+      sessionId?: number;
+      /**
+       * Format: date-time
+       * @description 예정 일시
+       */
+      scheduledAt?: string;
+    };
+    /** @description 내담자 최근 체크인 데이터 DTO */
+    ClientRecentCheckInDto: {
+      /**
+       * Format: date-time
+       * @description 체크인 일시
+       */
+      checkInAt?: string;
+      /**
+       * Format: double
+       * @description 기분 점수 (1-5)
+       * @example 4
+       */
+      moodScore?: number;
+      /**
+       * Format: double
+       * @description 스트레스 점수 (1-5)
+       * @example 3.2
+       */
+      stressScore?: number;
+      /**
+       * Format: double
+       * @description 에너지 점수 (1-5)
+       * @example 2.8
+       */
+      energyScore?: number;
+    };
+    /** @description 내담자 상세화면 내 과거 상담 내역 DTO */
+    ClientSessionHistoryDto: {
+      /**
+       * Format: int64
+       * @description 세션 ID
+       * @example 1
+       */
+      sessionId?: number;
+      /**
+       * Format: date-time
+       * @description 상담 진행 일시
+       */
+      sessionDate?: string;
+      /**
+       * @description 세션 상태
+       * @example COMPLETED
+       */
+      status?: string;
     };
     ClientTestResultResponse: {
       /** Format: int64 */
@@ -2891,6 +3131,74 @@ export interface components {
        * @description 분석 요청 시각
        */
       createdAt?: string;
+    };
+    ApiResponsePageTerminatedClientResponse: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['PageTerminatedClientResponse'];
+    };
+    PageTerminatedClientResponse: {
+      /** Format: int32 */
+      totalPages?: number;
+      /** Format: int64 */
+      totalElements?: number;
+      first?: boolean;
+      last?: boolean;
+      pageable?: components['schemas']['PageableObject'];
+      /** Format: int32 */
+      numberOfElements?: number;
+      /** Format: int32 */
+      size?: number;
+      content?: components['schemas']['TerminatedClientResponse'][];
+      /** Format: int32 */
+      number?: number;
+      sort?: components['schemas']['SortObject'];
+      empty?: boolean;
+    };
+    /** @description 종결 상담 조회 목록용 응답 DTO */
+    TerminatedClientResponse: {
+      /**
+       * Format: int64
+       * @description 내담자 ID
+       * @example 1
+       */
+      id?: number;
+      /**
+       * @description 내담자 이름
+       * @example 김철수
+       */
+      name?: string;
+      /**
+       * @description 성별
+       * @enum {string}
+       */
+      gender?: 'MALE' | 'FEMALE' | 'NON_BINARY';
+      /**
+       * Format: int32
+       * @description 나이
+       * @example 28
+       */
+      age?: number;
+      /**
+       * @description 주호소문제
+       * @example 우울, 직장 스트레스
+       */
+      chiefComplaint?: string;
+      /**
+       * @description 종결 사유
+       * @example 상담 목표 달성
+       */
+      terminationReason?: string;
+      /**
+       * Format: date
+       * @description 상담 시작일
+       */
+      counselingStartDate?: string;
+      /**
+       * Format: date-time
+       * @description 종결 일자
+       */
+      terminatedAt?: string;
     };
     ApiResponseIntakeAnalysisResponse: {
       code?: string;
@@ -3234,7 +3542,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SessionReminderRequest'];
+      };
+    };
     responses: {
       /** @description OK */
       200: {
@@ -3940,7 +4252,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 만료된 챌린지 */
+      /** @description 잘못된 OTP */
       400: {
         headers: {
           [name: string]: unknown;
@@ -4099,6 +4411,36 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseLong'];
+        };
+      };
+    };
+  };
+  sendSessionReminder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SessionReminderRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
         };
       };
     };
@@ -4440,6 +4782,62 @@ export interface operations {
       };
     };
   };
+  terminateClient: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClientTerminateRequest'];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  restoreClient: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 내담자 ID
+         * @example 1
+         */
+        clientId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
   updateClientEmail: {
     parameters: {
       query?: never;
@@ -4555,6 +4953,26 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseUserResponse'];
+        };
+      };
+    };
+  };
+  withdraw: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseVoid'];
         };
       };
     };
@@ -4691,6 +5109,28 @@ export interface operations {
         };
         content: {
           'application/octet-stream': string[];
+        };
+      };
+    };
+  };
+  getReminderHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseListSessionReminderLogResponse'];
         };
       };
     };
@@ -5117,6 +5557,28 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseClientDetailResponse'];
+        };
+      };
+    };
+  };
+  getTerminatedClients: {
+    parameters: {
+      query: {
+        pageable: components['schemas']['Pageable'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponsePageTerminatedClientResponse'];
         };
       };
     };
