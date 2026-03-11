@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session';
 import type { SessionInsightsSsePatch } from '../../types/session';
 import { useRecordingController } from '../../hooks/useRecordingController';
-import { useSessionAnalysis } from '../../hooks/useSessionAnalysis';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
 import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
 import { useAudioChunkUploader } from '../../hooks/useAudioChunkUploader';
@@ -105,8 +104,6 @@ interface SessionAutoRecordPanelProps {
 
 export default function SessionAutoRecordPanel({
   sessionId,
-  autoRecord,
-  baseInsights,
   onRecorderStateChange,
   onRiskSignalDetected,
   onAnalysisChange,
@@ -230,14 +227,6 @@ export default function SessionAutoRecordPanel({
     storageKey: getSessionAutoRecordStorageKey(sessionId),
     snapshot,
     hydrate,
-  });
-
-  const { liveSummary } = useSessionAnalysis({
-    locale,
-    isRecording,
-    transcriptItems,
-    autoRecord,
-    baseInsights,
   });
 
   // Extract nested data envelope if SSE payload shape is { code, message, data }
@@ -366,6 +355,13 @@ export default function SessionAutoRecordPanel({
     enabled: isRecording && !isPaused,
     onEvent: handleStreamEvent,
   });
+
+  useEffect(() => {
+    if (!isRecording) {
+      setStreamSummary(null);
+    }
+  }, [isRecording]);
+
   const activeStreamSummary = isRecording ? streamSummary : null;
 
   useEffect(() => {
@@ -725,8 +721,15 @@ export default function SessionAutoRecordPanel({
         />
         <SessionLiveSummaryCard
           locale={locale}
-          title={activeStreamSummary?.title ?? liveSummary.title}
-          body={activeStreamSummary?.body ?? liveSummary.body}
+          title={
+            activeStreamSummary?.title ??
+            (isRecording
+              ? locale === 'en'
+                ? 'Waiting for AI summary...'
+                : 'AI 요약 생성 대기 중...'
+              : '')
+          }
+          body={activeStreamSummary?.body ?? ''}
         />
         <SessionCounselorMemoCard locale={locale} defaultValue="" />
       </div>
