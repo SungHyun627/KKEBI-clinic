@@ -10,7 +10,7 @@ import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 export default function ClosedClientsPage() {
   const tClients = useTranslations('clients');
   const locale = useLocale();
-  const [closedClients, setClosedClients] = useState<ClosedClientItem[]>([]);
+  const [terminatedClients, setTerminatedClients] = useState<ClosedClientItem[]>([]);
   const [pendingClientIds, setPendingClientIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const periodLabel = tClients('closedColumnPeriod');
@@ -66,7 +66,7 @@ export default function ClosedClientsPage() {
       setIsLoading(true);
       const result = await getClosedClients();
       if (result.success && result.data) {
-        setClosedClients(result.data);
+        setTerminatedClients(result.data);
       }
       setIsLoading(false);
     };
@@ -106,16 +106,16 @@ export default function ClosedClientsPage() {
           </div>
         ) : (
           <ul className="flex w-full flex-col">
-            {closedClients.length === 0 ? (
+            {terminatedClients.length === 0 ? (
               <li className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
                 {tClients('closedEmptyLast30Days')}
               </li>
             ) : (
-              closedClients.map((item, index) => (
+              terminatedClients.map((item, index) => (
                 <ClosedClientCard
                   key={item.id}
                   item={item}
-                  isLast={index === closedClients.length - 1}
+                  isLast={index === terminatedClients.length - 1}
                   localizedClientName={getClientNameByLocale(
                     item.clientId,
                     item.clientName,
@@ -136,8 +136,8 @@ export default function ClosedClientsPage() {
                       return next;
                     });
                     if (!result.success) return;
-                    setClosedClients((prev) =>
-                      prev.filter((closedItem) => closedItem.clientId !== clientId),
+                    setTerminatedClients((prev) =>
+                      prev.filter((terminatedItem) => terminatedItem.clientId !== clientId),
                     );
                   }}
                 />

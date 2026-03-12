@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   try {
     return await proxyToBackend(request, {
       method: 'GET',
-      path: '/api/v1/clients/closed',
+      path: '/api/v1/clients/terminated',
     });
   } catch {
     return NextResponse.json(
