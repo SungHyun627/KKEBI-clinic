@@ -88,6 +88,10 @@ function buildPatchFallbackDetail(clientId: string): ClientDetailData {
       mbi: 0,
       etc: '',
     },
+    nextSession: {
+      sessionId: null,
+      scheduledAt: '',
+    },
     intakeAnswers: {
       reasonForVisit: '',
       expectedChange: '',
@@ -197,6 +201,10 @@ function buildClientDetail(clientId: string): ClientDetailData | null {
       pss10: target.riskType === '위험' ? 31 : target.riskType === '주의' ? 24 : 16,
       mbi: target.riskType === '위험' ? 62 : target.riskType === '주의' ? 49 : 35,
       etc: 'GAD-7: 9점',
+    },
+    nextSession: {
+      sessionId: `scheduled-${target.id}`,
+      scheduledAt: `2026-02-${String(nextDay).padStart(2, '0')} ${String(nextHour).padStart(2, '0')}:00`,
     },
     intakeAnswers: {
       reasonForVisit: '최근 업무 스트레스로 인해 수면과 집중 저하를 경험함',

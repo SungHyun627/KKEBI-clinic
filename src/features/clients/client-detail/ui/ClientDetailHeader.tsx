@@ -16,15 +16,21 @@ import { setSessionStartContext } from '@/shared/lib/session-start-context';
 interface ClientDetailHeaderProps {
   client: ClientLookupItem;
   sessionId?: string;
+  scheduledTime?: string;
 }
 
-export default function ClientDetailHeader({ client, sessionId }: ClientDetailHeaderProps) {
+export default function ClientDetailHeader({
+  client,
+  sessionId,
+  scheduledTime,
+}: ClientDetailHeaderProps) {
   const router = useRouter();
   const locale = useLocale();
   const tCommon = useTranslations('common');
   const tDashboard = useTranslations('dashboard');
   const localizedClientName = getClientNameByLocale(client.clientId, client.clientName, locale);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
+  const hasSessionId = Boolean(sessionId);
 
   const handleStart = () => {
     if (!sessionId) return;
@@ -53,7 +59,7 @@ export default function ClientDetailHeader({ client, sessionId }: ClientDetailHe
             size="icon"
             onClick={() => setIsReminderOpen(true)}
             aria-label={tDashboard('todayScheduleSendNotification', { name: localizedClientName })}
-            disabled
+            disabled={!hasSessionId}
             className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
           >
             <Image src="/icons/sent.svg" alt="" width={24} height={24} aria-hidden />
@@ -63,7 +69,7 @@ export default function ClientDetailHeader({ client, sessionId }: ClientDetailHe
             size="md"
             className="w-full"
             onClick={handleStart}
-            disabled={!sessionId}
+            disabled={!hasSessionId}
           >
             {tCommon('start')}
           </Button>
@@ -72,8 +78,9 @@ export default function ClientDetailHeader({ client, sessionId }: ClientDetailHe
       <SessionReminderDrawer
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
-        sessionId=""
+        sessionId={sessionId ?? ''}
         clientName={localizedClientName}
+        scheduledTime={scheduledTime}
       />
     </>
   );

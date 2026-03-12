@@ -180,7 +180,11 @@ function ClientDetailDrawerBody({
 
   return (
     <div className={DRAWER_BODY_CLASSNAME}>
-      <ClientDetailHeader client={displayClient} />
+      <ClientDetailHeader
+        client={displayClient}
+        sessionId={detail?.nextSession.sessionId ?? undefined}
+        scheduledTime={detail?.nextSession.scheduledAt}
+      />
       {detail ? (
         <ClientOverviewSection
           detail={detail}
