@@ -13,11 +13,14 @@ const Calendar = ({
   classNames,
   showOutsideDays = true,
   components,
+  pickerPanelClassName,
   month,
   defaultMonth,
   onMonthChange,
   ...props
-}: React.ComponentProps<typeof DayPicker>) => {
+}: React.ComponentProps<typeof DayPicker> & {
+  pickerPanelClassName?: string;
+}) => {
   const locale = useLocale();
   const [internalMonth, setInternalMonth] = React.useState<Date>(defaultMonth ?? new Date());
   const [pickerMode, setPickerMode] = React.useState<'month' | 'year' | null>(null);
@@ -157,7 +160,12 @@ const Calendar = ({
         {...props}
       />
       {pickerMode !== null ? (
-        <div className="mx-auto inline-flex w-[252px] flex-col rounded-lg border border-neutral-95 bg-white p-3">
+        <div
+          className={cn(
+            'mx-auto inline-flex w-[252px] flex-col rounded-lg border border-neutral-95 bg-white p-3',
+            pickerPanelClassName,
+          )}
+        >
           <div className="mb-3 flex items-center justify-between">
             <button
               type="button"

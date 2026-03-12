@@ -104,10 +104,14 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
               if (!date) return;
               setSelectedDate(date);
             }}
+            pickerPanelClassName="absolute left-1/2 top-[10px] z-20 -translate-x-1/2"
             className="h-full w-full p-0 [--session-calendar-max-h:calc(100dvh-10px)]"
             classNames={{
+              month: 'space-y-7',
+              month_caption: 'relative flex items-center justify-center pt-1',
+              month_grid: 'w-full border-collapse',
               caption_label:
-                'absolute left-1/2 -translate-x-1/2 pt-3 text-center text-[16px] font-medium text-neutral-30',
+                'body-14 text-netural-30 absolute left-1/2 -translate-x-1/2 font-medium text-center pt-3',
               weekdays:
                 'grid w-full grid-cols-7 gap-x-[3px] [&>*:first-child]:text-[#FA8FA8] [&>*:last-child]:text-[#7CB8FF]',
               weekday:
