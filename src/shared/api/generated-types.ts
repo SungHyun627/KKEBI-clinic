@@ -984,7 +984,7 @@ export interface paths {
     post?: never;
     /**
      * 회원 탈퇴
-     * @description 로그인한 사용자의 계정을 탈퇴 처리(소프트 삭제)합니다.
+     * @description 계정을 탈퇴 상태로 변경(소프트 삭제)하고 온보딩 내역을 초기화합니다.
      */
     delete: operations['withdraw'];
     options?: never;
@@ -1784,9 +1784,18 @@ export interface components {
       message?: string;
       data?: components['schemas']['SessionStartResponse'];
     };
+    /** @description 상담 세션 시작 응답 DTO */
     SessionStartResponse: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description DB에 생성된 세션 ID
+       * @example 10
+       */
       sessionId?: number;
+      /**
+       * @description FastAPI 연동을 위한 세션 식별자
+       * @example sess-abc1234
+       */
       fastApiSessionId?: string;
     };
     /** @description 세션 알림 수동 발송 요청 DTO */
@@ -1827,12 +1836,27 @@ export interface components {
       message?: string;
       data?: components['schemas']['AudioChunkResponse'];
     };
+    /** @description 실시간 오디오 분석 결과 응답 */
     AudioChunkResponse: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description 대화록 DB 식별자
+       * @example 105
+       */
       transcriptId?: number;
+      /**
+       * @description STT 변환 문장
+       * @example 오늘 기분이 안 좋아요.
+       */
       text?: string;
+      /** @description S3 버킷 객체 키 경로 */
       audioUrl?: string;
+      /**
+       * @description 주요 감정 결과
+       * @example sad
+       */
       topEmotion?: string;
+      /** @description 감정별 예측 확률 */
       emotionProbs?: {
         [key: string]: number;
       };
@@ -2344,31 +2368,94 @@ export interface components {
       message?: string;
       data?: components['schemas']['UserResponse'][];
     };
+    /** @description 사용자 앱 프로필 및 활동 정보 응답 DTO */
     UserResponse: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description 유저 고유 ID
+       * @example 10
+       */
       userId?: number;
+      /**
+       * @description 이메일 로그인 계정
+       * @example user@example.com
+       */
       email?: string;
+      /**
+       * @description 실명
+       * @example 홍길동
+       */
       name?: string;
+      /**
+       * @description 소셜 제공자 (Google/Kakao)
+       * @example KAKAO
+       */
       provider?: string;
+      /**
+       * @description 앱 내 표시 닉네임
+       * @example 행복한도토리
+       */
       nickname?: string;
+      /**
+       * @description 성별 (MALE/FEMALE)
+       * @example MALE
+       */
       gender?: string;
+      /**
+       * @description 직업
+       * @example 학생
+       */
       occupation?: string;
+      /**
+       * @description 생년월일
+       * @example 1995-05-10
+       */
       birthDate?: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 만 나이
+       * @example 29
+       */
       age?: number;
+      /**
+       * @description 연락처
+       * @example 010-1234-5678
+       */
       phoneNumber?: string;
+      /** @description 개인 맞춤 설정 속성들 */
       preferences?: {
         [key: string]: Record<string, never>;
       };
+      /** @description 선택한 주 호소 관심사 키워드들 */
       concerns?: string[];
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 현재 게이미피케이션 레벨
+       * @example 3
+       */
       level?: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 누적 경험치
+       * @example 1250
+       */
       xp?: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 보유 포인트
+       * @example 300
+       */
       points?: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 연속 앱 사용일수 (스트릭)
+       * @example 7
+       */
       streak?: number;
+      /**
+       * @description 탈퇴 회원 여부
+       * @example false
+       */
       isDeleted?: boolean;
     };
     ApiResponseUserResponse: {
@@ -2381,43 +2468,113 @@ export interface components {
       message?: string;
       data?: components['schemas']['OnboardingResponse'][];
     };
+    /** @description 단일 척도 검사 결과 */
     AssessmentResult: {
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 총점
+       * @example 15
+       */
       score?: number;
+      /**
+       * @description 위험 수준 범주명
+       * @example 중증 우울
+       */
       level?: string;
+      /**
+       * @description 해석 피드백
+       * @example 전문적인 도움이 필요합니다.
+       */
       feedback?: string;
     };
+    /** @description MBI 하위 세부 척도 */
     MbiDetails: {
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 정서적 고갈
+       * @example 20
+       */
       burnout?: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 비인간화
+       * @example 10
+       */
       depersonalisation?: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 개인적 성취감 저하
+       * @example 15
+       */
       personalAchievement?: number;
     };
+    /** @description MBI(직무소진) 검사 결과 */
     MbiResult: {
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 총점
+       * @example 45
+       */
       score?: number;
+      /**
+       * @description 위험 수준 범주명
+       * @example 위험
+       */
       level?: string;
+      /**
+       * @description 해석 피드백
+       * @example 번아웃 고위험군입니다.
+       */
       feedback?: string;
       details?: components['schemas']['MbiDetails'];
     };
+    /** @description 온보딩 문진 결과 및 프로필 응답 DTO */
     OnboardingResponse: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description 유저 고유 ID
+       * @example 10
+       */
       userId?: number;
+      /**
+       * @description 선택한 앱 닉네임
+       * @example 행복한도토리
+       */
       nickname?: string;
+      /**
+       * @description 성별
+       * @example MALE
+       */
       gender?: string;
+      /**
+       * @description 직업
+       * @example 학생
+       */
       occupation?: string;
+      /**
+       * @description 생년월일
+       * @example 1995-05-10
+       */
       birthDate?: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 만 나이
+       * @example 29
+       */
       age?: number;
+      /** @description 개인 맞춤 설정 */
       preferences?: {
         [key: string]: Record<string, never>;
       };
+      /** @description 주요 관심사(키워드) */
       concerns?: string[];
       phq9?: components['schemas']['AssessmentResult'];
       pss10?: components['schemas']['AssessmentResult'];
       mbi?: components['schemas']['MbiResult'];
+      /**
+       * @description 탈퇴 회원 여부
+       * @example false
+       */
       isDeleted?: boolean;
     };
     ApiResponseOnboardingResponse: {
@@ -2563,34 +2720,72 @@ export interface components {
       message?: string;
       data?: components['schemas']['SessionSummaryDataResponse'];
     };
+    /** @description 북마크 내역 */
     BookmarkView: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description 북마크 ID
+       * @example 5
+       */
       id?: number;
+      /** @description 지정된 대화 내용 */
       targetText?: string;
+      /** @description 메모 기록 */
       memo?: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 발생 시간(초)
+       * @example 300
+       */
       timeOffset?: number;
     };
-    Insights: {
-      riskType?: string;
-      keyConcerns?: string[];
-      distortionType?: string;
-    };
+    /** @description 추천 미션 */
     MissionDto: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description 미션 ID
+       * @example 10
+       */
       id?: number;
+      /**
+       * @description 미션명
+       * @example 하루 10분 명상
+       */
       title?: string;
+      /** @description 상세 설명 */
       description?: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 권장 수행 일수
+       * @example 7
+       */
       duration?: number;
     };
+    /** @description 녹음기 메타데이터 */
     RecorderState: {
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 진행 시간(초)
+       * @example 1800
+       */
       elapsedSeconds?: number;
     };
+    /** @description 상담 세션 기본 정보 */
     SessionData: {
+      /**
+       * @description 내담자 이름
+       * @example 김철수
+       */
       clientName?: string;
+      /**
+       * @description 상담 유형
+       * @example 정기 상담
+       */
       sessionType?: string;
+      /**
+       * @description 위험 수준
+       * @example 위험
+       */
       riskType?: string;
     };
     /** @description 상담 요약 페이지용 데이터 모델 (SummaryPayload) */
@@ -2602,24 +2797,54 @@ export interface components {
       sessionId?: number;
       /** @description 종료 시각 (ISO) */
       endedAt?: string;
+      /** @description 전체 녹음 파일 URL */
+      audioUrl?: string;
       sessionData?: components['schemas']['SessionData'];
       recorderState?: components['schemas']['RecorderState'];
       summarySnapshot?: components['schemas']['SummarySnapshot'];
     };
+    /** @description 세션 요약 데이터 */
     SummarySnapshot: {
-      insights?: components['schemas']['Insights'];
-      recentEmotionHistory?: string[];
+      /** @description 감정 패턴 목록 */
+      emotionPatterns?: string[];
+      /** @description 인지적 왜곡 유형 목록 */
+      detectedDistortions?: string[];
+      /** @description 대화록(STT) 목록 */
       transcript?: components['schemas']['TranscriptView'][];
+      /** @description 북마크 목록 */
       bookmarks?: components['schemas']['BookmarkView'][];
+      /**
+       * @description AI/상담사 작성 요약문
+       * @example 안정적인 상태를 보임.
+       */
       summaryText?: string;
+      /** @description 추천 미션 목록 */
       recommendedMissions?: components['schemas']['MissionDto'][];
     };
+    /** @description 발화(STT) 조각 정보 */
     TranscriptView: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description 세그먼트 ID
+       * @example 12
+       */
       id?: number;
+      /**
+       * @description 발화자 (CLIENT/COUNSELOR)
+       * @example CLIENT
+       */
       speaker?: string;
+      /** @description 발화 텍스트 */
       text?: string;
+      /**
+       * @description 시각
+       * @example 2024-03-15T15:00:12
+       */
       timestamp?: string;
+      /**
+       * @description 위험 발화 여부
+       * @example false
+       */
       isDanger?: boolean;
     };
     ApiResponseListSessionReminderLogResponse: {
@@ -2682,11 +2907,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      first?: boolean;
-      last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      first?: boolean;
+      last?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['RecordDto'][];
@@ -2696,12 +2921,12 @@ export interface components {
       empty?: boolean;
     };
     PageableObject: {
-      paged?: boolean;
-      unpaged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
       /** Format: int32 */
       pageSize?: number;
+      paged?: boolean;
+      unpaged?: boolean;
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
@@ -2718,8 +2943,8 @@ export interface components {
       notes?: string;
     };
     SortObject: {
-      unsorted?: boolean;
       sorted?: boolean;
+      unsorted?: boolean;
       empty?: boolean;
     };
     ApiResponseListNotificationResponse: {
@@ -2928,11 +3153,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      first?: boolean;
-      last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      first?: boolean;
+      last?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['ClientSummaryResponse'][];
@@ -2946,44 +3171,122 @@ export interface components {
       message?: string;
       data?: components['schemas']['ClientDetailResponse'];
     };
+    /** @description 내담자 상세 정보 조회 응답 DTO */
     ClientDetailResponse: {
-      /** Format: int64 */
+      /**
+       * Format: int64
+       * @description 내담자 DB 식별자
+       * @example 1
+       */
       id?: number;
+      /**
+       * @description 이름
+       * @example 김철수
+       */
       name?: string;
+      /**
+       * @description 닉네임
+       * @example 철수
+       */
       nickname?: string;
+      /**
+       * @description 연락처
+       * @example 010-1234-5678
+       */
       phoneNumber?: string;
+      /**
+       * @description 연동된 이메일
+       * @example client@example.com
+       */
       email?: string;
-      /** Format: date */
+      /**
+       * Format: date
+       * @description 생년월일
+       * @example 1990-01-01
+       */
       birthDate?: string;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 만 나이
+       * @example 34
+       */
       age?: number;
-      /** @enum {string} */
+      /**
+       * @description 성별
+       * @enum {string}
+       */
       gender?: 'MALE' | 'FEMALE' | 'NON_BINARY';
-      /** @enum {string} */
+      /**
+       * @description 위험 수준 파악 (STABLE/CAUTION/RISK)
+       * @enum {string}
+       */
       riskLevel?: 'STABLE' | 'CAUTION' | 'RISK';
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 앱 연속 접속일수
+       * @example 5
+       */
       streak?: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 현재(이번) 회차
+       * @example 3
+       */
       currentSessionCount?: number;
-      /** Format: int32 */
+      /**
+       * Format: int32
+       * @description 총 예정/진행 회차
+       * @example 10
+       */
       totalSessionCount?: number;
-      /** @enum {string} */
+      /**
+       * @description 결제/지원 유형
+       * @enum {string}
+       */
       paymentType?: 'SELF' | 'INSURANCE';
-      /** Format: date */
+      /**
+       * Format: date
+       * @description 상담 시작일
+       * @example 2024-03-01
+       */
       counselingStartDate?: string;
+      /**
+       * @description 주 호소 문제
+       * @example 우울, 무기력
+       */
       chiefComplaint?: string;
+      /**
+       * @description 유입 경로
+       * @example 지인 추천
+       */
       referralSource?: string;
+      /** @description 프로필 이미지 URL */
       profileImageUrl?: string;
+      /**
+       * @description 보험사 정보
+       * @example KB손해보험
+       */
       insuranceCompany?: string;
+      /**
+       * @description 상담 상태 (ACTIVE / TERMINATED)
+       * @example ACTIVE
+       */
       status?: string;
       nextSession?: components['schemas']['ClientNextSessionDto'];
+      /** @description 최근 감정/스트레스 체크인 데이터 (앱 연동) */
       recentCheckIns?: components['schemas']['ClientRecentCheckInDto'][];
+      /** @description 과거 상담 내역 요약 */
       counselingHistory?: components['schemas']['ClientSessionHistoryDto'][];
       intake?: components['schemas']['ClientIntakeResponse'];
+      /** @description 심리검사 결과 목록 */
       testResults?: components['schemas']['ClientTestResultResponse'][];
-      /** Format: date-time */
+      /**
+       * Format: date-time
+       * @description 내담자 등록 일시
+       */
       createdAt?: string;
     };
+    /** @description 초기 면접지(Intake) 응답 결과 */
     ClientIntakeResponse: {
       /** Format: int32 */
       phq9Score?: number;
@@ -3067,6 +3370,7 @@ export interface components {
        */
       status?: string;
     };
+    /** @description 심리검사 결과 목록 */
     ClientTestResultResponse: {
       /** Format: int64 */
       id?: number;
@@ -3142,11 +3446,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
-      first?: boolean;
-      last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
+      first?: boolean;
+      last?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['TerminatedClientResponse'][];
@@ -3159,7 +3463,7 @@ export interface components {
     TerminatedClientResponse: {
       /**
        * Format: int64
-       * @description 내담자 ID
+       * @description 내담자 DB 식별자
        * @example 1
        */
       id?: number;
@@ -3169,34 +3473,36 @@ export interface components {
        */
       name?: string;
       /**
-       * @description 성별
+       * @description 성별 (MALE/FEMALE)
+       * @example MALE
        * @enum {string}
        */
       gender?: 'MALE' | 'FEMALE' | 'NON_BINARY';
       /**
        * Format: int32
-       * @description 나이
+       * @description 만 나이
        * @example 28
        */
       age?: number;
       /**
-       * @description 주호소문제
+       * @description 접수 호소 문제
        * @example 우울, 직장 스트레스
        */
       chiefComplaint?: string;
       /**
-       * @description 종결 사유
+       * @description 종결 상태 사유
        * @example 상담 목표 달성
        */
       terminationReason?: string;
       /**
        * Format: date
-       * @description 상담 시작일
+       * @description 최초 상담 시작일
+       * @example 2024-01-10
        */
       counselingStartDate?: string;
       /**
        * Format: date-time
-       * @description 종결 일자
+       * @description 상담 종결 처리 일자
        */
       terminatedAt?: string;
     };
@@ -4143,7 +4449,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 유효하지 않은/만료된 토큰 */
+      /** @description 비밀번호 정책 위반 */
       400: {
         headers: {
           [name: string]: unknown;

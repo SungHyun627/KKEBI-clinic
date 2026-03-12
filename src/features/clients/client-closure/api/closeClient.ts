@@ -10,7 +10,10 @@ const requestCloseClient = async (
   payload: ClientClosePayload,
 ): Promise<ClientCloseResponse> => {
   try {
-    const response = await httpClient.post<unknown>(`/api/v1/clients/${clientId}/close`, payload);
+    const response = await httpClient.post<unknown>(
+      `/api/v1/clients/${clientId}/terminate`,
+      payload,
+    );
     const base = toBaseResponse<unknown>(response);
 
     return {
