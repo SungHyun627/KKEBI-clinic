@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { proxyToBackend } from '@/shared/server/backend-proxy';
-import { getSessionSummaryMock } from '@/features/summary/lib/summary-mock';
 import type { SummaryPayload } from '@/features/summary/types/summary';
 
 interface BackendSummaryEnvelope {
@@ -24,6 +23,8 @@ export const GET = async (
   const locale = request.headers.get('accept-language')?.toLowerCase().startsWith('en')
     ? 'en'
     : 'ko';
+  const loadFailedMessage =
+    locale === 'en' ? 'Failed to load session summary data.' : '데이터를 불러올 수 없습니다.';
 
   try {
     const proxied = await proxyToBackend(request, {
@@ -52,15 +53,26 @@ export const GET = async (
       code: payload?.code,
       message: payload?.message,
     });
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: payload?.message || loadFailedMessage,
+      },
+      { status: proxied.status >= 400 ? proxied.status : 502 },
+    );
   } catch (error) {
     console.error('[session-summary][proxy-exception]', {
       sessionId,
       error: error instanceof Error ? error.message : String(error),
     });
-  }
 
-  return NextResponse.json({
-    success: true,
-    data: getSessionSummaryMock(sessionId, locale),
-  });
+    return NextResponse.json(
+      {
+        success: false,
+        message: loadFailedMessage,
+      },
+      { status: 500 },
+    );
+  }
 };

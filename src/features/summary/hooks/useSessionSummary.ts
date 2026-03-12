@@ -11,11 +11,11 @@ import {
   downloadSessionTranscriptTxt,
 } from '@/features/summary/lib/downloads';
 import { formatSummaryDate } from '@/features/summary/lib/formatSummaryDate';
-import { getSummaryMissions } from '@/features/summary/lib/summaryMissions';
 import { toast } from '@/shared/ui/toast';
 import { getSessionAudioPreviewUrl } from '@/shared/lib/session-audio-preview-cache';
 import type {
   FollowUpSessionTiming,
+  MissionItem,
   RiskEvaluation,
   SummarySubmitFormValues,
   SummaryPayload,
@@ -79,10 +79,40 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     };
   }, [locale, sessionId]);
 
-  const transcriptItems = useMemo(
-    () => payload?.summarySnapshot?.transcript ?? [],
-    [payload?.summarySnapshot?.transcript],
-  );
+  const normalizeSpeaker = (value?: string) => {
+    if (value === 'counselor' || value === 'COUNSELOR') return 'counselor' as const;
+    if (value === 'client' || value === 'CLIENT') return 'client' as const;
+    return 'client' as const;
+  };
+
+  const normalizeTimestamp = (value?: string) => {
+    if (!value) return '--:--:--';
+    if (/^\d{2}:\d{2}:\d{2}$/.test(value)) return value;
+    if (/^\d{2}:\d{2}$/.test(value)) return `00:${value}`;
+
+    if (value.includes('T')) {
+      const [, timePart = ''] = value.split('T');
+      const hms = timePart.slice(0, 8);
+      if (/^\d{2}:\d{2}:\d{2}$/.test(hms)) return hms;
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    const hh = String(parsed.getHours()).padStart(2, '0');
+    const mm = String(parsed.getMinutes()).padStart(2, '0');
+    const ss = String(parsed.getSeconds()).padStart(2, '0');
+    return `${hh}:${mm}:${ss}`;
+  };
+
+  const transcriptItems = useMemo(() => {
+    const source = payload?.summarySnapshot?.transcript ?? [];
+    return source.map((item, index) => ({
+      ...item,
+      id: item.id ?? index + 1,
+      speaker: normalizeSpeaker(item.speaker),
+      timestamp: normalizeTimestamp(item.timestamp),
+    }));
+  }, [payload?.summarySnapshot?.transcript]);
   const durationMinutesText = `${Math.floor((payload?.recorderState?.elapsedSeconds ?? 0) / 60)}${tSummary(
     'durationMinuteUnit',
   )}`;
@@ -92,28 +122,14 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
   const sessionType = payload?.sessionData?.sessionType;
   const riskType = payload?.sessionData?.riskType;
   const recordingPreviewUrl = getSessionAudioPreviewUrl(String(sessionId));
-  const hasRecording = Boolean(recordingPreviewUrl);
+  const recordingAudioUrl = payload?.audioUrl || recordingPreviewUrl || '';
+  const hasRecording = Boolean(recordingAudioUrl);
   const effectiveIsPlaying = hasRecording && isPlaying;
-  const emotions = payload?.summarySnapshot?.recentEmotionHistory ?? [];
-  const distortions = useMemo(() => {
-    const distortionType = payload?.summarySnapshot?.insights?.distortionType;
-    return distortionType ? [distortionType] : [];
-  }, [payload?.summarySnapshot?.insights?.distortionType]);
+  const emotions = payload?.summarySnapshot?.emotionPatterns ?? [];
+  const distortions = payload?.summarySnapshot?.detectedDistortions ?? [];
 
-  const derivedSummaryText = useMemo(() => {
-    const clientTurns = transcriptItems.filter((item) => item.speaker === 'client');
-    const latestClientText = clientTurns.at(-1)?.text ?? '';
-
-    return locale === 'en'
-      ? `Client reported ${clientTurns.length} key statements. Main topics include ${
-          (payload?.summarySnapshot?.insights?.keyConcerns ?? []).join(', ') || 'daily stress'
-        }. Latest concern: ${latestClientText || 'N/A'}.`
-      : `내담자 발화 ${clientTurns.length}건을 기반으로, 주요 주제는 ${
-          (payload?.summarySnapshot?.insights?.keyConcerns ?? []).join(', ') || '일상 스트레스'
-        }입니다. 최근 진술: ${latestClientText || '없음'}.`;
-  }, [locale, payload?.summarySnapshot?.insights?.keyConcerns, transcriptItems]);
-
-  const summaryText = summaryTextOverride || derivedSummaryText;
+  const summaryTextFromResponse = payload?.summarySnapshot?.summaryText ?? '';
+  const summaryText = summaryTextOverride || summaryTextFromResponse;
   const riskEvaluation = useWatch({ control, name: 'riskEvaluation' });
   const followUpSessionTiming = useWatch({ control, name: 'followUpSessionTiming' });
   const additionalMemo = useWatch({ control, name: 'additionalMemo' });
@@ -122,14 +138,36 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
   const nextStartTime = useWatch({ control, name: 'nextStartTime' });
   const nextEndTime = useWatch({ control, name: 'nextEndTime' });
 
+  const missions = useMemo<MissionItem[]>(() => {
+    const recommended = payload?.summarySnapshot?.recommendedMissions ?? [];
+    if (recommended.length > 0) {
+      return recommended.map((mission, index) => ({
+        id: String(mission.id ?? `recommended-${index + 1}`),
+        name: mission.title ?? (locale === 'en' ? 'Recommended mission' : '추천 미션'),
+        category: mission.description ?? '-',
+        duration:
+          typeof mission.duration === 'number'
+            ? locale === 'en'
+              ? `${mission.duration} days`
+              : `${mission.duration}일`
+            : '-',
+      }));
+    }
+
+    return [];
+  }, [locale, payload?.summarySnapshot?.recommendedMissions]);
+
   const isNextSessionAllSelected =
     Boolean(nextDate) && Boolean(nextStartTime) && Boolean(nextEndTime);
   const isNextSessionAllEmpty = !nextDate && !nextStartTime && !nextEndTime;
   const isNextSessionSelectionValid = isNextSessionAllSelected || isNextSessionAllEmpty;
+  const isMissionSelectionValid = missions.length === 0 || selectedMissionIds.length > 0;
+  const canSubmitSummary = !error && Boolean(payload);
   const isSubmitEnabled =
+    canSubmitSummary &&
     Boolean(riskEvaluation) &&
     Boolean(followUpSessionTiming) &&
-    selectedMissionIds.length > 0 &&
+    isMissionSelectionValid &&
     isNextSessionSelectionValid &&
     !isSubmitting;
 
@@ -155,11 +193,9 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     });
   }, [payload?.summarySnapshot?.bookmarks, sessionId, transcriptItems]);
 
-  const missions = useMemo(() => getSummaryMissions(locale), [locale]);
-
   const handleSummaryChange = (value: string) => {
     const trimmed = value.trim();
-    const defaultTrimmed = derivedSummaryText.trim();
+    const defaultTrimmed = summaryTextFromResponse.trim();
     setSummaryTextOverride(trimmed === defaultTrimmed ? '' : value);
   };
 
@@ -176,6 +212,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
       sessionId,
       transcriptItems,
       locale,
+      audioUrl: recordingAudioUrl || undefined,
     });
   };
 
@@ -187,7 +224,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
   };
 
   const handleSubmitSummary = async () => {
-    if (!riskEvaluation || !followUpSessionTiming) return;
+    if (!canSubmitSummary || !riskEvaluation || !followUpSessionTiming) return;
 
     setIsSubmitting(true);
     const result = await submitSessionSummary(sessionId, {
@@ -287,7 +324,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     handleDownloadAudio,
     handleSubmitSummary,
     audioRef,
-    recordingPreviewUrl,
+    recordingAudioUrl,
     payloadExists: Boolean(payload),
   };
 }

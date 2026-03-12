@@ -3,6 +3,7 @@ import type { RiskType, SessionType } from '@/features/dashboard/types/schedule'
 export type SummaryPayload = {
   sessionId?: number;
   endedAt: string;
+  audioUrl?: string;
   sessionData?: {
     clientName?: string;
     sessionType?: string;
@@ -12,21 +13,18 @@ export type SummaryPayload = {
     elapsedSeconds?: number;
   } | null;
   summarySnapshot?: {
-    insights?: {
-      riskType?: RiskType;
-      keyConcerns?: string[];
-      distortionType?: string;
-    } | null;
-    recentEmotionHistory?: string[];
+    emotionPatterns?: string[];
+    detectedDistortions?: string[];
     transcript?: SummaryTranscriptItem[];
     bookmarks?: SummaryBookmarkItem[];
-    autoMemo?: string;
+    summaryText?: string;
+    recommendedMissions?: SummaryRecommendedMissionItem[];
   } | null;
 };
 
 export interface SummaryTranscriptItem {
   id?: number;
-  speaker?: 'counselor' | 'client';
+  speaker?: 'counselor' | 'client' | 'COUNSELOR' | 'CLIENT';
   text?: string;
   timestamp?: string;
   isDanger?: boolean;
@@ -37,6 +35,13 @@ export interface SummaryBookmarkItem {
   targetText?: string;
   memo?: string;
   timeOffset?: number;
+}
+
+export interface SummaryRecommendedMissionItem {
+  id?: number;
+  title?: string;
+  description?: string;
+  duration?: number;
 }
 
 export type RiskEvaluation = 'stable' | 'caution' | 'risk' | 'urgent';
