@@ -19,6 +19,7 @@ import SessionLiveSummaryCard from './SessionLiveSummaryCard';
 import SessionCounselorMemoCard from './SessionCounselorMemoCard';
 import SessionAudioControls from './SessionAudioControls';
 import { toast } from '@/shared/ui/toast';
+import Image from 'next/image';
 
 type PersistedAutoRecordState = {
   transcriptItems: SessionAutoRecordData['transcripts'];
@@ -681,28 +682,34 @@ export default function SessionAutoRecordPanel({
 
   return (
     <section className="relative flex min-h-full flex-col gap-[25px] bg-neutral-99 px-8 pt-[26px] pb-[130px]">
-      <div className="flex items-center gap-2">
-        <div className="text-[24px] font-semibold">{tSession('recordTitle')}</div>
-        <span
-          className={`rounded-[10px] px-3 py-1 body-14 font-semibold ${
-            activeSpeaker === 'counselor'
-              ? 'bg-neutral-95 text-label-normal'
-              : 'bg-[#FFE5E5] text-[#FF6363]'
-          }`}
-        >
-          {activeSpeaker === 'counselor'
-            ? locale === 'en'
-              ? 'Counselor'
-              : '상담사'
-            : locale === 'en'
-              ? 'Client'
-              : '내담자'}
-        </span>
-        <span className="ml-auto hidden body-13 text-label-assistive sm:inline">
-          {locale === 'en'
-            ? 'Space: switch speaker · Enter: pause/resume'
-            : 'Space: 발화자 전환 · Enter: 일시정지/재개'}
-        </span>
+      <div className="flex flex-col items-start gap-3">
+        <div className="flex items-center gap-2">
+          <div className="text-[24px] font-semibold">{tSession('recordTitle')}</div>
+          <span
+            className={`flex justify-center items-center border  w-[75px] rounded-[100px] px-4 py-[3px] body-14 font-semibold text-center text-label-neutral ${
+              activeSpeaker === 'counselor'
+                ? 'bg-white border-neutral-95'
+                : 'bg-neutral-95 border-neutral-90'
+            }`}
+          >
+            {activeSpeaker === 'counselor'
+              ? locale === 'en'
+                ? 'Counselor'
+                : '상담사'
+              : locale === 'en'
+                ? 'Client'
+                : '내담자'}
+          </span>
+        </div>
+        <div className="flex items-center gap-[6px]">
+          <Image src="/icons/information-circle.svg" alt="information" width={24} height={24} />
+          <span className="text-label-alternative body-16">
+            {locale === 'en'
+              ? 'Press Enter or Space to switch speakers.'
+              : 'Enter 또는 Space를 눌러 발화자를 전환해 보세요.'}
+          </span>
+        </div>
+        <span className="ml-auto hidden body-13 text-label-assistive sm:inline"></span>
         <span className="ml-auto body-13 text-label-assistive sm:hidden">
           {locale === 'en' ? 'Space switch · Enter pause' : 'Space 전환 · Enter 정지/재개'}
         </span>

@@ -185,7 +185,7 @@ export default function SessionHeader({
         ) : null}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex items-center gap-3">
         <div className="flex items-center gap-[19px] max-w-[135px] w-full">
           <Button
             onClick={async () => {
