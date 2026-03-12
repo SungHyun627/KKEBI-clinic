@@ -45,7 +45,7 @@ const formatToKstDateTime = (value?: string) => {
   if (!value) return '';
 
   const hasTimezone = /(?:Z|[+\-]\d{2}:\d{2})$/i.test(value);
-  const normalizedValue = hasTimezone ? value : `${value}Z`;
+  const normalizedValue = hasTimezone ? value : `${value}+09:00`;
   const parsed = new Date(normalizedValue);
   if (Number.isNaN(parsed.getTime())) return '';
 
@@ -71,6 +71,18 @@ const splitDateTime = (value?: string) => {
   return { date: date ?? '', time };
 };
 
+const toKstScheduledDateTime = (item: BackendSessionItem) => {
+  if (item.scheduledAt) {
+    return formatToKstDateTime(item.scheduledAt);
+  }
+
+  if (item.scheduledDate && item.scheduledTime) {
+    return formatToKstDateTime(`${item.scheduledDate}T${item.scheduledTime}:00+09:00`);
+  }
+
+  return '';
+};
+
 export const mapBackendSessionListResponse = (
   payload: unknown,
   status: SessionStatus,
@@ -93,10 +105,7 @@ export const mapBackendSessionListResponse = (
       : [];
     const groupMap = new Map<string, ScheduledSessionGroup>();
     source.forEach((item, index) => {
-      const kstDateTime =
-        item.scheduledDate && item.scheduledTime
-          ? `${item.scheduledDate}T${item.scheduledTime}:00`
-          : formatToKstDateTime(item.scheduledAt);
+      const kstDateTime = toKstScheduledDateTime(item);
       const { date, time } = splitDateTime(kstDateTime);
       if (!date) return;
       const existing = groupMap.get(date);

@@ -47,13 +47,21 @@ const mapScheduledAtToTime = (value: unknown): string => {
     return value;
   }
 
-  const parsedDate = new Date(value);
+  const hasTimezone = /(?:Z|[+\-]\d{2}:\d{2})$/i.test(value);
+  const normalizedValue = hasTimezone ? value : `${value}+09:00`;
+  const parsedDate = new Date(normalizedValue);
   if (Number.isNaN(parsedDate.getTime())) {
     return '10:00';
   }
 
-  const hours = String(parsedDate.getHours()).padStart(2, '0');
-  const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
+  const formatter = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Seoul',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  const formatted = formatter.format(parsedDate); // sv-SE => "HH:mm"
+  const [hours = '10', minutes = '00'] = formatted.split(':');
   return `${hours}:${minutes}`;
 };
 
