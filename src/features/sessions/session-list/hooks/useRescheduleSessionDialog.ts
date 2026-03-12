@@ -26,7 +26,7 @@ const toDateKey = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const toLocalDateTimeString = (dateKey: string, time: string) => {
+const toUtcIsoString = (dateKey: string, time: string) => {
   const dateMatch = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   const timeMatch = time.match(/^(\d{2}):(\d{2})$/);
   if (!dateMatch || !timeMatch) return null;
@@ -53,7 +53,9 @@ const toLocalDateTimeString = (dateKey: string, time: string) => {
     return null;
   }
 
-  return `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}T${timeMatch[1]}:${timeMatch[2]}:00`;
+  const localDate = new Date(year, month - 1, day, hour, minute, 0);
+  if (Number.isNaN(localDate.getTime())) return null;
+  return localDate.toISOString();
 };
 
 const getNextTime = (value: string) => {
@@ -137,7 +139,7 @@ export const useRescheduleSessionDialog = ({
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      const nextScheduledAt = toLocalDateTimeString(toDateKey(selectedDate), startTime);
+      const nextScheduledAt = toUtcIsoString(toDateKey(selectedDate), startTime);
       if (!nextScheduledAt) {
         throw new Error('Invalid schedule date/time');
       }
