@@ -41,11 +41,15 @@ const toRiskType = (value?: string): RiskType => {
   return '안정';
 };
 
-const formatToKstDateTime = (value?: string) => {
+const formatToKstDateTime = (value?: string, timezoneIfMissing: 'UTC' | 'KST' = 'KST') => {
   if (!value) return '';
 
   const hasTimezone = /(?:Z|[+\-]\d{2}:\d{2})$/i.test(value);
-  const normalizedValue = hasTimezone ? value : `${value}+09:00`;
+  const normalizedValue = hasTimezone
+    ? value
+    : timezoneIfMissing === 'UTC'
+      ? `${value}Z`
+      : `${value}+09:00`;
   const parsed = new Date(normalizedValue);
   if (Number.isNaN(parsed.getTime())) return '';
 
@@ -73,10 +77,12 @@ const splitDateTime = (value?: string) => {
 
 const toKstScheduledDateTime = (item: BackendSessionItem) => {
   if (item.scheduledAt) {
-    return formatToKstDateTime(item.scheduledAt);
+    // 백엔드 scheduledAt 이 타임존 없이 내려오면 UTC 기준으로 간주해 KST로 변환한다.
+    return formatToKstDateTime(item.scheduledAt, 'UTC');
   }
 
   if (item.scheduledDate && item.scheduledTime) {
+    // 분리 필드(scheduledDate/scheduledTime)는 KST 로컬 예약값으로 해석한다.
     return formatToKstDateTime(`${item.scheduledDate}T${item.scheduledTime}:00+09:00`);
   }
 

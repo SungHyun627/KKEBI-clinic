@@ -48,7 +48,8 @@ const mapScheduledAtToTime = (value: unknown): string => {
   }
 
   const hasTimezone = /(?:Z|[+\-]\d{2}:\d{2})$/i.test(value);
-  const normalizedValue = hasTimezone ? value : `${value}+09:00`;
+  // scheduledAt 이 타임존 없이 내려오면 UTC 로 간주해 KST 시각으로 복원한다.
+  const normalizedValue = hasTimezone ? value : `${value}Z`;
   const parsedDate = new Date(normalizedValue);
   if (Number.isNaN(parsedDate.getTime())) {
     return '10:00';
