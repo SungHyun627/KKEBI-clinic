@@ -4,7 +4,7 @@ import type { ClientRestoreResponse } from '@/features/clients/client-closure/ty
 
 const requestRestoreClient = async (clientId: string): Promise<ClientRestoreResponse> => {
   try {
-    const response = await httpClient.post<unknown>(`/api/v1/clients/${clientId}/restore`);
+    const response = await httpClient.patch<unknown>(`/api/v1/clients/${clientId}/restore`);
     const base = toBaseResponse<unknown>(response);
 
     return {
