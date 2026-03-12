@@ -46,13 +46,17 @@ function TimeWheelPicker({
   const tCommon = useTranslations('common');
   const normalizedValue = TIME_OPTIONS.includes(value) ? value : '09:00';
   const [draftValue, setDraftValue] = useState(normalizedValue);
+  const [manualValue, setManualValue] = useState(normalizedValue);
+  const [initialValueAtOpen, setInitialValueAtOpen] = useState(normalizedValue);
   const activeIndex = TIME_OPTIONS.indexOf(draftValue);
-
-  const isUnchanged = draftValue === normalizedValue;
+  const isUnchanged = draftValue === initialValueAtOpen;
+  const isValidTimeFormat = (input: string) => /^([01]\d|2[0-3]):([0-5]\d)$/.test(input);
 
   const step = (delta: number) => {
     const nextIndex = getWrappedIndex(activeIndex + delta, TIME_OPTIONS.length);
-    setDraftValue(TIME_OPTIONS[nextIndex]);
+    const nextValue = TIME_OPTIONS[nextIndex];
+    setDraftValue(nextValue);
+    setManualValue(nextValue);
   };
 
   const panelAlignClass =
@@ -65,23 +69,57 @@ function TimeWheelPicker({
   return (
     <div className="flex w-full flex-col gap-[10px]">
       <span className="body-16 font-semibold text-label-neutral">{label}</span>
-      <button
-        type="button"
-        aria-label={label}
-        onClick={() => {
-          const nextOpen = !open;
-          if (nextOpen) setDraftValue(normalizedValue);
-          onOpenChange(nextOpen);
-        }}
-        className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 text-left transition-all hover:cursor-pointer hover:border-label-strong focus-within:border-label-normal"
-      >
-        <span className="body-14 min-w-0 flex-1 truncate font-medium text-label-alternative">
-          {value}
-        </span>
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center">
+      <div className="group relative flex h-14.5 w-full items-center gap-2 rounded-2xl border border-neutral-95 bg-white px-4 transition-all hover:border-label-strong focus-within:border-label-normal">
+        <input
+          aria-label={label}
+          inputMode="numeric"
+          placeholder="HH:mm"
+          maxLength={5}
+          value={open ? manualValue : normalizedValue}
+          onChange={(event) => {
+            const nextValue = event.target.value.replace(/[^\d:]/g, '').slice(0, 5);
+            setManualValue(nextValue);
+            if (open && isValidTimeFormat(nextValue)) {
+              setDraftValue(nextValue);
+            }
+          }}
+          onBlur={() => {
+            if (!isValidTimeFormat(manualValue)) {
+              setManualValue(normalizedValue);
+              return;
+            }
+            setDraftValue(manualValue);
+            onValueChange(manualValue);
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            if (!isValidTimeFormat(manualValue)) {
+              setManualValue(normalizedValue);
+              return;
+            }
+            setDraftValue(manualValue);
+            onValueChange(manualValue);
+          }}
+          className="body-14 min-w-0 flex-1 bg-transparent font-medium text-label-alternative outline-none"
+        />
+        <button
+          type="button"
+          aria-label={label}
+          onClick={() => {
+            const nextOpen = !open;
+            if (nextOpen) {
+              setInitialValueAtOpen(normalizedValue);
+              setDraftValue(normalizedValue);
+              setManualValue(normalizedValue);
+            }
+            onOpenChange(nextOpen);
+          }}
+          className="flex h-6 w-6 shrink-0 items-center justify-center hover:cursor-pointer"
+        >
           <Image src="/icons/clock.svg" alt="" width={24} height={24} aria-hidden />
-        </span>
-      </button>
+        </button>
+      </div>
       {open && (
         <div
           className={`mt-3 flex w-[calc(200%+45px)] self-stretch flex-col items-center gap-[26px] rounded-[16px] border border-neutral-95 bg-white px-6 py-[18px] shadow-[0_2px_8px_0_rgba(0,0,0,0.12),0_1px_4px_0_rgba(0,0,0,0.08),0_0_1px_0_rgba(0,0,0,0.08)] ${panelAlignClass}`}
@@ -90,6 +128,7 @@ function TimeWheelPicker({
             className="relative h-21 w-full overflow-hidden rounded-xl bg-white"
             onWheel={(event) => {
               event.preventDefault();
+              event.stopPropagation();
               step(event.deltaY > 0 ? 1 : -1);
             }}
           >
@@ -105,7 +144,10 @@ function TimeWheelPicker({
                   <button
                     key={`${option}-${offset}`}
                     type="button"
-                    onClick={() => setDraftValue(option)}
+                    onClick={() => {
+                      setDraftValue(option);
+                      setManualValue(option);
+                    }}
                     className={`flex h-[22px] w-full items-center justify-center text-center leading-[22px] transition-colors hover:cursor-pointer ${
                       distance === 0
                         ? 'body-14 font-semibold text-primary'
@@ -129,6 +171,7 @@ function TimeWheelPicker({
             disabled={isUnchanged}
             onClick={() => {
               onValueChange(draftValue);
+              setManualValue(draftValue);
               onOpenChange(false);
             }}
           >
