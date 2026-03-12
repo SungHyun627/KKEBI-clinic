@@ -207,6 +207,7 @@ export function buildLiveInsights(
     overgeneralization: /매번|언제나|모든 사람|아무도|every time|everyone|no one/,
     catastrophizing: /최악|끔찍|망했|재앙|worst|disaster|ruined/,
     should_statement: /해야 해|하면 안 돼|should|must|have to/,
+    none: /a^/,
   };
   const distortionPattern = distortionPatternMap[distortionType];
   const distortionExample =

@@ -78,6 +78,16 @@ const mapDistortionToType = (value: string): SessionInsightsData['distortionType
     return 'overgeneralization';
   if (normalized === 'catastrophizing' || normalized === '파국화') return 'catastrophizing';
   if (
+    normalized === 'none' ||
+    normalized === '없음' ||
+    normalized === '없다' ||
+    normalized === '해당 없음' ||
+    normalized === 'no_distortion' ||
+    normalized === 'no distortion'
+  ) {
+    return 'none';
+  }
+  if (
     normalized === 'should_statement' ||
     normalized === '당위적 사고' ||
     normalized === '당위적사고'
@@ -85,6 +95,143 @@ const mapDistortionToType = (value: string): SessionInsightsData['distortionType
     return 'should_statement';
   }
   return undefined;
+};
+
+const toFiniteNumber = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
+};
+
+const pickNonEmptyString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length > 0) return trimmed;
+    }
+  }
+  return undefined;
+};
+
+const extractDistortionPatch = (payload: Record<string, unknown>) => {
+  const distortionPayload = parseJsonObject(payload.distortion);
+  const mappedTypeCandidates = [
+    payload.distortionType,
+    payload.distortion_type,
+    payload.cognitiveDistortionType,
+    payload.cognitive_distortion_type,
+    distortionPayload?.distortionType,
+    distortionPayload?.distortion_type,
+    distortionPayload?.type,
+    distortionPayload?.distortion,
+  ]
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => mapDistortionToType(item))
+    .filter((item): item is SessionInsightsData['distortionType'] => Boolean(item));
+
+  const distortionType = mappedTypeCandidates[0];
+  const distortionSummary = pickNonEmptyString(
+    payload.distortionSummary,
+    payload.distortion_summary,
+    payload.cognitiveDistortionSummary,
+    payload.cognitive_distortion_summary,
+    payload.distortionExample,
+    payload.distortion_example,
+    distortionPayload?.summary,
+    distortionPayload?.distortionSummary,
+    distortionPayload?.distortion_summary,
+    distortionPayload?.cognitiveDistortionSummary,
+    distortionPayload?.cognitive_distortion_summary,
+    distortionPayload?.example,
+    distortionPayload?.distortionExample,
+    distortionPayload?.distortion_example,
+    distortionPayload?.detail,
+  );
+
+  return {
+    distortionType,
+    distortionSummary,
+  };
+};
+
+const extractPhq9ScoreFromPayload = (payload: Record<string, unknown>) => {
+  const directCandidates = [
+    payload.phq9Score,
+    payload.phq9,
+    payload.phqScore,
+    payload.phq,
+    payload.phq_9,
+    payload.phq9_score,
+  ];
+
+  for (const candidate of directCandidates) {
+    const parsed = toFiniteNumber(candidate);
+    if (typeof parsed === 'number') {
+      const rounded = Math.round(parsed);
+      if (rounded >= 0 && rounded <= 27) return rounded;
+    }
+  }
+
+  const nestedPhq =
+    typeof payload.phq9 === 'object' && payload.phq9
+      ? (payload.phq9 as Record<string, unknown>)
+      : null;
+  if (nestedPhq) {
+    const parsed = toFiniteNumber(nestedPhq.score ?? nestedPhq.total ?? nestedPhq.value);
+    if (typeof parsed === 'number') {
+      const rounded = Math.round(parsed);
+      if (rounded >= 0 && rounded <= 27) return rounded;
+    }
+  }
+
+  return undefined;
+};
+
+const resolveEmotionFromChunkResult = (chunkData?: {
+  topEmotion?: string;
+  emotionProbs?: Record<string, number>;
+}) => {
+  if (!chunkData) {
+    return { emotion: undefined, confidence: undefined };
+  }
+
+  const mappedFromTop = chunkData.topEmotion
+    ? mapEmotionKeyToSessionEmotion(chunkData.topEmotion)
+    : undefined;
+  if (mappedFromTop) {
+    const probs = chunkData.emotionProbs && Object.entries(chunkData.emotionProbs);
+    const topProb =
+      probs && probs.length > 0
+        ? probs.reduce((prev, curr) => (curr[1] > prev[1] ? curr : prev))[1]
+        : undefined;
+    const confidence =
+      typeof topProb === 'number'
+        ? Math.max(0, Math.min(100, Math.round(topProb <= 1 ? topProb * 100 : topProb)))
+        : undefined;
+    return { emotion: mappedFromTop, confidence };
+  }
+
+  const probs = chunkData.emotionProbs ? Object.entries(chunkData.emotionProbs) : [];
+  if (probs.length === 0) {
+    return { emotion: undefined, confidence: undefined };
+  }
+
+  const topEntry = probs.reduce((prev, curr) => (curr[1] > prev[1] ? curr : prev));
+  const mappedFromProb = mapEmotionKeyToSessionEmotion(topEntry[0]);
+  if (!mappedFromProb) {
+    return { emotion: undefined, confidence: undefined };
+  }
+
+  return {
+    emotion: mappedFromProb,
+    confidence: Math.max(
+      0,
+      Math.min(100, Math.round(topEntry[1] <= 1 ? topEntry[1] * 100 : topEntry[1])),
+    ),
+  };
 };
 
 interface SessionAutoRecordPanelProps {
@@ -257,7 +404,12 @@ export default function SessionAutoRecordPanel({
       }
 
       // Summary event: prefer stream-provided summary over local mock analyzer output
-      const body = typeof obj.summaryText === 'string' ? obj.summaryText : undefined;
+      const body =
+        typeof obj.summaryText === 'string'
+          ? obj.summaryText
+          : typeof obj.summary === 'string'
+            ? obj.summary
+            : undefined;
       const title =
         typeof obj.summaryTitle === 'string'
           ? obj.summaryTitle
@@ -268,82 +420,19 @@ export default function SessionAutoRecordPanel({
         setStreamSummary({ title, body });
       }
 
-      // Insights event: only reflect currently provided SSE fields.
-      const emotionPayload = parseJsonObject(obj.emotion);
-      const distortionPayload = parseJsonObject(obj.distortion);
+      // Insights event: PHQ-9/인지왜곡은 SSE 기준으로 반영
+      const nextPhq9Score = extractPhq9ScoreFromPayload(obj);
+      const { distortionType, distortionSummary } = extractDistortionPatch(obj);
 
-      const emotionEntries = emotionPayload
-        ? Object.entries(emotionPayload).filter((entry): entry is [string, number] => {
-            const [, score] = entry;
-            return typeof score === 'number';
-          })
-        : [];
-      const topEmotionEntry =
-        emotionEntries.length > 0
-          ? emotionEntries.reduce((prev, curr) => (curr[1] > prev[1] ? curr : prev))
-          : null;
-      const mappedEmotionFromPayload = topEmotionEntry
-        ? mapEmotionKeyToSessionEmotion(topEmotionEntry[0])
-        : undefined;
-
-      const distortionValue =
-        distortionPayload && typeof distortionPayload.distortion === 'string'
-          ? distortionPayload.distortion
-          : undefined;
-      const mappedDistortionFromPayload = distortionValue
-        ? mapDistortionToType(distortionValue)
-        : undefined;
-
-      const normalizedEmotion =
-        typeof obj.currentEmotion === 'string'
-          ? mapEmotionKeyToSessionEmotion(obj.currentEmotion)
-          : mappedEmotionFromPayload;
-      const normalizedDistortion =
-        typeof obj.distortionType === 'string'
-          ? obj.distortionType.toLowerCase()
-          : mappedDistortionFromPayload;
-
-      const confidence =
-        typeof obj.confidence === 'number'
-          ? obj.confidence
-          : topEmotionEntry
-            ? Math.round(topEmotionEntry[1] * 100)
-            : undefined;
-
-      const hasEmotion =
-        (normalizedEmotion === 'anxious' ||
-          normalizedEmotion === 'sad' ||
-          normalizedEmotion === 'angry' ||
-          normalizedEmotion === 'happy' ||
-          normalizedEmotion === 'surprise' ||
-          normalizedEmotion === 'calm' ||
-          normalizedEmotion === 'fearful' ||
-          normalizedEmotion === 'disgust') &&
-        typeof confidence === 'number';
-      const hasDistortion =
-        (normalizedDistortion === 'black_and_white' ||
-          normalizedDistortion === 'overgeneralization' ||
-          normalizedDistortion === 'catastrophizing' ||
-          normalizedDistortion === 'should_statement') &&
-        (typeof obj.distortionExample === 'string' || Boolean(distortionValue));
-
-      if (hasEmotion || hasDistortion) {
+      if (
+        typeof nextPhq9Score === 'number' ||
+        typeof distortionType === 'string' ||
+        typeof distortionSummary === 'string'
+      ) {
         onAnalysisChange?.({
-          currentEmotion: hasEmotion
-            ? (normalizedEmotion as SessionInsightsData['currentEmotion'])
-            : undefined,
-          confidence: hasEmotion ? confidence : undefined,
-          emotionHistory: Array.isArray(obj.emotionHistory)
-            ? (obj.emotionHistory as SessionInsightsData['emotionHistory'])
-            : undefined,
-          distortionType: hasDistortion
-            ? (normalizedDistortion as SessionInsightsData['distortionType'])
-            : undefined,
-          distortionExample: hasDistortion
-            ? typeof obj.distortionExample === 'string'
-              ? (obj.distortionExample as string)
-              : distortionValue
-            : undefined,
+          phq9Score: nextPhq9Score,
+          distortionType,
+          distortionExample: distortionSummary,
         });
       }
     },
@@ -463,6 +552,13 @@ export default function SessionAutoRecordPanel({
         typeof uploadResult.data?.transcriptId === 'number' &&
         typeof uploadResult.data?.text === 'string'
       ) {
+        const chunkEmotion = resolveEmotionFromChunkResult(uploadResult.data);
+        if (chunkEmotion.emotion) {
+          onAnalysisChange?.({
+            currentEmotion: chunkEmotion.emotion,
+            confidence: chunkEmotion.confidence,
+          });
+        }
         resolvePendingTranscript({
           pendingId: pendingTranscriptId,
           transcriptId: uploadResult.data.transcriptId,
@@ -479,7 +575,7 @@ export default function SessionAutoRecordPanel({
             : '음성 분석이 일시적으로 실패했어요. 다시 시도해 주세요.',
       });
     },
-    [locale, resolvePendingTranscript, uploadChunk],
+    [locale, onAnalysisChange, resolvePendingTranscript, uploadChunk],
   );
 
   const getPendingTranscriptMessage = useCallback(
@@ -631,8 +727,7 @@ export default function SessionAutoRecordPanel({
     if (!isRecording) return;
 
     // Keyboard shortcuts:
-    // - Space: upload current speaker chunk then toggle speaker
-    // - Enter: pause/resume recording
+    // - Enter / Space: upload current speaker chunk then toggle speaker
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.isComposing) return;
       if (event.repeat) return;
@@ -645,15 +740,14 @@ export default function SessionAutoRecordPanel({
         Boolean(target?.isContentEditable);
       if (isEditable) return;
 
-      if (event.code === 'Space') {
+      if (
+        event.code === 'Space' ||
+        event.key === ' ' ||
+        event.code === 'Enter' ||
+        event.key === 'Enter'
+      ) {
         event.preventDefault();
         void handleSpeakerSwitch();
-        return;
-      }
-
-      if (event.code === 'Enter' || event.key === 'Enter') {
-        event.preventDefault();
-        handlePauseResume();
       }
     };
 
@@ -661,7 +755,7 @@ export default function SessionAutoRecordPanel({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handlePauseResume, handleSpeakerSwitch, isRecording]);
+  }, [handleSpeakerSwitch, isRecording]);
 
   useEffect(() => {
     return () => {
@@ -711,7 +805,7 @@ export default function SessionAutoRecordPanel({
         </div>
         <span className="ml-auto hidden body-13 text-label-assistive sm:inline"></span>
         <span className="ml-auto body-13 text-label-assistive sm:hidden">
-          {locale === 'en' ? 'Space switch · Enter pause' : 'Space 전환 · Enter 정지/재개'}
+          {locale === 'en' ? 'Enter / Space switch' : 'Enter / Space 전환'}
         </span>
       </div>
       <div className="flex w-full flex-col items-start gap-4">

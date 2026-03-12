@@ -14,7 +14,8 @@ export type CognitiveDistortionType =
   | 'black_and_white'
   | 'overgeneralization'
   | 'catastrophizing'
-  | 'should_statement';
+  | 'should_statement'
+  | 'none';
 
 export interface SessionEmotionHistoryItem {
   emotion: SessionEmotionType;
@@ -37,6 +38,7 @@ export interface SessionInsightsSsePatch {
   currentEmotion?: SessionEmotionType;
   confidence?: number;
   emotionHistory?: SessionEmotionHistoryItem[];
+  phq9Score?: number;
   distortionType?: CognitiveDistortionType;
   distortionExample?: string;
 }

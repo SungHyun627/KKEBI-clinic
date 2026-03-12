@@ -90,6 +90,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       currentEmotion: analysisSsePatch?.currentEmotion ?? pageMock.insights.currentEmotion,
       confidence: analysisSsePatch?.confidence ?? pageMock.insights.confidence,
       emotionHistory: analysisSsePatch?.emotionHistory ?? pageMock.insights.emotionHistory,
+      phq9Score: analysisSsePatch?.phq9Score ?? pageMock.insights.phq9Score,
       distortionType: analysisSsePatch?.distortionType ?? pageMock.insights.distortionType,
       distortionExample: analysisSsePatch?.distortionExample ?? pageMock.insights.distortionExample,
     };
@@ -174,6 +175,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
           <SessionInsightsPanel
             insights={mergedInsights}
             hasEmotionData={Boolean(analysisSsePatch?.currentEmotion)}
+            hasPhq9Data={typeof analysisSsePatch?.phq9Score === 'number'}
             hasDistortionData={Boolean(analysisSsePatch?.distortionType)}
             recentEmotionHistory={recentEmotionHistory}
             keyConcernHistory={[]}

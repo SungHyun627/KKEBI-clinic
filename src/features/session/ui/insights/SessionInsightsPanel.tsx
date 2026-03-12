@@ -12,6 +12,7 @@ import type {
 interface SessionInsightsPanelProps {
   insights: SessionInsightsData;
   hasEmotionData: boolean;
+  hasPhq9Data: boolean;
   hasDistortionData: boolean;
   recentEmotionHistory: SessionEmotionType[];
   keyConcernHistory: string[];
@@ -52,6 +53,7 @@ const distortionLabel = (type: CognitiveDistortionType, locale: string) => {
     overgeneralization: { ko: '과잉일반화', en: 'Overgeneralization' },
     catastrophizing: { ko: '파국화', en: 'Catastrophizing' },
     should_statement: { ko: '당위적 사고', en: 'Should statement' },
+    none: { ko: '없음', en: 'None' },
   } satisfies Record<CognitiveDistortionType, { ko: string; en: string }>;
   return locale === 'en' ? map[type].en : map[type].ko;
 };
@@ -59,6 +61,7 @@ const distortionLabel = (type: CognitiveDistortionType, locale: string) => {
 export default function SessionInsightsPanel({
   insights,
   hasEmotionData,
+  hasPhq9Data,
   hasDistortionData,
   recentEmotionHistory,
   keyConcernHistory,
@@ -147,9 +150,17 @@ export default function SessionInsightsPanel({
           title={locale === 'en' ? 'KKEBI data summary' : 'KKEBI 데이터 요약'}
           iconSrc="/icons/clipboard.svg"
           mainContent={
-            <div className="flex min-h-[34px] items-center">
-              <span className="body-14 text-label-disable">{summaryWaitingMessage}</span>
-            </div>
+            hasPhq9Data ? (
+              <div className="flex min-h-[34px] items-center">
+                <span className="text-[32px] font-semibold leading-[30px] text-label-normal">
+                  {locale === 'en' ? `${insights.phq9Score} pts` : `${insights.phq9Score}점`}
+                </span>
+              </div>
+            ) : (
+              <div className="flex min-h-[34px] items-center">
+                <span className="body-14 text-label-disable">{summaryWaitingMessage}</span>
+              </div>
+            )
           }
           subContent={
             <>
