@@ -81,7 +81,8 @@ const ClientRegistrationCounselingInfoForm = ({
                     <FormControl>
                       <TimeWheelPicker
                         label={t('fields.counselingStartTime')}
-                        value={field.value || '09:00'}
+                        value={field.value || '08:00'}
+                        fallbackValue="08:00"
                         onValueChange={field.onChange}
                         align="start"
                         open={openTimePicker === 'start'}
@@ -103,7 +104,8 @@ const ClientRegistrationCounselingInfoForm = ({
                     <FormControl>
                       <TimeWheelPicker
                         label={t('fields.counselingEndTime')}
-                        value={field.value || '10:00'}
+                        value={field.value || '09:00'}
+                        fallbackValue="09:00"
                         onValueChange={field.onChange}
                         align="end"
                         open={openTimePicker === 'end'}
@@ -163,6 +165,7 @@ const ClientRegistrationCounselingInfoForm = ({
 interface TimeWheelPickerProps {
   label: string;
   value: string;
+  fallbackValue: string;
   onValueChange: (value: string) => void;
   align?: 'start' | 'center' | 'end';
   open: boolean;
@@ -172,13 +175,15 @@ interface TimeWheelPickerProps {
 function TimeWheelPicker({
   label,
   value,
+  fallbackValue,
   onValueChange,
   align = 'center',
   open,
   onOpenChange,
 }: TimeWheelPickerProps) {
   const tCommon = useTranslations('common');
-  const normalizedValue = TIME_OPTIONS.includes(value) ? value : '09:00';
+  const safeFallback = TIME_OPTIONS.includes(fallbackValue) ? fallbackValue : '08:00';
+  const normalizedValue = TIME_OPTIONS.includes(value) ? value : safeFallback;
   const [draftValue, setDraftValue] = useState(normalizedValue);
   const [manualValue, setManualValue] = useState(normalizedValue);
   const [initialValueAtOpen, setInitialValueAtOpen] = useState(normalizedValue);

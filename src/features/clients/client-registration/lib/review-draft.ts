@@ -19,8 +19,8 @@ export const EMPTY_BASIC_INFO: BasicInfoFormValues = {
 
 export const EMPTY_COUNSELING_INFO: CounselingInfoFormValues = {
   counselingStartDate: '',
-  counselingStartTime: '09:00',
-  counselingEndTime: '10:00',
+  counselingStartTime: '08:00',
+  counselingEndTime: '09:00',
   chiefConcern: '',
   referralPath: '',
 };
