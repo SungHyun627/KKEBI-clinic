@@ -155,10 +155,11 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     return [];
   }, [locale, payload?.summarySnapshot?.recommendedMissions]);
 
-  const isNextSessionAllSelected =
-    Boolean(nextDate) && Boolean(nextStartTime) && Boolean(nextEndTime);
-  const isNextSessionAllEmpty = !nextDate && !nextStartTime && !nextEndTime;
-  const isNextSessionSelectionValid = isNextSessionAllSelected || isNextSessionAllEmpty;
+  const hasAnyNextSessionInput =
+    Boolean(nextDate) || Boolean(nextStartTime) || Boolean(nextEndTime);
+  const isNextSessionAllEmpty = !hasAnyNextSessionInput;
+  const isNextSessionSelectionValid =
+    isNextSessionAllEmpty || (Boolean(nextDate) && Boolean(nextStartTime));
   const isMissionSelectionValid = missions.length === 0 || selectedMissionIds.length > 0;
   const canSubmitSummary = !error && Boolean(payload);
   const isSubmitEnabled =
@@ -243,13 +244,13 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
       summaryText,
       riskEvaluation,
       followUpSessionTiming,
+      additionalMemo,
       selectedMissionIds,
       nextSession:
-        nextDate && nextStartTime && nextEndTime
+        nextDate && nextStartTime
           ? {
               date: nextDate,
               startTime: nextStartTime,
-              endTime: nextEndTime,
             }
           : null,
     });

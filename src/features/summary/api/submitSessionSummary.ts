@@ -12,6 +12,7 @@ interface SubmitSessionSummaryRequestDto {
   summaryText: string;
   riskEvaluation: string;
   followUpSessionTiming: string;
+  additionalMemo?: string;
   selectedMissionIds: number[];
   nextSession?: {
     date?: string;
@@ -74,6 +75,7 @@ const toSubmitRequestDto = (
     summaryText: payload.summaryText,
     riskEvaluation: mapRiskEvaluation(payload.riskEvaluation),
     followUpSessionTiming: mapFollowUpSessionTiming(payload.followUpSessionTiming),
+    additionalMemo: payload.additionalMemo.trim() || undefined,
     selectedMissionIds: missionIds,
     nextSession: payload.nextSession
       ? {

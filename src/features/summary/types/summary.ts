@@ -49,7 +49,7 @@ export type FollowUpSessionTiming = '1w' | '2w' | '1m' | 'as-needed';
 export type SummaryNextSessionSchedule = {
   date: string;
   startTime: string;
-  endTime: string;
+  endTime?: string;
 };
 
 export type SummarySubmitFormValues = {
@@ -67,6 +67,7 @@ export type SubmitSessionSummaryPayload = {
   summaryText: string;
   riskEvaluation: RiskEvaluation;
   followUpSessionTiming: FollowUpSessionTiming;
+  additionalMemo: string;
   selectedMissionIds: string[];
   nextSession: SummaryNextSessionSchedule | null;
 };
