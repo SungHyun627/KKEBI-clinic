@@ -3,10 +3,10 @@ import { getAccessToken } from '@/shared/api/token-store';
 
 type ReportKind = 'txt' | 'pdf' | 'audio';
 
-const REPORT_TYPE_CANDIDATES: Record<ReportKind, string[]> = {
-  txt: ['TXT', 'txt', 'TRANSCRIPT', 'transcript', 'TEXT', 'text'],
-  pdf: ['PDF', 'pdf'],
-  audio: ['AUDIO', 'audio', 'RECORDING', 'recording'],
+const REPORT_TYPE: Record<ReportKind, 'TXT' | 'PDF' | 'AUDIO'> = {
+  txt: 'TXT',
+  pdf: 'PDF',
+  audio: 'AUDIO',
 };
 
 const parseFilenameFromDisposition = (contentDisposition: string | null, fallback: string) => {
@@ -54,30 +54,26 @@ export const downloadSessionReport = async (sessionId: number, kind: ReportKind)
         ? `${sessionId}-summary.pdf`
         : `${sessionId}-recording.webm`;
 
-  let lastStatus = 0;
-  for (const type of REPORT_TYPE_CANDIDATES[kind]) {
-    const response = await fetch(
-      `/api/v1/sessions/${encodeURIComponent(String(sessionId))}/reports/download?type=${encodeURIComponent(type)}`,
-      {
-        method: 'GET',
-        credentials: 'include',
-        headers,
-        cache: 'no-store',
-      },
-    );
-    if (!response.ok) {
-      lastStatus = response.status;
-      continue;
-    }
+  const response = await fetch(
+    `/api/v1/sessions/${encodeURIComponent(String(sessionId))}/reports/download?type=${encodeURIComponent(
+      REPORT_TYPE[kind],
+    )}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+      headers,
+      cache: 'no-store',
+    },
+  );
 
-    const blob = await response.blob();
-    const filename = parseFilenameFromDisposition(
-      response.headers.get('content-disposition'),
-      fallbackFilename,
-    );
-    triggerBlobDownload(blob, filename);
-    return;
+  if (!response.ok) {
+    throw new Error(`Failed to download report (status: ${response.status || 'unknown'})`);
   }
 
-  throw new Error(`Failed to download report (status: ${lastStatus || 'unknown'})`);
+  const blob = await response.blob();
+  const filename = parseFilenameFromDisposition(
+    response.headers.get('content-disposition'),
+    fallbackFilename,
+  );
+  triggerBlobDownload(blob, filename);
 };
