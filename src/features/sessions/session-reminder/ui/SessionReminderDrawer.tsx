@@ -100,6 +100,7 @@ const SessionReminderDrawer = ({
       sessionId,
       channel: mapReminderChannel(selectedChannel),
       customMessage: resolvedMessage,
+      locale: locale === 'en' ? 'en' : 'ko',
     });
     setIsSubmitting(false);
 

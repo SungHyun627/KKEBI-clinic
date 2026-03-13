@@ -7,6 +7,10 @@ const BACKEND_BASE_URL =
 export const dynamic = 'force-dynamic';
 
 export const GET = async (request: Request) => {
+  const locale = request.headers.get('accept-language')?.toLowerCase().startsWith('en')
+    ? 'en'
+    : 'ko';
+
   if (!BACKEND_BASE_URL) {
     return NextResponse.json(
       { code: 'CONFIG_ERROR', message: 'API base URL is not configured' },
@@ -56,7 +60,13 @@ export const GET = async (request: Request) => {
     });
   } catch {
     return NextResponse.json(
-      { code: 'INTERNAL_SERVER_ERROR', message: '실시간 알림 구독 중 오류가 발생했습니다.' },
+      {
+        code: 'INTERNAL_SERVER_ERROR',
+        message:
+          locale === 'en'
+            ? 'An error occurred while subscribing to realtime notifications.'
+            : '실시간 알림 구독 중 오류가 발생했습니다.',
+      },
       { status: 500 },
     );
   }

@@ -7,12 +7,13 @@ import { ApiError, httpClient } from '@/shared/api/http-client';
 const requestSendSessionReminder = async (
   payload: SessionReminderRequestPayload,
 ): Promise<SessionReminderResponse> => {
+  const locale = payload.locale === 'en' ? 'en' : 'ko';
   const normalizedSessionId = payload.sessionId?.trim();
   const sessionId = Number(normalizedSessionId);
   if (!Number.isFinite(sessionId) || sessionId <= 0) {
     return {
       success: false,
-      message: '유효한 세션 ID가 아닙니다.',
+      message: locale === 'en' ? 'Invalid session ID.' : '유효한 세션 ID가 아닙니다.',
     };
   }
 
@@ -29,7 +30,9 @@ const requestSendSessionReminder = async (
     if (error instanceof ApiError) {
       return {
         success: false,
-        message: error.message || '세션 알림 발송에 실패했습니다.',
+        message:
+          error.message ||
+          (locale === 'en' ? 'Failed to send session reminder.' : '세션 알림 발송에 실패했습니다.'),
       };
     }
     return {

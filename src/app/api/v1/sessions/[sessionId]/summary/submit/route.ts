@@ -6,6 +6,9 @@ export const POST = async (
   { params }: { params: Promise<{ sessionId: string }> },
 ): Promise<Response> => {
   const { sessionId } = await params;
+  const locale = request.headers.get('accept-language')?.toLowerCase().startsWith('en')
+    ? 'en'
+    : 'ko';
   try {
     return await proxyToBackend(request, {
       method: 'POST',
@@ -15,7 +18,10 @@ export const POST = async (
     return NextResponse.json(
       {
         code: 'INTERNAL_SERVER_ERROR',
-        message: '상담 요약 제출 중 오류가 발생했습니다.',
+        message:
+          locale === 'en'
+            ? 'An error occurred while submitting session summary.'
+            : '상담 요약 제출 중 오류가 발생했습니다.',
       },
       { status: 500 },
     );

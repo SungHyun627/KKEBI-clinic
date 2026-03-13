@@ -5,6 +5,7 @@ export interface SessionReminderRequestPayload {
   sessionId: string;
   channel: ReminderApiChannel;
   customMessage?: string;
+  locale?: 'ko' | 'en';
 }
 
 export interface SessionReminderResponse {
