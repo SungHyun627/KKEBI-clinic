@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface UseSessionPersistenceParams<T> {
   storageKey: string;
@@ -14,6 +14,11 @@ export function useSessionPersistence<T>({
   hydrate,
 }: UseSessionPersistenceParams<T>) {
   const [isHydrated, setIsHydrated] = useState(false);
+  const hydrateRef = useRef(hydrate);
+
+  useEffect(() => {
+    hydrateRef.current = hydrate;
+  }, [hydrate]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -26,13 +31,13 @@ export function useSessionPersistence<T>({
 
     try {
       const parsed = JSON.parse(raw) as T;
-      hydrate(parsed);
+      hydrateRef.current(parsed);
     } catch {
       window.sessionStorage.removeItem(storageKey);
     } finally {
       setIsHydrated(true);
     }
-  }, [hydrate, storageKey]);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!isHydrated || typeof window === 'undefined') return;

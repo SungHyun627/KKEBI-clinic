@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
-import { printSessionSummaryPdf } from '@/features/summary/lib/downloads';
 import {
   AiSummaryCard,
   CompletionCard,
@@ -15,11 +14,11 @@ import {
   DetectedCognitiveDistortionCard,
   BookmarkedMomentsCard,
 } from './components';
-import { useSessionSummaryPage } from '../hooks/useSessionSummaryPage';
+import { useSessionSummary } from '../hooks/useSessionSummary';
 
 interface SessionSummaryContentProps {
   locale: string;
-  sessionId: string;
+  sessionId: number;
   backLabel: string;
 }
 
@@ -64,10 +63,13 @@ export default function SessionSummaryContent({
     setNextEndTime,
     handleToggleMission,
     handleDownloadTxt,
+    handleDownloadPdf,
     handleDownloadAudio,
     handleSubmitSummary,
+    audioRef,
+    recordingAudioUrl,
     payloadExists,
-  } = useSessionSummaryPage({ locale, sessionId });
+  } = useSessionSummary({ locale, sessionId });
 
   if (loading) {
     return (
@@ -77,16 +79,11 @@ export default function SessionSummaryContent({
     );
   }
 
-  if (error || !payloadExists) {
-    return (
-      <section className="flex min-h-[320px] items-center justify-center body-14 text-status-negative">
-        {error ?? tSummary('loadFailed')}
-      </section>
-    );
-  }
+  const hasLoadError = Boolean(error) || !payloadExists;
 
   return (
     <section className="flex w-full flex-col gap-[62px] pb-5">
+      <audio ref={audioRef} src={recordingAudioUrl || undefined} preload="metadata" />
       <SummaryTopBar
         locale={locale}
         backLabel={backLabel}
@@ -97,11 +94,16 @@ export default function SessionSummaryContent({
         hasRecording={hasRecording}
         onDownloadTxt={handleDownloadTxt}
         onDownloadAudio={handleDownloadAudio}
-        onPrintPdf={printSessionSummaryPdf}
+        onPrintPdf={handleDownloadPdf}
         onBack={() => router.push(`/${locale}`)}
       />
 
       <div className="flex flex-col gap-[53px] items-start w-full px-15">
+        {hasLoadError ? (
+          <div className="w-full rounded-[10px] border border-status-negative/20 bg-status-negative/5 px-4 py-3 body-14 text-status-negative">
+            {tSummary('loadFailed')}
+          </div>
+        ) : null}
         <CompletionCard
           duration={durationMinutesText}
           endedAt={endedAt}
@@ -146,7 +148,7 @@ export default function SessionSummaryContent({
             <Button
               type="button"
               className="w-full max-w-[416px]"
-              disabled={!isSubmitEnabled}
+              disabled={hasLoadError || !isSubmitEnabled}
               onClick={handleSubmitSummary}
             >
               {tSummary('submitButton')}

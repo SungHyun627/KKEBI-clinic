@@ -18,7 +18,7 @@ export function LocaleSwitchButton({ className = '' }: { className?: string }) {
 
   return (
     <button
-      className={`hover:cursor-pointer ${className}`.trim()}
+      className={`inline-flex h-6 w-6 min-h-6 min-w-6 shrink-0 items-center justify-center hover:cursor-pointer ${className}`.trim()}
       type="button"
       onClick={switchLocale}
       aria-label={tCommon('localeSwitch')}

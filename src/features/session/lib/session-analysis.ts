@@ -2,7 +2,7 @@ import type {
   SessionAutoRecordData,
   SessionEmotionType,
   SessionInsightsData,
-} from '../types/session-page';
+} from '../types/session';
 
 export type SummaryTopicKey = 'workStress' | 'sleepIssues' | 'selfCriticism' | 'safetyConcerns';
 
@@ -13,6 +13,38 @@ export interface LiveSummaryAnalysis {
   currentEmotion: SessionEmotionType;
   distortionType: SessionInsightsData['distortionType'];
   riskCount: number;
+}
+
+function normalizeTranscriptText(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+function isLikelyNoiseUtterance(text: string): boolean {
+  const normalized = normalizeTranscriptText(text);
+  if (!normalized) return true;
+
+  const lowered = normalized.toLowerCase();
+  if (
+    /analyzing .*speech|transcription failed|no audio captured|분석 중|다시 시도해 주세요|녹음된 음성이 없습니다/.test(
+      lowered,
+    )
+  ) {
+    return true;
+  }
+
+  const compact = normalized.replace(/\s+/g, '');
+  const meaningfulCharCount = compact.match(/[가-힣a-zA-Z0-9]/g)?.length ?? 0;
+  if (meaningfulCharCount < 4) return true;
+
+  const meaningfulRatio = meaningfulCharCount / compact.length;
+  return meaningfulRatio < 0.45;
+}
+
+function toAnalyzableClientTexts(transcripts: SessionAutoRecordData['transcripts']): string[] {
+  return transcripts
+    .filter((line) => line.speaker === 'client')
+    .map((line) => normalizeTranscriptText(line.text))
+    .filter((text) => !isLikelyNoiseUtterance(text));
 }
 
 export function formatTimestampToHms(value: string): string {
@@ -77,8 +109,7 @@ export function analyzeLiveSummary(
 ): LiveSummaryAnalysis | null {
   if (transcripts.length === 0) return null;
 
-  const clientLines = transcripts.filter((line) => line.speaker === 'client');
-  const clientTexts = clientLines.map((line) => line.text);
+  const clientTexts = toAnalyzableClientTexts(transcripts);
   if (clientTexts.length < 2 || transcripts.length < 4) return null;
 
   const fullText = clientTexts.join(' ').toLowerCase();
@@ -129,16 +160,17 @@ export function buildLiveInsights(
 
   const clientLines = transcripts.filter((line) => line.speaker === 'client');
   if (clientLines.length === 0) return null;
-  const sourceLines = clientLines;
-  const texts = sourceLines.map((line) => line.text);
+  const sanitizedClientTexts = toAnalyzableClientTexts(transcripts);
+  const texts =
+    sanitizedClientTexts.length > 0 ? sanitizedClientTexts : clientLines.map((line) => line.text);
   const fullText = texts.join(' ').toLowerCase();
 
-  const resolvedEmotions: SessionEmotionType[] = sourceLines.map((line, index) => {
-    const detected = detectEmotionFromText(line.text);
+  const resolvedEmotions: SessionEmotionType[] = texts.map((text, index) => {
+    const detected = detectEmotionFromText(text);
     if (detected !== 'calm') return detected;
-    const previousDetected = sourceLines
+    const previousDetected = texts
       .slice(0, index)
-      .map((prev) => detectEmotionFromText(prev.text))
+      .map((prev) => detectEmotionFromText(prev))
       .reverse()
       .find((emotion) => emotion !== 'calm');
     return previousDetected ?? 'calm';
@@ -175,6 +207,7 @@ export function buildLiveInsights(
     overgeneralization: /매번|언제나|모든 사람|아무도|every time|everyone|no one/,
     catastrophizing: /최악|끔찍|망했|재앙|worst|disaster|ruined/,
     should_statement: /해야 해|하면 안 돼|should|must|have to/,
+    none: /a^/,
   };
   const distortionPattern = distortionPatternMap[distortionType];
   const distortionExample =

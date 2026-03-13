@@ -7,3 +7,4 @@ export { default as RecommendedMissionsCard } from './RecommendedMissionsCard';
 export { default as NextSessionBookingCard } from './NextSessionBookingCard';
 export { default as DetectedCognitiveDistortionCard } from './DetectedCognitiveDistortionCard';
 export { default as BookmarkedMomentsCard } from './BookmarkedMomentsCard';
+export { default as SummaryQuitConfirmDialog } from './SummaryQuitConfirmDialog';

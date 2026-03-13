@@ -1,0 +1,104 @@
+import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
+
+export type SessionEmotionType =
+  | 'anxious'
+  | 'sad'
+  | 'angry'
+  | 'happy'
+  | 'calm'
+  | 'fearful'
+  | 'disgust'
+  | 'surprise';
+
+export type CognitiveDistortionType =
+  | 'black_and_white'
+  | 'overgeneralization'
+  | 'catastrophizing'
+  | 'should_statement'
+  | 'none';
+
+export interface SessionEmotionHistoryItem {
+  emotion: SessionEmotionType;
+  minutesAgo: number;
+}
+
+export interface SessionInsightsData {
+  currentEmotion: SessionEmotionType;
+  confidence: number;
+  emotionHistory: SessionEmotionHistoryItem[];
+  phq9Score: number;
+  riskType: RiskType;
+  recentEmotionPattern: string;
+  keyConcerns: string[];
+  distortionType: CognitiveDistortionType;
+  distortionExample: string;
+}
+
+export interface SessionInsightsSsePatch {
+  currentEmotion?: SessionEmotionType;
+  confidence?: number;
+  emotionHistory?: SessionEmotionHistoryItem[];
+  phq9Score?: number;
+  distortionType?: CognitiveDistortionType;
+  distortionExample?: string;
+}
+
+export interface SessionTranscriptItem {
+  id: string;
+  transcriptId?: number;
+  bookmarkId?: number;
+  speaker: 'counselor' | 'client';
+  text: string;
+  timestamp: string;
+  bookmarked?: boolean;
+  isPendingTranscription?: boolean;
+}
+
+export interface SessionAutoRecordData {
+  transcripts: SessionTranscriptItem[];
+  liveSummaryTitle: string;
+  liveSummaryBody: string;
+  counselorMemo: string;
+}
+
+export interface SessionBasicInfo {
+  scheduledAt: string;
+  clientName: string;
+  sessionNumber: number;
+  sessionType: string;
+  riskType: string;
+  contact: string;
+}
+
+export interface SessionPageViewData {
+  sessionId: string;
+  clientId: string;
+  clientName: string;
+  sessionType: SessionType;
+  riskType: RiskType;
+  scheduledAt: string;
+  sessionNumber: number;
+  contact: string;
+  insights: SessionInsightsData;
+  autoRecord: SessionAutoRecordData;
+}
+
+export type SessionInsightsStreamStatus = 'idle' | 'connecting' | 'open' | 'error';
+
+export interface SessionInsightsStreamEvent {
+  type: string;
+  data: unknown;
+  raw: string;
+}
+
+export interface SessionInfoResponse {
+  code: string;
+  message: string;
+  data?: SessionBasicInfo;
+}
+
+export const isSessionType = (value: string): value is SessionType =>
+  value === '초기' || value === '정기' || value === '위기';
+
+export const isRiskType = (value: string): value is RiskType =>
+  value === '안정' || value === '주의' || value === '위험';

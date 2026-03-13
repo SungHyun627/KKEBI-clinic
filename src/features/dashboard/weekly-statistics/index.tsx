@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Title } from '@/shared/ui/title';
 import type { RiskAlert as RiskAlertType, WeeklyStatistics } from '@/features/dashboard';
 import { getRiskAlerts } from './api/getRiskAlerts';
 import { getWeeklyStatistics } from './api/getWeeklyStatistics';
+import { subscribeNotificationReceived } from '@/features/notification/lib/notification-events';
 import WeeklyStatisticsCard from './ui/WeeklyStatisticsCard';
 import RiskAlert from './ui/RiskAlert';
 
@@ -16,30 +17,48 @@ const WeeklyStatisticsSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadWeeklyStatistics = async () => {
-      setIsLoading(true);
-      const [statisticsResult, riskAlertsResult] = await Promise.all([
-        getWeeklyStatistics(),
-        getRiskAlerts(),
-      ]);
+  const loadWeeklyStatistics = useCallback(async () => {
+    setIsLoading(true);
+    const [statisticsResult, riskAlertsResult] = await Promise.all([
+      getWeeklyStatistics(),
+      getRiskAlerts(),
+    ]);
 
-      if (!statisticsResult.success || !statisticsResult.data) {
-        setErrorMessage(statisticsResult.message || tDashboard('weeklyStatsLoadFailed'));
-        setStatistics(null);
-        setRiskAlerts([]);
-        setIsLoading(false);
+    if (!statisticsResult.success || !statisticsResult.data) {
+      setErrorMessage(statisticsResult.message || tDashboard('weeklyStatsLoadFailed'));
+      setStatistics(null);
+      setRiskAlerts([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setStatistics(statisticsResult.data);
+    setRiskAlerts(riskAlertsResult.success && riskAlertsResult.data ? riskAlertsResult.data : []);
+    setErrorMessage(null);
+    setIsLoading(false);
+  }, [tDashboard]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadWeeklyStatistics();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [loadWeeklyStatistics]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeNotificationReceived((notification) => {
+      if (notification.type !== 'HIGH_PHQ9' && notification.type !== 'APP_INACTIVE') {
         return;
       }
 
-      setStatistics(statisticsResult.data);
-      setRiskAlerts(riskAlertsResult.success && riskAlertsResult.data ? riskAlertsResult.data : []);
-      setErrorMessage(null);
-      setIsLoading(false);
-    };
+      void loadWeeklyStatistics();
+    });
 
-    void loadWeeklyStatistics();
-  }, []);
+    return unsubscribe;
+  }, [loadWeeklyStatistics]);
 
   if (isLoading) {
     return (

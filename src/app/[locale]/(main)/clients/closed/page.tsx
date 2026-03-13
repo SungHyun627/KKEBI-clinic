@@ -1,19 +1,16 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useTranslations } from 'next-intl';
 import { getClosedClients, restoreClient, type ClosedClientItem } from '@/features/clients';
-import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
-import { Button } from '@/shared/ui/button';
-import CloseReasonChip from '@/features/clients/client-closure/ui/CloseReasonChip';
+import ClosedClientCard from '@/features/clients/client-closure/ui/ClosedClientCard';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 export default function ClosedClientsPage() {
   const tClients = useTranslations('clients');
   const locale = useLocale();
-  const [closedClients, setClosedClients] = useState<ClosedClientItem[]>([]);
+  const [terminatedClients, setTerminatedClients] = useState<ClosedClientItem[]>([]);
   const [pendingClientIds, setPendingClientIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const periodLabel = tClients('closedColumnPeriod');
@@ -69,7 +66,7 @@ export default function ClosedClientsPage() {
       setIsLoading(true);
       const result = await getClosedClients();
       if (result.success && result.data) {
-        setClosedClients(result.data);
+        setTerminatedClients(result.data);
       }
       setIsLoading(false);
     };
@@ -109,74 +106,41 @@ export default function ClosedClientsPage() {
           </div>
         ) : (
           <ul className="flex w-full flex-col">
-            {closedClients.length === 0 ? (
+            {terminatedClients.length === 0 ? (
               <li className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
                 {tClients('closedEmptyLast30Days')}
               </li>
             ) : (
-              closedClients.map((item, index) => (
-                <li
+              terminatedClients.map((item, index) => (
+                <ClosedClientCard
                   key={item.id}
-                  className={[
-                    'grid w-full grid-cols-[4fr_2fr_2fr_4fr_2fr_4fr] items-center gap-3 border-x border-b border-neutral-95 bg-white px-4 py-3 max-[1200px]:gap-2 max-[1100px]:grid-cols-[4fr_2fr_4fr_2fr_4fr] max-[1100px]:px-3',
-                    index === closedClients.length - 1 ? 'rounded-b-[8px]' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <span className="body-16 min-w-0 truncate text-label-normal">
-                    {item.counselingPeriod}
-                  </span>
-                  <span className="body-16 min-w-0 truncate text-label-normal">
-                    {getClientNameByLocale(item.clientId, item.clientName, locale)}
-                  </span>
-                  <span className="body-16 min-w-0 truncate text-label-normal max-[1100px]:hidden">
-                    {formatAgeGenderByLocale(item.ageGender, locale)}
-                  </span>
-                  <span className="flex min-w-0 flex-wrap gap-2 overflow-hidden">
-                    {item.chiefConcern.map((concern) => (
-                      <ChiefConcernChip
-                        key={`${item.id}-${concern}`}
-                        value={localizeChiefConcern(concern)}
-                      />
-                    ))}
-                  </span>
-                  <CloseReasonChip value={item.closeReason} />
-                  <div className="flex min-w-0 w-full items-center justify-end gap-2 pl-2">
-                    <Button
-                      disabled
-                      type="button"
-                      variant="icon"
-                      size="icon"
-                      aria-label={detailLabel}
-                      className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
-                    >
-                      <Image src="/icons/report.svg" alt="" width={24} height={24} aria-hidden />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="md"
-                      className="w-full max-w-[181px]"
-                      disabled={pendingClientIds.has(item.clientId)}
-                      onClick={async () => {
-                        if (pendingClientIds.has(item.clientId)) return;
-                        setPendingClientIds((prev) => new Set(prev).add(item.clientId));
-                        const result = await restoreClient(item.clientId);
-                        setPendingClientIds((prev) => {
-                          const next = new Set(prev);
-                          next.delete(item.clientId);
-                          return next;
-                        });
-                        if (!result.success) return;
-                        setClosedClients((prev) =>
-                          prev.filter((closedItem) => closedItem.clientId !== item.clientId),
-                        );
-                      }}
-                    >
-                      {restoreLabel}
-                    </Button>
-                  </div>
-                </li>
+                  item={item}
+                  isLast={index === terminatedClients.length - 1}
+                  localizedClientName={getClientNameByLocale(
+                    item.clientId,
+                    item.clientName,
+                    locale,
+                  )}
+                  ageGenderText={formatAgeGenderByLocale(item.ageGender, locale)}
+                  detailLabel={detailLabel}
+                  restoreLabel={restoreLabel}
+                  isRestoring={pendingClientIds.has(item.clientId)}
+                  localizeChiefConcern={localizeChiefConcern}
+                  onRestore={async (clientId) => {
+                    if (pendingClientIds.has(clientId)) return;
+                    setPendingClientIds((prev) => new Set(prev).add(clientId));
+                    const result = await restoreClient(clientId);
+                    setPendingClientIds((prev) => {
+                      const next = new Set(prev);
+                      next.delete(clientId);
+                      return next;
+                    });
+                    if (!result.success) return;
+                    setTerminatedClients((prev) =>
+                      prev.filter((terminatedItem) => terminatedItem.clientId !== clientId),
+                    );
+                  }}
+                />
               ))
             )}
           </ul>

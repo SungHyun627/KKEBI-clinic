@@ -1,7 +1,7 @@
 'use client';
 import { useLocale } from 'next-intl';
 
-import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import Image from 'next/image';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
@@ -23,7 +23,13 @@ import {
 import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation';
 import { Toast, toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
+import {
+  getUnreadNotificationCount,
+  useNotificationSse,
+  type NotificationItem,
+} from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
+import { ensureAccessToken } from '@/shared/api/http-client';
 
 const navItems = [
   { key: 'dashboard', href: '/', icon: '/icons/dashboard.svg' },
@@ -46,6 +52,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   };
 
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
   const userName = authSession?.userName || tCommon('defaultUserName');
 
@@ -55,6 +62,27 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       router.replace('/login');
     }
   }, [authSession, router]);
+
+  useEffect(() => {
+    const latestSession = getAuthSession();
+    if (!latestSession?.authenticated) return;
+    void ensureAccessToken();
+  }, [authSession]);
+
+  useEffect(() => {
+    const latestSession = getAuthSession();
+    if (!latestSession?.authenticated) return;
+
+    const loadUnreadCount = async () => {
+      const result = await getUnreadNotificationCount();
+      if (!result.success || typeof result.data !== 'number') return;
+      setUnreadNotificationCount(Math.max(0, result.data));
+    };
+
+    void loadUnreadCount();
+  }, [authSession]);
+
+  const displayedUnreadNotificationCount = authSession?.authenticated ? unreadNotificationCount : 0;
 
   useEffect(() => {
     return subscribeAuthRequired(() => {
@@ -72,6 +100,39 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     window.sessionStorage.removeItem('kkebi:summarySubmitted');
     toast(locale === 'en' ? 'Session content has been saved.' : '상담 내용이 저장되었습니다.');
   }, [locale, pathname]);
+
+  const handleNotificationReceived = useCallback(
+    (notification: NotificationItem) => {
+      if (notification.isRead) return;
+
+      setUnreadNotificationCount((prev) => prev + 1);
+
+      switch (notification.type) {
+        case 'HIGH_PHQ9':
+          toast(
+            notification.message ||
+              (locale === 'en' ? 'High PHQ-9 risk detected.' : 'PHQ-9 고위험 알림이 도착했습니다.'),
+          );
+          break;
+        case 'SCHEDULE_CHANGE_REQUEST':
+          toast(
+            notification.message ||
+              (locale === 'en'
+                ? 'A schedule change request has arrived.'
+                : '일정 변경 요청 알림이 도착했습니다.'),
+          );
+          break;
+        default:
+          break;
+      }
+    },
+    [locale],
+  );
+
+  useNotificationSse({
+    enabled: Boolean(authSession?.authenticated),
+    onNotification: handleNotificationReceived,
+  });
 
   const currentTitle =
     navItems.find(
@@ -213,10 +274,16 @@ export default function MainLayout({ children }: { children: ReactNode }) {
               <Image src="/icons/global.svg" alt={tCommon('localeSwitch')} width={24} height={24} />
             </button>
             <button
-              className="hover:cursor-pointer"
+              className="relative inline-flex hover:cursor-pointer"
               type="button"
               onClick={() => setIsNotificationOpen(true)}
             >
+              {displayedUnreadNotificationCount > 0 ? (
+                <span
+                  className="absolute right-0 top-0 h-2 w-2 rounded-full bg-status-negative"
+                  aria-hidden
+                />
+              ) : null}
               <Image src="/icons/bell.svg" alt={tNav('notifications')} width={24} height={24} />
             </button>
           </div>
@@ -224,7 +291,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <main className="flex flex-col pl-5">{children}</main>
       </SidebarInset>
 
-      <NotificationDrawer open={isNotificationOpen} onOpenChange={setIsNotificationOpen} />
+      <NotificationDrawer
+        open={isNotificationOpen}
+        onOpenChange={setIsNotificationOpen}
+        onUnreadCountSync={(count) => setUnreadNotificationCount(Math.max(0, count))}
+        onReadNotification={() => setUnreadNotificationCount((prev) => Math.max(0, prev - 1))}
+      />
       <Toast />
     </div>
   );

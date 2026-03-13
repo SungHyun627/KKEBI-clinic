@@ -1,23 +1,28 @@
-import type { NotificationType } from '@/features/notification/types/notification';
 import { useTranslations } from 'next-intl';
+import type { NotificationApiType } from '@/features/notification/types/notification';
+import { getNotificationTypeLabelKey } from '@/features/notification/lib/notification-routing';
 
 interface NotificationTypeChipProps {
-  type: NotificationType;
+  type: NotificationApiType;
 }
 
 export default function NotificationTypeChip({ type }: NotificationTypeChipProps) {
   const tNotification = useTranslations('notification');
-  const isRisk = type === 'risk';
+  const labelKey = getNotificationTypeLabelKey(type);
+  const isScheduleType = type === 'SCHEDULE_CHANGE_REQUEST';
+  const isRiskType = type === 'HIGH_PHQ9' || type === 'APP_INACTIVE';
 
   return (
     <span
-      className={`flex items-center justify-center rounded-[100px] border px-[8px] py-[3px] body-12 font-medium ${
-        isRisk
+      className={`body-12 flex items-center justify-center rounded-[100px] border px-[8px] py-[3px] font-medium ${
+        isRiskType
           ? 'border-[rgba(229,34,34,0.50)] bg-[rgba(229,34,34,0.10)] text-status-negative'
-          : 'border-[rgba(66,158,0,0.50)] bg-[rgba(66,158,0,0.10)] text-[#429E00]'
+          : isScheduleType
+            ? 'border-[rgba(66,158,0,0.50)] bg-[rgba(66,158,0,0.10)] text-[#429E00]'
+            : 'border-neutral-90 bg-neutral-97 text-label-alternative'
       }`}
     >
-      {isRisk ? tNotification('typeRisk') : tNotification('typeScheduleChange')}
+      {tNotification(labelKey)}
     </span>
   );
 }

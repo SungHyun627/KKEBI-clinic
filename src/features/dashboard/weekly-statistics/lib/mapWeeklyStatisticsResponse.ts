@@ -23,32 +23,21 @@ export const normalizeWeeklyStatistics = (data: unknown): WeeklyStatisticsMapped
     improvementRate?: unknown;
   };
 
+  const toNumberOrZero = (raw: unknown) =>
+    typeof raw === 'number' ? raw : raw === null ? 0 : null;
   const completedSessions =
-    typeof value.completedSessions === 'number'
-      ? value.completedSessions
-      : typeof value.completedCount === 'number'
-        ? value.completedCount
-        : null;
+    toNumberOrZero(value.completedSessions) ?? toNumberOrZero(value.completedCount);
   const averageSessionMinutes =
-    typeof value.averageSessionMinutes === 'number'
-      ? value.averageSessionMinutes
-      : typeof value.avgDurationMinutes === 'number'
-        ? value.avgDurationMinutes
-        : null;
+    toNumberOrZero(value.averageSessionMinutes) ?? toNumberOrZero(value.avgDurationMinutes);
   const clientImprovementRate =
-    typeof value.clientImprovementRate === 'number'
-      ? value.clientImprovementRate
-      : typeof value.improvementRate === 'number'
-        ? value.improvementRate
-        : null;
+    toNumberOrZero(value.clientImprovementRate) ?? toNumberOrZero(value.improvementRate);
 
   if (
     completedSessions === null ||
     averageSessionMinutes === null ||
     clientImprovementRate === null
-  ) {
+  )
     return null;
-  }
 
   return {
     completedSessions,

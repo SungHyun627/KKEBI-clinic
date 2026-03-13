@@ -113,7 +113,7 @@ export const mapApiClientDetailToUi = (detail?: ApiClientDetail): ClientDetailDa
     currentSession: 1,
     totalSession: 1,
     visitPurpose: '고민 상담',
-    nextCounselingAt: detail.counselingStartDate ?? '',
+    nextCounselingAt: detail.nextSession?.scheduledAt ?? detail.counselingStartDate ?? '',
     recentRisks: EMPTY_RECENT_RISKS,
     recentCheckins: EMPTY_RECENT_CHECKINS,
     counselingHistory: EMPTY_COUNSELING_HISTORY,
@@ -122,6 +122,13 @@ export const mapApiClientDetailToUi = (detail?: ApiClientDetail): ClientDetailDa
       pss10,
       mbi,
       etc: buildEtcScaleText(detail.testResults),
+    },
+    nextSession: {
+      sessionId:
+        typeof detail.nextSession?.sessionId === 'number'
+          ? String(detail.nextSession.sessionId)
+          : null,
+      scheduledAt: detail.nextSession?.scheduledAt ?? '',
     },
     intakeAnswers: mapIntakeAnswers(detail.intake),
   };

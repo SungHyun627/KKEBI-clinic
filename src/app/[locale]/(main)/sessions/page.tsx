@@ -1,7 +1,9 @@
 import { getTranslations } from 'next-intl/server';
-import SessionListPanel from '@/features/sessions/ui/SessionListPanel';
-import type { SessionStatusTab } from '@/features/sessions/ui/SessionStatusTabs';
-import SessionStatusTabsWithQuery from '@/features/sessions/ui/SessionStatusTabsWithQuery';
+import {
+  SessionListPanel,
+  SessionStatusTabsWithQuery,
+  type SessionStatusTab,
+} from '@/features/sessions/session-list';
 
 interface SessionsPageProps {
   params: Promise<{ locale: string }>;

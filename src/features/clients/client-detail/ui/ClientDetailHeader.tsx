@@ -10,41 +10,36 @@ import { DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import type { ClientLookupItem } from '@/features/clients/types/common';
 import { useLocale, useTranslations } from 'next-intl';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
-import { startSession } from '@/features/sessions/api/startSession';
-import { toast } from '@/shared/ui/toast';
+import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
-import SessionReminderDrawer from '@/features/notification/ui/SessionReminderDrawer';
 
 interface ClientDetailHeaderProps {
   client: ClientLookupItem;
+  sessionId?: string;
+  scheduledTime?: string;
 }
 
-export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) {
+export default function ClientDetailHeader({
+  client,
+  sessionId,
+  scheduledTime,
+}: ClientDetailHeaderProps) {
   const router = useRouter();
   const locale = useLocale();
   const tCommon = useTranslations('common');
   const tDashboard = useTranslations('dashboard');
   const localizedClientName = getClientNameByLocale(client.clientId, client.clientName, locale);
-  const [isStarting, setIsStarting] = useState(false);
   const [isReminderOpen, setIsReminderOpen] = useState(false);
+  const hasSessionId = Boolean(sessionId);
 
-  const handleStart = async () => {
-    setIsStarting(true);
-    const result = await startSession({ clientId: client.clientId, source: 'client-detail' });
-    setIsStarting(false);
+  const handleStart = () => {
+    if (!sessionId) return;
 
-    if (!result.success || !result.sessionId) {
-      toast(result.message || tCommon('underConstruction'));
-      return;
-    }
-
-    setSessionStartContext(result.sessionId, {
+    setSessionStartContext(sessionId, {
       name: localizedClientName,
       riskType: client.riskType,
     });
-    router.push(
-      `/session/${result.sessionId}?returnTo=${encodeURIComponent(`/${locale}/clients`)}`,
-    );
+    router.push(`/session/${sessionId}?returnTo=${encodeURIComponent(`/${locale}/clients`)}`);
   };
 
   return (
@@ -64,6 +59,7 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
             size="icon"
             onClick={() => setIsReminderOpen(true)}
             aria-label={tDashboard('todayScheduleSendNotification', { name: localizedClientName })}
+            disabled={!hasSessionId}
             className="h-[42px] w-[42px] min-h-[42px] min-w-[42px] shrink-0 rounded-[12px] border-neutral-95 p-0"
           >
             <Image src="/icons/sent.svg" alt="" width={24} height={24} aria-hidden />
@@ -72,8 +68,8 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
             type="button"
             size="md"
             className="w-full"
-            disabled={isStarting}
             onClick={handleStart}
+            disabled={!hasSessionId}
           >
             {tCommon('start')}
           </Button>
@@ -82,8 +78,9 @@ export default function ClientDetailHeader({ client }: ClientDetailHeaderProps) 
       <SessionReminderDrawer
         open={isReminderOpen}
         onOpenChange={setIsReminderOpen}
-        clientId={client.clientId}
+        sessionId={sessionId ?? ''}
         clientName={localizedClientName}
+        scheduledTime={scheduledTime}
       />
     </>
   );

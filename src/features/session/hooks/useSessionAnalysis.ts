@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import type { SessionAutoRecordData, SessionInsightsData } from '../types/session-page';
+import type { SessionAutoRecordData, SessionInsightsData } from '../types/session';
 import { analyzeLiveSummary, buildLiveInsights } from '../lib/session-analysis';
 
 interface UseSessionAnalysisParams {

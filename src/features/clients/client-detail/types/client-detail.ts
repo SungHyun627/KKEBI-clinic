@@ -72,6 +72,10 @@ export interface ClientDetailData extends ClientLookupItem {
     mbi: number;
     etc: string;
   };
+  nextSession: {
+    sessionId: string | null;
+    scheduledAt: string;
+  };
   intakeAnswers: ClientIntakeAnswers;
 }
 

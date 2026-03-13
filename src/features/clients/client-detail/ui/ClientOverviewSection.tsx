@@ -208,7 +208,7 @@ export default function ClientOverviewSection({
                 label={tClients('detailVisitReason')}
                 value={localizedVisitPurpose}
               />
-              <NextCounselingDatePicker initialValue={detail.nextCounselingAt} />
+              <NextCounselingDatePicker initialValue={detail.nextCounselingAt} disabled />
             </>
           )}
         </div>

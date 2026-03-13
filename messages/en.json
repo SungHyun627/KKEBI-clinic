@@ -291,6 +291,8 @@
     "reschedulePickDateAria": "Select reschedule date",
     "rescheduleStartTimeLabel": "Start time",
     "rescheduleEndTimeLabel": "End time",
+    "rescheduleRequestLabel": "Client request details",
+    "rescheduleRequestNoReason": "No reason provided.",
     "rescheduleSuccessToast": "Schedule change completed.",
     "summaryTitle": "Session summary in progress",
     "summaryJoinWord": "and",
@@ -387,7 +389,9 @@
     "commonEmpty": "There are no recent notifications.",
     "commonLoadFailed": "Failed to load notifications.",
     "typeRisk": "Risk alert",
+    "typeIntake": "Intake analysis",
     "typeScheduleChange": "Schedule change request",
+    "unreadCount": "{count} unread",
     "timeJustNow": "Just now",
     "timeMinutesAgo": "{count} min ago",
     "timeHoursAgo": "{count} hr ago",
@@ -450,11 +454,16 @@
       "title": "Counseling Information",
       "fields": {
         "counselingStartDate": "Counseling start date",
+        "counselingTime": "Counseling time",
+        "counselingStartTime": "Counseling start time",
+        "counselingEndTime": "Counseling end time",
         "chiefConcern": "Chief concern",
         "referralPath": "Referral source"
       },
       "placeholders": {
         "counselingStartDate": "Select counseling start date",
+        "counselingStartTime": "Select counseling start time",
+        "counselingEndTime": "Select counseling end time",
         "chiefConcern": "Enter chief concern",
         "referralPath": "Referral source - Search/Referral/Hospital referral/KKEBI app/Other"
       },

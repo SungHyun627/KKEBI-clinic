@@ -291,6 +291,8 @@
     "reschedulePickDateAria": "변경 날짜 선택",
     "rescheduleStartTimeLabel": "시작 시간",
     "rescheduleEndTimeLabel": "종료 시간",
+    "rescheduleRequestLabel": "내담자 요청 내용",
+    "rescheduleRequestNoReason": "요청 사유가 없습니다.",
     "rescheduleSuccessToast": "일정 변경이 완료되었습니다.",
     "summaryTitle": "상담 요약 업데이트",
     "summaryJoinWord": "및",
@@ -387,7 +389,9 @@
     "commonEmpty": "최근 온 알림이 없습니다.",
     "commonLoadFailed": "알림 목록을 불러오지 못했습니다.",
     "typeRisk": "위험 알림",
+    "typeIntake": "접수 분석 알림",
     "typeScheduleChange": "일정 변경 요청",
+    "unreadCount": "미확인 {count}개",
     "timeJustNow": "방금 전",
     "timeMinutesAgo": "{count}분 전",
     "timeHoursAgo": "{count}시간 전",
@@ -450,11 +454,16 @@
       "title": "상담 정보",
       "fields": {
         "counselingStartDate": "상담 시작 일자",
+        "counselingTime": "상담 시간",
+        "counselingStartTime": "상담 시작 시간",
+        "counselingEndTime": "상담 종료 시간",
         "chiefConcern": "주 호소 문제",
         "referralPath": "유입 경로"
       },
       "placeholders": {
         "counselingStartDate": "상담 시작 일자를 선택해 주세요",
+        "counselingStartTime": "상담 시작 시간을 선택해 주세요",
+        "counselingEndTime": "상담 종료 시간을 선택해 주세요",
         "chiefConcern": "주 호소 문제를 입력해 주세요",
         "referralPath": "유입 경로-검색/지인 추천/병원 의뢰/KKEBI앱/기타"
       },
