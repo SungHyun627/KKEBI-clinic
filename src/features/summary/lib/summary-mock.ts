@@ -9,20 +9,19 @@ function hashString(value: string) {
   return hash;
 }
 
-function emotionLabelByLocale(
-  emotion: 'anxious' | 'sad' | 'angry' | 'happy' | 'calm' | 'fearful',
-  locale: string,
-) {
-  const map = {
+function emotionLabelByLocale(emotion: string, locale: string) {
+  const map: Record<string, { ko: string; en: string }> = {
     anxious: { ko: '불안', en: 'Anxious' },
     sad: { ko: '슬픔', en: 'Sad' },
     angry: { ko: '분노', en: 'Angry' },
     happy: { ko: '기쁨', en: 'Happy' },
     calm: { ko: '평온', en: 'Calm' },
     fearful: { ko: '두려움', en: 'Fearful' },
-  } as const;
+  };
 
-  return locale === 'en' ? map[emotion].en : map[emotion].ko;
+  const label = map[emotion];
+  if (!label) return emotion;
+  return locale === 'en' ? label.en : label.ko;
 }
 
 function distortionLabelByLocale(distortionType: string, locale: string) {
@@ -82,14 +81,10 @@ export function getSessionSummaryMock(sessionId: number, locale: string): Summar
       elapsedSeconds,
     },
     summarySnapshot: {
-      insights: {
-        riskType: sessionPage.insights.riskType,
-        keyConcerns: sessionPage.insights.keyConcerns,
-        distortionType: sessionPage.insights.distortionType,
-      },
-      recentEmotionHistory: sessionPage.insights.emotionHistory.map((item) =>
+      emotionPatterns: sessionPage.insights.emotionHistory.map((item) =>
         emotionLabelByLocale(item.emotion, locale),
       ),
+      detectedDistortions: [distortionLabelByLocale(sessionPage.insights.distortionType, locale)],
       transcript: transcriptItems.map((item) => ({
         id: Number(item.id),
         speaker: item.speaker,
@@ -102,7 +97,7 @@ export function getSessionSummaryMock(sessionId: number, locale: string): Summar
         memo: distortionLabelByLocale(sessionPage.insights.distortionType, locale),
         timeOffset: 60 * (index + 1),
       })),
-      autoMemo: sessionPage.autoRecord.counselorMemo,
+      summaryText: sessionPage.autoRecord.liveSummaryBody,
     },
   };
 }

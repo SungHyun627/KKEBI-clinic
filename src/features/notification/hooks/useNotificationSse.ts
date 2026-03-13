@@ -20,7 +20,7 @@ export const useNotificationSse = ({ enabled, onNotification }: UseNotificationS
 
     let isCancelled = false;
     let eventSource: EventSource | null = null;
-    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let reconnectTimer: number | NodeJS.Timeout | null = null;
 
     const clearReconnectTimer = () => {
       if (!reconnectTimer) return;
