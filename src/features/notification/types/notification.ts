@@ -1,45 +1,27 @@
-export type NotificationType = 'risk' | 'schedule_change';
-export type NotificationViewMode = 'risk' | 'all';
-export type NotificationMockSet = 'all' | 'risk' | 'empty';
-type NotificationParams = Record<string, string | number>;
+import type { components } from '@/shared/api/generated-types';
 
-interface NotificationBase {
+export type NotificationApiType = NonNullable<
+  components['schemas']['NotificationResponse']['type']
+>;
+
+export interface NotificationItem {
   id: string;
-  type: NotificationType;
-  createdAt?: string;
-  createdAtKey?: string;
-  createdAtParams?: NotificationParams;
-  clientId: string;
-}
-
-export interface RiskNotification extends NotificationBase {
-  type: 'risk';
-  clientId: string;
-  name: string;
-  description?: string;
-  descriptionKey?: string;
-  descriptionParams?: NotificationParams;
-}
-
-export interface ScheduleChangeNotification extends NotificationBase {
-  type: 'schedule_change';
-  title?: string;
-  titleKey?: string;
-  titleParams?: NotificationParams;
-  description?: string;
-  descriptionKey?: string;
-  descriptionParams?: NotificationParams;
-}
-
-export type NotificationItem = RiskNotification | ScheduleChangeNotification;
-
-export interface NotificationListData {
-  viewMode: NotificationViewMode;
-  items: NotificationItem[];
+  type: NotificationApiType;
+  title: string;
+  message: string;
+  referenceId: string | null;
+  isRead: boolean;
+  createdAt: string;
 }
 
 export interface NotificationListResponse {
   success: boolean;
-  data?: NotificationListData;
+  data?: NotificationItem[];
+  message?: string;
+}
+
+export interface NotificationUnreadCountResponse {
+  success: boolean;
+  data?: number;
   message?: string;
 }

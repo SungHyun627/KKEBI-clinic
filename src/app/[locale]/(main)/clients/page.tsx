@@ -13,6 +13,12 @@ import type { RiskFilter } from '@/features/clients/client-list/types/client-lis
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;
+const toRiskFilterFromQuery = (value: string | null): RiskFilter => {
+  if (value === 'high') return '위험';
+  if (value === 'caution') return '주의';
+  if (value === 'stable') return '안정';
+  return 'all';
+};
 
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
@@ -22,6 +28,7 @@ export default function ClientsPage() {
   const searchParams = useSearchParams();
   const targetClientId = searchParams.get('clientId');
   const targetOpenAt = searchParams.get('openAt');
+  const targetRisk = searchParams.get('risk');
   const targetQueryKey = targetClientId ? `${targetClientId}:${targetOpenAt ?? ''}` : null;
   const fallbackConcerns = useMemo(
     () => [tClients('concernsDepression'), tClients('concernsStress'), tClients('concernsSleep')],
@@ -29,7 +36,7 @@ export default function ClientsPage() {
   );
   const [searchInput, setSearchInput] = useState('');
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all');
+  const [riskFilter, setRiskFilter] = useState<RiskFilter>(() => toRiskFilterFromQuery(targetRisk));
   const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
   const [page, setPage] = useState(1);
   const { clients, isLoading, errorMessage, totalElements, totalPages, removeClient } =
