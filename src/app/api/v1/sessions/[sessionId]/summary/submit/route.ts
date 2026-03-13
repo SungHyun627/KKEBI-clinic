@@ -7,19 +7,17 @@ export const POST = async (
 ): Promise<Response> => {
   const { sessionId } = await params;
   try {
-    const proxied = await proxyToBackend(request, {
+    return await proxyToBackend(request, {
       method: 'POST',
       path: `/api/v1/sessions/${encodeURIComponent(sessionId)}/summary/submit`,
     });
-
-    if (proxied.ok || proxied.status === 401 || proxied.status === 403) {
-      return proxied;
-    }
-  } catch {}
-
-  return NextResponse.json({
-    code: 'SUCCESS',
-    message: '요청이 성공적으로 처리되었습니다',
-    data: {},
-  });
+  } catch {
+    return NextResponse.json(
+      {
+        code: 'INTERNAL_SERVER_ERROR',
+        message: '상담 요약 제출 중 오류가 발생했습니다.',
+      },
+      { status: 500 },
+    );
+  }
 };
