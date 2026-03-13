@@ -90,6 +90,14 @@ export const buildRegisterClientPayload = (
       paymentInfo.paymentType === 'insurance'
         ? paymentInfo.insuranceCompany.trim() || undefined
         : undefined,
+    initialTestResults: assessmentResults.additionalResults
+      .filter(
+        (result) => result.testName.trim().length > 0 && typeof result.testResult === 'number',
+      )
+      .map((result) => ({
+        testName: result.testName.trim(),
+        score: result.testResult ?? undefined,
+      })),
     intake: {
       phq9Score: assessmentResults.phq9Score ?? undefined,
       pss10Score: assessmentResults.pss10Score ?? undefined,
