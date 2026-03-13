@@ -43,6 +43,9 @@ export const useSessionList = ({
 
   const statusParam = searchParams.get('status');
   const viewParam = searchParams.get('view');
+  const actionParam = searchParams.get('action');
+  const targetSessionId =
+    actionParam === 'reschedule-request' ? searchParams.get('sessionId') : null;
   const selectedStatus: SessionStatus = isSessionStatusTab(statusParam)
     ? statusParam
     : initialStatus;
@@ -106,6 +109,7 @@ export const useSessionList = ({
     selectedStatus,
     selectedView,
     visibleScheduledGroups,
+    targetSessionId,
     visibleCompletedGroups,
     hasNoData,
     formatDate,

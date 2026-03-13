@@ -212,8 +212,11 @@ export default function RescheduleSessionDialog({
     handleStartTimePickerOpenChange,
     handleEndTimePickerOpenChange,
     handleSubmit,
+    latestRequestReason,
+    latestRequestedAtLabel,
   } = useRescheduleSessionDialog({
     sessionId,
+    open,
     currentDate,
     initialStartTime,
     onOpenChange,
@@ -306,6 +309,17 @@ export default function RescheduleSessionDialog({
                 />
               </div>
             </div>
+            {latestRequestedAtLabel ? (
+              <div className="flex w-full flex-col gap-2 rounded-2xl border border-neutral-95 bg-neutral-99 px-4 py-3">
+                <p className="body-14 text-label-alternative">
+                  {tSessions('rescheduleRequestLabel')}
+                </p>
+                <p className="body-14 font-semibold text-label-normal">{latestRequestedAtLabel}</p>
+                <p className="body-14 text-label-normal">
+                  {latestRequestReason || tSessions('rescheduleRequestNoReason')}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex justify-center items-center gap-2">

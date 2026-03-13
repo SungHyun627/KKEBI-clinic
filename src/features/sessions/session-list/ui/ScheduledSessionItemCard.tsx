@@ -23,6 +23,7 @@ interface ScheduledSessionItemCardProps {
   moodLabel: string;
   stressLabel: string;
   viewMode?: 'list' | 'calendar';
+  autoOpenReschedule?: boolean;
 }
 
 export default function ScheduledSessionItemCard({
@@ -31,6 +32,7 @@ export default function ScheduledSessionItemCard({
   moodLabel,
   stressLabel,
   viewMode,
+  autoOpenReschedule = false,
 }: ScheduledSessionItemCardProps) {
   const router = useRouter();
   const locale = useLocale();
@@ -64,6 +66,11 @@ export default function ScheduledSessionItemCard({
       window.clearInterval(timer);
     };
   }, []);
+
+  useEffect(() => {
+    if (!autoOpenReschedule) return;
+    setIsRescheduleOpen(true);
+  }, [autoOpenReschedule]);
 
   const handleStart = () => {
     setSessionStartContext(item.id, {

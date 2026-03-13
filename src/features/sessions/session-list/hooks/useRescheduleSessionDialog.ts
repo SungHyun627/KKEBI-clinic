@@ -1,14 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/shared/ui/toast';
 import { rescheduleSession } from '../api/rescheduleSession';
+import { getRescheduleRequests } from '../api/getRescheduleRequests';
 import { sessionListQueryKey } from '../lib/query-keys';
 
 interface UseRescheduleSessionDialogParams {
   sessionId: string;
+  open: boolean;
   currentDate: string;
   initialStartTime: string;
   onOpenChange: (open: boolean) => void;
@@ -58,6 +60,27 @@ const toUtcIsoString = (dateKey: string, time: string) => {
   return localDate.toISOString();
 };
 
+const parseBackendDateTime = (value: string) => {
+  if (!value) return null;
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+  const hasTimezone = /([zZ]|[+-]\d{2}:\d{2})$/.test(normalized);
+  const parsed = new Date(hasTimezone ? normalized : `${normalized}Z`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const formatDateToKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const formatTime = (date: Date) => {
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  return `${hour}:${minute}`;
+};
+
 const getNextTime = (value: string) => {
   const [hourRaw, minuteRaw] = value.split(':');
   const hour = Number(hourRaw);
@@ -73,6 +96,7 @@ const getNextTime = (value: string) => {
 
 export const useRescheduleSessionDialog = ({
   sessionId,
+  open,
   currentDate,
   initialStartTime,
   onOpenChange,
@@ -89,6 +113,8 @@ export const useRescheduleSessionDialog = ({
   const [endTime, setEndTime] = useState(getNextTime(initialStartTime));
   const [openTimePicker, setOpenTimePicker] = useState<'start' | 'end' | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [latestRequestReason, setLatestRequestReason] = useState('');
+  const [latestRequestedAtLabel, setLatestRequestedAtLabel] = useState('');
 
   const selectedDateLabel = useMemo(() => {
     return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
@@ -105,6 +131,57 @@ export const useRescheduleSessionDialog = ({
     toDateKey(selectedDate) !== initialDateKey ||
     startTime !== initialStartTime ||
     endTime !== initialEndTime;
+
+  useEffect(() => {
+    if (!open) return;
+
+    let isCancelled = false;
+    const loadRescheduleRequests = async () => {
+      const result = await getRescheduleRequests(sessionId);
+      if (!result.success || !result.data || result.data.length === 0 || isCancelled) {
+        if (!isCancelled) {
+          setLatestRequestReason('');
+          setLatestRequestedAtLabel('');
+        }
+        return;
+      }
+
+      const latestRequest = result.data[0];
+      setLatestRequestReason(latestRequest.reason);
+
+      const requestedAtDate = parseBackendDateTime(latestRequest.requestedAt);
+      if (!requestedAtDate) {
+        setLatestRequestedAtLabel('');
+        return;
+      }
+
+      setLatestRequestedAtLabel(
+        new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'ko-KR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(requestedAtDate),
+      );
+
+      const requestedDateKey = formatDateToKey(requestedAtDate);
+      const requestedStartTime = formatTime(requestedAtDate);
+      const requestedDate = parseDateFromIso(requestedDateKey);
+
+      setSelectedDate(requestedDate);
+      setDraftDate(requestedDate);
+      setVisibleMonth(requestedDate);
+      setStartTime(requestedStartTime);
+      setEndTime(getNextTime(requestedStartTime));
+    };
+
+    void loadRescheduleRequests();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [locale, open, sessionId]);
 
   const handleToggleDatePicker = () => {
     const nextOpen = !isDatePickerOpen;
@@ -176,5 +253,7 @@ export const useRescheduleSessionDialog = ({
     handleStartTimePickerOpenChange,
     handleEndTimePickerOpenChange,
     handleSubmit,
+    latestRequestReason,
+    latestRequestedAtLabel,
   };
 };

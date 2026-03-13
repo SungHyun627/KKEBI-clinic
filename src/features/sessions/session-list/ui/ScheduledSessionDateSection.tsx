@@ -11,6 +11,7 @@ interface ScheduledSessionDateSectionProps {
   moodLabel: string;
   stressLabel: string;
   viewMode?: 'list' | 'calendar';
+  targetSessionId?: string | null;
 }
 
 export default function ScheduledSessionDateSection({
@@ -19,6 +20,7 @@ export default function ScheduledSessionDateSection({
   moodLabel,
   stressLabel,
   viewMode,
+  targetSessionId,
 }: ScheduledSessionDateSectionProps) {
   return (
     <section
@@ -55,6 +57,7 @@ export default function ScheduledSessionDateSection({
               moodLabel={moodLabel}
               stressLabel={stressLabel}
               viewMode={viewMode}
+              autoOpenReschedule={Boolean(targetSessionId && targetSessionId === item.id)}
             />
           </li>
         ))}

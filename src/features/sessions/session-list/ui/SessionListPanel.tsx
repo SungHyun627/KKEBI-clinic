@@ -23,6 +23,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
     selectedStatus,
     selectedView,
     visibleScheduledGroups,
+    targetSessionId,
     visibleCompletedGroups,
     hasNoData,
     formatDate,
@@ -78,6 +79,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
                 moodLabel={tClients('checkinMood')}
                 stressLabel={tClients('checkinStress')}
                 viewMode={selectedView}
+                targetSessionId={targetSessionId}
               />
             ))
           : visibleCompletedGroups.map((group) => (
