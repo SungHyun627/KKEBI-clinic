@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
-import { printSessionSummaryPdf } from '@/features/summary/lib/downloads';
 import {
   AiSummaryCard,
   CompletionCard,
@@ -64,6 +63,7 @@ export default function SessionSummaryContent({
     setNextEndTime,
     handleToggleMission,
     handleDownloadTxt,
+    handleDownloadPdf,
     handleDownloadAudio,
     handleSubmitSummary,
     audioRef,
@@ -94,7 +94,7 @@ export default function SessionSummaryContent({
         hasRecording={hasRecording}
         onDownloadTxt={handleDownloadTxt}
         onDownloadAudio={handleDownloadAudio}
-        onPrintPdf={printSessionSummaryPdf}
+        onPrintPdf={handleDownloadPdf}
         onBack={() => router.push(`/${locale}`)}
       />
 

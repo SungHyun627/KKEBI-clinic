@@ -6,10 +6,8 @@ import { useTranslations } from 'next-intl';
 import { useForm, useWatch } from 'react-hook-form';
 import { getSessionSummary } from '@/features/summary/api/getSessionSummary';
 import { submitSessionSummary } from '@/features/summary/api/submitSessionSummary';
-import {
-  downloadSessionRecordingFile,
-  downloadSessionTranscriptTxt,
-} from '@/features/summary/lib/downloads';
+import { downloadSessionReport } from '@/features/summary/api/downloadSessionReport';
+import { downloadSessionRecordingFile } from '@/features/summary/lib/downloads';
 import { formatSummaryDate } from '@/features/summary/lib/formatSummaryDate';
 import { toast } from '@/shared/ui/toast';
 import { getSessionAudioPreviewUrl } from '@/shared/lib/session-audio-preview-cache';
@@ -199,21 +197,34 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     setSummaryTextOverride(trimmed === defaultTrimmed ? '' : value);
   };
 
-  const handleDownloadTxt = () => {
-    downloadSessionTranscriptTxt({
-      sessionId,
-      transcriptItems,
-      locale,
-    });
+  const handleDownloadTxt = async () => {
+    try {
+      await downloadSessionReport(sessionId, 'txt');
+    } catch {
+      toast(locale === 'en' ? 'Failed to download TXT.' : 'TXT 다운로드에 실패했습니다.');
+    }
   };
 
-  const handleDownloadAudio = () => {
-    downloadSessionRecordingFile({
-      sessionId,
-      transcriptItems,
-      locale,
-      audioUrl: recordingAudioUrl || undefined,
-    });
+  const handleDownloadPdf = async () => {
+    try {
+      await downloadSessionReport(sessionId, 'pdf');
+    } catch {
+      toast(locale === 'en' ? 'Failed to download PDF.' : 'PDF 다운로드에 실패했습니다.');
+    }
+  };
+
+  const handleDownloadAudio = async () => {
+    try {
+      await downloadSessionReport(sessionId, 'audio');
+    } catch {
+      // 백엔드 파일 다운로드 실패 시 기존 로컬 다운로드로 폴백
+      downloadSessionRecordingFile({
+        sessionId,
+        transcriptItems,
+        locale,
+        audioUrl: recordingAudioUrl || undefined,
+      });
+    }
   };
 
   const handleToggleMission = (id: string, checked: boolean) => {
@@ -321,6 +332,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
       setValue('nextEndTime', value, { shouldDirty: true, shouldValidate: true }),
     handleToggleMission,
     handleDownloadTxt,
+    handleDownloadPdf,
     handleDownloadAudio,
     handleSubmitSummary,
     audioRef,
