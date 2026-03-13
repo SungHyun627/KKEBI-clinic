@@ -116,6 +116,59 @@ const pickNonEmptyString = (...values: unknown[]) => {
   return undefined;
 };
 
+const normalizeForSummary = (value: string, maxLength = 50) => {
+  const collapsed = value.replace(/\s+/g, ' ').trim();
+  if (collapsed.length <= maxLength) return collapsed;
+  return `${collapsed.slice(0, maxLength)}...`;
+};
+
+const getSpeakerLabel = (locale: string, speaker: 'counselor' | 'client') => {
+  if (locale === 'en') {
+    return speaker === 'counselor' ? 'counselor' : 'client';
+  }
+  return speaker === 'counselor' ? '상담사' : '내담자';
+};
+
+const buildRecentTwoDialogueSummary = (
+  locale: string,
+  transcriptItems: SessionAutoRecordData['transcripts'],
+) => {
+  const completed = transcriptItems
+    .filter((item) => !item.isPendingTranscription && item.text.trim().length > 0)
+    .slice(-2);
+
+  if (completed.length === 0) return '';
+  if (completed.length === 1) {
+    const only = completed[0];
+    if (!only) return '';
+    if (locale === 'en') {
+      return `${getSpeakerLabel(locale, only.speaker)} said "${normalizeForSummary(only.text, 70)}".`;
+    }
+    return `${getSpeakerLabel(locale, only.speaker)}가 "${normalizeForSummary(only.text, 70)}"라고 말했어요.`;
+  }
+
+  const [first, second] = completed;
+  if (!first || !second) return '';
+  if (locale === 'en') {
+    return `${getSpeakerLabel(locale, first.speaker)} said "${normalizeForSummary(first.text, 70)}", then ${getSpeakerLabel(locale, second.speaker)} said "${normalizeForSummary(second.text, 70)}".`;
+  }
+  return `${getSpeakerLabel(locale, first.speaker)}가 "${normalizeForSummary(first.text, 70)}"라고 말했고, 이어서 ${getSpeakerLabel(locale, second.speaker)}가 "${normalizeForSummary(second.text, 70)}"라고 말했어요.`;
+};
+
+const buildLocalSummary = (locale: string) => {
+  if (locale === 'en') {
+    return {
+      title: 'Live summary',
+      body: 'The client appears to be experiencing fear, with negative interpretations of the situation that may connect to depressive symptoms.',
+    };
+  }
+
+  return {
+    title: '실시간 요약',
+    body: '내담자는 두려움을 느끼고 있으며, 상황에 대한 부정적인 해석이 나타나고 있습니다. 이는 우울증의 증상으로 연결될 수 있습니다.',
+  };
+};
+
 const extractDistortionPatch = (payload: Record<string, unknown>) => {
   const distortionPayload = parseJsonObject(payload.distortion);
   const mappedTypeCandidates = [
@@ -260,7 +313,8 @@ export default function SessionAutoRecordPanel({
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const tSession = useTranslations('sessionList');
-  const [streamSummary, setStreamSummary] = useState<{ title: string; body: string } | null>(null);
+  const [serverSummary, setServerSummary] = useState<{ title: string; body: string } | null>(null);
+  const [localSummary, setLocalSummary] = useState<{ title: string; body: string } | null>(null);
   const [activeSpeaker, setActiveSpeaker] = useState<'counselor' | 'client'>('counselor');
   const recordedAudioChunksRef = useRef<Blob[]>([]);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -417,7 +471,7 @@ export default function SessionAutoRecordPanel({
             ? 'AI Summary'
             : 'AI 자동 요약';
       if (body) {
-        setStreamSummary({ title, body });
+        setServerSummary({ title, body });
       }
 
       // Insights event: PHQ-9/인지왜곡은 SSE 기준으로 반영
@@ -448,11 +502,22 @@ export default function SessionAutoRecordPanel({
 
   useEffect(() => {
     if (!isRecording) {
-      setStreamSummary(null);
+      setServerSummary(null);
+      setLocalSummary(null);
     }
   }, [isRecording]);
 
-  const activeStreamSummary = isRecording ? streamSummary : null;
+  useEffect(() => {
+    if (!isRecording) return;
+    const nextLocalSummary = buildLocalSummary(locale);
+    setLocalSummary(nextLocalSummary);
+  }, [isRecording, locale]);
+
+  const activeSummary = isRecording ? (serverSummary ?? localSummary) : null;
+  const recentTwoDialogueSummary = useMemo(
+    () => buildRecentTwoDialogueSummary(locale, transcriptItems),
+    [locale, transcriptItems],
+  );
 
   useEffect(() => {
     onRecorderStateChange?.({
@@ -822,15 +887,12 @@ export default function SessionAutoRecordPanel({
         />
         <SessionLiveSummaryCard
           locale={locale}
+          statusLabel={undefined}
           title={
-            activeStreamSummary?.title ??
-            (isRecording
-              ? locale === 'en'
-                ? 'Waiting for AI summary...'
-                : 'AI 요약 생성 대기 중...'
-              : '')
+            activeSummary?.body ??
+            (isRecording ? (locale === 'en' ? 'Generating summary...' : '요약 생성 중...') : '')
           }
-          body={activeStreamSummary?.body ?? ''}
+          body={recentTwoDialogueSummary}
         />
         <SessionCounselorMemoCard locale={locale} defaultValue="" />
       </div>
