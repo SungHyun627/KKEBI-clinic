@@ -251,6 +251,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
           ? {
               date: nextDate,
               startTime: nextStartTime,
+              endTime: nextEndTime || undefined,
             }
           : null,
     });

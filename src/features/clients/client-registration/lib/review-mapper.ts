@@ -82,6 +82,8 @@ export const buildRegisterClientPayload = (
     gender: mapGenderToApi(basicInfo.gender),
     paymentType: mapPaymentTypeToApi(paymentInfo.paymentType),
     counselingStartDate: counselingInfo.counselingStartDate || undefined,
+    counselingStartTime: counselingInfo.counselingStartTime || undefined,
+    counselingEndTime: counselingInfo.counselingEndTime || undefined,
     chiefComplaint: counselingInfo.chiefConcern.trim() || undefined,
     referralSource: mapReferralSourceToApi(counselingInfo.referralPath, locale),
     insuranceCompany:
