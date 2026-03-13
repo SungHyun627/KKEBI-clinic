@@ -1,8 +1,9 @@
 import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
 
 export type SummaryPayload = {
-  sessionId: string;
+  sessionId?: number;
   endedAt: string;
+  audioUrl?: string;
   sessionData?: {
     clientName?: string;
     sessionType?: string;
@@ -12,27 +13,35 @@ export type SummaryPayload = {
     elapsedSeconds?: number;
   } | null;
   summarySnapshot?: {
-    insights?: {
-      riskType?: RiskType;
-      keyConcerns?: string[];
-      distortionType?: string;
-    } | null;
-    recentEmotionHistory?: string[];
-    recentCognitiveDistortions?: string[];
-    distortionExampleHistory?: string[];
-    additionalMemo?: string;
-  } | null;
-  runtime?: {
-    transcriptItems?: SummaryTranscriptItem[];
-    bookmarkIds?: string[];
+    emotionPatterns?: string[];
+    detectedDistortions?: string[];
+    transcript?: SummaryTranscriptItem[];
+    bookmarks?: SummaryBookmarkItem[];
+    summaryText?: string;
+    recommendedMissions?: SummaryRecommendedMissionItem[];
   } | null;
 };
 
 export interface SummaryTranscriptItem {
-  id?: string;
-  speaker?: 'counselor' | 'client';
+  id?: number;
+  speaker?: 'counselor' | 'client' | 'COUNSELOR' | 'CLIENT';
   text?: string;
   timestamp?: string;
+  isDanger?: boolean;
+}
+
+export interface SummaryBookmarkItem {
+  id?: number;
+  targetText?: string;
+  memo?: string;
+  timeOffset?: number;
+}
+
+export interface SummaryRecommendedMissionItem {
+  id?: number;
+  title?: string;
+  description?: string;
+  duration?: number;
 }
 
 export type RiskEvaluation = 'stable' | 'caution' | 'risk' | 'urgent';
@@ -40,7 +49,7 @@ export type FollowUpSessionTiming = '1w' | '2w' | '1m' | 'as-needed';
 export type SummaryNextSessionSchedule = {
   date: string;
   startTime: string;
-  endTime: string;
+  endTime?: string;
 };
 
 export type SummarySubmitFormValues = {
@@ -54,9 +63,11 @@ export type SummarySubmitFormValues = {
 };
 
 export type SubmitSessionSummaryPayload = {
+  endedAt: string;
   summaryText: string;
   riskEvaluation: RiskEvaluation;
   followUpSessionTiming: FollowUpSessionTiming;
+  additionalMemo: string;
   selectedMissionIds: string[];
   nextSession: SummaryNextSessionSchedule | null;
 };

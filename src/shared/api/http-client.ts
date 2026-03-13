@@ -85,6 +85,12 @@ async function requestTokenRefresh(): Promise<boolean> {
   return refreshPromise;
 }
 
+export async function ensureAccessToken(): Promise<boolean> {
+  const token = getAccessToken();
+  if (token) return true;
+  return requestTokenRefresh();
+}
+
 async function parseResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get('content-type') ?? '';
   if (contentType.includes('application/json')) {

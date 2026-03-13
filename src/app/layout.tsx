@@ -6,7 +6,7 @@ import ReactQueryProvider from '@/shared/lib/react-query-provider';
 
 export const metadata: Metadata = {
   title: 'Kkebi Clinic',
-  description: 'Kkebi Clinic의 공식 웹사이트입니다.',
+  description: 'Official website of Kkebi Clinic.',
 };
 
 export default async function RootLayout({

@@ -1,36 +1,42 @@
+import { ApiError, httpClient } from '@/shared/api/http-client';
+import { toBaseResponse } from '@/shared/api/base-response';
 import type {
   ClientClosePayload,
   ClientCloseResponse,
 } from '@/features/clients/client-closure/types/client-closure';
 
 const requestCloseClient = async (
-  url: string,
+  clientId: string,
   payload: ClientClosePayload,
 ): Promise<ClientCloseResponse> => {
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json().catch(() => null);
-    if (typeof data === 'object' && data !== null && 'success' in data) {
-      return data as ClientCloseResponse;
-    }
+    const response = await httpClient.post<unknown>(
+      `/api/v1/clients/${clientId}/terminate`,
+      payload,
+    );
+    const base = toBaseResponse<unknown>(response);
 
     return {
-      success: response.ok,
-      message: response.ok ? undefined : '내담자 종결 처리에 실패했습니다.',
+      success: base.success,
+      data:
+        base.data && typeof base.data === 'object'
+          ? (base.data as ClientCloseResponse['data'])
+          : undefined,
+      message: base.message,
     };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message:
+        error instanceof ApiError
+          ? error.message || '내담자 종결 처리에 실패했습니다.'
+          : error instanceof Error
+            ? error.message
+            : 'Network error',
     };
   }
 };
 
 export const closeClient = (clientId: string, payload: ClientClosePayload) =>
-  requestCloseClient(`/api/v1/clients/${clientId}/close`, payload);
+  requestCloseClient(clientId, payload);
 export const closeClientMock = closeClient;

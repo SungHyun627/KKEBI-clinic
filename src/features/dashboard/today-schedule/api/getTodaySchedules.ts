@@ -1,9 +1,12 @@
-import { httpClient } from '@/shared/api/http-client';
+import { ensureAccessToken, httpClient } from '@/shared/api/http-client';
 import type { TodayScheduleResponse } from '../../types/schedule';
+import { normalizeTodaySchedules } from '../lib/mapTodaySchedulesResponse';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
+const COUNSELOR_TODAY_SCHEDULE_PATH = '/api/v1/counselor/dashboard/today-schedule';
 
 type BackendEnvelope<TData> = {
+  success?: boolean;
   code?: string;
   message?: string;
   data?: TData;
@@ -29,6 +32,15 @@ const extractSchedules = (data: unknown): TodayScheduleResponse['data'] | undefi
   return undefined;
 };
 
+const toNormalizedSchedules = (data: unknown): TodayScheduleResponse['data'] | undefined => {
+  const schedules = extractSchedules(data);
+  if (!schedules) {
+    return undefined;
+  }
+
+  return normalizeTodaySchedules(schedules);
+};
+
 const normalizeTodaySchedulesResponse = (
   payload: unknown,
   fallbackMessage: string,
@@ -39,7 +51,7 @@ const normalizeTodaySchedulesResponse = (
 
   if ('success' in payload) {
     const response = payload as TodayScheduleResponse;
-    const schedules = extractSchedules(response.data);
+    const schedules = toNormalizedSchedules(response.data);
     if (!schedules) {
       return {
         success: false,
@@ -53,9 +65,25 @@ const normalizeTodaySchedulesResponse = (
     };
   }
 
+  if ('code' in payload) {
+    const envelope = payload as BackendEnvelope<TodayScheduleResponse['data']>;
+    const schedules = toNormalizedSchedules(envelope.data);
+    if (!schedules) {
+      return {
+        success: false,
+        message: envelope.message || fallbackMessage,
+      };
+    }
+    return {
+      success: true,
+      data: schedules,
+      message: envelope.message,
+    };
+  }
+
   if ('data' in payload) {
     const envelope = payload as BackendEnvelope<TodayScheduleResponse['data']>;
-    const schedules = extractSchedules(envelope.data);
+    const schedules = toNormalizedSchedules(envelope.data);
     if (!schedules) {
       return {
         success: false,
@@ -105,7 +133,15 @@ const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse
 
 export const getTodaySchedules = async (): Promise<TodayScheduleResponse> => {
   try {
-    const response = await httpClient.get<unknown>('/api/v1/dashboard/today-schedules');
+    const hasAccessToken = await ensureAccessToken();
+    if (!hasAccessToken) {
+      return {
+        success: false,
+        message: 'Unauthorized',
+      };
+    }
+
+    const response = await httpClient.get<unknown>(COUNSELOR_TODAY_SCHEDULE_PATH);
     return normalizeTodaySchedulesResponse(response, '오늘의 일정을 불러오지 못했습니다.');
   } catch (error) {
     return {
@@ -122,7 +158,7 @@ export const getTodaySchedulesServer = () => {
       message: 'NEXT_PUBLIC_API_BASE_URL is not configured',
     } satisfies TodayScheduleResponse);
   }
-  return requestTodaySchedules(`${SERVER_API_BASE_URL}/api/v1/dashboard/today-schedules`);
+  return requestTodaySchedules(`${SERVER_API_BASE_URL}${COUNSELOR_TODAY_SCHEDULE_PATH}`);
 };
 
 export const getTodaySchedulesMock = getTodaySchedules;

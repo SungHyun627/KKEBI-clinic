@@ -3,9 +3,9 @@ import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 import type {
   CognitiveDistortionType,
   SessionEmotionType,
-  SessionPageData,
+  SessionPageViewData,
   SessionTranscriptItem,
-} from '@/features/session/types/session-page';
+} from '@/features/session/types/session';
 
 const EMOTIONS: SessionEmotionType[] = ['anxious', 'sad', 'angry', 'happy', 'calm', 'fearful'];
 const DISTORTIONS: CognitiveDistortionType[] = [
@@ -54,7 +54,7 @@ const findScheduleSourceFromSessionId = (sessionId: string) => {
   return null;
 };
 
-export const getSessionPageMock = (sessionId: string, locale: string): SessionPageData => {
+export const getSessionPageMock = (sessionId: string, locale: string): SessionPageViewData => {
   const resolvedSource = findScheduleSourceFromSessionId(sessionId);
   const source =
     resolvedSource ?? TODAY_SCHEDULES_MOCK[hashString(sessionId) % TODAY_SCHEDULES_MOCK.length];
@@ -79,6 +79,9 @@ export const getSessionPageMock = (sessionId: string, locale: string): SessionPa
     clientName,
     sessionType: source.sessionType,
     riskType: source.riskType,
+    scheduledAt: new Date().toISOString(),
+    sessionNumber: normalizedIndex + 1,
+    contact: '',
     insights: {
       currentEmotion: emotion,
       confidence: 78 + (normalizedIndex % 18),

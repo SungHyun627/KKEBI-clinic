@@ -1,26 +1,15 @@
 export { default as NotificationDrawer } from './ui/NotificationDrawer';
 export type {
+  NotificationApiType,
   NotificationItem,
-  NotificationListData,
   NotificationListResponse,
-  NotificationMockSet,
-  NotificationType,
-  NotificationViewMode,
-  ReminderChannel,
-  RiskNotification,
-  ScheduleChangeNotification,
-  SessionReminderPayload,
-  SessionReminderResponse,
+  NotificationUnreadCountResponse,
 } from './types/notification';
 export {
-  getAllNotificationsDemo,
-  getAllNotificationsServer,
-  getEmptyNotificationsDemo,
-  getEmptyNotificationsServer,
   getNotifications,
-  getNotificationsDemo,
-  getNotificationsServer,
-  getRiskNotificationsDemo,
-  getRiskNotificationsServer,
+  getUnreadNotificationCount,
+  getUnreadNotifications,
+  mapNotificationPayload,
+  markNotificationAsRead,
 } from './api/getNotifications';
-export { sendSessionReminder, sendSessionReminderMock } from './api/sendSessionReminder';
+export { useNotificationSse } from './hooks/useNotificationSse';

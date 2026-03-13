@@ -17,7 +17,7 @@ export function buildTranscriptText(transcriptItems: SummaryTranscriptItem[]) {
 }
 
 export function downloadSessionTranscriptTxt(params: {
-  sessionId: string;
+  sessionId: number;
   transcriptItems: SummaryTranscriptItem[];
   locale: string;
 }) {
@@ -31,11 +31,23 @@ export function downloadSessionTranscriptTxt(params: {
 }
 
 export function downloadSessionRecordingFile(params: {
-  sessionId: string;
+  sessionId: number;
   transcriptItems: SummaryTranscriptItem[];
   locale: string;
+  audioUrl?: string;
 }) {
-  const { sessionId, transcriptItems, locale } = params;
+  const { sessionId, transcriptItems, locale, audioUrl } = params;
+
+  if (audioUrl) {
+    const a = document.createElement('a');
+    a.href = audioUrl;
+    a.download = `${sessionId}-recording`;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.click();
+    return;
+  }
+
   const content = transcriptItems
     .map((item) => `${item.timestamp ?? '--:--:--'} ${item.speaker}: ${item.text ?? ''}`)
     .join('\n');

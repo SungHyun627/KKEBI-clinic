@@ -58,7 +58,6 @@ export default function TodayScheduleItem({ schedule, className }: TodaySchedule
         />
       </span>
       <TodayScheduleAction
-        clientId={schedule.clientId}
         scheduleId={schedule.id}
         clientName={localizedClientName}
         scheduledTime={schedule.time}

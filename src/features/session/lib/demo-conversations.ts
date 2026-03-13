@@ -1,4 +1,4 @@
-import type { SessionAutoRecordData } from '../types/session-page';
+import type { SessionAutoRecordData } from '../types/session';
 
 type DemoLine = Pick<SessionAutoRecordData['transcripts'][number], 'speaker' | 'text'>;
 

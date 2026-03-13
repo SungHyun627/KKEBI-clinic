@@ -9,6 +9,16 @@ import ClientDetailDrawer from '@/features/clients/client-detail/ui/ClientDetail
 import type { ClientLookupItem } from '@/features/clients/types/common';
 import ClientListFilters from '@/features/clients/client-list/ui/ClientListFilters';
 import ClientListTableSection from '@/features/clients/client-list/ui/ClientListTableSection';
+import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
+
+const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
+const toRiskFilterFromQuery = (value: string | null): RiskFilter => {
+  if (value === 'high') return '위험';
+  if (value === 'caution') return '주의';
+  if (value === 'stable') return '안정';
+  return 'all';
+};
 
 export default function ClientsPage() {
   const tClients = useTranslations('clients');
@@ -18,32 +28,30 @@ export default function ClientsPage() {
   const searchParams = useSearchParams();
   const targetClientId = searchParams.get('clientId');
   const targetOpenAt = searchParams.get('openAt');
+  const targetRisk = searchParams.get('risk');
   const targetQueryKey = targetClientId ? `${targetClientId}:${targetOpenAt ?? ''}` : null;
   const fallbackConcerns = useMemo(
     () => [tClients('concernsDepression'), tClients('concernsStress'), tClients('concernsSleep')],
     [tClients],
   );
-  const {
-    clients,
-    filteredClients,
-    isLoading,
-    errorMessage,
-    searchKeyword,
-    setSearchKeyword,
-    riskFilter,
-    setRiskFilter,
-    isRiskFilterInteracted,
-    setIsRiskFilterInteracted,
-    removeClient,
-  } = useClientList({
-    locale,
-    listLoadFailedMessage: tClients('listLoadFailed'),
-    fallbackConcerns,
-  });
+  const [searchInput, setSearchInput] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [riskFilter, setRiskFilter] = useState<RiskFilter>(() => toRiskFilterFromQuery(targetRisk));
+  const [isRiskFilterInteracted, setIsRiskFilterInteracted] = useState(false);
+  const [page, setPage] = useState(1);
+  const { clients, isLoading, errorMessage, totalElements, totalPages, removeClient } =
+    useClientList({
+      locale,
+      listLoadFailedMessage: tClients('listLoadFailed'),
+      fallbackConcerns,
+      page,
+      pageSize: PAGE_SIZE,
+      searchKeyword,
+      riskFilter,
+    });
   const [selectedClient, setSelectedClient] = useState<ClientLookupItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [dismissedQueryKey, setDismissedQueryKey] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
 
   useEffect(() => {
     if (!targetClientId || clients.length === 0) return;
@@ -63,19 +71,24 @@ export default function ClientsPage() {
     targetClientId && selectedClientFromQuery && targetQueryKey !== dismissedQueryKey,
   );
 
-  const pageSize = 10;
-  const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const pagedClients = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredClients.slice(start, start + pageSize);
-  }, [filteredClients, currentPage]);
+  const normalizedTotalPages = Math.max(1, totalPages || 1);
+  const currentPage = Math.min(page, normalizedTotalPages);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSearchKeyword(searchInput);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [searchInput]);
 
   return (
     <section className="flex w-full flex-col items-start gap-7">
       <ClientListFilters
-        searchKeyword={searchKeyword}
-        setSearchKeyword={setSearchKeyword}
+        searchKeyword={searchInput}
+        setSearchKeyword={setSearchInput}
         riskFilter={riskFilter}
         setRiskFilter={setRiskFilter}
         isRiskFilterInteracted={isRiskFilterInteracted}
@@ -96,20 +109,20 @@ export default function ClientsPage() {
         onFilterChanged={() => setPage(1)}
       />
       <ClientListTableSection
-        filteredCount={filteredClients.length}
-        pagedClients={pagedClients}
+        filteredCount={totalElements}
+        pagedClients={clients}
         isLoading={isLoading}
         errorMessage={errorMessage}
         currentPage={currentPage}
-        totalPages={totalPages}
+        totalPages={normalizedTotalPages}
         onPreviousPage={() => setPage((prev) => Math.max(1, prev - 1))}
-        onNextPage={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+        onNextPage={() => setPage((prev) => Math.min(normalizedTotalPages, prev + 1))}
         onSelectClient={(client) => {
           setSelectedClient(client);
           setIsDrawerOpen(true);
         }}
         labels={{
-          totalCount: tClients('listTotalCount', { count: filteredClients.length }),
+          totalCount: tClients('listTotalCount', { count: totalElements }),
           previous10: tClients('listPrevious10'),
           next10: tClients('listNext10'),
           time: tClients('listTime'),

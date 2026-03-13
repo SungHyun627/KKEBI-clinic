@@ -1,25 +1,23 @@
 import { NextResponse } from 'next/server';
-import { restoreClosedClient } from '@/shared/mock/client-lifecycle-store';
+import { proxyToBackend } from '@/shared/server/backend-proxy';
 
-export async function POST(_request: Request, context: { params: Promise<{ clientId: string }> }) {
+export async function PATCH(request: Request, context: { params: Promise<{ clientId: string }> }) {
   const { clientId } = await context.params;
-  const restored = restoreClosedClient(clientId);
 
-  if (!restored) {
+  try {
+    return await proxyToBackend(request, {
+      method: 'PATCH',
+      path: `/api/v1/clients/${clientId}/restore`,
+    });
+  } catch {
     return NextResponse.json(
       {
-        success: false,
-        message: '내담자 정보를 찾을 수 없습니다.',
+        code: 'INTERNAL_SERVER_ERROR',
+        message: '내담자 복구 처리 중 오류가 발생했습니다.',
       },
-      { status: 404 },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      clientId: restored.clientId,
-      restoredAt: new Date().toISOString(),
-    },
-  });
 }
+
+export const POST = PATCH;

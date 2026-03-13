@@ -1,38 +1,88 @@
-interface BookmarkResponse {
-  success: boolean;
-  data?: {
-    transcriptId: string;
-    bookmarked: boolean;
-  };
+import { ApiError, httpClient } from '@/shared/api/http-client';
+
+interface ApiResponseLong {
+  code?: string;
+  message?: string;
+  data?: number;
+}
+
+interface ApiResponseVoid {
+  code?: string;
   message?: string;
 }
 
-const call = async (
+interface BookmarkResponse {
+  success: boolean;
+  bookmarkId?: number;
+  message?: string;
+}
+
+interface RemoveBookmarkParams {
+  sessionId: string;
+  bookmarkId?: number;
+}
+
+const toValidNumber = (value: string) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return null;
+  return parsed;
+};
+
+export const addTranscriptBookmark = async (
   sessionId: string,
   transcriptId: string,
-  method: 'POST' | 'DELETE',
 ): Promise<BookmarkResponse> => {
+  const parsedTranscriptId = toValidNumber(transcriptId);
+  if (!parsedTranscriptId) {
+    return { success: false, message: 'Invalid transcriptId' };
+  }
+
   try {
-    const response = await fetch(`/api/v1/sessions/${encodeURIComponent(sessionId)}/bookmarks`, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transcriptId }),
-    });
-    const data = (await response.json().catch(() => null)) as BookmarkResponse | null;
-    if (data && typeof data === 'object' && 'success' in data) {
-      return data;
-    }
-    return { success: false, message: 'Invalid response' };
+    const response = await httpClient.post<ApiResponseLong>(
+      `/api/v1/sessions/${encodeURIComponent(sessionId)}/bookmarks`,
+      { transcriptId: parsedTranscriptId },
+    );
+
+    return {
+      success: response.code === 'SUCCESS',
+      bookmarkId: response.data,
+      message: response.message,
+    };
   } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, message: error.message };
+    }
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Network error',
+      message: error instanceof Error ? error.message : 'Failed to add bookmark',
     };
   }
 };
 
-export const addTranscriptBookmark = (sessionId: string, transcriptId: string) =>
-  call(sessionId, transcriptId, 'POST');
+export const removeTranscriptBookmark = async ({
+  sessionId,
+  bookmarkId,
+}: RemoveBookmarkParams): Promise<BookmarkResponse> => {
+  if (!bookmarkId) {
+    return { success: false, message: 'Bookmark id is required' };
+  }
 
-export const removeTranscriptBookmark = (sessionId: string, transcriptId: string) =>
-  call(sessionId, transcriptId, 'DELETE');
+  try {
+    const response = await httpClient.delete<ApiResponseVoid>(
+      `/api/v1/sessions/${encodeURIComponent(sessionId)}/bookmarks/${bookmarkId}`,
+    );
+
+    return {
+      success: response.code === 'SUCCESS',
+      message: response.message,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { success: false, message: error.message };
+    }
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to remove bookmark',
+    };
+  }
+};
