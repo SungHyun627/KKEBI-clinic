@@ -33,6 +33,7 @@ const ClientRegistrationReviewPage = () => {
     messages: {
       registerFailed: t('toast.registerFailed'),
       registerSuccess: t('toast.registerSuccess'),
+      additionalResultFailed: t('toast.additionalResultFailed'),
     },
     onSuccess: () => router.push('/clients'),
   });
