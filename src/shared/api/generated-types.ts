@@ -205,6 +205,56 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/sessions/{sessionId}/reschedule-requests': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * 일정 변경 요청 목록 조회
+     * @description 내담자가 해당 세션에 대해 요청한 일정 변경 요청 중 PENDING 상태인 항목을 최신순으로 반환합니다.
+     *
+     *     **사용 시나리오**
+     *     - 상담사가 `SCHEDULE_CHANGE_REQUEST` 알림(SSE)을 수신한 뒤 이 API로 요청 내용을 확인합니다.
+     *     - `requestedAt`(내담자가 원하는 새 일시)과 `reason`(사유)을 확인한 후,
+     *       원하는 일시로 `PATCH /{sessionId}/schedule`을 호출하여 일정을 확정합니다.
+     *     - 별도의 승인/거절 엔드포인트는 없으며, 일정 확정 자체가 승인 동작입니다.
+     *
+     *     **오류 응답**
+     *     - `404` : 세션을 찾을 수 없음
+     *     - `403` : 담당 상담사가 아닌 경우
+     */
+    get: operations['getRescheduleRequests'];
+    put?: never;
+    /**
+     * 일정 변경 요청
+     * @description 내담자가 예정된 세션의 일정 변경을 상담사에게 요청합니다.
+     *
+     *     **처리 흐름**
+     *     1. 세션 소유권 검증 (본인 세션인지 확인)
+     *     2. 세션 상태 검증 (SCHEDULED 상태여야 요청 가능)
+     *     3. `session_reschedule_requests` 테이블에 PENDING 상태로 저장
+     *     4. 담당 상담사에게 SSE 알림 즉시 push (type: `SCHEDULE_CHANGE_REQUEST`)
+     *
+     *     **오류 응답**
+     *     - `404` : 세션을 찾을 수 없음
+     *     - `403` : 본인 세션이 아님
+     *     - `400` : SCHEDULED 상태가 아닌 세션 (이미 진행 중이거나 완료된 세션)
+     *
+     *     **알림 메시지 포맷** (상담사 수신)
+     *     - 제목: `[일정 변경 요청]`
+     *     - 내용: `{내담자명}님이 {yyyy년 M월 d일 HH:mm}의 일정 변경을 요청하였습니다.`
+     *     - referenceId: `sessionId` → 상담사 대시보드에서 해당 세션 상세로 이동 가능
+     */
+    post: operations['requestReschedule'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/sessions/{sessionId}/reminder': {
     parameters: {
       query?: never;
@@ -625,6 +675,16 @@ export interface paths {
     /**
      * 검사 결과 추가
      * @description 내담자에게 검사 결과(검사명, 점수, 날짜, 메모)를 추가합니다.
+     *
+     *     **[HIGH_PHQ9 위험 알림 트리거]**
+     *     testName을 "PHQ-9"으로, score를 20 이상으로 요청하면 담당 상담사에게 위험 알림이 즉시 발송됩니다.
+     *     PHQ-9(Patient Health Questionnaire-9)은 우울증 선별 척도로 20점 이상은 심한 우울(Severe Depression) 구간입니다.
+     *
+     *     **SSE 알림 수신 확인 방법**
+     *     1. GET /api/v1/notifications/subscribe 로 SSE 구독
+     *     2. 이 API에 testName="PHQ-9", score=20 이상으로 요청
+     *     3. SSE 스트림에서 type="HIGH_PHQ9" notification 이벤트 수신 확인
+     *     4. GET /api/v1/notifications 에서 저장된 알림 조회 가능
      */
     post: operations['addTestResult'];
     delete?: never;
@@ -909,6 +969,23 @@ export interface paths {
      * @description 내담자의 이메일을 변경합니다. 새 이메일이 KKEBI 앱 유저와 일치하면 자동 재연결, 불일치 시 연결 해제됩니다.
      */
     patch: operations['updateClientEmail'];
+    trace?: never;
+  };
+  '/api/v1/voice-baseline/{userId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** 음성 기준치 조회 */
+    get: operations['getBaseline'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/api/v1/voice-baseline/prompts': {
@@ -1449,14 +1526,24 @@ export interface paths {
      * 위험 알림 조회
      * @description Counselor 인증 토큰이 있어야 호출할 수 있으며, 해당 상담사에게 배정된 내담자 중 아래 조건에 해당하는 사람만 심각도 순으로 반환합니다.
      *     로컬 기본 관리자(admin@kkebi.local / admin123!) 계정에는 HIGH_PHQ9/APP_INACTIVE 더미 알림이 포함되어 있어 프론트에서 바로 테스트 가능합니다.
-     *      유형 기준
-     *      - HIGH_PHQ9: 최신 PHQ-9 점수가 20 이상
-     *      - APP_INACTIVE: 앱 미접속 7일 이상
+     *
+     *      알림 유형 기준
+     *      - HIGH_PHQ9: PHQ-9(우울증 선별 척도, 0~27점) 최신 점수가 20 이상인 경우. 20점 이상은 심한 우울(Severe Depression) 구간으로 즉각적인 개입이 필요합니다.
+     *      - APP_INACTIVE: 내담자가 KKEBI 앱에 7일 이상 접속하지 않은 경우.
+     *
      *      Response
      *      - items[].clientId/clientName: 클릭 시 내담자 프로필 이동에 사용
      *      - items[].alertType: HIGH_PHQ9 또는 APP_INACTIVE
      *      - items[].latestPhq9Score: 위험 알림의 근거 점수(null 허용)
      *      - page/totalPages: 페이지네이션 정보 (페이지당 5건, 0부터 시작)
+     *
+     *      [SSE 실시간 알림 연동]
+     *      이 API는 폴링용입니다. 실시간으로 위험 알림을 받으려면 SSE를 함께 사용하세요.
+     *      1. GET /api/v1/notifications/subscribe 로 SSE 구독 (로그인 직후 1회)
+     *      2. HIGH_PHQ9 테스트: POST /api/v1/clients/{clientId}/tests 에 testName="PHQ-9", score=20 이상 요청
+     *         → SSE 스트림에서 type="HIGH_PHQ9" notification 이벤트 즉시 수신
+     *         → 이벤트 수신 후 이 API(GET /risk-alerts)를 재호출해 목록 갱신
+     *      3. APP_INACTIVE 테스트: 매일 오전 9시 스케줄러가 자동 실행되므로 별도 트리거 없이 확인 가능
      */
     get: operations['getRiskAlerts'];
     put?: never;
@@ -1797,6 +1884,19 @@ export interface components {
        * @example sess-abc1234
        */
       fastApiSessionId?: string;
+    };
+    /** @description 일정 변경 요청 바디 */
+    RescheduleRequestBody: {
+      /**
+       * Format: date-time
+       * @description 변경을 원하는 새 일시
+       */
+      requestedAt: string;
+      /**
+       * @description 변경 사유 (선택, 최대 300자)
+       * @example 병원 예약이 겹쳐서 변경 요청드립니다.
+       */
+      reason?: string;
     };
     /** @description 세션 알림 수동 발송 요청 DTO */
     SessionReminderRequest: {
@@ -2847,6 +2947,35 @@ export interface components {
        */
       isDanger?: boolean;
     };
+    ApiResponseListRescheduleRequestSummary: {
+      code?: string;
+      message?: string;
+      data?: components['schemas']['RescheduleRequestSummary'][];
+    };
+    /** @description 내담자가 요청한 일정 변경 요청 항목 */
+    RescheduleRequestSummary: {
+      /**
+       * Format: int64
+       * @description 요청 ID
+       * @example 1
+       */
+      requestId?: number;
+      /**
+       * Format: date-time
+       * @description 내담자가 원하는 새 일시
+       */
+      requestedAt?: string;
+      /**
+       * @description 변경 사유. 내담자가 입력하지 않은 경우 null
+       * @example 병원 예약이 겹쳐서 변경 요청드립니다.
+       */
+      reason?: string;
+      /**
+       * Format: date-time
+       * @description 요청 생성 시각
+       */
+      createdAt?: string;
+    };
     ApiResponseListSessionReminderLogResponse: {
       code?: string;
       message?: string;
@@ -2907,11 +3036,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
+      last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
       first?: boolean;
-      last?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['RecordDto'][];
@@ -2922,9 +3051,9 @@ export interface components {
     };
     PageableObject: {
       /** Format: int32 */
-      pageNumber?: number;
-      /** Format: int32 */
       pageSize?: number;
+      /** Format: int32 */
+      pageNumber?: number;
       paged?: boolean;
       unpaged?: boolean;
       /** Format: int64 */
@@ -2961,10 +3090,15 @@ export interface components {
        */
       id?: number;
       /**
-       * @description 알림 유형 (INTAKE_ANALYSIS_COMPLETE: 분석 완료, INTAKE_ANALYSIS_READY_FOR_REVIEW: 검토 대기)
+       * @description 알림 유형 (INTAKE_ANALYSIS_COMPLETE: 분석 완료, INTAKE_ANALYSIS_READY_FOR_REVIEW: 검토 대기, HIGH_PHQ9: PHQ-9 고위험, APP_INACTIVE: 앱 미접속, SCHEDULE_CHANGE_REQUEST: 일정 변경 요청)
        * @enum {string}
        */
-      type?: 'INTAKE_ANALYSIS_COMPLETE' | 'INTAKE_ANALYSIS_READY_FOR_REVIEW';
+      type?:
+        | 'INTAKE_ANALYSIS_COMPLETE'
+        | 'INTAKE_ANALYSIS_READY_FOR_REVIEW'
+        | 'HIGH_PHQ9'
+        | 'APP_INACTIVE'
+        | 'SCHEDULE_CHANGE_REQUEST';
       /**
        * @description 알림 제목
        * @example Intake analysis complete
@@ -3153,11 +3287,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
+      last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
       first?: boolean;
-      last?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['ClientSummaryResponse'][];
@@ -3446,11 +3580,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
+      last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
       first?: boolean;
-      last?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['TerminatedClientResponse'][];
@@ -3835,6 +3969,108 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseSessionStartResponse'];
+        };
+      };
+    };
+  };
+  getRescheduleRequests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 조회할 세션 ID
+         * @example 1
+         */
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseListRescheduleRequestSummary'];
+        };
+      };
+    };
+  };
+  requestReschedule: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /**
+         * @description 일정 변경을 요청할 세션 ID
+         * @example 1
+         */
+        sessionId: number;
+      };
+      cookie?: never;
+    };
+    /** @description 변경을 원하는 새 일시와 사유 */
+    requestBody: {
+      content: {
+        /**
+         * @example {
+         *       "requestedAt": "2026-03-20T14:00:00",
+         *       "reason": "병원 예약이 겹쳐서 변경 요청드립니다."
+         *     }
+         */
+        'application/json': components['schemas']['RescheduleRequestBody'];
+      };
+    };
+    responses: {
+      /** @description 요청 생성 성공. status는 항상 PENDING으로 반환됩니다. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "code": "SUCCESS",
+           *       "data": {
+           *         "requestId": 1,
+           *         "status": "PENDING"
+           *       }
+           *     }
+           */
+          'application/json': unknown;
+        };
+      };
+      /** @description SCHEDULED 상태가 아닌 세션에 요청 시 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "code": "INVALID_INPUT",
+           *       "message": "예정된 세션만 일정 변경 요청이 가능합니다."
+           *     }
+           */
+          'application/json': unknown;
+        };
+      };
+      /** @description 본인 세션이 아닌 경우 */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          /**
+           * @example {
+           *       "code": "FORBIDDEN",
+           *       "message": "해당 세션에 접근 권한이 없습니다."
+           *     }
+           */
+          'application/json': unknown;
         };
       };
     };
@@ -4558,7 +4794,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 잘못된 OTP */
+      /** @description 만료된 챌린지 */
       400: {
         headers: {
           [name: string]: unknown;
@@ -5173,6 +5409,28 @@ export interface operations {
         };
         content: {
           '*/*': components['schemas']['ApiResponseVoid'];
+        };
+      };
+    };
+  };
+  getBaseline: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          '*/*': components['schemas']['ApiResponseMlVoiceBaselineResponse'];
         };
       };
     };
