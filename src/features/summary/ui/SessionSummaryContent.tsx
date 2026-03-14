@@ -54,7 +54,6 @@ export default function SessionSummaryContent({
     nextDate,
     nextStartTime,
     nextEndTime,
-    isSubmitEnabled,
     setRiskEvaluation,
     setFollowUpSessionTiming,
     setAdditionalMemo,
@@ -68,6 +67,7 @@ export default function SessionSummaryContent({
     handleSubmitSummary,
     audioRef,
     recordingAudioUrl,
+    isSubmitEnabled,
     payloadExists,
   } = useSessionSummary({ locale, sessionId });
 

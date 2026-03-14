@@ -7,12 +7,14 @@ interface SessionLiveSummaryCardProps {
   locale: string;
   title: string;
   body: string;
+  statusLabel?: string;
 }
 
 export default function SessionLiveSummaryCard({
   locale,
   title,
   body,
+  statusLabel,
 }: SessionLiveSummaryCardProps) {
   const isEmpty = title.trim().length === 0 && body.trim().length === 0;
 
@@ -22,22 +24,31 @@ export default function SessionLiveSummaryCard({
         <span className="body-18 font-medium text-neutral-40">
           {locale === 'en' ? 'Live summary' : '실시간 요약'}
         </span>
-        <div
-          className={`body-18 min-h-[28px] w-full ${
-            isEmpty ? 'font-medium text-label-assistive' : 'font-semibold text-label-normal'
-          }`}
-        >
-          {isEmpty
-            ? locale === 'en'
-              ? 'No active recording session.'
-              : '녹음 중인 상담이 없습니다.'
-            : title}
+        <div className="flex min-h-[28px] w-full items-center gap-2">
+          <div
+            className={`body-18 ${
+              isEmpty ? 'font-medium text-label-assistive' : 'font-semibold text-label-normal'
+            }`}
+          >
+            {isEmpty
+              ? locale === 'en'
+                ? 'No active recording session.'
+                : '녹음 중인 상담이 없습니다.'
+              : title}
+          </div>
+          {!isEmpty && statusLabel ? (
+            <span className="rounded-full bg-neutral-95 px-2 py-1 body-12 font-medium text-label-neutral">
+              {statusLabel}
+            </span>
+          ) : null}
         </div>
       </div>
       <Divider />
       <div className="flex min-h-[21px] items-start gap-3">
         <Image src="/icons/speaker.svg" alt="speaker" width={20} height={20} />
-        <div className="body-14 text-label-alternative">{isEmpty ? '' : body}</div>
+        <div className="body-14 whitespace-pre-line text-label-alternative">
+          {isEmpty ? '' : body}
+        </div>
       </div>
     </div>
   );

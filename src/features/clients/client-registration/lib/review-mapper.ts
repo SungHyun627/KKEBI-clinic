@@ -82,12 +82,22 @@ export const buildRegisterClientPayload = (
     gender: mapGenderToApi(basicInfo.gender),
     paymentType: mapPaymentTypeToApi(paymentInfo.paymentType),
     counselingStartDate: counselingInfo.counselingStartDate || undefined,
+    counselingStartTime: counselingInfo.counselingStartTime || undefined,
+    counselingEndTime: counselingInfo.counselingEndTime || undefined,
     chiefComplaint: counselingInfo.chiefConcern.trim() || undefined,
     referralSource: mapReferralSourceToApi(counselingInfo.referralPath, locale),
     insuranceCompany:
       paymentInfo.paymentType === 'insurance'
         ? paymentInfo.insuranceCompany.trim() || undefined
         : undefined,
+    initialTestResults: assessmentResults.additionalResults
+      .filter(
+        (result) => result.testName.trim().length > 0 && typeof result.testResult === 'number',
+      )
+      .map((result) => ({
+        testName: result.testName.trim(),
+        score: result.testResult ?? undefined,
+      })),
     intake: {
       phq9Score: assessmentResults.phq9Score ?? undefined,
       pss10Score: assessmentResults.pss10Score ?? undefined,

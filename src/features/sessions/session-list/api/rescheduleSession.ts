@@ -1,7 +1,9 @@
 import { httpClient } from '@/shared/api/http-client';
 
 export interface RescheduleSessionRequest {
-  newScheduledAt: string;
+  date: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface RescheduleSessionResponse {
