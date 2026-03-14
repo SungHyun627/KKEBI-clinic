@@ -67,6 +67,7 @@ export default function SessionSummaryContent({
     handleSubmitSummary,
     audioRef,
     recordingAudioUrl,
+    isSubmitted,
     isSubmitEnabled,
     payloadExists,
   } = useSessionSummary({ locale, sessionId });
@@ -96,6 +97,7 @@ export default function SessionSummaryContent({
         onDownloadAudio={handleDownloadAudio}
         onPrintPdf={handleDownloadPdf}
         onBack={() => router.push(`/${locale}`)}
+        confirmOnBack={!isSubmitted}
       />
 
       <div className="flex flex-col gap-[53px] items-start w-full px-15">
@@ -113,47 +115,57 @@ export default function SessionSummaryContent({
         />
         <div className="flex flex-col gap-[100px] items-start w-full">
           <div className="flex flex-col gap-[70px] items-start w-full">
-            <AiSummaryCard value={summaryText} onChange={handleSummaryChange} />
+            <AiSummaryCard
+              value={summaryText}
+              onChange={handleSummaryChange}
+              isReadOnly={isSubmitted}
+            />
 
             <EmotionPatternsCard emotions={emotions} />
             <DetectedCognitiveDistortionCard distortions={distortions} />
             <BookmarkedMomentsCard locale={locale} moments={bookmarkedMoments} />
 
-            <CounselorEvaluationCard
-              riskEvaluation={riskEvaluation}
-              followUpSessionTiming={followUpSessionTiming}
-              additionalMemo={additionalMemo}
-              onRiskEvaluationChange={setRiskEvaluation}
-              onFollowUpSessionTimingChange={setFollowUpSessionTiming}
-              onAdditionalMemoChange={setAdditionalMemo}
-            />
+            {isSubmitted ? null : (
+              <>
+                <CounselorEvaluationCard
+                  riskEvaluation={riskEvaluation}
+                  followUpSessionTiming={followUpSessionTiming}
+                  additionalMemo={additionalMemo}
+                  onRiskEvaluationChange={setRiskEvaluation}
+                  onFollowUpSessionTimingChange={setFollowUpSessionTiming}
+                  onAdditionalMemoChange={setAdditionalMemo}
+                />
 
-            <RecommendedMissionsCard
-              missions={missions}
-              selectedMissions={selectedMissionIds}
-              onToggleMission={handleToggleMission}
-            />
+                <RecommendedMissionsCard
+                  missions={missions}
+                  selectedMissions={selectedMissionIds}
+                  onToggleMission={handleToggleMission}
+                />
 
-            <NextSessionBookingCard
-              locale={locale}
-              nextDate={nextDate}
-              nextStartTime={nextStartTime}
-              nextEndTime={nextEndTime}
-              onNextDateChange={setNextDate}
-              onNextStartTimeChange={setNextStartTime}
-              onNextEndTimeChange={setNextEndTime}
-            />
+                <NextSessionBookingCard
+                  locale={locale}
+                  nextDate={nextDate}
+                  nextStartTime={nextStartTime}
+                  nextEndTime={nextEndTime}
+                  onNextDateChange={setNextDate}
+                  onNextStartTimeChange={setNextStartTime}
+                  onNextEndTimeChange={setNextEndTime}
+                />
+              </>
+            )}
           </div>
-          <div className="flex justify-center items-center w-full">
-            <Button
-              type="button"
-              className="w-full max-w-[416px]"
-              disabled={hasLoadError || !isSubmitEnabled}
-              onClick={handleSubmitSummary}
-            >
-              {tSummary('submitButton')}
-            </Button>
-          </div>
+          {isSubmitted ? null : (
+            <div className="flex justify-center items-center w-full">
+              <Button
+                type="button"
+                className="w-full max-w-[416px]"
+                disabled={hasLoadError || !isSubmitEnabled}
+                onClick={handleSubmitSummary}
+              >
+                {tSummary('submitButton')}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </section>

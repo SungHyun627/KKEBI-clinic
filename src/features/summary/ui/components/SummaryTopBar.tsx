@@ -17,6 +17,7 @@ interface SummaryTopBarProps {
   onDownloadAudio: () => void;
   onPrintPdf: () => void;
   onBack: () => void;
+  confirmOnBack?: boolean;
 }
 
 const SummaryTopBar = ({
@@ -28,6 +29,7 @@ const SummaryTopBar = ({
   onDownloadAudio,
   onPrintPdf,
   onBack,
+  confirmOnBack = true,
 }: SummaryTopBarProps) => {
   const tSummary = useTranslations('summary');
   const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
@@ -38,7 +40,13 @@ const SummaryTopBar = ({
         <div className="flex items-center gap-[22px]">
           <Button
             variant="icon"
-            onClick={() => setIsQuitDialogOpen(true)}
+            onClick={() => {
+              if (confirmOnBack) {
+                setIsQuitDialogOpen(true);
+                return;
+              }
+              onBack();
+            }}
             className="p-0 border-none hover:bg-white h-6 w-6"
           >
             <Image src="/icons/back-ward.svg" alt={backLabel} width={24} height={24} />
@@ -111,14 +119,16 @@ const SummaryTopBar = ({
         </div>
       </div>
 
-      <SummaryQuitConfirmDialog
-        open={isQuitDialogOpen}
-        onOpenChange={setIsQuitDialogOpen}
-        onConfirm={() => {
-          setIsQuitDialogOpen(false);
-          onBack();
-        }}
-      />
+      {confirmOnBack ? (
+        <SummaryQuitConfirmDialog
+          open={isQuitDialogOpen}
+          onOpenChange={setIsQuitDialogOpen}
+          onConfirm={() => {
+            setIsQuitDialogOpen(false);
+            onBack();
+          }}
+        />
+      ) : null}
     </>
   );
 };
