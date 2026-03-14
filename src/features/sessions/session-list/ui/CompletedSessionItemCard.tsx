@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import RecordCompleteChip from '@/shared/ui/chips/record-complete-chip';
 import Divider from '@/shared/ui/divider';
@@ -27,6 +28,7 @@ export default function CompletedSessionItemCard({
   minutesUnit,
   viewMode,
 }: CompletedSessionItemCardProps) {
+  const router = useRouter();
   const locale = useLocale();
   const tCommon = useTranslations('common');
   const tSessions = useTranslations('sessionList');
@@ -51,8 +53,9 @@ export default function CompletedSessionItemCard({
             type="button"
             size="md"
             className="w-full w-max-[181px]"
-            onClick={() => {}}
-            disabled
+            onClick={() => {
+              router.push(`/${locale}/session/${encodeURIComponent(item.id)}/summary`);
+            }}
           >
             {tSessions('viewDetails')}
           </Button>
