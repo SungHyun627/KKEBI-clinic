@@ -39,8 +39,8 @@ export default function RecommendedMissionsCard({
               className="flex flex-col w-full h-110px max-w-[190px] px-[13px] py-5 items-start gap-[18px] border border-neutral-95 rounded-[16px]"
               key={mission.id}
             >
-              <div key={mission.id} className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 body-14 text-label-normal">
+              <div key={mission.id} className="flex w-full items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2 body-14 text-label-normal">
                   <button
                     type="button"
                     role="checkbox"
@@ -66,7 +66,7 @@ export default function RecommendedMissionsCard({
                       />
                     </svg>
                   </button>
-                  <span className="body-18 font-semibold text-label-neutral whitespace-nowrap">
+                  <span className="body-18 min-w-0 flex-1 truncate font-semibold text-label-neutral">
                     {mission.name}
                   </span>
                 </div>
@@ -76,7 +76,7 @@ export default function RecommendedMissionsCard({
                   <span className="body-16 text-neutral-60 min-w-[74px] w-full">
                     {tSummary('missionsCategoryLabel')}
                   </span>
-                  <span className="body-16 font-medium text-neutral-30 w-full">
+                  <span className="body-16 w-full truncate font-medium text-neutral-30">
                     {mission.category}
                   </span>
                 </div>
@@ -84,7 +84,7 @@ export default function RecommendedMissionsCard({
                   <span className="body-16 text-neutral-60 min-w-[74px] w-full">
                     {tSummary('missionsDurationLabel')}
                   </span>
-                  <span className="body-16 font-medium text-neutral-30 w-full">
+                  <span className="body-16 w-full truncate font-medium text-neutral-30">
                     {mission.duration}
                   </span>
                 </div>
