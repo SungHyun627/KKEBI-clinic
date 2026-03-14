@@ -330,6 +330,7 @@
     "submitButton": "기록 저장 및 완료",
     "submitFailed": "제출에 실패했습니다.",
     "durationMinuteUnit": "분",
+    "durationSecondUnit": "초",
     "completionAlt": "상담 완료",
     "completionTitle": "상담이 완료되었습니다",
     "completionDateLabel": "상담 날짜",

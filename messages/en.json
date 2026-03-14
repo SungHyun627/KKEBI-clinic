@@ -330,6 +330,7 @@
     "submitButton": "Save record and complete",
     "submitFailed": "Failed to submit summary.",
     "durationMinuteUnit": " min",
+    "durationSecondUnit": " sec",
     "completionAlt": "Session completed",
     "completionTitle": "Session completed",
     "completionDateLabel": "Date",
