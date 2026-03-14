@@ -72,11 +72,31 @@ const mapEmotionKeyToSessionEmotion = (
 };
 
 const mapDistortionToType = (value: string): SessionInsightsData['distortionType'] | undefined => {
-  const normalized = value.trim().toLowerCase();
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, '');
   if (normalized === 'black_and_white' || normalized === '흑백논리') return 'black_and_white';
-  if (normalized === 'overgeneralization' || normalized === '과잉일반화')
+  if (
+    normalized === 'overgeneralization' ||
+    normalized === '과잉일반화' ||
+    normalized === '과일반화' ||
+    normalized === '과도한일반화'
+  ) {
     return 'overgeneralization';
+  }
   if (normalized === 'catastrophizing' || normalized === '파국화') return 'catastrophizing';
+  if (
+    normalized === 'emotionalreasoning' ||
+    normalized === '감정적추론' ||
+    normalized === '정서적추론'
+  ) {
+    return 'catastrophizing';
+  }
+  if (
+    normalized === 'selfdeprecation' ||
+    normalized === 'self-criticism' ||
+    normalized === '자기비하'
+  ) {
+    return 'should_statement';
+  }
   if (
     normalized === 'none' ||
     normalized === '없음' ||
@@ -96,6 +116,12 @@ const mapDistortionToType = (value: string): SessionInsightsData['distortionType
   }
   return undefined;
 };
+
+const splitDistortionValues = (value: string) =>
+  value
+    .split(/[,，/|;]+/g)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
 
 const toFiniteNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -155,18 +181,26 @@ const buildRecentTwoDialogueSummary = (
   return `${getSpeakerLabel(locale, first.speaker)}가 "${normalizeForSummary(first.text, 70)}"라고 말했고, 이어서 ${getSpeakerLabel(locale, second.speaker)}가 "${normalizeForSummary(second.text, 70)}"라고 말했어요.`;
 };
 
-const buildLocalSummary = (locale: string) => {
-  if (locale === 'en') {
-    return {
-      title: 'Live summary',
-      body: 'The client appears to be experiencing fear, with negative interpretations of the situation that may connect to depressive symptoms.',
-    };
+const emotionLabelByLocale = (
+  emotion: SessionInsightsData['currentEmotion'] | null,
+  locale: string,
+) => {
+  if (!emotion) {
+    return locale === 'en' ? 'analyzing' : '분석 중';
   }
 
-  return {
-    title: '실시간 요약',
-    body: '내담자는 두려움을 느끼고 있으며, 상황에 대한 부정적인 해석이 나타나고 있습니다. 이는 우울증의 증상으로 연결될 수 있습니다.',
-  };
+  const map = {
+    anxious: { ko: '불안', en: 'anxious' },
+    sad: { ko: '슬픔', en: 'sad' },
+    angry: { ko: '분노', en: 'angry' },
+    happy: { ko: '기쁨', en: 'happy' },
+    surprise: { ko: '놀람', en: 'surprised' },
+    calm: { ko: '평온', en: 'calm' },
+    fearful: { ko: '두려움', en: 'fearful' },
+    disgust: { ko: '혐오', en: 'disgusted' },
+  } satisfies Record<SessionInsightsData['currentEmotion'], { ko: string; en: string }>;
+
+  return locale === 'en' ? map[emotion].en : map[emotion].ko;
 };
 
 const extractDistortionPatch = (payload: Record<string, unknown>) => {
@@ -182,10 +216,12 @@ const extractDistortionPatch = (payload: Record<string, unknown>) => {
     distortionPayload?.distortion,
   ]
     .filter((item): item is string => typeof item === 'string')
+    .flatMap((item) => splitDistortionValues(item))
     .map((item) => mapDistortionToType(item))
     .filter((item): item is SessionInsightsData['distortionType'] => Boolean(item));
 
-  const distortionType = mappedTypeCandidates[0];
+  const distortionType =
+    mappedTypeCandidates.find((item) => item !== 'none') ?? mappedTypeCandidates[0];
   const distortionSummary = pickNonEmptyString(
     payload.distortionSummary,
     payload.distortion_summary,
@@ -313,8 +349,9 @@ export default function SessionAutoRecordPanel({
 }: SessionAutoRecordPanelProps) {
   const locale = useLocale();
   const tSession = useTranslations('sessionList');
-  const [serverSummary, setServerSummary] = useState<{ title: string; body: string } | null>(null);
-  const [localSummary, setLocalSummary] = useState<{ title: string; body: string } | null>(null);
+  const [liveEmotion, setLiveEmotion] = useState<SessionInsightsData['currentEmotion'] | null>(
+    null,
+  );
   const [activeSpeaker, setActiveSpeaker] = useState<'counselor' | 'client'>('counselor');
   const recordedAudioChunksRef = useRef<Blob[]>([]);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -457,21 +494,20 @@ export default function SessionAutoRecordPanel({
         });
       }
 
-      // Summary event: prefer stream-provided summary over local mock analyzer output
-      const body =
-        typeof obj.summaryText === 'string'
-          ? obj.summaryText
-          : typeof obj.summary === 'string'
-            ? obj.summary
-            : undefined;
-      const title =
-        typeof obj.summaryTitle === 'string'
-          ? obj.summaryTitle
-          : locale === 'en'
-            ? 'AI Summary'
-            : 'AI 자동 요약';
-      if (body) {
-        setServerSummary({ title, body });
+      const eventEmotion = pickNonEmptyString(
+        obj.currentEmotion,
+        obj.current_emotion,
+        obj.emotion,
+        obj.emotionType,
+        obj.emotion_type,
+        obj.topEmotion,
+        obj.top_emotion,
+      );
+      const mappedEventEmotion = eventEmotion
+        ? mapEmotionKeyToSessionEmotion(eventEmotion)
+        : undefined;
+      if (mappedEventEmotion) {
+        setLiveEmotion(mappedEventEmotion);
       }
 
       // Insights event: PHQ-9/인지왜곡은 SSE 기준으로 반영
@@ -479,18 +515,20 @@ export default function SessionAutoRecordPanel({
       const { distortionType, distortionSummary } = extractDistortionPatch(obj);
 
       if (
+        typeof mappedEventEmotion === 'string' ||
         typeof nextPhq9Score === 'number' ||
         typeof distortionType === 'string' ||
         typeof distortionSummary === 'string'
       ) {
         onAnalysisChange?.({
+          currentEmotion: mappedEventEmotion,
           phq9Score: nextPhq9Score,
           distortionType,
           distortionExample: distortionSummary,
         });
       }
     },
-    [locale, onAnalysisChange, unwrapStreamData, upsertTranscriptFromSse],
+    [onAnalysisChange, unwrapStreamData, upsertTranscriptFromSse],
   );
 
   // Subscribe to SSE after recording starts
@@ -502,22 +540,31 @@ export default function SessionAutoRecordPanel({
 
   useEffect(() => {
     if (!isRecording) {
-      setServerSummary(null);
-      setLocalSummary(null);
+      setLiveEmotion(null);
     }
   }, [isRecording]);
+  const liveSummaryTitle = useMemo(() => {
+    if (!isRecording) return '';
+    const emotionLabel = emotionLabelByLocale(liveEmotion, locale);
+    const dialogueCount = transcriptItems.filter(
+      (item) => !item.isPendingTranscription && item.text.trim().length > 0,
+    ).length;
+    if (dialogueCount < 1) return '';
 
-  useEffect(() => {
-    if (!isRecording) return;
-    const nextLocalSummary = buildLocalSummary(locale);
-    setLocalSummary(nextLocalSummary);
-  }, [isRecording, locale]);
+    if (locale === 'en') {
+      return `The client's real-time emotion is ${emotionLabel}. There have been ${dialogueCount} dialogue turns between the counselor and client so far.`;
+    }
+    return `현재 내담자의 실시간 감정은 ${emotionLabel}입니다. 상담자와 내담자 사이에 현재까지 ${dialogueCount}개의 대화가 오가고 있습니다.`;
+  }, [isRecording, liveEmotion, locale, transcriptItems]);
 
-  const activeSummary = isRecording ? (serverSummary ?? localSummary) : null;
-  const recentTwoDialogueSummary = useMemo(
-    () => buildRecentTwoDialogueSummary(locale, transcriptItems),
-    [locale, transcriptItems],
-  );
+  const liveSummaryBody = useMemo(() => {
+    if (!isRecording) return '';
+    const completedCount = transcriptItems.filter(
+      (item) => !item.isPendingTranscription && item.text.trim().length > 0,
+    ).length;
+    if (completedCount < 1) return '';
+    return buildRecentTwoDialogueSummary(locale, transcriptItems);
+  }, [isRecording, locale, transcriptItems]);
 
   useEffect(() => {
     onRecorderStateChange?.({
@@ -619,6 +666,7 @@ export default function SessionAutoRecordPanel({
       ) {
         const chunkEmotion = resolveEmotionFromChunkResult(uploadResult.data);
         if (chunkEmotion.emotion) {
+          setLiveEmotion(chunkEmotion.emotion);
           onAnalysisChange?.({
             currentEmotion: chunkEmotion.emotion,
             confidence: chunkEmotion.confidence,
@@ -888,11 +936,8 @@ export default function SessionAutoRecordPanel({
         <SessionLiveSummaryCard
           locale={locale}
           statusLabel={undefined}
-          title={
-            activeSummary?.body ??
-            (isRecording ? (locale === 'en' ? 'Generating summary...' : '요약 생성 중...') : '')
-          }
-          body={recentTwoDialogueSummary}
+          title={liveSummaryTitle}
+          body={liveSummaryBody}
         />
         <SessionCounselorMemoCard locale={locale} defaultValue="" />
       </div>
