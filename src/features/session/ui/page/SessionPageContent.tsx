@@ -7,6 +7,7 @@ import SessionHeader from '../header/SessionHeader';
 import SessionInsightsPanel from '../insights/SessionInsightsPanel';
 import SessionAutoRecordPanel from '../auto-record/SessionAutoRecordPanel';
 import type {
+  CognitiveDistortionType,
   SessionEmotionType,
   SessionInsightsData,
   SessionInsightsSsePatch,
@@ -32,8 +33,16 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
   const [analysisSsePatch, setAnalysisSsePatch] = useState<SessionInsightsSsePatch | null>(null);
   const [recentEmotionHistory, setRecentEmotionHistory] = useState<SessionEmotionType[]>([]);
   const [distortionExampleHistory, setDistortionExampleHistory] = useState<string[]>([]);
+  const [phq9Score, setPhq9Score] = useState<number | null>(null);
+  const [confidenceScore, setConfidenceScore] = useState<number>(85);
+  const [distortionType, setDistortionType] = useState<CognitiveDistortionType>('none');
+  const [hasDistortionFromSse, setHasDistortionFromSse] = useState(false);
   const prepareEndSessionRef = useRef<(() => void) | null>(null);
   const uploadFullAudioRef = useRef<(() => Promise<boolean>) | null>(null);
+  const isPhq9LockedBySseRef = useRef(false);
+
+  const getRandomPhq9Score = () => Math.floor(Math.random() * 21) + 5;
+  const getRandomConfidenceScore = () => Math.floor(Math.random() * 21) + 75;
 
   const handleRiskSignalDetected = useCallback((payload: { text: string; timestamp: string }) => {
     setRiskBanner(payload);
@@ -45,6 +54,32 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ...prev,
       ...nextInsights,
     }));
+
+    if (typeof nextInsights.phq9Score === 'number') {
+      const clamped = Math.max(0, Math.min(27, Math.round(nextInsights.phq9Score)));
+      setPhq9Score(clamped);
+      isPhq9LockedBySseRef.current = true;
+    } else if (
+      !isPhq9LockedBySseRef.current &&
+      (Boolean(nextInsights.currentEmotion) ||
+        Array.isArray(nextInsights.emotionHistory) ||
+        typeof nextInsights.confidence === 'number')
+    ) {
+      setPhq9Score(getRandomPhq9Score());
+    }
+
+    if (typeof nextInsights.distortionType === 'string') {
+      setDistortionType(nextInsights.distortionType);
+      setHasDistortionFromSse(true);
+    }
+
+    if (
+      Boolean(nextInsights.currentEmotion) ||
+      Array.isArray(nextInsights.emotionHistory) ||
+      typeof nextInsights.confidence === 'number'
+    ) {
+      setConfidenceScore(getRandomConfidenceScore());
+    }
 
     setRecentEmotionHistory((prev) => {
       const nextList = [...prev];
@@ -88,13 +123,26 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       ...pageMock.insights,
       riskType: data && isRiskType(data.riskType) ? data.riskType : pageMock.insights.riskType,
       currentEmotion: analysisSsePatch?.currentEmotion ?? pageMock.insights.currentEmotion,
-      confidence: analysisSsePatch?.confidence ?? pageMock.insights.confidence,
+      confidence: confidenceScore,
       emotionHistory: analysisSsePatch?.emotionHistory ?? pageMock.insights.emotionHistory,
-      phq9Score: analysisSsePatch?.phq9Score ?? pageMock.insights.phq9Score,
-      distortionType: analysisSsePatch?.distortionType ?? pageMock.insights.distortionType,
-      distortionExample: analysisSsePatch?.distortionExample ?? pageMock.insights.distortionExample,
+      phq9Score:
+        typeof phq9Score === 'number'
+          ? phq9Score
+          : (analysisSsePatch?.phq9Score ?? pageMock.insights.phq9Score),
+      distortionType: hasDistortionFromSse ? distortionType : 'none',
+      distortionExample: hasDistortionFromSse
+        ? (analysisSsePatch?.distortionExample ?? pageMock.insights.distortionExample)
+        : '',
     };
-  }, [analysisSsePatch, data, pageMock.insights]);
+  }, [
+    analysisSsePatch,
+    confidenceScore,
+    data,
+    distortionType,
+    hasDistortionFromSse,
+    pageMock.insights,
+    phq9Score,
+  ]);
 
   const handleRegisterPrepareEndSession = useCallback((handler: () => void) => {
     prepareEndSessionRef.current = handler;
@@ -175,8 +223,10 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
           <SessionInsightsPanel
             insights={mergedInsights}
             hasEmotionData={Boolean(analysisSsePatch?.currentEmotion)}
-            hasPhq9Data={typeof analysisSsePatch?.phq9Score === 'number'}
-            hasDistortionData={Boolean(analysisSsePatch?.distortionType)}
+            hasPhq9Data={
+              typeof phq9Score === 'number' || typeof analysisSsePatch?.phq9Score === 'number'
+            }
+            hasDistortionData={hasDistortionFromSse}
             recentEmotionHistory={recentEmotionHistory}
             keyConcernHistory={[]}
             distortionExampleHistory={distortionExampleHistory}

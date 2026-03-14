@@ -37,7 +37,7 @@ export default function AiSummaryCard({ value, onChange }: AiSummaryCardProps) {
         <Textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full px-[26px] py-[23px]  min-h-[74px]"
+          className="w-full h-auto min-h-[120px] px-[26px] py-[23px] [&_textarea]:overflow-hidden"
           placeholder={tSummary('aiSummaryEditPlaceholder')}
         />
       </div>

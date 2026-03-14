@@ -28,17 +28,13 @@ const toDateKey = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
-const toUtcIsoString = (dateKey: string, time: string) => {
+const isValidDateKey = (dateKey: string) => {
   const dateMatch = dateKey.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  const timeMatch = time.match(/^(\d{2}):(\d{2})$/);
-  if (!dateMatch || !timeMatch) return null;
+  if (!dateMatch) return false;
 
   const year = Number(dateMatch[1]);
   const month = Number(dateMatch[2]);
   const day = Number(dateMatch[3]);
-  const hour = Number(timeMatch[1]);
-  const minute = Number(timeMatch[2]);
-
   if (
     !Number.isInteger(year) ||
     !Number.isInteger(month) ||
@@ -46,18 +42,27 @@ const toUtcIsoString = (dateKey: string, time: string) => {
     month < 1 ||
     month > 12 ||
     day < 1 ||
-    day > 31 ||
-    hour < 0 ||
-    hour > 23 ||
-    minute < 0 ||
-    minute > 59
+    day > 31
   ) {
-    return null;
+    return false;
   }
 
-  const localDate = new Date(year, month - 1, day, hour, minute, 0);
-  if (Number.isNaN(localDate.getTime())) return null;
-  return localDate.toISOString();
+  const parsedDate = new Date(year, month - 1, day);
+  return !Number.isNaN(parsedDate.getTime());
+};
+
+const isValidTime = (time: string) => {
+  const timeMatch = time.match(/^(\d{2}):(\d{2})$/);
+  if (!timeMatch) return false;
+
+  const hour = Number(timeMatch[1]);
+  const minute = Number(timeMatch[2]);
+
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    return false;
+  }
+
+  return true;
 };
 
 const parseBackendDateTime = (value: string) => {
@@ -216,11 +221,16 @@ export const useRescheduleSessionDialog = ({
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      const nextScheduledAt = toUtcIsoString(toDateKey(selectedDate), startTime);
-      if (!nextScheduledAt) {
+      const nextDate = toDateKey(selectedDate);
+      if (!isValidDateKey(nextDate) || !isValidTime(startTime) || !isValidTime(endTime)) {
         throw new Error('Invalid schedule date/time');
       }
-      await rescheduleSession(sessionId, { newScheduledAt: nextScheduledAt });
+
+      await rescheduleSession(sessionId, {
+        date: nextDate,
+        startTime,
+        endTime,
+      });
       await queryClient.invalidateQueries({
         queryKey: sessionListQueryKey('scheduled', locale),
       });

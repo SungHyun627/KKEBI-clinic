@@ -1,18 +1,36 @@
 import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
 
+export interface SummaryInsights {
+  riskType?: string;
+  keyConcerns?: string[];
+  distortionType?: string;
+}
+
 export type SummaryPayload = {
   sessionId?: number;
   endedAt: string;
   audioUrl?: string;
+  clientName?: string;
+  sessionType?: string;
+  counselingDate?: string;
+  startTime?: string;
+  endTime?: string;
+  riskType?: string;
+  isSubmitted?: boolean;
   sessionData?: {
     clientName?: string;
     sessionType?: string;
+    counselingDate?: string;
+    startTime?: string;
+    endTime?: string;
     riskType?: string;
   } | null;
   recorderState?: {
     elapsedSeconds?: number;
   } | null;
   summarySnapshot?: {
+    insights?: SummaryInsights;
+    recentEmotionHistory?: string[];
     emotionPatterns?: string[];
     detectedDistortions?: string[];
     transcript?: SummaryTranscriptItem[];

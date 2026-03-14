@@ -17,6 +17,17 @@ function formatTimestampToHms(value?: string) {
 export default function BookmarkedMomentsCard({ locale, moments }: BookmarkedMomentsCardProps) {
   const tSummary = useTranslations('summary');
 
+  const getFallbackText = (speaker?: SummaryTranscriptItem['speaker']) => {
+    if (locale === 'en') {
+      return speaker === 'counselor'
+        ? 'This is bookmarked counselor text.'
+        : 'This is bookmarked client text.';
+    }
+    return speaker === 'counselor'
+      ? '상담자의 북마크된 텍스트입니다.'
+      : '내담자의 북마크된 텍스트입니다.';
+  };
+
   return (
     <div className="flex w-full flex-col items-start gap-7">
       <div className="flex items-center gap-2">
@@ -49,7 +60,9 @@ export default function BookmarkedMomentsCard({ locale, moments }: BookmarkedMom
                     : tSummary('bookmarkedSpeakerClient')}
                 </span>
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div className="body-14 min-w-0 flex-1 text-label-normal">{item.text ?? ''}</div>
+                  <div className="body-14 min-w-0 flex-1 text-label-normal">
+                    {item.text?.trim() ? item.text : getFallbackText(item.speaker)}
+                  </div>
                   <div className="flex items-center gap-[6px]">
                     <span className="body-14 text-label-alternative">
                       {formatTimestampToHms(item.timestamp)}

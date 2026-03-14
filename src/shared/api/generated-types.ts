@@ -1810,10 +1810,21 @@ export interface components {
        */
       clientId: number;
       /**
-       * Format: date-time
-       * @description 예약 일시
+       * Format: date
+       * @description 예약 일시(날짜)
+       * @example 2024-03-20
        */
-      scheduledAt: string;
+      date: string;
+      /**
+       * @description 상담 시작 시간 (HH:mm)
+       * @example 14:00
+       */
+      startTime?: string;
+      /**
+       * @description 상담 종료 시간 (HH:mm)
+       * @example 15:00
+       */
+      endTime?: string;
     };
     ApiResponseLong: {
       code?: string;
@@ -1823,8 +1834,21 @@ export interface components {
     };
     /** @description 다음 세션 예약 객체 (선택) */
     NextSession: {
+      /**
+       * @description 상담 일자 (YYYY-MM-DD)
+       * @example 2024-03-22
+       */
       date?: string;
-      time?: string;
+      /**
+       * @description 상담 시작 시간 (HH:mm)
+       * @example 14:00
+       */
+      startTime?: string;
+      /**
+       * @description 상담 종료 시간 (HH:mm)
+       * @example 15:00
+       */
+      endTime?: string;
     };
     /** @description 최종 상담 요약 제출 요청 DTO */
     SubmitSessionSummaryRequest: {
@@ -2346,8 +2370,21 @@ export interface components {
        * @example 삼성화재
        */
       insuranceCompany?: string;
+      /**
+       * @description 정기 상담 시작 시간 (HH:mm)
+       * @example 14:00
+       */
+      counselingStartTime?: string;
+      /**
+       * @description 정기 상담 종료 시간 (HH:mm)
+       * @example 15:00
+       */
+      counselingEndTime?: string;
+      /** @description 초기 심리검사 결과 목록 */
+      initialTestResults?: components['schemas']['ClientTestResultRequest'][];
       intake?: components['schemas']['ClientIntakeRequest'];
     };
+    /** @description 초기 심리검사 결과 목록 */
     ClientTestResultRequest: {
       testName?: string;
       /** Format: int32 */
@@ -2438,10 +2475,21 @@ export interface components {
     /** @description 상담 변경 요청 DTO */
     ScheduleModificationRequest: {
       /**
-       * Format: date-time
-       * @description 변경할 예약 일시 (ISO-8601)
+       * Format: date
+       * @description 변경할 예약 일자(날짜)
+       * @example 2024-03-25
        */
-      newScheduledAt: string;
+      date: string;
+      /**
+       * @description 변경할 상담 시작 시간 (HH:mm)
+       * @example 10:00
+       */
+      startTime?: string;
+      /**
+       * @description 변경할 상담 종료 시간 (HH:mm)
+       * @example 11:00
+       */
+      endTime?: string;
     };
     /** @description 상담 종결 요청 DTO */
     ClientTerminateRequest: {
@@ -2839,6 +2887,21 @@ export interface components {
        */
       timeOffset?: number;
     };
+    /** @description 세션별 인사이트 */
+    Insights: {
+      /**
+       * @description 판단된 위험도
+       * @example 주의
+       */
+      riskType?: string;
+      /** @description 주요 고민 키워드 목록 */
+      keyConcerns?: string[];
+      /**
+       * @description 인지적 왜곡 유형
+       * @example 흑백논리
+       */
+      distortionType?: string;
+    };
     /** @description 추천 미션 */
     MissionDto: {
       /**
@@ -2883,6 +2946,21 @@ export interface components {
        */
       sessionType?: string;
       /**
+       * @description 상담 날짜
+       * @example 2026.03.13
+       */
+      counselingDate?: string;
+      /**
+       * @description 상담 시작 시간
+       * @example 14:00
+       */
+      startTime?: string;
+      /**
+       * @description 상담 종료 시간
+       * @example 15:00
+       */
+      endTime?: string;
+      /**
        * @description 위험 수준
        * @example 위험
        */
@@ -2899,16 +2977,20 @@ export interface components {
       endedAt?: string;
       /** @description 전체 녹음 파일 URL */
       audioUrl?: string;
+      /**
+       * @description 최종 제출 완료 여부
+       * @example false
+       */
+      isSubmitted?: boolean;
       sessionData?: components['schemas']['SessionData'];
       recorderState?: components['schemas']['RecorderState'];
       summarySnapshot?: components['schemas']['SummarySnapshot'];
     };
     /** @description 세션 요약 데이터 */
     SummarySnapshot: {
-      /** @description 감정 패턴 목록 */
-      emotionPatterns?: string[];
-      /** @description 인지적 왜곡 유형 목록 */
-      detectedDistortions?: string[];
+      insights?: components['schemas']['Insights'];
+      /** @description 최근 감정 추이 배열 */
+      recentEmotionHistory?: string[];
       /** @description 대화록(STT) 목록 */
       transcript?: components['schemas']['TranscriptView'][];
       /** @description 북마크 목록 */
@@ -3036,11 +3118,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
+      first?: boolean;
       last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      first?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['RecordDto'][];
@@ -3050,12 +3132,12 @@ export interface components {
       empty?: boolean;
     };
     PageableObject: {
-      /** Format: int32 */
-      pageSize?: number;
+      unpaged?: boolean;
+      paged?: boolean;
       /** Format: int32 */
       pageNumber?: number;
-      paged?: boolean;
-      unpaged?: boolean;
+      /** Format: int32 */
+      pageSize?: number;
       /** Format: int64 */
       offset?: number;
       sort?: components['schemas']['SortObject'];
@@ -3072,8 +3154,8 @@ export interface components {
       notes?: string;
     };
     SortObject: {
-      sorted?: boolean;
       unsorted?: boolean;
+      sorted?: boolean;
       empty?: boolean;
     };
     ApiResponseListNotificationResponse: {
@@ -3287,11 +3369,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
+      first?: boolean;
       last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      first?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['ClientSummaryResponse'][];
@@ -3401,6 +3483,16 @@ export interface components {
        * @example KB손해보험
        */
       insuranceCompany?: string;
+      /**
+       * @description 정기 상담 시작 시간
+       * @example 14:00
+       */
+      counselingStartTime?: string;
+      /**
+       * @description 정기 상담 종료 시간
+       * @example 15:00
+       */
+      counselingEndTime?: string;
       /**
        * @description 상담 상태 (ACTIVE / TERMINATED)
        * @example ACTIVE
@@ -3580,11 +3672,11 @@ export interface components {
       totalPages?: number;
       /** Format: int64 */
       totalElements?: number;
+      first?: boolean;
       last?: boolean;
       pageable?: components['schemas']['PageableObject'];
       /** Format: int32 */
       numberOfElements?: number;
-      first?: boolean;
       /** Format: int32 */
       size?: number;
       content?: components['schemas']['TerminatedClientResponse'][];
@@ -4685,7 +4777,7 @@ export interface operations {
           'application/json': components['schemas']['ApiResponse'];
         };
       };
-      /** @description 비밀번호 정책 위반 */
+      /** @description 유효하지 않은/만료된 토큰 */
       400: {
         headers: {
           [name: string]: unknown;

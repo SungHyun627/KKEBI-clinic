@@ -77,8 +77,8 @@ const splitDateTime = (value?: string) => {
 
 const toKstScheduledDateTime = (item: BackendSessionItem) => {
   if (item.scheduledAt) {
-    // 백엔드 scheduledAt 이 타임존 없이 내려오면 UTC 기준으로 간주해 KST로 변환한다.
-    return formatToKstDateTime(item.scheduledAt, 'UTC');
+    // 백엔드 scheduledAt 이 타임존 없이 내려오면 KST 로컬 시각으로 해석한다.
+    return formatToKstDateTime(item.scheduledAt, 'KST');
   }
 
   if (item.scheduledDate && item.scheduledTime) {

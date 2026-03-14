@@ -16,7 +16,8 @@ interface SubmitSessionSummaryRequestDto {
   selectedMissionIds: number[];
   nextSession?: {
     date?: string;
-    time?: string;
+    startTime?: string;
+    endTime?: string;
   };
 }
 
@@ -80,7 +81,8 @@ const toSubmitRequestDto = (
     nextSession: payload.nextSession
       ? {
           date: payload.nextSession.date,
-          time: payload.nextSession.startTime,
+          startTime: payload.nextSession.startTime,
+          endTime: payload.nextSession.endTime,
         }
       : undefined,
   };

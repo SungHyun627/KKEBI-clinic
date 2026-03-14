@@ -102,6 +102,12 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     return `${hh}:${mm}:${ss}`;
   };
 
+  const splitDistortionLabels = (value: string) =>
+    value
+      .split(/[,，/|;]+/g)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
   const transcriptItems = useMemo(() => {
     const source = payload?.summarySnapshot?.transcript ?? [];
     return source.map((item, index) => ({
@@ -111,20 +117,43 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
       timestamp: normalizeTimestamp(item.timestamp),
     }));
   }, [payload?.summarySnapshot?.transcript]);
-  const durationMinutesText = `${Math.floor((payload?.recorderState?.elapsedSeconds ?? 0) / 60)}${tSummary(
-    'durationMinuteUnit',
+
+  const formatCounselingDate = (value?: string) => {
+    if (!value) return '';
+    const normalized = value.trim();
+    if (/^\d{4}\.\d{2}\.\d{2}$/.test(normalized)) return normalized;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return normalized.replaceAll('-', '.');
+    return formatSummaryDate(normalized);
+  };
+
+  const elapsedSeconds = Math.max(0, payload?.recorderState?.elapsedSeconds ?? 0);
+  const durationMinutes = Math.floor(elapsedSeconds / 60);
+  const durationSeconds = elapsedSeconds % 60;
+  const durationMinutesText = `${durationMinutes}${tSummary('durationMinuteUnit')} ${durationSeconds}${tSummary(
+    'durationSecondUnit',
   )}`;
-  const endedAt = formatSummaryDate(payload?.endedAt);
-  const clientName = payload?.sessionData?.clientName ?? tCommon('defaultUserName');
+  const endedAt =
+    formatCounselingDate(payload?.counselingDate) ||
+    formatCounselingDate(payload?.sessionData?.counselingDate) ||
+    formatSummaryDate(payload?.endedAt);
+  const clientName =
+    payload?.clientName ?? payload?.sessionData?.clientName ?? tCommon('defaultUserName');
   const profileSuffix = tCommon('profileSuffix');
-  const sessionType = payload?.sessionData?.sessionType;
-  const riskType = payload?.sessionData?.riskType;
+  const sessionType = payload?.sessionType ?? payload?.sessionData?.sessionType;
+  const riskType = payload?.riskType ?? payload?.sessionData?.riskType;
+  const isSubmitted = payload?.isSubmitted === true;
   const recordingPreviewUrl = getSessionAudioPreviewUrl(String(sessionId));
   const recordingAudioUrl = payload?.audioUrl || recordingPreviewUrl || '';
   const hasRecording = Boolean(recordingAudioUrl);
   const effectiveIsPlaying = hasRecording && isPlaying;
-  const emotions = payload?.summarySnapshot?.emotionPatterns ?? [];
-  const distortions = payload?.summarySnapshot?.detectedDistortions ?? [];
+  const emotions =
+    payload?.summarySnapshot?.recentEmotionHistory ??
+    payload?.summarySnapshot?.emotionPatterns ??
+    [];
+  const distortionFromInsights = payload?.summarySnapshot?.insights?.distortionType;
+  const distortions = distortionFromInsights
+    ? splitDistortionLabels(distortionFromInsights)
+    : (payload?.summarySnapshot?.detectedDistortions?.flatMap(splitDistortionLabels) ?? []);
 
   const summaryTextFromResponse = payload?.summarySnapshot?.summaryText ?? '';
   const summaryText = summaryTextOverride || summaryTextFromResponse;
@@ -251,12 +280,30 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
           ? {
               date: nextDate,
               startTime: nextStartTime,
+              endTime: nextEndTime || undefined,
             }
           : null,
     });
 
     if (!result.success) {
-      toast(result.message || tSummary('submitFailed'));
+      const normalizedMessage = result.message?.trim();
+      const shouldReplaceWithEnglishFallback =
+        locale === 'en' &&
+        typeof normalizedMessage === 'string' &&
+        /[가-힣]/.test(normalizedMessage);
+      const lowerMessage = normalizedMessage?.toLowerCase() ?? '';
+      const isInternalServerError =
+        lowerMessage.includes('internal server error') || lowerMessage.includes('서버 내부 오류');
+
+      toast(
+        shouldReplaceWithEnglishFallback
+          ? 'An internal server error occurred while processing session summary.'
+          : normalizedMessage || tSummary('submitFailed'),
+      );
+      if (isInternalServerError) {
+        router.push(`/${locale}/sessions`);
+        return;
+      }
       setIsSubmitting(false);
       return;
     }
@@ -318,6 +365,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     nextDate,
     nextStartTime,
     nextEndTime,
+    isSubmitted,
     isSubmitEnabled,
     setRiskEvaluation: (value: RiskEvaluation) =>
       setValue('riskEvaluation', value, { shouldDirty: true, shouldValidate: true }),
