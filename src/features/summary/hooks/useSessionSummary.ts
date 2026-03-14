@@ -190,7 +190,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
   const isNextSessionSelectionValid =
     isNextSessionAllEmpty || (Boolean(nextDate) && Boolean(nextStartTime));
   const isMissionSelectionValid = missions.length === 0 || selectedMissionIds.length > 0;
-  const canSubmitSummary = !error && Boolean(payload);
+  const canSubmitSummary = !error && Boolean(payload) && !isSubmitted;
   const isSubmitEnabled =
     canSubmitSummary &&
     Boolean(riskEvaluation) &&
@@ -265,7 +265,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
   };
 
   const handleSubmitSummary = async () => {
-    if (!canSubmitSummary || !riskEvaluation || !followUpSessionTiming) return;
+    if (!canSubmitSummary || isSubmitted || !riskEvaluation || !followUpSessionTiming) return;
 
     setIsSubmitting(true);
     const result = await submitSessionSummary(sessionId, {

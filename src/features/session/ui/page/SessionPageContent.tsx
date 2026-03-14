@@ -3,6 +3,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { getSessionPageMock } from '@/shared/mock/session-page';
+import { toast } from '@/shared/ui/toast';
+import { completeSessionById } from '../../api/completeSessionById';
 import SessionHeader from '../header/SessionHeader';
 import SessionInsightsPanel from '../insights/SessionInsightsPanel';
 import SessionAutoRecordPanel from '../auto-record/SessionAutoRecordPanel';
@@ -156,8 +158,29 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     await new Promise((resolve) => setTimeout(resolve, 0));
   }, []);
   const handleBeforeEndSession = useCallback(async () => {
-    return (await uploadFullAudioRef.current?.()) ?? true;
-  }, []);
+    const isUploadSucceeded = (await uploadFullAudioRef.current?.()) ?? true;
+    if (!isUploadSucceeded) {
+      toast(
+        locale === 'en'
+          ? 'Failed to upload recording file. Please try again.'
+          : '녹음 파일 업로드에 실패했습니다. 다시 시도해 주세요.',
+      );
+      return false;
+    }
+
+    const completeResult = await completeSessionById({ sessionId });
+    if (!completeResult.success) {
+      toast(
+        completeResult.message ||
+          (locale === 'en'
+            ? 'Failed to complete session. Please try again.'
+            : '상담 종료 처리에 실패했습니다. 다시 시도해 주세요.'),
+      );
+      return false;
+    }
+
+    return true;
+  }, [locale, sessionId]);
 
   return (
     <section className="flex min-h-[calc(100dvh)] w-full flex-col gap-5 bg-white">

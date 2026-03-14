@@ -5,9 +5,10 @@ import { useTranslations } from 'next-intl';
 interface AiSummaryCardProps {
   value: string;
   onChange: (value: string) => void;
+  isReadOnly?: boolean;
 }
 
-export default function AiSummaryCard({ value, onChange }: AiSummaryCardProps) {
+export default function AiSummaryCard({ value, onChange, isReadOnly = false }: AiSummaryCardProps) {
   const tSummary = useTranslations('summary');
 
   return (
@@ -30,17 +31,19 @@ export default function AiSummaryCard({ value, onChange }: AiSummaryCardProps) {
       <div className="flex min-h-[124px] w-full px-[26px] py-[23px] rounded-[16px] border border-neutral-95 body-16 text-label-normal">
         {value}
       </div>
-      <div className="flex flex-col items-start gap-[10px] w-full">
-        <span className="body-16 font-medium text-label-neutral">
-          {tSummary('aiSummaryEditLabel')}
-        </span>
-        <Textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full h-auto min-h-[120px] px-[26px] py-[23px] [&_textarea]:overflow-hidden"
-          placeholder={tSummary('aiSummaryEditPlaceholder')}
-        />
-      </div>
+      {isReadOnly ? null : (
+        <div className="flex flex-col items-start gap-[10px] w-full">
+          <span className="body-16 font-medium text-label-neutral">
+            {tSummary('aiSummaryEditLabel')}
+          </span>
+          <Textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full h-auto min-h-[120px] px-[26px] py-[23px] [&_textarea]:overflow-hidden"
+            placeholder={tSummary('aiSummaryEditPlaceholder')}
+          />
+        </div>
+      )}
     </div>
   );
 }
