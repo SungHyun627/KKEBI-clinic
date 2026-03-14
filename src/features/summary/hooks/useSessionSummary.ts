@@ -289,12 +289,19 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
       const normalizedMessage = result.message?.trim();
       const shouldReplaceWithEnglishFallback =
         locale === 'en' && Boolean(normalizedMessage) && /[가-힣]/.test(normalizedMessage);
+      const lowerMessage = normalizedMessage?.toLowerCase() ?? '';
+      const isInternalServerError =
+        lowerMessage.includes('internal server error') || lowerMessage.includes('서버 내부 오류');
 
       toast(
         shouldReplaceWithEnglishFallback
           ? 'An internal server error occurred while processing session summary.'
           : normalizedMessage || tSummary('submitFailed'),
       );
+      if (isInternalServerError) {
+        router.push(`/${locale}/sessions`);
+        return;
+      }
       setIsSubmitting(false);
       return;
     }
