@@ -288,7 +288,9 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     if (!result.success) {
       const normalizedMessage = result.message?.trim();
       const shouldReplaceWithEnglishFallback =
-        locale === 'en' && Boolean(normalizedMessage) && /[가-힣]/.test(normalizedMessage);
+        locale === 'en' &&
+        typeof normalizedMessage === 'string' &&
+        /[가-힣]/.test(normalizedMessage);
       const lowerMessage = normalizedMessage?.toLowerCase() ?? '';
       const isInternalServerError =
         lowerMessage.includes('internal server error') || lowerMessage.includes('서버 내부 오류');
