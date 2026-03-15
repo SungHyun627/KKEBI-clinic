@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ClosedClientCard } from '@/features/clients';
 import { getClosedClients } from '@/features/clients/client-closure/api/getClosedClients';
 import { restoreClient } from '@/features/clients/client-closure/api/restoreClient';
 import type { ClosedClientsResponse } from '@/features/clients/client-closure/types/client-closure';
 import { closedClientsQueryKey } from '@/features/clients/client-closure/lib/query-keys';
+import ClosedClientCard from '@/features/clients/client-closure/ui/ClosedClientCard';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 type ClientsTranslationConcernKeyMap = {

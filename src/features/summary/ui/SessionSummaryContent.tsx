@@ -3,17 +3,15 @@
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
-import {
-  AiSummaryCard,
-  CompletionCard,
-  CounselorEvaluationCard,
-  NextSessionBookingCard,
-  RecommendedMissionsCard,
-  SummaryTopBar,
-  EmotionPatternsCard,
-  DetectedCognitiveDistortionCard,
-  BookmarkedMomentsCard,
-} from './components';
+import AiSummaryCard from './components/AiSummaryCard';
+import CompletionCard from './components/CompletionCard';
+import CounselorEvaluationCard from './components/CounselorEvaluationCard';
+import NextSessionBookingCard from './components/NextSessionBookingCard';
+import RecommendedMissionsCard from './components/RecommendedMissionsCard';
+import SummaryTopBar from './components/SummaryTopBar';
+import EmotionPatternsCard from './components/EmotionPatternsCard';
+import DetectedCognitiveDistortionCard from './components/DetectedCognitiveDistortionCard';
+import BookmarkedMomentsCard from './components/BookmarkedMomentsCard';
 import { useSessionSummary } from '../hooks/useSessionSummary';
 
 interface SessionSummaryContentProps {

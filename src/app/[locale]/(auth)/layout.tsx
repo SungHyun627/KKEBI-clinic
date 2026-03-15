@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Toast } from '@/shared/ui/toast';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { getAuthSession } from '@/features/auth';
+import { getAuthSession } from '@/features/auth/login/lib/authSession';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const locale = useLocale();

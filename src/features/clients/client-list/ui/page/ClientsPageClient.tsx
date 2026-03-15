@@ -4,15 +4,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import {
-  ClientDetailDrawer,
-  ClientListFilters,
-  ClientListTableSection,
-  type RiskFilter,
-  useClientList,
-} from '@/features/clients';
-
 import type { ClientLookupItem } from '@/entities/client/model/types';
+import ClientDetailDrawer from '@/features/clients/client-detail/ui/ClientDetailDrawer';
+import ClientListFilters from '@/features/clients/client-list/ui/ClientListFilters';
+import ClientListTableSection from '@/features/clients/client-list/ui/ClientListTableSection';
+import useClientList from '@/features/clients/client-list/hooks/useClientList';
+import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
 
 const PAGE_SIZE = 10;
 const SEARCH_DEBOUNCE_MS = 300;

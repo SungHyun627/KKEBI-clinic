@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, type ReactNode } from 'react';
-import { getAuthSession } from '@/features/auth';
+import { getAuthSession } from '@/features/auth/login/lib/authSession';
 import { ensureAccessToken } from '@/shared/api/http-client';
 import { isLighthouseBypassAuthEnabled } from '@/shared/lib/perf-flags';
 import { Toast } from '@/shared/ui/toast';
