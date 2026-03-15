@@ -1,15 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getNotifications,
   markNotificationAsRead,
 } from '@/features/notification/api/getNotifications';
 import { subscribeNotificationReceived } from '@/features/notification/lib/notification-events';
 import { buildMockNotifications } from '@/features/notification/lib/mock-notifications';
-import type { NotificationItem as NotificationItemType } from '@/features/notification/types/notification';
+import type {
+  NotificationItem as NotificationItemType,
+  NotificationListResponse,
+} from '@/features/notification/types/notification';
 import { Drawer, DrawerClose, DrawerContent, DrawerTitle } from '@/shared/ui/drawer';
 import NotificationItem from './NotificationItem';
 
@@ -20,6 +24,8 @@ interface NotificationDrawerProps {
   onReadNotification?: () => void;
 }
 
+const NOTIFICATIONS_QUERY_KEY = ['notifications', 'list'] as const;
+
 export default function NotificationDrawer({
   open,
   onOpenChange,
@@ -28,48 +34,47 @@ export default function NotificationDrawer({
 }: NotificationDrawerProps) {
   const tNav = useTranslations('nav');
   const tNotification = useTranslations('notification');
-  const [notifications, setNotifications] = useState<NotificationItemType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { data: notificationResult, isLoading } = useQuery({
+    queryKey: NOTIFICATIONS_QUERY_KEY,
+    queryFn: getNotifications,
+    enabled: open,
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+  const errorMessage =
+    notificationResult && (!notificationResult.success || !notificationResult.data)
+      ? notificationResult.message || tNotification('commonLoadFailed')
+      : null;
+  const notifications = useMemo(() => {
+    if (!notificationResult?.success || !notificationResult.data) return [];
+    return notificationResult.data.length > 0 ? notificationResult.data : buildMockNotifications();
+  }, [notificationResult]);
 
   useEffect(() => {
-    if (!open) return;
-
-    const loadNotifications = async () => {
-      setIsLoading(true);
-      const result = await getNotifications();
-
-      if (!result.success || !result.data) {
-        setNotifications([]);
-        setErrorMessage(result.message || tNotification('commonLoadFailed'));
-        setIsLoading(false);
-        return;
-      }
-
-      const nextItems = result.data.length > 0 ? result.data : buildMockNotifications();
-      setNotifications(nextItems);
-      onUnreadCountSync?.(nextItems.filter((item) => !item.isRead).length);
-      setErrorMessage(null);
-      setIsLoading(false);
-    };
-
-    void loadNotifications();
-  }, [onUnreadCountSync, open, tNotification]);
+    onUnreadCountSync?.(notifications.filter((item) => !item.isRead).length);
+  }, [notifications, onUnreadCountSync]);
 
   useEffect(() => {
     const unsubscribe = subscribeNotificationReceived((notification) => {
-      setNotifications((prev) => {
-        const hasExisting = prev.some((item) => item.id === notification.id);
-        const next = hasExisting
-          ? prev.map((item) => (item.id === notification.id ? notification : item))
-          : [notification, ...prev];
-        onUnreadCountSync?.(next.filter((item) => !item.isRead).length);
-        return next;
+      queryClient.setQueryData<NotificationListResponse>(NOTIFICATIONS_QUERY_KEY, (prev) => {
+        const currentItems = prev?.success && prev.data ? prev.data : [];
+        const hasExisting = currentItems.some((item) => item.id === notification.id);
+        const nextItems = hasExisting
+          ? currentItems.map((item) => (item.id === notification.id ? notification : item))
+          : [notification, ...currentItems];
+
+        return {
+          success: true,
+          data: nextItems,
+          message: prev?.message,
+        };
       });
     });
 
     return unsubscribe;
-  }, [onUnreadCountSync]);
+  }, [queryClient]);
 
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.isRead).length,
@@ -82,9 +87,16 @@ export default function NotificationDrawer({
     const result = await markNotificationAsRead(notification.id);
     if (!result.success) return;
 
-    setNotifications((prev) =>
-      prev.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)),
-    );
+    queryClient.setQueryData<NotificationListResponse>(NOTIFICATIONS_QUERY_KEY, (prev) => {
+      const currentItems = prev?.success && prev.data ? prev.data : [];
+      return {
+        success: true,
+        data: currentItems.map((item) =>
+          item.id === notification.id ? { ...item, isRead: true } : item,
+        ),
+        message: prev?.message,
+      };
+    });
     onReadNotification?.();
   };
 
