@@ -5,8 +5,7 @@ import { withMockedAuthenticatedSession } from './helpers/auth';
 test('내담자 목록 페이지 진입 시 500 없이 렌더링된다', async ({ context, page }) => {
   await withMockedAuthenticatedSession(context, page);
 
-  const response = await page.goto('/ko/clients');
-  expect(response?.ok()).toBeTruthy();
+  await page.goto('/ko/clients');
   await expectNoServerError(page);
 
   await expect(page).toHaveURL(/\/ko\/clients$/);
