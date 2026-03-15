@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getSessionList } from '../api/getSessionList';
 import type {
-  CompletedSessionGroup,
-  ScheduledSessionGroup,
+  CompletedSessionsResponse,
+  ScheduledSessionsResponse,
   SessionStatus,
 } from '../types/session-list';
 import type { SessionStatusTab } from '../ui/SessionStatusTabs';
@@ -25,6 +25,18 @@ const isSessionStatusTab = (value: string | null): value is SessionStatusTab =>
 
 const isSessionViewFilter = (value: string | null): value is SessionViewFilter =>
   value === 'list' || value === 'calendar';
+
+const isScheduledSessionsResponse = (value: unknown): value is ScheduledSessionsResponse => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<ScheduledSessionsResponse>;
+  return candidate.success === true && candidate.status === 'scheduled';
+};
+
+const isCompletedSessionsResponse = (value: unknown): value is CompletedSessionsResponse => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<CompletedSessionsResponse>;
+  return candidate.success === true && candidate.status === 'completed';
+};
 
 const formatDateKey = (date: Date) => {
   const year = date.getFullYear();
@@ -62,15 +74,15 @@ export const useSessionList = ({
   const isQueryInvalid = !queryResult?.success || !queryResult?.data;
   const scheduledGroups = useMemo(
     () =>
-      selectedStatus === 'scheduled' && queryResult?.success && queryResult.data
-        ? (queryResult.data as ScheduledSessionGroup[])
+      selectedStatus === 'scheduled' && isScheduledSessionsResponse(queryResult) && queryResult.data
+        ? queryResult.data
         : [],
     [queryResult, selectedStatus],
   );
   const completedGroups = useMemo(
     () =>
-      selectedStatus === 'completed' && queryResult?.success && queryResult.data
-        ? (queryResult.data as CompletedSessionGroup[])
+      selectedStatus === 'completed' && isCompletedSessionsResponse(queryResult) && queryResult.data
+        ? queryResult.data
         : [],
     [queryResult, selectedStatus],
   );
