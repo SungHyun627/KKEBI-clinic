@@ -1,4 +1,4 @@
-import TwoFactorAuthCard from '@/features/auth/2fa/ui/TwoFactorAuthCard';
+import { TwoFactorAuthCard } from '@/features/auth';
 
 export default function TwoFactorPageWidget() {
   return <TwoFactorAuthCard />;

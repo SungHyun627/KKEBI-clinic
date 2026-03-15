@@ -1,6 +1,5 @@
 import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
-import { getClientListServer } from '@/features/clients/client-list/api/getClientList';
-import { clientListQueryKey } from '@/features/clients/client-list/lib/query-keys';
+import { clientListQueryKey, getClientListServer } from '@/features/clients';
 import ClientsPageWidget from '@/widgets/clients/ui/ClientsPageWidget';
 
 const PAGE_SIZE = 10;

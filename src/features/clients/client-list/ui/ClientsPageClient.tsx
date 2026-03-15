@@ -20,7 +20,7 @@ const toRiskFilterFromQuery = (value: string | null): RiskFilter => {
   return 'all';
 };
 
-export default function ClientsPage() {
+export default function ClientsPageClient() {
   const tClients = useTranslations('clients');
   const locale = useLocale();
   const router = useRouter();

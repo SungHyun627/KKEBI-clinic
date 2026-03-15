@@ -1,6 +1,5 @@
 import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
-import { getClosedClientsServer } from '@/features/clients/client-closure/api/getClosedClients';
-import { closedClientsQueryKey } from '@/features/clients/client-closure/lib/query-keys';
+import { closedClientsQueryKey, getClosedClientsServer } from '@/features/clients';
 import ClosedClientsPageWidget from '@/widgets/clients/ui/ClosedClientsPageWidget';
 
 export default async function ClosedClientsPage() {

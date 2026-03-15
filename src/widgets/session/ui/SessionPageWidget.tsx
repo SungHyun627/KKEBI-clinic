@@ -3,22 +3,23 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocale } from 'next-intl';
-import { completeSessionById } from '@/features/session/api/completeSessionById';
-import { useSessionInfo } from '@/features/session/hooks/useSessionInfo';
-import type {
-  CognitiveDistortionType,
-  SessionEmotionType,
-  SessionInsightsData,
-  SessionInsightsSsePatch,
-} from '@/features/session/types/session';
-import { isRiskType, isSessionType } from '@/features/session/types/session';
-import SessionHeader from '@/features/session/ui/header/SessionHeader';
-import SessionInsightsPanel from '@/features/session/ui/insights/SessionInsightsPanel';
+import {
+  completeSessionById,
+  isRiskType,
+  isSessionType,
+  SessionHeader,
+  SessionInsightsPanel,
+  useSessionInfo,
+  type CognitiveDistortionType,
+  type SessionEmotionType,
+  type SessionInsightsData,
+  type SessionInsightsSsePatch,
+} from '@/features/session';
 import { getSessionPageMock } from '@/shared/mock/session-page';
 import { toast } from '@/shared/ui/toast';
 
 const SessionAutoRecordPanelLazy = dynamic(
-  () => import('@/features/session/ui/auto-record/SessionAutoRecordPanel'),
+  () => import('@/features/session').then((module) => module.SessionAutoRecordPanel),
   {
     loading: () => (
       <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">

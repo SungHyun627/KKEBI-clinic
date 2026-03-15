@@ -1,6 +1,6 @@
 'use client';
 
-import ClientsPageClient from '@/features/clients/client-list/ui/page/ClientsPageClient';
+import { ClientsPageClient } from '@/features/clients';
 
 export default function ClientsPageWidget() {
   return <ClientsPageClient />;

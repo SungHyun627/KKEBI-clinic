@@ -19,14 +19,16 @@ import {
   clearAuthSession,
   getAuthSession,
   subscribeAuthSession,
-} from '@/features/auth/login/lib/authSession';
-import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation';
+  useLogoutMutation,
+} from '@/features/auth';
 
 import { Toast, toast } from '@/shared/ui/toast';
-import NotificationDrawer from '@/features/notification/ui/NotificationDrawer';
-import { getUnreadNotificationCount } from '@/features/notification/api/getNotifications';
-import { useNotificationSse } from '@/features/notification/hooks/useNotificationSse';
-import type { NotificationItem } from '@/features/notification/types/notification';
+import {
+  getUnreadNotificationCount,
+  NotificationDrawer,
+  type NotificationItem,
+  useNotificationSse,
+} from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
 import { ensureAccessToken } from '@/shared/api/http-client';
 import { isLighthouseBypassAuthEnabled } from '@/shared/lib/perf-flags';

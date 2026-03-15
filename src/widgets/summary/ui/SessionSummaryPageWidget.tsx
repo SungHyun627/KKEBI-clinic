@@ -1,4 +1,4 @@
-import SessionSummaryContent from '@/features/summary/ui/SessionSummaryContent';
+import { SessionSummaryContent } from '@/features/summary';
 
 interface SessionSummaryPageWidgetProps {
   locale: string;
