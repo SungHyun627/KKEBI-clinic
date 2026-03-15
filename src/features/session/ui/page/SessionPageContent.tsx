@@ -2,12 +2,12 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
+import dynamic from 'next/dynamic';
 import { getSessionPageMock } from '@/shared/mock/session-page';
 import { toast } from '@/shared/ui/toast';
 import { completeSessionById } from '../../api/completeSessionById';
 import SessionHeader from '../header/SessionHeader';
 import SessionInsightsPanel from '../insights/SessionInsightsPanel';
-import SessionAutoRecordPanel from '../auto-record/SessionAutoRecordPanel';
 import type {
   CognitiveDistortionType,
   SessionEmotionType,
@@ -16,6 +16,14 @@ import type {
 } from '../../types/session';
 import { isRiskType, isSessionType } from '../../types/session';
 import { useSessionInfo } from '../../hooks/useSessionInfo';
+
+const SessionAutoRecordPanel = dynamic(() => import('../auto-record/SessionAutoRecordPanel'), {
+  loading: () => (
+    <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
+      Loading recording panel...
+    </div>
+  ),
+});
 
 interface SessionPageContentProps {
   sessionId: string;
