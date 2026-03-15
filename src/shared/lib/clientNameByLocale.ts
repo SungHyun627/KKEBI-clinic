@@ -1,5 +1,3 @@
-import type { AbstractIntlMessages } from 'next-intl';
-
 const CLIENT_NAME_MAP: Record<string, { ko: string; en: string }> = {
   client_1001: { ko: '김하늘', en: 'Ellie Wynn' },
   client_1007: { ko: '박준서', en: 'June Kim' },
