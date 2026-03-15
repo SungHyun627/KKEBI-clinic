@@ -119,21 +119,12 @@ export default function ClientDetailDrawer({
               setErrorMessage(result.message || tClients('detailLoadFailed'));
               return;
             }
-
-            const refreshed = await getClientDetail(next.clientId);
-            if (!refreshed.success || !refreshed.data) {
-              if (result.data) {
-                setDetail(result.data);
-                setErrorMessage(null);
-                setIsEditing(false);
-                return;
-              }
-
-              setErrorMessage(refreshed.message || tClients('detailLoadFailed'));
-              return;
+            // 저장 API 응답이나 편집값으로 즉시 UI를 동기화해 추가 재조회 워터폴을 제거한다.
+            if (result.data) {
+              setDetail(result.data);
+            } else {
+              setDetail(next);
             }
-
-            setDetail(refreshed.data);
             setErrorMessage(null);
             setIsEditing(false);
           }}
