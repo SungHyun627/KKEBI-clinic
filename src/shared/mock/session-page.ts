@@ -5,7 +5,7 @@ import type {
   SessionEmotionType,
   SessionPageViewData,
   SessionTranscriptItem,
-} from '@/features/session/types/session';
+} from '@/shared/mock/types/session-page';
 
 const EMOTIONS: SessionEmotionType[] = ['anxious', 'sad', 'angry', 'happy', 'calm', 'fearful'];
 const DISTORTIONS: CognitiveDistortionType[] = [
