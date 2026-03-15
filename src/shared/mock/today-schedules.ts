@@ -1,4 +1,4 @@
-import type { TodayScheduleItem } from '@/entities/dashboard/model/types';
+import type { TodayScheduleItem } from '@/shared/model/counseling';
 
 export const TODAY_SCHEDULES_MOCK: TodayScheduleItem[] = [
   {

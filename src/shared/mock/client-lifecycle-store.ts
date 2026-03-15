@@ -1,4 +1,4 @@
-import type { TodayScheduleItem } from '@/entities/dashboard/model/types';
+import type { TodayScheduleItem } from '@/shared/model/counseling';
 import { TODAY_SCHEDULES_MOCK } from './today-schedules';
 
 type ClientCloseReason = 'session-complete' | 'dropout' | 'other';

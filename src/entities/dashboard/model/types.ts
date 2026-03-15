@@ -1,17 +1,6 @@
-export type SessionType = '초기' | '정기' | '위기';
-export type RiskType = '안정' | '주의' | '위험';
+import type { RiskType, SessionType, TodayScheduleItem } from '@/shared/model/counseling';
 
-export interface TodayScheduleItem {
-  id: string;
-  time: string;
-  clientId: string;
-  clientName: string;
-  sessionType: SessionType;
-  riskType: RiskType;
-  moodScore: number | null;
-  stressScore: number | null;
-  streakDays?: number;
-}
+export type { RiskType, SessionType, TodayScheduleItem };
 
 export interface TodayScheduleResponse {
   success: boolean;

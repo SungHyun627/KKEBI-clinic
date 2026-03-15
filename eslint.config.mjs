@@ -14,9 +14,9 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             {
-              group: ['@/features/*', '@/app/*', '@/widgets/*', '@/processes/*'],
+              group: ['@/entities/*', '@/features/*', '@/app/*', '@/widgets/*', '@/processes/*'],
               message:
-                'shared 레이어는 상위 레이어(app/processes/widgets/features)를 참조할 수 없습니다.',
+                'shared 레이어는 상위 레이어(app/processes/widgets/features/entities)를 참조할 수 없습니다.',
             },
           ],
         },
