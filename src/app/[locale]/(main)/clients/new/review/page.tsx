@@ -3,15 +3,15 @@
 import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
-import useSubmitClientRegistration from '@/features/clients/client-registration/hooks/use-submit-client-registration';
 import {
+  ClientRegistrationLabelCell as LabelCell,
+  ClientRegistrationStepBar,
+  ClientRegistrationValueCell as ValueCell,
+  getReviewStateFromStorage,
   getGenderDisplayValue,
   getReferralPathDisplayValue,
-} from '@/features/clients/client-registration/lib/review-mapper';
-import { getReviewStateFromStorage } from '@/features/clients/client-registration/lib/review-draft';
-import LabelCell from '@/features/clients/client-registration/ui/ClientRegistrationLabelCell';
-import ValueCell from '@/features/clients/client-registration/ui/ClientRegistrationValueCell';
+  useSubmitClientRegistration,
+} from '@/features/clients/client-registration';
 import { Button } from '@/shared/ui/button';
 import Image from 'next/image';
 

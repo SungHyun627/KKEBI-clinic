@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import SessionSummaryContent from '@/features/summary/ui/SessionSummaryContent';
+import { SessionSummaryContent } from '@/features/summary';
 
 interface SessionSummaryPageProps {
   params: Promise<{ locale: string; id: string }>;

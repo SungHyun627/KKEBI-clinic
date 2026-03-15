@@ -3,8 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useTranslations } from 'next-intl';
-import { getClosedClients, restoreClient, type ClosedClientItem } from '@/features/clients';
-import ClosedClientCard from '@/features/clients/client-closure/ui/ClosedClientCard';
+import {
+  ClosedClientCard,
+  getClosedClients,
+  restoreClient,
+  type ClosedClientItem,
+} from '@/features/clients';
+
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 export default function ClosedClientsPage() {

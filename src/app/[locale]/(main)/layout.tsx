@@ -19,8 +19,9 @@ import {
   clearAuthSession,
   getAuthSession,
   subscribeAuthSession,
-} from '@/features/auth/login/lib/authSession';
-import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation';
+  useLogoutMutation,
+} from '@/features/auth';
+
 import { Toast, toast } from '@/shared/ui/toast';
 import { NotificationDrawer } from '@/features/notification';
 import {

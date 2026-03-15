@@ -7,6 +7,7 @@ export { login } from './login/api/login';
 export { logout } from './login/api/logout';
 export { useLoginMutation } from './login/hooks/useLoginMutation';
 export { useLogoutMutation } from './login/hooks/useLogoutMutation';
+export { clearAuthSession, getAuthSession, subscribeAuthSession } from './login/lib/authSession';
 export type { LoginForm } from './login/types/login';
 
 export { verify2FA, resend2FA } from './2fa/api/2fa';

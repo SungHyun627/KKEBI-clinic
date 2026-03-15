@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, type ReactNode } from 'react';
-import { getAuthSession } from '@/features/auth/login/lib/authSession';
+import { getAuthSession } from '@/features/auth';
 import { ensureAccessToken } from '@/shared/api/http-client';
 import { Toast } from '@/shared/ui/toast';
 

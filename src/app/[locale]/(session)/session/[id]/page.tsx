@@ -1,4 +1,4 @@
-import SessionPageContent from '@/features/session/ui/page/SessionPageContent';
+import { SessionPageContent } from '@/features/session';
 
 interface SessionDetailPageProps {
   params: Promise<{ locale: string; id: string }>;
