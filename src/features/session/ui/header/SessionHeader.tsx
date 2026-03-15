@@ -10,15 +10,12 @@ import SessionTypeChip from '@/features/dashboard/today-schedule/ui/SessionTypeC
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
-import { isRiskType, isSessionType } from '../../types/session';
-import type { SessionBasicInfo } from '../../types/session';
+import { isRiskType, isSessionType } from '../../model/types';
+import type { SessionBasicInfo } from '../../model/types';
 import SessionEndConfirmDialog from './SessionEndConfirmDialog';
 import SessionQuitConfirmDialog from './SessionQuitConfirmDialog';
-import type { SessionEmotionType, SessionInsightsData } from '../../types/session';
-import {
-  getSessionAutoRecordStorageKey,
-  getSessionSummaryStorageKey,
-} from '../../lib/session-storage';
+import type { SessionEmotionType, SessionInsightsData } from '../../model/types';
+import { getSessionAutoRecordStorageKey, getSessionSummaryStorageKey } from '../../model/storage';
 
 interface SessionHeaderProps {
   sessionId: string;

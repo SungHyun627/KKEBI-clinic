@@ -10,4 +10,4 @@ export {
   type SessionEmotionType,
   type SessionInsightsData,
   type SessionInsightsSsePatch,
-} from './types/session';
+} from './model/types';

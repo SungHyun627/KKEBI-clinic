@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { SessionTranscriptItem } from '../../types/session';
+import type { SessionTranscriptItem } from '../../model/types';
 
 interface SessionTranscriptCardProps {
   locale: string;

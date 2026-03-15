@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { SessionInsightsStreamEvent, SessionInsightsStreamStatus } from '../types/session';
+import type { SessionInsightsStreamEvent, SessionInsightsStreamStatus } from '../model/types';
 import { ensureAccessToken } from '@/shared/api/http-client';
 import { clearAccessToken, getAccessToken } from '@/shared/api/token-store';
 

@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { SessionAutoRecordData } from '../types/session';
-import { getDemoConversation } from '../lib/demo-conversations';
-import { formatElapsedToTimestamp } from '../lib/session-analysis';
+import type { SessionAutoRecordData } from '../model/types';
+import { getDemoConversation } from '../model/demo-conversations';
+import { formatElapsedToTimestamp } from '../model/analysis';
 import { addTranscriptBookmark, removeTranscriptBookmark } from '../api/bookmarkTranscript';
 
 interface UseTranscriptRuntimeParams {

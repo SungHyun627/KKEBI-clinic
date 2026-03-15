@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session';
-import type { SessionInsightsSsePatch } from '../../types/session';
+import type { SessionAutoRecordData, SessionInsightsData } from '../../model/types';
+import type { SessionInsightsSsePatch } from '../../model/types';
 import { useRecordingController } from '../../hooks/useRecordingController';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
 import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
 import { useAudioChunkUploader } from '../../hooks/useAudioChunkUploader';
 import { uploadFullAudioFile } from '../../api/uploadFullAudioFile';
 import { setSessionAudioPreviewUrl } from '@/shared/lib/session-audio-preview-cache';
-import { formatElapsedToTimestamp, formatTimestampToHms } from '../../lib/session-analysis';
+import { formatElapsedToTimestamp, formatTimestampToHms } from '../../model/analysis';
 import { useSessionPersistence } from '../../hooks/useSessionPersistence';
-import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
+import { getSessionAutoRecordStorageKey } from '../../model/storage';
 import { renderHighlightedText } from './session-transcript-highlight';
 import SessionTranscriptCard from './SessionTranscriptCard';
 import SessionLiveSummaryCard from './SessionLiveSummaryCard';
