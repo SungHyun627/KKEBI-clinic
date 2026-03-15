@@ -60,14 +60,20 @@ export const useSessionList = ({
 
   const queryResult = sessionListQuery.data;
   const isQueryInvalid = !queryResult?.success || !queryResult?.data;
-  const scheduledGroups =
-    selectedStatus === 'scheduled' && queryResult?.success && queryResult.data
-      ? (queryResult.data as ScheduledSessionGroup[])
-      : [];
-  const completedGroups =
-    selectedStatus === 'completed' && queryResult?.success && queryResult.data
-      ? (queryResult.data as CompletedSessionGroup[])
-      : [];
+  const scheduledGroups = useMemo(
+    () =>
+      selectedStatus === 'scheduled' && queryResult?.success && queryResult.data
+        ? (queryResult.data as ScheduledSessionGroup[])
+        : [],
+    [queryResult, selectedStatus],
+  );
+  const completedGroups = useMemo(
+    () =>
+      selectedStatus === 'completed' && queryResult?.success && queryResult.data
+        ? (queryResult.data as CompletedSessionGroup[])
+        : [],
+    [queryResult, selectedStatus],
+  );
   const errorMessage = sessionListQuery.isError || isQueryInvalid ? loadFailedMessage : null;
   const isLoading = sessionListQuery.isPending;
 
