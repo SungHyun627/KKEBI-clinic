@@ -1,4 +1,4 @@
-import type { FollowUpSessionTiming, RiskEvaluation } from '@/features/summary/types/summary';
+import type { FollowUpSessionTiming, RiskEvaluation } from '@/entities/summary/model/types';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';

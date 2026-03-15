@@ -1,5 +1,5 @@
 import { getSessionPageMock } from '@/shared/mock/session-page';
-import type { SummaryPayload } from '@/features/summary/types/summary';
+import type { SummaryPayload } from '@/entities/summary/model/types';
 
 function hashString(value: string) {
   let hash = 0;

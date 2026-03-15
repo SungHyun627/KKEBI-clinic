@@ -1,4 +1,4 @@
-import type { MissionItem } from '@/features/summary/types/summary';
+import type { MissionItem } from '@/entities/summary/model/types';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 

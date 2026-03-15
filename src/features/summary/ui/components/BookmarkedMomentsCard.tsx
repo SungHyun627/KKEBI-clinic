@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import type { SummaryTranscriptItem } from '@/features/summary/types/summary';
+import type { SummaryTranscriptItem } from '@/entities/summary/model/types';
 
 interface BookmarkedMomentsCardProps {
   locale: string;

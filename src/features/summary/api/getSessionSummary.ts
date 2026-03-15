@@ -1,5 +1,5 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
-import type { SummaryApiResponse, SummaryPayload } from '@/features/summary/types/summary';
+import type { SummaryApiResponse, SummaryPayload } from '@/entities/summary/model/types';
 
 export const getSessionSummary = async (
   sessionId: number,

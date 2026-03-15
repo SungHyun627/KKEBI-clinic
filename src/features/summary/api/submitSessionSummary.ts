@@ -4,7 +4,7 @@ import type {
   RiskEvaluation,
   SubmitSessionSummaryPayload,
   SubmitSessionSummaryResponse,
-} from '@/features/summary/types/summary';
+} from '@/entities/summary/model/types';
 
 interface SubmitSessionSummaryRequestDto {
   sessionId: number;

@@ -17,7 +17,7 @@ import type {
   RiskEvaluation,
   SummarySubmitFormValues,
   SummaryPayload,
-} from '@/features/summary/types/summary';
+} from '@/entities/summary/model/types';
 
 interface UseSessionSummaryProps {
   locale: string;

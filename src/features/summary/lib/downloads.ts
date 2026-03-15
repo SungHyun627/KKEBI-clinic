@@ -1,4 +1,4 @@
-import type { SummaryTranscriptItem } from '@/features/summary/types/summary';
+import type { SummaryTranscriptItem } from '@/entities/summary/model/types';
 
 function triggerDownload(filename: string, content: string, type = 'text/plain') {
   const blob = new Blob([content], { type });

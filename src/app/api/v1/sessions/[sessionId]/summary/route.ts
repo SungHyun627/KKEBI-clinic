@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { proxyToBackend } from '@/shared/server/backend-proxy';
-import type { SummaryPayload } from '@/features/summary/types/summary';
+import type { SummaryPayload } from '@/entities/summary/model/types';
 
 interface BackendSummaryEnvelope {
   code?: string;
