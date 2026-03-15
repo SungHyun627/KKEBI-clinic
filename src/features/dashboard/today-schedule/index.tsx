@@ -8,13 +8,25 @@ import { getTodaySchedules } from './api/getTodaySchedules';
 import TodayScheduleHeader from './ui/TodayScheduleHeader';
 import TodayScheduleListItem from './ui/TodayScheduleItem';
 
-export default function TodayScheduleSection() {
+interface TodayScheduleSectionProps {
+  initialSchedules?: TodayScheduleItem[];
+  initialLoaded?: boolean;
+}
+
+export default function TodayScheduleSection({
+  initialSchedules = [],
+  initialLoaded = false,
+}: TodayScheduleSectionProps) {
   const tDashboard = useTranslations('dashboard');
-  const [schedules, setSchedules] = useState<TodayScheduleItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [schedules, setSchedules] = useState<TodayScheduleItem[]>(() => initialSchedules);
+  const [isLoading, setIsLoading] = useState(!initialLoaded);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (initialLoaded) {
+      return;
+    }
+
     const loadTodaySchedules = async () => {
       setIsLoading(true);
       const result = await getTodaySchedules();
@@ -33,7 +45,7 @@ export default function TodayScheduleSection() {
     };
 
     void loadTodaySchedules();
-  }, []);
+  }, [initialLoaded, tDashboard]);
 
   if (isLoading) {
     return (
