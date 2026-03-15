@@ -7,6 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test",
+    "test:e2e:ui": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test --ui",
     "generate:types": "curl -s 'http://ec2-52-79-154-149.ap-northeast-2.compute.amazonaws.com/api-docs/%EC%A0%84%EC%B2%B4' -o openapi.json && openapi-typescript openapi.json -o src/shared/api/generated-types.ts",
     "i18n:sync": "node scripts/sync-i18n-from-csv.mjs /tmp/i18n_sheet.csv",
     "format": "prettier --write .",
@@ -43,7 +48,10 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -52,12 +60,14 @@
     "eslint-config-next": "16.0.10",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
+    "jsdom": "^29.0.0",
     "lighthouse": "^13.0.3",
     "lint-staged": "^16.2.7",
     "openapi-typescript": "^7.13.0",
     "playwright": "^1.58.2",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.0"
   }
 }
