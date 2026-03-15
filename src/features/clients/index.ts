@@ -5,7 +5,11 @@ export {
   getClientDetailMock,
   getClientDetailServer,
 } from './client-detail/api/getClientDetail';
-export { getClosedClients, getClosedClientsMock } from './client-closure/api/getClosedClients';
+export {
+  getClosedClients,
+  getClosedClientsServer,
+  getClosedClientsMock,
+} from './client-closure/api/getClosedClients';
 export { updateClientDetail, updateClientDetailMock } from './client-detail/api/updateClientDetail';
 export { closeClient, closeClientMock } from './client-closure/api/closeClient';
 export { restoreClient, restoreClientMock } from './client-closure/api/restoreClient';

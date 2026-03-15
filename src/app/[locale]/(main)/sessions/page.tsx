@@ -20,10 +20,14 @@ export default async function SessionsPage({ params, searchParams }: SessionsPag
   const initialStatus: SessionStatusTab = status === 'completed' ? 'completed' : 'scheduled';
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: sessionListQueryKey(initialStatus, locale),
-    queryFn: () => getSessionListServer(initialStatus, { locale }),
-  });
+  await Promise.all(
+    (['scheduled', 'completed'] as const).map((sessionStatus) =>
+      queryClient.prefetchQuery({
+        queryKey: sessionListQueryKey(sessionStatus, locale),
+        queryFn: () => getSessionListServer(sessionStatus, { locale }),
+      }),
+    ),
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
