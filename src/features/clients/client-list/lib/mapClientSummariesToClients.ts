@@ -1,5 +1,5 @@
 import type { components } from '@/shared/api/generated-types';
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 import type { RiskType } from '@/entities/dashboard/model/types';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 

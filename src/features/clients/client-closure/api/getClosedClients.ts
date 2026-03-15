@@ -2,7 +2,7 @@ import { ApiError, httpClient } from '@/shared/api/http-client';
 import { toBaseResponse } from '@/shared/api/base-response';
 import type { components } from '@/shared/api/generated-types';
 import type { ClosedClientsResponse } from '@/features/clients/client-closure/types/client-closure';
-import type { ClosedClientItem } from '@/features/clients/types/common';
+import type { ClosedClientItem } from '@/entities/client/model/types';
 
 type ApiTerminatedClientsPage = components['schemas']['PageTerminatedClientResponse'];
 type ApiTerminatedClient = components['schemas']['TerminatedClientResponse'];

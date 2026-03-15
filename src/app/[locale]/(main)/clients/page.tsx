@@ -6,7 +6,7 @@ import { usePathname, useRouter } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useClientList } from '@/features/clients';
 import ClientDetailDrawer from '@/features/clients/client-detail/ui/ClientDetailDrawer';
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 import ClientListFilters from '@/features/clients/client-list/ui/ClientListFilters';
 import ClientListTableSection from '@/features/clients/client-list/ui/ClientListTableSection';
 import type { RiskFilter } from '@/features/clients/client-list/types/client-list';

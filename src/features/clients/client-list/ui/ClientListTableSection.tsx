@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';

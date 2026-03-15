@@ -1,4 +1,4 @@
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 
 export type RiskReason = '자살 언급' | '자해 시도' | '타해 위험';
 export type TaskStatus = '완수' | '진행중' | '미완수';

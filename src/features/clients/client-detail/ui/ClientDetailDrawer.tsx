@@ -14,7 +14,7 @@ import type {
   ClientDetailData,
   ClientDetailUpdatePayload,
 } from '@/features/clients/client-detail/types/client-detail';
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 import Divider from '@/shared/ui/divider';
 
 interface ClientDetailDrawerProps {
