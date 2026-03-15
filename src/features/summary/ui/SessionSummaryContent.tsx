@@ -1,13 +1,11 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import AiSummaryCard from './components/AiSummaryCard';
 import CompletionCard from './components/CompletionCard';
-import CounselorEvaluationCard from './components/CounselorEvaluationCard';
-import NextSessionBookingCard from './components/NextSessionBookingCard';
-import RecommendedMissionsCard from './components/RecommendedMissionsCard';
 import SummaryTopBar from './components/SummaryTopBar';
 import EmotionPatternsCard from './components/EmotionPatternsCard';
 import DetectedCognitiveDistortionCard from './components/DetectedCognitiveDistortionCard';
@@ -19,6 +17,10 @@ interface SessionSummaryContentProps {
   sessionId: number;
   backLabel: string;
 }
+
+const CounselorEvaluationCard = dynamic(() => import('./components/CounselorEvaluationCard'));
+const RecommendedMissionsCard = dynamic(() => import('./components/RecommendedMissionsCard'));
+const NextSessionBookingCard = dynamic(() => import('./components/NextSessionBookingCard'));
 
 export default function SessionSummaryContent({
   locale,
