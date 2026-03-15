@@ -8,6 +8,7 @@ import {
   type ClientListResponse,
 } from '@/features/clients/client-list/api/getClientList';
 import { mapClientSummariesToClients } from '@/features/clients/client-list/lib/mapClientSummariesToClients';
+import { clientListQueryKey } from '@/features/clients/client-list/lib/query-keys';
 import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
 import type { components } from '@/shared/api/generated-types';
 
@@ -52,19 +53,13 @@ const useClientList = ({
   const normalizedPage = Math.max(0, page - 1);
   const normalizedKeyword = searchKeyword.trim() || undefined;
   const normalizedRiskLevel = mapRiskFilterToRiskLevel(riskFilter);
-  const queryKey = useMemo(
-    () =>
-      [
-        'clients',
-        'list',
-        locale,
-        normalizedPage,
-        pageSize,
-        normalizedKeyword ?? '',
-        normalizedRiskLevel ?? 'all',
-      ] as const,
-    [locale, normalizedKeyword, normalizedPage, normalizedRiskLevel, pageSize],
-  );
+  const queryKey = clientListQueryKey({
+    locale,
+    page: normalizedPage,
+    pageSize,
+    searchKeyword: normalizedKeyword,
+    riskLevel: normalizedRiskLevel,
+  });
 
   const clientListQuery = useQuery({
     queryKey,
