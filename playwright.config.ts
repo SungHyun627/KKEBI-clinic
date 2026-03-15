@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 3100;
-const BASE_URL = `http://127.0.0.1:${PORT}`;
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -18,12 +18,14 @@ export default defineConfig({
     baseURL: BASE_URL,
     trace: 'on-first-retry',
   },
-  webServer: {
-    command: `pnpm dev -p ${PORT}`,
-    url: `${BASE_URL}/ko/login`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: `pnpm dev -p ${PORT}`,
+        url: `${BASE_URL}/ko/login`,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
   projects: [
     {
       name: 'chromium',

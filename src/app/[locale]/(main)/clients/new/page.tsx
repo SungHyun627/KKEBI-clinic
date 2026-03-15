@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
 import {
   ClientRegistrationBasicInfoForm,
@@ -115,13 +115,15 @@ const NewClientPage = () => {
     }
   }, [basicInfoForm, counselingInfoForm, kkebiNicknameForm, paymentInfoForm]);
 
-  const basicName = basicInfoForm.watch('name');
-  const basicPhone = basicInfoForm.watch('phone');
-  const basicEmail = basicInfoForm.watch('email');
-  const basicBirthDate = basicInfoForm.watch('birthDate');
-  const counselingChiefConcern = counselingInfoForm.watch('chiefConcern');
-  const paymentType = paymentInfoForm.watch('paymentType');
-  const insuranceCompany = paymentInfoForm.watch('insuranceCompany');
+  const basicName = useWatch({ control: basicInfoForm.control, name: 'name' }) ?? '';
+  const basicPhone = useWatch({ control: basicInfoForm.control, name: 'phone' }) ?? '';
+  const basicEmail = useWatch({ control: basicInfoForm.control, name: 'email' }) ?? '';
+  const basicBirthDate = useWatch({ control: basicInfoForm.control, name: 'birthDate' }) ?? '';
+  const counselingChiefConcern =
+    useWatch({ control: counselingInfoForm.control, name: 'chiefConcern' }) ?? '';
+  const paymentType = useWatch({ control: paymentInfoForm.control, name: 'paymentType' }) ?? '';
+  const insuranceCompany =
+    useWatch({ control: paymentInfoForm.control, name: 'insuranceCompany' }) ?? '';
   const isInsurancePayment = paymentType === 'insurance';
   const isAllRequiredFilled =
     Boolean(basicName.trim()) &&
