@@ -1,7 +1,7 @@
 import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
-import ClosedClientsPageClient from '@/features/clients/client-closure/ui/page/ClosedClientsPageClient';
 import { getClosedClientsServer } from '@/features/clients/client-closure/api/getClosedClients';
 import { closedClientsQueryKey } from '@/features/clients/client-closure/lib/query-keys';
+import ClosedClientsPageWidget from '@/widgets/clients/ui/ClosedClientsPageWidget';
 
 export default async function ClosedClientsPage() {
   const queryClient = new QueryClient();
@@ -13,7 +13,7 @@ export default async function ClosedClientsPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClosedClientsPageClient />
+      <ClosedClientsPageWidget />
     </HydrationBoundary>
   );
 }

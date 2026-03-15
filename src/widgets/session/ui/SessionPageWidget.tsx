@@ -1,35 +1,38 @@
 'use client';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useLocale } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { getSessionPageMock } from '@/shared/mock/session-page';
-import { toast } from '@/shared/ui/toast';
-import { completeSessionById } from '../../api/completeSessionById';
-import SessionHeader from '../header/SessionHeader';
-import SessionInsightsPanel from '../insights/SessionInsightsPanel';
+import { useLocale } from 'next-intl';
+import { completeSessionById } from '@/features/session/api/completeSessionById';
+import { useSessionInfo } from '@/features/session/hooks/useSessionInfo';
 import type {
   CognitiveDistortionType,
   SessionEmotionType,
   SessionInsightsData,
   SessionInsightsSsePatch,
-} from '../../types/session';
-import { isRiskType, isSessionType } from '../../types/session';
-import { useSessionInfo } from '../../hooks/useSessionInfo';
+} from '@/features/session/types/session';
+import { isRiskType, isSessionType } from '@/features/session/types/session';
+import SessionHeader from '@/features/session/ui/header/SessionHeader';
+import SessionInsightsPanel from '@/features/session/ui/insights/SessionInsightsPanel';
+import { getSessionPageMock } from '@/shared/mock/session-page';
+import { toast } from '@/shared/ui/toast';
 
-const SessionAutoRecordPanel = dynamic(() => import('../auto-record/SessionAutoRecordPanel'), {
-  loading: () => (
-    <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
-      Loading recording panel...
-    </div>
-  ),
-});
+const SessionAutoRecordPanelLazy = dynamic(
+  () => import('@/features/session/ui/auto-record/SessionAutoRecordPanel'),
+  {
+    loading: () => (
+      <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
+        Loading recording panel...
+      </div>
+    ),
+  },
+);
 
-interface SessionPageContentProps {
+interface SessionPageWidgetProps {
   sessionId: string;
 }
 
-export default function SessionPageContent({ sessionId }: SessionPageContentProps) {
+export default function SessionPageWidget({ sessionId }: SessionPageWidgetProps) {
   const locale = useLocale();
   const { data, loading, error } = useSessionInfo({ sessionId });
   const pageMock = useMemo(() => getSessionPageMock(sessionId, locale), [locale, sessionId]);
@@ -128,8 +131,8 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     }
   }, []);
 
-  const mergedInsights: SessionInsightsData = useMemo(() => {
-    return {
+  const mergedInsights: SessionInsightsData = useMemo(
+    () => ({
       ...pageMock.insights,
       riskType: data && isRiskType(data.riskType) ? data.riskType : pageMock.insights.riskType,
       currentEmotion: analysisSsePatch?.currentEmotion ?? pageMock.insights.currentEmotion,
@@ -143,20 +146,22 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       distortionExample: hasDistortionFromSse
         ? (analysisSsePatch?.distortionExample ?? pageMock.insights.distortionExample)
         : '',
-    };
-  }, [
-    analysisSsePatch,
-    confidenceScore,
-    data,
-    distortionType,
-    hasDistortionFromSse,
-    pageMock.insights,
-    phq9Score,
-  ]);
+    }),
+    [
+      analysisSsePatch,
+      confidenceScore,
+      data,
+      distortionType,
+      hasDistortionFromSse,
+      pageMock.insights,
+      phq9Score,
+    ],
+  );
 
   const handleRegisterPrepareEndSession = useCallback((handler: () => void) => {
     prepareEndSessionRef.current = handler;
   }, []);
+
   const handleRegisterUploadFullAudio = useCallback((handler: () => Promise<boolean>) => {
     uploadFullAudioRef.current = handler;
   }, []);
@@ -165,6 +170,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     prepareEndSessionRef.current?.();
     await new Promise((resolve) => setTimeout(resolve, 0));
   }, []);
+
   const handleBeforeEndSession = useCallback(async () => {
     const isUploadSucceeded = (await uploadFullAudioRef.current?.()) ?? true;
     if (!isUploadSucceeded) {
@@ -262,7 +268,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             keyConcernHistory={[]}
             distortionExampleHistory={distortionExampleHistory}
           />
-          <SessionAutoRecordPanel
+          <SessionAutoRecordPanelLazy
             sessionId={sessionId}
             autoRecord={pageMock.autoRecord}
             baseInsights={pageMock.insights}

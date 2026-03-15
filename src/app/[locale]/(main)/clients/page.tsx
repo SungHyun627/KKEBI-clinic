@@ -1,7 +1,7 @@
 import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
-import ClientsPageClient from '@/features/clients/client-list/ui/page/ClientsPageClient';
 import { getClientListServer } from '@/features/clients/client-list/api/getClientList';
 import { clientListQueryKey } from '@/features/clients/client-list/lib/query-keys';
+import ClientsPageWidget from '@/widgets/clients/ui/ClientsPageWidget';
 
 const PAGE_SIZE = 10;
 
@@ -30,7 +30,7 @@ export default async function ClientsPage({ params }: ClientsPageProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ClientsPageClient />
+      <ClientsPageWidget />
     </HydrationBoundary>
   );
 }
