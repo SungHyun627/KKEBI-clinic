@@ -1,4 +1,4 @@
-import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
+import type { RiskType, SessionType } from '@/entities/dashboard/model/types';
 
 export type SessionStatus = 'scheduled' | 'completed';
 

@@ -1,4 +1,4 @@
-import type { TodayScheduleItem } from '@/features/dashboard/types/schedule';
+import type { TodayScheduleItem } from '@/entities/dashboard/model/types';
 import type {
   ClientCloseReason,
   ClosedClientItem,

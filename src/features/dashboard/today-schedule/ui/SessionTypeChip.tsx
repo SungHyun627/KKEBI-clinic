@@ -1,4 +1,4 @@
-import type { SessionType } from '@/features/dashboard/types/schedule';
+import type { SessionType } from '@/entities/dashboard/model/types';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';
 

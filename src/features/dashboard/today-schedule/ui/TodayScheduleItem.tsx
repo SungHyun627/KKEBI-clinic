@@ -1,5 +1,5 @@
 import MoodStressToken from './MoodStressToken';
-import type { TodayScheduleItem as TodayScheduleItemType } from '@/features/dashboard/types/schedule';
+import type { TodayScheduleItem as TodayScheduleItemType } from '@/entities/dashboard/model/types';
 import { cn } from '@/shared/lib/utils';
 import RiskTypeChip from './RiskTypeChip';
 import SessionTypeChip from './SessionTypeChip';

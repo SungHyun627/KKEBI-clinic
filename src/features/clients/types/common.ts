@@ -1,4 +1,4 @@
-import type { RiskType } from '@/features/dashboard';
+import type { RiskType } from '@/entities/dashboard/model/types';
 
 export interface ClientLookupItem {
   time: string;

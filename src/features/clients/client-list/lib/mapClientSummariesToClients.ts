@@ -1,6 +1,6 @@
 import type { components } from '@/shared/api/generated-types';
 import type { ClientLookupItem } from '@/features/clients/types/common';
-import type { RiskType } from '@/features/dashboard';
+import type { RiskType } from '@/entities/dashboard/model/types';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 type ClientSummaryResponse = components['schemas']['ClientSummaryResponse'];

@@ -1,4 +1,4 @@
-import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
+import type { RiskType, SessionType } from '@/entities/dashboard/model/types';
 
 const STORAGE_KEY = 'kkebi-session-start-context';
 
