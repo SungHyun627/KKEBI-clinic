@@ -12,6 +12,8 @@
     "test:unit:watch": "vitest",
     "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test",
     "test:e2e:ui": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test --ui",
+    "lighthouse:en:all": "node scripts/lighthouse-en-pages.mjs",
+    "lighthouse:en:all:auth": "node scripts/lighthouse-en-pages-auth.mjs",
     "generate:types": "curl -s 'http://ec2-52-79-154-149.ap-northeast-2.compute.amazonaws.com/api-docs/%EC%A0%84%EC%B2%B4' -o openapi.json && openapi-typescript openapi.json -o src/shared/api/generated-types.ts",
     "i18n:sync": "node scripts/sync-i18n-from-csv.mjs /tmp/i18n_sheet.csv",
     "format": "prettier --write .",

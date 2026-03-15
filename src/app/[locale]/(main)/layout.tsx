@@ -31,6 +31,7 @@ import {
 } from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
 import { ensureAccessToken } from '@/shared/api/http-client';
+import { isLighthouseBypassAuthEnabled } from '@/shared/lib/perf-flags';
 
 const navItems = [
   { key: 'dashboard', href: '/', icon: '/icons/dashboard.svg' },
@@ -55,22 +56,26 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
+  const authBypassEnabled = isLighthouseBypassAuthEnabled();
   const userName = authSession?.userName || tCommon('defaultUserName');
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     const latestSession = getAuthSession();
     if (!latestSession?.authenticated) {
       router.replace('/login');
     }
-  }, [authSession, router]);
+  }, [authBypassEnabled, authSession, router]);
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     const latestSession = getAuthSession();
     if (!latestSession?.authenticated) return;
     void ensureAccessToken();
-  }, [authSession]);
+  }, [authBypassEnabled, authSession]);
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     const latestSession = getAuthSession();
     if (!latestSession?.authenticated) return;
 
@@ -81,17 +86,18 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     };
 
     void loadUnreadCount();
-  }, [authSession]);
+  }, [authBypassEnabled, authSession]);
 
   const displayedUnreadNotificationCount = authSession?.authenticated ? unreadNotificationCount : 0;
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     return subscribeAuthRequired(() => {
       clearAuthSession();
       localStorage.removeItem('kkebi-login-info');
       router.replace('/login');
     });
-  }, [router]);
+  }, [authBypassEnabled, router]);
 
   useEffect(() => {
     if (pathname !== '/') return;
@@ -131,7 +137,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   );
 
   useNotificationSse({
-    enabled: Boolean(authSession?.authenticated),
+    enabled: authBypassEnabled ? false : Boolean(authSession?.authenticated),
     onNotification: handleNotificationReceived,
   });
 
