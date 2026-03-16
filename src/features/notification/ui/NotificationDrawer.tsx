@@ -127,7 +127,7 @@ export default function NotificationDrawer({
               </div>
             ) : null}
             {!isLoading && errorMessage ? (
-              <p className="body-16 text-status-negative">{errorMessage}</p>
+              <p className="body-16 text-black">{errorMessage}</p>
             ) : null}
             {!isLoading && !errorMessage && notifications.length === 0 ? (
               <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 text-center">

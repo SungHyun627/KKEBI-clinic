@@ -97,7 +97,7 @@ const ClientListTableSection = ({
             {labels.loading}
           </div>
         ) : errorMessage ? (
-          <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-status-negative">
+          <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-black">
             {errorMessage}
           </div>
         ) : filteredCount === 0 ? (

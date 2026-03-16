@@ -253,7 +253,7 @@ export default function SessionPageWidget({ sessionId }: SessionPageWidgetProps)
           Loading session data...
         </div>
       ) : error || !data ? (
-        <div className="flex min-h-[320px] items-center justify-center body-14 text-status-negative">
+        <div className="flex min-h-[320px] items-center justify-center body-14 text-black">
           {error ?? 'Failed to load session data'}
         </div>
       ) : (

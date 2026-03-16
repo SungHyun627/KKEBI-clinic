@@ -44,7 +44,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
 
     if (errorMessage) {
       return (
-        <div className="flex min-h-[500px] w-full items-center justify-center text-label-alternative">
+        <div className="flex min-h-[500px] w-full items-center justify-center text-black">
           {errorMessage}
         </div>
       );

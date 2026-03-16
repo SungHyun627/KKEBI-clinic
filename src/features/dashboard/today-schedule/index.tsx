@@ -61,7 +61,7 @@ export default function TodayScheduleSection({
       <div className="w-full mb-[21px]">
         <TodayScheduleHeader />
         {errorMessage ? (
-          <div className="body-14 flex w-full h-[180px] items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
+          <div className="body-14 flex w-full h-[180px] items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-black">
             {errorMessage}
           </div>
         ) : schedules.length === 0 ? (

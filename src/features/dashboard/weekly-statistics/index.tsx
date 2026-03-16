@@ -131,7 +131,7 @@ const WeeklyStatisticsSection = ({
               />
             </div>
           </div>
-          {errorMessage ? <p className="body-14 text-label-alternative">{errorMessage}</p> : null}
+          {errorMessage ? <p className="body-14 text-black">{errorMessage}</p> : null}
         </div>
       </div>
 

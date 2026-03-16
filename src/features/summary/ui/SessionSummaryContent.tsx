@@ -102,7 +102,7 @@ export default function SessionSummaryContent({
 
       <div className="flex flex-col gap-[53px] items-start w-full px-15">
         {hasLoadError ? (
-          <div className="w-full rounded-[10px] border border-status-negative/20 bg-status-negative/5 px-4 py-3 body-14 text-status-negative">
+          <div className="w-full rounded-[10px] border border-status-negative/20 bg-status-negative/5 px-4 py-3 body-14 text-black">
             {tSummary('loadFailed')}
           </div>
         ) : null}

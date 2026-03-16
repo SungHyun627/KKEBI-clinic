@@ -157,7 +157,7 @@ function ClientDetailDrawerBody({
   if (errorMessage) {
     return (
       <div className={DRAWER_BODY_CLASSNAME}>
-        <div className="body-14 text-status-negative">{errorMessage}</div>
+        <div className="body-14 text-black">{errorMessage}</div>
       </div>
     );
   }
