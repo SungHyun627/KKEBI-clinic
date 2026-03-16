@@ -1,11 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
 import { Textarea } from '@/shared/ui/textarea';
-import type { ClientCloseReason } from '@/features/clients/types/common';
+import type { ClientCloseReason } from '@/entities/client/model/types';
 
 type CloseReason = ClientCloseReason;
 
@@ -24,7 +24,8 @@ const SessionCloseDialog = ({
   onOpenChange,
   onConfirm,
 }: SessionCloseDialogProps) => {
-  const locale = useLocale();
+  const tClients = useTranslations('clients');
+  const tCommon = useTranslations('common');
   const [reason, setReason] = useState<CloseReason>('session-complete');
   const [reasonDetail, setReasonDetail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,12 +38,12 @@ const SessionCloseDialog = ({
     () => [
       {
         value: 'session-complete' as const,
-        label: locale === 'en' ? 'Session complete' : '회기 종료',
+        label: tClients('terminatedReasonSessionComplete'),
       },
-      { value: 'dropout' as const, label: locale === 'en' ? 'Client dropout' : '내담자 중도 탈락' },
-      { value: 'other' as const, label: locale === 'en' ? 'Other' : '기타' },
+      { value: 'dropout' as const, label: tClients('terminatedReasonDropout') },
+      { value: 'other' as const, label: tClients('terminatedReasonOther') },
     ],
-    [locale],
+    [tClients],
   );
 
   const closeDialog = () => {
@@ -59,22 +60,20 @@ const SessionCloseDialog = ({
       <div className="relative flex h-full items-center justify-center p-4">
         <div className="flex w-full max-w-[480px] flex-col items-start gap-6 rounded-[24px] bg-white px-8 py-7 shadow-lg outline-none">
           <h2 className="absolute m-0 h-0 w-0 overflow-hidden p-0">
-            <VisuallyHidden>{locale === 'en' ? 'Close Session' : '상담 종결하기'}</VisuallyHidden>
+            <VisuallyHidden>{tClients('detailCloseDialogA11yTitle')}</VisuallyHidden>
           </h2>
 
           <div className="flex w-full flex-col items-start gap-7">
             <span className="body-20 font-semibold text-black">
-              {locale === 'en' ? 'Close Session' : '상담을 종결하시겠습니까?'}
+              {tClients('detailCloseDialogTitle')}
             </span>
             <span className="body-14 text-label-normal">
-              {locale === 'en'
-                ? `Do you want to close the case with ${clientName}?`
-                : `${clientName}님과의 상담을 종결하시겠습니까?`}
+              {tClients('detailCloseDialogDescription', { clientName })}
             </span>
 
             <div className="flex w-full flex-col gap-[23px] rounded-[16px] border border-neutral-95 bg-white p-4">
               <span className="body-18 font-semibold text-neutral-20">
-                {locale === 'en' ? 'Close reason' : '종결 사유'}
+                {tClients('detailCloseReasonTitle')}
               </span>
               <div className="flex w-full flex-col gap-4">
                 {reasonOptions.map((option) => {
@@ -117,11 +116,7 @@ const SessionCloseDialog = ({
                           onChange={(event) =>
                             setReasonDetail(event.target.value.slice(0, MAX_REASON_LENGTH))
                           }
-                          placeholder={
-                            locale === 'en'
-                              ? 'Enter a reason for closure.'
-                              : '종결 사유를 입력해주세요.'
-                          }
+                          placeholder={tClients('detailCloseReasonPlaceholder')}
                         />
                       ) : null}
                     </div>
@@ -131,10 +126,10 @@ const SessionCloseDialog = ({
             </div>
             <div className="flex flex-col gap-[3px] w-full body-14 text-neutral-50 rounded-[16px] bg-neutral-99 px-3 py-4 items-start">
               <span className="body-14 text-neutral-50">
-                • 종결된 내담자의 기록은 30일 이후 삭제됩니다.
+                • {tClients('detailCloseNoticeLine1')}
               </span>
               <span className="body-14 text-neutral-50">
-                • 30일 간은 종결 상담 확인 페이지에서 확인 및 수정할 수 있습니다.
+                • {tClients('detailCloseNoticeLine2')}
               </span>
             </div>
           </div>
@@ -147,7 +142,7 @@ const SessionCloseDialog = ({
               className="flex-[6] rounded-[16px]"
               onClick={closeDialog}
             >
-              {locale === 'en' ? 'Cancel' : '취소하기'}
+              {tCommon('cancel')}
             </Button>
             <Button
               type="button"
@@ -161,7 +156,7 @@ const SessionCloseDialog = ({
                 closeDialog();
               }}
             >
-              {locale === 'en' ? 'Close' : '종결하기'}
+              {tCommon('closeCase')}
             </Button>
           </div>
         </div>

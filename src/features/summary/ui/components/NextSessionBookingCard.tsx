@@ -41,6 +41,7 @@ const toDateKey = (date: Date) => {
 interface TimeWheelPickerProps {
   label: string;
   value: string;
+  placeholder: string;
   onValueChange: (value: string) => void;
   align?: 'start' | 'end';
   open: boolean;
@@ -50,6 +51,7 @@ interface TimeWheelPickerProps {
 function TimeWheelPicker({
   label,
   value,
+  placeholder,
   onValueChange,
   align = 'start',
   open,
@@ -57,7 +59,8 @@ function TimeWheelPicker({
 }: TimeWheelPickerProps) {
   const tSummary = useTranslations('summary');
   const hasSelectedValue = TIME_OPTIONS.includes(value);
-  const normalizedValue = hasSelectedValue ? value : '09:00';
+  const fallbackValue = TIME_OPTIONS.includes(placeholder) ? placeholder : '09:00';
+  const normalizedValue = hasSelectedValue ? value : fallbackValue;
   const [draftValue, setDraftValue] = useState(normalizedValue);
   const [manualValue, setManualValue] = useState(hasSelectedValue ? normalizedValue : '');
   const [initialValueAtOpen, setInitialValueAtOpen] = useState(normalizedValue);
@@ -80,7 +83,7 @@ function TimeWheelPicker({
         <input
           aria-label={label}
           inputMode="numeric"
-          placeholder={tSummary('nextSessionSelectTime')}
+          placeholder={placeholder}
           maxLength={5}
           value={open ? manualValue : hasSelectedValue ? normalizedValue : ''}
           onChange={(event) => {
@@ -214,7 +217,7 @@ export default function NextSessionBookingCard({
     }).format(selectedDate);
   }, [selectedDate, locale]);
 
-  const isDateUnchanged = toDateKey(draftDate) === toDateKey(selectedDate);
+  const isDateUnchanged = nextDate ? toDateKey(draftDate) === toDateKey(selectedDate) : false;
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
@@ -316,6 +319,7 @@ export default function NextSessionBookingCard({
           <TimeWheelPicker
             label={tSummary('nextSessionStartTime')}
             value={nextStartTime}
+            placeholder="08:00"
             onValueChange={onNextStartTimeChange}
             align="start"
             open={openTimePicker === 'start'}
@@ -329,6 +333,7 @@ export default function NextSessionBookingCard({
           <TimeWheelPicker
             label={tSummary('nextSessionEndTime')}
             value={nextEndTime}
+            placeholder="09:00"
             onValueChange={onNextEndTimeChange}
             align="end"
             open={openTimePicker === 'end'}

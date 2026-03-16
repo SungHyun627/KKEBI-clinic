@@ -1,11 +1,5 @@
-import WeeklyStatisticsSection from '@/features/dashboard/weekly-statistics';
-import TodayScheduleSection from '@/features/dashboard/today-schedule';
+import DashboardPageWidget from '@/widgets/dashboard/ui/DashboardPageWidget';
 
-export default function DashBoard() {
-  return (
-    <div className="flex w-full flex-col gap-[46px]">
-      <WeeklyStatisticsSection />
-      <TodayScheduleSection />
-    </div>
-  );
+export default async function DashBoard() {
+  return <DashboardPageWidget />;
 }

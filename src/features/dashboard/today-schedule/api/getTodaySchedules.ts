@@ -1,4 +1,4 @@
-import { ensureAccessToken, httpClient } from '@/shared/api/http-client';
+import { httpClient } from '@/shared/api/http-client';
 import type { TodayScheduleResponse } from '../../types/schedule';
 import { normalizeTodaySchedules } from '../lib/mapTodaySchedulesResponse';
 
@@ -133,14 +133,6 @@ const requestTodaySchedules = async (url: string): Promise<TodayScheduleResponse
 
 export const getTodaySchedules = async (): Promise<TodayScheduleResponse> => {
   try {
-    const hasAccessToken = await ensureAccessToken();
-    if (!hasAccessToken) {
-      return {
-        success: false,
-        message: 'Unauthorized',
-      };
-    }
-
     const response = await httpClient.get<unknown>(COUNSELOR_TODAY_SCHEDULE_PATH);
     return normalizeTodaySchedulesResponse(response, '오늘의 일정을 불러오지 못했습니다.');
   } catch (error) {

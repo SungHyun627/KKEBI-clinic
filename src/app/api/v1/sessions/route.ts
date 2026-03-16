@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { proxyToBackend } from '@/shared/server/backend-proxy';
-import type { SessionStatus } from '@/features/sessions/session-list/types/session-list';
+import type { SessionStatus } from '@/entities/session/model/session-list-types';
 
 export const GET = async (request: Request) => {
   const { searchParams } = new URL(request.url);

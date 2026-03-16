@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/playwright-report/
+/test-results/
 
 # next.js
 /.next/
@@ -30,6 +32,11 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# local perf/cache artifacts
+.lighthouse/
+.playwright-browsers/
+.pnpm-store/
+
 # env files (can opt-in for committing if needed)
 .env*
 
@@ -45,4 +52,5 @@ auth.md
 
 openapi.json
 api.md
+local-docs/
 *.local.md

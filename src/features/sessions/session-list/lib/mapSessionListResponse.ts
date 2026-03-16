@@ -1,5 +1,5 @@
 import type { SessionListResponse, SessionStatus } from '../types/session-list';
-import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
+import type { RiskType, SessionType } from '@/entities/dashboard/model/types';
 import type { CompletedSessionGroup, ScheduledSessionGroup } from '../types/session-list';
 
 type BackendSessionItem = {

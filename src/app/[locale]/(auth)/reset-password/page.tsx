@@ -1,11 +1,7 @@
 'use client';
 
-import { ResetPasswordCard } from '@/features/auth';
+import ResetPasswordPageWidget from '@/widgets/auth/reset-password/ui/ResetPasswordPageWidget';
 
 export default function ResetPasswordPage() {
-  return (
-    <>
-      <ResetPasswordCard />
-    </>
-  );
+  return <ResetPasswordPageWidget />;
 }

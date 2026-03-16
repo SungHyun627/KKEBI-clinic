@@ -24,6 +24,7 @@ interface ClientRegistrationBasicInfoFormProps {
 
 const ClientRegistrationBasicInfoForm = ({ form }: ClientRegistrationBasicInfoFormProps) => {
   const t = useTranslations('clientRegistration.basicInfo');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const selectedGender = form.watch('gender');
 
@@ -107,6 +108,7 @@ const ClientRegistrationBasicInfoForm = ({ form }: ClientRegistrationBasicInfoFo
                     value={field.value}
                     onValueChange={field.onChange}
                     placeholder={t('placeholders.birthDate')}
+                    saveLabel={tCommon('save')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -167,11 +169,13 @@ const DatePickerField = ({
   value,
   onValueChange,
   placeholder,
+  saveLabel,
 }: {
   locale: string;
   value: string;
   onValueChange: (value: string) => void;
   placeholder: string;
+  saveLabel: string;
 }) => {
   const [open, setOpen] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(parseDateFromIso(value) ?? new Date());
@@ -237,7 +241,7 @@ const DatePickerField = ({
             }}
             className="inline-flex h-[42px] w-full  rounded-[12px]"
           >
-            {locale === 'en' ? 'Save' : '저장'}
+            {saveLabel}
           </Button>
         </div>
       </PopoverContent>

@@ -14,7 +14,7 @@ import type {
   ClientDetailData,
   ClientDetailUpdatePayload,
 } from '@/features/clients/client-detail/types/client-detail';
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 import Divider from '@/shared/ui/divider';
 
 interface ClientDetailDrawerProps {
@@ -119,21 +119,12 @@ export default function ClientDetailDrawer({
               setErrorMessage(result.message || tClients('detailLoadFailed'));
               return;
             }
-
-            const refreshed = await getClientDetail(next.clientId);
-            if (!refreshed.success || !refreshed.data) {
-              if (result.data) {
-                setDetail(result.data);
-                setErrorMessage(null);
-                setIsEditing(false);
-                return;
-              }
-
-              setErrorMessage(refreshed.message || tClients('detailLoadFailed'));
-              return;
+            // 저장 API 응답이나 편집값으로 즉시 UI를 동기화해 추가 재조회 워터폴을 제거한다.
+            if (result.data) {
+              setDetail(result.data);
+            } else {
+              setDetail(next);
             }
-
-            setDetail(refreshed.data);
             setErrorMessage(null);
             setIsEditing(false);
           }}
@@ -166,7 +157,7 @@ function ClientDetailDrawerBody({
   if (errorMessage) {
     return (
       <div className={DRAWER_BODY_CLASSNAME}>
-        <div className="body-14 text-status-negative">{errorMessage}</div>
+        <div className="body-14 text-black">{errorMessage}</div>
       </div>
     );
   }

@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import type { SessionAutoRecordData, SessionInsightsData } from '../types/session';
-import { analyzeLiveSummary, buildLiveInsights } from '../lib/session-analysis';
+import type { SessionAutoRecordData, SessionInsightsData } from '../model/types';
+import { analyzeLiveSummary, buildLiveInsights } from '../model/analysis';
 
 interface UseSessionAnalysisParams {
   locale: string;

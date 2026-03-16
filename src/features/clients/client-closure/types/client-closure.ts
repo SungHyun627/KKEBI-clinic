@@ -2,7 +2,7 @@ import type {
   ClientCloseReason,
   ClosedClientItem,
   ClosedClientReasonLabel,
-} from '@/features/clients/types/common';
+} from '@/entities/client/model/types';
 
 export interface ClientClosePayload {
   reason: ClientCloseReason;

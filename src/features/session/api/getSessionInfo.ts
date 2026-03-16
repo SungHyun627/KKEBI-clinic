@@ -1,5 +1,5 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
-import type { SessionInfoResponse } from '../types/session';
+import type { SessionInfoResponse } from '../model/types';
 
 export const getSessionInfo = async (sessionId: string): Promise<SessionInfoResponse> => {
   try {

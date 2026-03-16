@@ -5,12 +5,13 @@ import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getSessionList } from '../api/getSessionList';
 import type {
-  CompletedSessionGroup,
-  ScheduledSessionGroup,
+  CompletedSessionsResponse,
+  ScheduledSessionsResponse,
   SessionStatus,
 } from '../types/session-list';
 import type { SessionStatusTab } from '../ui/SessionStatusTabs';
 import { sessionListQueryKey } from '../lib/query-keys';
+import { resolveUserErrorMessage } from '@/shared/lib/resolve-user-error-message';
 
 export type SessionViewFilter = 'list' | 'calendar';
 
@@ -18,6 +19,8 @@ interface UseSessionListParams {
   initialStatus: SessionStatus;
   locale: string;
   loadFailedMessage: string;
+  sessionExpiredMessage: string;
+  temporaryUnavailableMessage: string;
 }
 
 const isSessionStatusTab = (value: string | null): value is SessionStatusTab =>
@@ -25,6 +28,18 @@ const isSessionStatusTab = (value: string | null): value is SessionStatusTab =>
 
 const isSessionViewFilter = (value: string | null): value is SessionViewFilter =>
   value === 'list' || value === 'calendar';
+
+const isScheduledSessionsResponse = (value: unknown): value is ScheduledSessionsResponse => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<ScheduledSessionsResponse>;
+  return candidate.success === true && candidate.status === 'scheduled';
+};
+
+const isCompletedSessionsResponse = (value: unknown): value is CompletedSessionsResponse => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<CompletedSessionsResponse>;
+  return candidate.success === true && candidate.status === 'completed';
+};
 
 const formatDateKey = (date: Date) => {
   const year = date.getFullYear();
@@ -37,6 +52,8 @@ export const useSessionList = ({
   initialStatus,
   locale,
   loadFailedMessage,
+  sessionExpiredMessage,
+  temporaryUnavailableMessage,
 }: UseSessionListParams) => {
   const searchParams = useSearchParams();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -54,21 +71,37 @@ export const useSessionList = ({
   const sessionListQuery = useQuery({
     queryKey: sessionListQueryKey(selectedStatus, locale),
     queryFn: () => getSessionList(selectedStatus, { locale }),
-    staleTime: 30 * 1000,
+    staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const queryResult = sessionListQuery.data;
   const isQueryInvalid = !queryResult?.success || !queryResult?.data;
-  const scheduledGroups =
-    selectedStatus === 'scheduled' && queryResult?.success && queryResult.data
-      ? (queryResult.data as ScheduledSessionGroup[])
-      : [];
-  const completedGroups =
-    selectedStatus === 'completed' && queryResult?.success && queryResult.data
-      ? (queryResult.data as CompletedSessionGroup[])
-      : [];
-  const errorMessage = sessionListQuery.isError || isQueryInvalid ? loadFailedMessage : null;
+  const scheduledGroups = useMemo(
+    () =>
+      selectedStatus === 'scheduled' && isScheduledSessionsResponse(queryResult) && queryResult.data
+        ? queryResult.data
+        : [],
+    [queryResult, selectedStatus],
+  );
+  const completedGroups = useMemo(
+    () =>
+      selectedStatus === 'completed' && isCompletedSessionsResponse(queryResult) && queryResult.data
+        ? queryResult.data
+        : [],
+    [queryResult, selectedStatus],
+  );
+  const queryErrorMessage =
+    sessionListQuery.error instanceof Error ? sessionListQuery.error.message : undefined;
+  const errorMessage =
+    sessionListQuery.isError || isQueryInvalid
+      ? resolveUserErrorMessage(queryResult?.message || queryErrorMessage, {
+          defaultMessage: loadFailedMessage,
+          sessionExpiredMessage,
+          temporaryUnavailableMessage,
+        })
+      : null;
   const isLoading = sessionListQuery.isPending;
 
   const visibleScheduledGroups = useMemo(() => {

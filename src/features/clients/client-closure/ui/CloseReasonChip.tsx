@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';
-import type { ClosedClientItem } from '@/features/clients/types/common';
+import type { ClosedClientItem } from '@/entities/client/model/types';
 
 interface CloseReasonChipProps {
   value: ClosedClientItem['closeReason'];
@@ -16,9 +16,9 @@ const closeReasonStyleByValue: Record<ClosedClientItem['closeReason'], string> =
 const CloseReasonChip = ({ value, className }: CloseReasonChipProps) => {
   const tClients = useTranslations('clients');
   const closeReasonLabelByValue: Record<ClosedClientItem['closeReason'], string> = {
-    '회기 종료': tClients('closedReasonSessionComplete'),
-    '중도 탈락': tClients('closedReasonDropout'),
-    기타: tClients('closedReasonOther'),
+    '회기 종료': tClients('terminatedReasonSessionComplete'),
+    '중도 탈락': tClients('terminatedReasonDropout'),
+    기타: tClients('terminatedReasonOther'),
   };
 
   return (

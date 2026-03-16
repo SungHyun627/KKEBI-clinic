@@ -1,4 +1,4 @@
-import type { RiskType } from '@/features/dashboard/types/schedule';
+import type { RiskType } from '@/shared/model/counseling';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/shared/lib/utils';
 

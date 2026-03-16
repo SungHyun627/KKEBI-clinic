@@ -2,7 +2,7 @@ import type {
   SessionAutoRecordData,
   SessionEmotionType,
   SessionInsightsData,
-} from '../types/session';
+} from '../model/types';
 
 export type SummaryTopicKey = 'workStress' | 'sleepIssues' | 'selfCriticism' | 'safetyConcerns';
 

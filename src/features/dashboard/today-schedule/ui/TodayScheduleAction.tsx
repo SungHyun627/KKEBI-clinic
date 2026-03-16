@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Button } from '@/shared/ui/button';
 import { toast } from '@/shared/ui/toast';
-import type { RiskType, SessionType } from '@/features/dashboard/types/schedule';
+import type { RiskType, SessionType } from '@/entities/dashboard/model/types';
 import { setSessionStartContext } from '@/shared/lib/session-start-context';
 import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';
 

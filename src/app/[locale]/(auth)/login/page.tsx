@@ -1,12 +1,7 @@
 'use client';
 
-import { LoginCard, LoginSupportActions } from '@/features/auth';
+import LoginPageWidget from '@/widgets/auth/login/ui/LoginPageWidget';
 
 export default function LoginPage() {
-  return (
-    <>
-      <LoginCard />
-      <LoginSupportActions />
-    </>
-  );
+  return <LoginPageWidget />;
 }

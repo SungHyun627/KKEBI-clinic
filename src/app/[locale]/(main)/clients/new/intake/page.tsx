@@ -4,11 +4,11 @@ import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
-import ClientRegistrationAssessmentResultsForm from '@/features/clients/client-registration/ui/ClientRegistrationAssessmentResultsForm';
-import ClientRegistrationIntakeInterviewForm from '@/features/clients/client-registration/ui/ClientRegistrationIntakeInterviewForm';
 import {
   clearRegistrationDraft,
+  ClientRegistrationAssessmentResultsForm,
+  ClientRegistrationIntakeInterviewForm,
+  ClientRegistrationStepBar,
   getAssessmentResultsFromDraft,
   getDefaultAssessmentResults,
   getDefaultIntakeInterview,
@@ -16,11 +16,9 @@ import {
   getStoredClientRegistrationDraft,
   hasRequiredRegistrationDraft,
   saveIntakeStepDraft,
-} from '@/features/clients/client-registration/intake/lib/intake-draft';
-import type {
-  AssessmentResultsFormValues,
-  IntakeInterviewFormValues,
-} from '@/features/clients/client-registration/types/client-registration';
+  type AssessmentResultsFormValues,
+  type IntakeInterviewFormValues,
+} from '@/features/clients/client-registration';
 import { Button } from '@/shared/ui/button';
 
 const ClientRegistrationIntakePage = () => {

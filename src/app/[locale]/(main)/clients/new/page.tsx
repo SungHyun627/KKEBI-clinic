@@ -2,23 +2,23 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useRouter } from '@/i18n/navigation';
-import ClientRegistrationStepBar from '@/features/clients/client-registration/ui/ClientRegistrationStepBar';
-import ClientRegistrationBasicInfoForm from '@/features/clients/client-registration/ui/ClientRegistrationBasicInfoForm';
-import ClientRegistrationCounselingInfoForm from '@/features/clients/client-registration/ui/ClientRegistrationCounselingInfoForm';
-import ClientRegistrationPaymentInfoForm from '@/features/clients/client-registration/ui/ClientRegistrationPaymentInfoForm';
-import ClientRegistrationKkebiNicknameForm from '@/features/clients/client-registration/ui/ClientRegistrationKkebiNicknameForm';
 import {
+  ClientRegistrationBasicInfoForm,
+  ClientRegistrationCounselingInfoForm,
+  ClientRegistrationKkebiNicknameForm,
+  ClientRegistrationPaymentInfoForm,
+  ClientRegistrationStepBar,
+  CLIENT_REGISTRATION_DRAFT_STORAGE_KEY,
   type AssessmentResultsFormValues,
   type BasicInfoFormValues,
+  type ClientRegistrationDraft,
   type CounselingInfoFormValues,
+  type IntakeInterviewFormValues,
   type KkebiNicknameFormValues,
   type PaymentInfoFormValues,
-  type ClientRegistrationDraft,
-  type IntakeInterviewFormValues,
-} from '@/features/clients/client-registration/types/client-registration';
-import { CLIENT_REGISTRATION_DRAFT_STORAGE_KEY } from '@/features/clients/client-registration/lib/client-registration-storage';
+} from '@/features/clients/client-registration';
 import { Button } from '@/shared/ui/button';
 
 const getDefaultAssessmentResults = (): AssessmentResultsFormValues => ({
@@ -115,13 +115,15 @@ const NewClientPage = () => {
     }
   }, [basicInfoForm, counselingInfoForm, kkebiNicknameForm, paymentInfoForm]);
 
-  const basicName = basicInfoForm.watch('name');
-  const basicPhone = basicInfoForm.watch('phone');
-  const basicEmail = basicInfoForm.watch('email');
-  const basicBirthDate = basicInfoForm.watch('birthDate');
-  const counselingChiefConcern = counselingInfoForm.watch('chiefConcern');
-  const paymentType = paymentInfoForm.watch('paymentType');
-  const insuranceCompany = paymentInfoForm.watch('insuranceCompany');
+  const basicName = useWatch({ control: basicInfoForm.control, name: 'name' }) ?? '';
+  const basicPhone = useWatch({ control: basicInfoForm.control, name: 'phone' }) ?? '';
+  const basicEmail = useWatch({ control: basicInfoForm.control, name: 'email' }) ?? '';
+  const basicBirthDate = useWatch({ control: basicInfoForm.control, name: 'birthDate' }) ?? '';
+  const counselingChiefConcern =
+    useWatch({ control: counselingInfoForm.control, name: 'chiefConcern' }) ?? '';
+  const paymentType = useWatch({ control: paymentInfoForm.control, name: 'paymentType' }) ?? '';
+  const insuranceCompany =
+    useWatch({ control: paymentInfoForm.control, name: 'insuranceCompany' }) ?? '';
   const isInsurancePayment = paymentType === 'insurance';
   const isAllRequiredFilled =
     Boolean(basicName.trim()) &&

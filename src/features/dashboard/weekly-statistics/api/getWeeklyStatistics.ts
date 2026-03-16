@@ -1,4 +1,4 @@
-import { ensureAccessToken, httpClient } from '@/shared/api/http-client';
+import { httpClient } from '@/shared/api/http-client';
 import type { WeeklyStatisticsResponse } from '../../types/statistics';
 import { normalizeWeeklyStatistics } from '../lib/mapWeeklyStatisticsResponse';
 
@@ -91,14 +91,6 @@ const requestWeeklyStatistics = async (url: string): Promise<WeeklyStatisticsRes
 
 export const getWeeklyStatistics = async (): Promise<WeeklyStatisticsResponse> => {
   try {
-    const hasAccessToken = await ensureAccessToken();
-    if (!hasAccessToken) {
-      return {
-        success: false,
-        message: 'Unauthorized',
-      };
-    }
-
     const response = await httpClient.get<unknown>(COUNSELOR_WEEKLY_STATS_PATH);
     return normalizeWeeklyStatisticsResponse(response, '주간 통계를 불러오지 못했습니다.');
   } catch (error) {
