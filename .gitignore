@@ -52,4 +52,5 @@ auth.md
 
 openapi.json
 api.md
+local-docs/
 *.local.md

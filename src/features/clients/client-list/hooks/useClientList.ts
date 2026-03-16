@@ -70,8 +70,9 @@ const useClientList = ({
         name: normalizedKeyword,
         riskLevel: normalizedRiskLevel,
       }),
-    staleTime: 60 * 1000,
+    staleTime: 0,
     gcTime: 5 * 60 * 1000,
+    refetchOnMount: 'always',
     placeholderData: (previousData) => previousData,
   });
 
@@ -89,12 +90,15 @@ const useClientList = ({
     clientListQuery.data?.success && clientListQuery.data
       ? (clientListQuery.data.totalPages ?? 0)
       : 0;
-  const errorMessage =
-    clientListQuery.isError ||
-    (clientListQuery.data && (!clientListQuery.data.success || !clientListQuery.data.data))
+  const hasInvalidResponse = Boolean(
+    clientListQuery.data && (!clientListQuery.data.success || !clientListQuery.data.data),
+  );
+  const isLoading = clientListQuery.isPending || (clientListQuery.isFetching && hasInvalidResponse);
+  const errorMessage = hasInvalidResponse
+    ? clientListQuery.data?.message || listLoadFailedMessage
+    : clientListQuery.isError
       ? listLoadFailedMessage
       : null;
-  const isLoading = clientListQuery.isPending;
 
   const removeClient = (clientId: string) => {
     queryClient.setQueryData<ClientListResponse>(queryKey, (prev) => {

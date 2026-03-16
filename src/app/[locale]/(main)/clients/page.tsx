@@ -20,11 +20,18 @@ export default async function ClientsPage({ params }: ClientsPageProps) {
       searchKeyword: '',
       riskLevel: undefined,
     }),
-    queryFn: () =>
-      getClientListServer({
+    queryFn: async () => {
+      const result = await getClientListServer({
         page: 0,
         size: PAGE_SIZE,
-      }),
+      });
+
+      if (!result.success) {
+        throw new Error(result.message ?? '내담자 목록을 불러오지 못했습니다.');
+      }
+
+      return result;
+    },
   });
 
   return (
