@@ -1,15 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import type { ClientLookupItem } from '@/features/clients/types/common';
-import { getClientList } from '@/features/clients/client-list/api/getClientList';
+import { useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { ClientLookupItem } from '@/entities/client/model/types';
+import {
+  getClientList,
+  type ClientListResponse,
+} from '@/features/clients/client-list/api/getClientList';
 import { mapClientSummariesToClients } from '@/features/clients/client-list/lib/mapClientSummariesToClients';
+import { clientListQueryKey } from '@/features/clients/client-list/lib/query-keys';
 import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
 import type { components } from '@/shared/api/generated-types';
+import { resolveUserErrorMessage } from '@/shared/lib/resolve-user-error-message';
 
 interface UseClientListParams {
   locale: string;
   listLoadFailedMessage: string;
+  sessionExpiredMessage: string;
+  temporaryUnavailableMessage: string;
+  noCheckinLabel: string;
   fallbackConcerns: string[];
   page: number;
   pageSize: number;
@@ -38,50 +47,86 @@ const mapRiskFilterToRiskLevel = (riskFilter: RiskFilter): RiskLevel | undefined
 const useClientList = ({
   locale,
   listLoadFailedMessage,
+  sessionExpiredMessage,
+  temporaryUnavailableMessage,
+  noCheckinLabel,
   fallbackConcerns,
   page,
   pageSize,
   searchKeyword,
   riskFilter,
 }: UseClientListParams): UseClientListResult => {
-  const [clients, setClients] = useState<ClientLookupItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [totalElements, setTotalElements] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const queryClient = useQueryClient();
+  const normalizedPage = Math.max(0, page - 1);
+  const normalizedKeyword = searchKeyword.trim() || undefined;
+  const normalizedRiskLevel = mapRiskFilterToRiskLevel(riskFilter);
+  const queryKey = clientListQueryKey({
+    locale,
+    page: normalizedPage,
+    pageSize,
+    searchKeyword: normalizedKeyword,
+    riskLevel: normalizedRiskLevel,
+  });
 
-  useEffect(() => {
-    const loadClients = async () => {
-      setIsLoading(true);
-      const result = await getClientList({
-        page: Math.max(0, page - 1),
+  const clientListQuery = useQuery({
+    queryKey,
+    queryFn: () =>
+      getClientList({
+        page: normalizedPage,
         size: pageSize,
-        name: searchKeyword.trim() || undefined,
-        riskLevel: mapRiskFilterToRiskLevel(riskFilter),
-      });
+        name: normalizedKeyword,
+        riskLevel: normalizedRiskLevel,
+      }),
+    staleTime: 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
+  });
 
-      if (!result.success || !result.data) {
-        setClients([]);
-        setTotalElements(0);
-        setTotalPages(0);
-        setErrorMessage(listLoadFailedMessage);
-        setIsLoading(false);
-        return;
-      }
+  const clients = useMemo(() => {
+    const response = clientListQuery.data;
+    if (!response?.success || !response.data) return [];
+    return mapClientSummariesToClients(response.data, locale, fallbackConcerns, noCheckinLabel);
+  }, [clientListQuery.data, fallbackConcerns, locale, noCheckinLabel]);
 
-      setClients(mapClientSummariesToClients(result.data, locale, fallbackConcerns));
-      setTotalElements(result.totalElements ?? 0);
-      setTotalPages(result.totalPages ?? 0);
-      setErrorMessage(null);
-      setIsLoading(false);
-    };
-
-    void loadClients();
-  }, [fallbackConcerns, listLoadFailedMessage, locale, page, pageSize, riskFilter, searchKeyword]);
+  const totalElements =
+    clientListQuery.data?.success && clientListQuery.data
+      ? (clientListQuery.data.totalElements ?? 0)
+      : 0;
+  const totalPages =
+    clientListQuery.data?.success && clientListQuery.data
+      ? (clientListQuery.data.totalPages ?? 0)
+      : 0;
+  const hasInvalidResponse = Boolean(
+    clientListQuery.data && (!clientListQuery.data.success || !clientListQuery.data.data),
+  );
+  const isLoading = clientListQuery.isPending || (clientListQuery.isFetching && hasInvalidResponse);
+  const resolvedMessage = resolveUserErrorMessage(clientListQuery.data?.message, {
+    defaultMessage: listLoadFailedMessage,
+    sessionExpiredMessage,
+    temporaryUnavailableMessage,
+  });
+  const queryErrorMessage =
+    clientListQuery.error instanceof Error ? clientListQuery.error.message : undefined;
+  const errorMessage = hasInvalidResponse
+    ? resolvedMessage
+    : clientListQuery.isError
+      ? resolveUserErrorMessage(queryErrorMessage, {
+          defaultMessage: listLoadFailedMessage,
+          sessionExpiredMessage,
+          temporaryUnavailableMessage,
+        })
+      : null;
 
   const removeClient = (clientId: string) => {
-    setClients((prev) => prev.filter((client) => client.clientId !== clientId));
-    setTotalElements((prev) => Math.max(0, prev - 1));
+    queryClient.setQueryData<ClientListResponse>(queryKey, (prev) => {
+      if (!prev?.success || !prev.data) return prev;
+
+      return {
+        ...prev,
+        data: prev.data.filter((client) => String(client.id) !== clientId),
+        totalElements: Math.max(0, Number(prev.totalElements ?? 0) - 1),
+      };
+    });
   };
 
   return {

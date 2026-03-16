@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 import ChiefConcernChip from '@/shared/ui/chips/chief-concern-chip';
 import MoodScoreChip from '@/shared/ui/chips/mood-score-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
@@ -97,7 +97,7 @@ const ClientListTableSection = ({
             {labels.loading}
           </div>
         ) : errorMessage ? (
-          <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-status-negative">
+          <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-black">
             {errorMessage}
           </div>
         ) : filteredCount === 0 ? (
@@ -118,7 +118,7 @@ const ClientListTableSection = ({
                   .join(' ')}
                 onClick={() => onSelectClient(client)}
               >
-                <span className="body-16 min-w-0 text-label-normal max-[1000px]:hidden">
+                <span className="body-16 min-w-0 whitespace-nowrap text-label-normal max-[1000px]:hidden">
                   {client.time}
                 </span>
                 <span className="flex max-w-full items-center gap-3 overflow-hidden">
@@ -126,7 +126,7 @@ const ClientListTableSection = ({
                     {client.clientName}
                   </span>
                   <span className="hidden min-w-0 flex-1 flex-col text-label-normal max-[1000px]:flex">
-                    <span className="body-14">{client.time}</span>
+                    <span className="body-14 whitespace-nowrap">{client.time}</span>
                     <span className="body-16 truncate">{client.clientName}</span>
                   </span>
                   <span className="shrink-0 max-[1100px]:hidden">

@@ -1,11 +1,14 @@
 import { ApiError, httpClient } from '@/shared/api/http-client';
-import { toBaseResponse } from '@/shared/api/base-response';
+import { isApiResponse, toBaseResponse } from '@/shared/api/base-response';
 import type { components } from '@/shared/api/generated-types';
 import type { ClosedClientsResponse } from '@/features/clients/client-closure/types/client-closure';
-import type { ClosedClientItem } from '@/features/clients/types/common';
+import type { ClosedClientItem } from '@/entities/client/model/types';
 
 type ApiTerminatedClientsPage = components['schemas']['PageTerminatedClientResponse'];
 type ApiTerminatedClient = components['schemas']['TerminatedClientResponse'];
+const SERVER_API_BASE_URL =
+  process.env.API_BASE_URL?.replace(/\/$/, '') ??
+  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
 const toClosedReason = (terminationReason?: string): ClosedClientItem['closeReason'] => {
   const normalized = terminationReason?.trim() ?? '';
@@ -63,18 +66,28 @@ const mapTerminatedClients = (content?: ApiTerminatedClient[]) =>
     } satisfies ClosedClientItem;
   });
 
+const toClosedClientsResponse = (value: unknown): ClosedClientsResponse => {
+  if (!isApiResponse(value)) {
+    return {
+      success: false,
+      message: '종결 상담자 목록 응답 형식이 올바르지 않습니다.',
+    };
+  }
+
+  const base = toBaseResponse<ApiTerminatedClientsPage>(value);
+  return {
+    success: base.success,
+    data: mapTerminatedClients(base.data?.content),
+    message: base.message,
+  };
+};
+
 const requestTerminatedClients = async (): Promise<ClosedClientsResponse> => {
   try {
-    const response =
-      await httpClient.get<components['schemas']['ApiResponsePageTerminatedClientResponse']>(
-        '/api/v1/clients/closed',
-      );
-    const base = toBaseResponse<ApiTerminatedClientsPage>(response);
-    return {
-      success: base.success,
-      data: mapTerminatedClients(base.data?.content),
-      message: base.message,
-    };
+    const response = await httpClient.get<
+      components['schemas']['ApiResponsePageTerminatedClientResponse']
+    >('/api/v1/clients/terminated');
+    return toClosedClientsResponse(response);
   } catch (error) {
     return {
       success: false,
@@ -88,5 +101,30 @@ const requestTerminatedClients = async (): Promise<ClosedClientsResponse> => {
   }
 };
 
+const requestTerminatedClientsServer = async (): Promise<ClosedClientsResponse> => {
+  if (!SERVER_API_BASE_URL) {
+    return {
+      success: false,
+      message: 'API base URL is not configured',
+    };
+  }
+
+  try {
+    const response = await fetch(`${SERVER_API_BASE_URL}/api/v1/clients/terminated`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+    const payload = await response.json().catch(() => null);
+    return toClosedClientsResponse(payload);
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Network error',
+    };
+  }
+};
+
 export const getClosedClients = () => requestTerminatedClients();
+export const getClosedClientsServer = () => requestTerminatedClientsServer();
 export const getClosedClientsMock = getClosedClients;

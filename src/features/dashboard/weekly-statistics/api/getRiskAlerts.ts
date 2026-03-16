@@ -1,4 +1,4 @@
-import { ApiError, ensureAccessToken, httpClient } from '@/shared/api/http-client';
+import { ApiError, httpClient } from '@/shared/api/http-client';
 import type { RiskAlertsResponse } from '../../types/statistics';
 
 const SERVER_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
@@ -159,14 +159,6 @@ const requestRiskAlerts = async (url: string): Promise<RiskAlertsResponse> => {
 
 export const getRiskAlerts = async (): Promise<RiskAlertsResponse> => {
   try {
-    const hasAccessToken = await ensureAccessToken();
-    if (!hasAccessToken) {
-      return {
-        success: false,
-        message: 'Unauthorized',
-      };
-    }
-
     const response = await httpClient.get<unknown>(COUNSELOR_RISK_ALERTS_PATH);
     return normalizeRiskAlertsResponse(response, '위험 알림을 불러오지 못했습니다.');
   } catch (error) {

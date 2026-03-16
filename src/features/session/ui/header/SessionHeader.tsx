@@ -10,15 +10,12 @@ import SessionTypeChip from '@/features/dashboard/today-schedule/ui/SessionTypeC
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import Image from 'next/image';
 import { Button } from '@/shared/ui/button';
-import { isRiskType, isSessionType } from '../../types/session';
-import type { SessionBasicInfo } from '../../types/session';
+import { isRiskType, isSessionType } from '../../model/types';
+import type { SessionBasicInfo } from '../../model/types';
 import SessionEndConfirmDialog from './SessionEndConfirmDialog';
 import SessionQuitConfirmDialog from './SessionQuitConfirmDialog';
-import type { SessionEmotionType, SessionInsightsData } from '../../types/session';
-import {
-  getSessionAutoRecordStorageKey,
-  getSessionSummaryStorageKey,
-} from '../../lib/session-storage';
+import type { SessionEmotionType, SessionInsightsData } from '../../model/types';
+import { getSessionAutoRecordStorageKey, getSessionSummaryStorageKey } from '../../model/storage';
 
 interface SessionHeaderProps {
   sessionId: string;
@@ -54,6 +51,7 @@ export default function SessionHeader({
   onBeforeEndSession,
 }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
+  const tSession = useTranslations('sessionList');
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -157,13 +155,7 @@ export default function SessionHeader({
                 aria-hidden
               />
               <span className="body-16 font-semibold text-label-normal">
-                {isPaused
-                  ? locale === 'en'
-                    ? 'Paused'
-                    : '일시정지'
-                  : locale === 'en'
-                    ? 'Recording'
-                    : '녹음 중'}
+                {isPaused ? tSession('headerPaused') : tSession('headerRecording')}
               </span>
             </div>
 
@@ -194,7 +186,7 @@ export default function SessionHeader({
             }}
             className="h-[38px] w-[92px] rounded-[8px]"
           >
-            {locale === 'en' ? 'End' : '상담 종료'}
+            {tSession('headerEndButton')}
           </Button>
         </div>
         <LocaleSwitchButton />

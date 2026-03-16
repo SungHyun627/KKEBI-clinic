@@ -1,6 +1,6 @@
 import type { components } from '@/shared/api/generated-types';
-import type { ClientLookupItem } from '@/features/clients/types/common';
-import type { RiskType } from '@/features/dashboard';
+import type { ClientLookupItem } from '@/entities/client/model/types';
+import type { RiskType } from '@/entities/dashboard/model/types';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 
 type ClientSummaryResponse = components['schemas']['ClientSummaryResponse'];
@@ -9,6 +9,7 @@ export const mapClientSummariesToClients = (
   summaries: ClientSummaryResponse[],
   locale: string,
   fallbackConcerns: string[],
+  noCheckinLabel: string,
 ): ClientLookupItem[] =>
   summaries.map((summary) => {
     const clientId = String(summary.id ?? '');
@@ -20,7 +21,7 @@ export const mapClientSummariesToClients = (
       : fallbackConcerns;
 
     return {
-      time: summary.lastCheckInLabel?.trim() ? summary.lastCheckInLabel : '1일 전',
+      time: summary.lastCheckInLabel?.trim() ? summary.lastCheckInLabel : noCheckinLabel,
       clientId,
       clientName: getClientNameByLocale(clientId, summary.name ?? '-', locale),
       streakDays: Number(summary.streak ?? 0),

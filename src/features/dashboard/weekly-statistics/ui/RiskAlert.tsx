@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import type { RiskAlert as RiskAlertType } from '@/features/dashboard';
+import type { RiskAlert as RiskAlertType } from '@/entities/dashboard/model/types';
 import { Button } from '@/shared/ui/button';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 

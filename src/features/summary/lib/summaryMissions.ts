@@ -1,4 +1,4 @@
-import type { MissionItem } from '@/features/summary/types/summary';
+import type { MissionItem } from '@/entities/summary/model/types';
 
 export function getSummaryMissions(locale: string): MissionItem[] {
   return [

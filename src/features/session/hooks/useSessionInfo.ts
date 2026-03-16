@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getSessionInfo } from '../api/getSessionInfo';
-import type { SessionBasicInfo } from '../types/session';
+import type { SessionBasicInfo } from '../model/types';
 
 interface UseSessionInfoParams {
   sessionId: string;

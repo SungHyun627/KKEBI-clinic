@@ -1,10 +1,18 @@
-import type { TodayScheduleItem } from '@/features/dashboard/types/schedule';
-import type {
-  ClientCloseReason,
-  ClosedClientItem,
-  ClosedClientReasonLabel,
-} from '@/features/clients/types/common';
+import type { TodayScheduleItem } from '@/shared/model/counseling';
 import { TODAY_SCHEDULES_MOCK } from './today-schedules';
+
+type ClientCloseReason = 'session-complete' | 'dropout' | 'other';
+type ClosedClientReasonLabel = '회기 종료' | '중도 탈락' | '기타';
+
+interface ClosedClientItem {
+  id: string;
+  clientId: string;
+  counselingPeriod: string;
+  clientName: string;
+  ageGender: string;
+  chiefConcern: string[];
+  closeReason: ClosedClientReasonLabel;
+}
 
 const ACTIVE_SCHEDULES: TodayScheduleItem[] = TODAY_SCHEDULES_MOCK.map((item) => ({ ...item }));
 

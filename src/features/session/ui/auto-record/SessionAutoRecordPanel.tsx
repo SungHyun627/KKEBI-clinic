@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import type { SessionAutoRecordData, SessionInsightsData } from '../../types/session';
-import type { SessionInsightsSsePatch } from '../../types/session';
+import type { SessionAutoRecordData, SessionInsightsData } from '../../model/types';
+import type { SessionInsightsSsePatch } from '../../model/types';
 import { useRecordingController } from '../../hooks/useRecordingController';
 import { useTranscriptRuntime } from '../../hooks/useTranscriptRuntime';
 import { useSessionInsightsStream } from '../../hooks/useSessionInsightsStream';
 import { useAudioChunkUploader } from '../../hooks/useAudioChunkUploader';
 import { uploadFullAudioFile } from '../../api/uploadFullAudioFile';
 import { setSessionAudioPreviewUrl } from '@/shared/lib/session-audio-preview-cache';
-import { formatElapsedToTimestamp, formatTimestampToHms } from '../../lib/session-analysis';
+import { formatElapsedToTimestamp, formatTimestampToHms } from '../../model/analysis';
 import { useSessionPersistence } from '../../hooks/useSessionPersistence';
-import { getSessionAutoRecordStorageKey } from '../../lib/session-storage';
+import { getSessionAutoRecordStorageKey } from '../../model/storage';
 import { renderHighlightedText } from './session-transcript-highlight';
 import SessionTranscriptCard from './SessionTranscriptCard';
 import SessionLiveSummaryCard from './SessionLiveSummaryCard';
@@ -146,61 +146,6 @@ const normalizeForSummary = (value: string, maxLength = 50) => {
   const collapsed = value.replace(/\s+/g, ' ').trim();
   if (collapsed.length <= maxLength) return collapsed;
   return `${collapsed.slice(0, maxLength)}...`;
-};
-
-const getSpeakerLabel = (locale: string, speaker: 'counselor' | 'client') => {
-  if (locale === 'en') {
-    return speaker === 'counselor' ? 'counselor' : 'client';
-  }
-  return speaker === 'counselor' ? '상담사' : '내담자';
-};
-
-const buildRecentTwoDialogueSummary = (
-  locale: string,
-  transcriptItems: SessionAutoRecordData['transcripts'],
-) => {
-  const completed = transcriptItems
-    .filter((item) => !item.isPendingTranscription && item.text.trim().length > 0)
-    .slice(-2);
-
-  if (completed.length === 0) return '';
-  if (completed.length === 1) {
-    const only = completed[0];
-    if (!only) return '';
-    if (locale === 'en') {
-      return `${getSpeakerLabel(locale, only.speaker)} said "${normalizeForSummary(only.text, 70)}".`;
-    }
-    return `${getSpeakerLabel(locale, only.speaker)}가 "${normalizeForSummary(only.text, 70)}"라고 말했어요.`;
-  }
-
-  const [first, second] = completed;
-  if (!first || !second) return '';
-  if (locale === 'en') {
-    return `${getSpeakerLabel(locale, first.speaker)} said "${normalizeForSummary(first.text, 70)}", then ${getSpeakerLabel(locale, second.speaker)} said "${normalizeForSummary(second.text, 70)}".`;
-  }
-  return `${getSpeakerLabel(locale, first.speaker)}가 "${normalizeForSummary(first.text, 70)}"라고 말했고, 이어서 ${getSpeakerLabel(locale, second.speaker)}가 "${normalizeForSummary(second.text, 70)}"라고 말했어요.`;
-};
-
-const emotionLabelByLocale = (
-  emotion: SessionInsightsData['currentEmotion'] | null,
-  locale: string,
-) => {
-  if (!emotion) {
-    return locale === 'en' ? 'analyzing' : '분석 중';
-  }
-
-  const map = {
-    anxious: { ko: '불안', en: 'anxious' },
-    sad: { ko: '슬픔', en: 'sad' },
-    angry: { ko: '분노', en: 'angry' },
-    happy: { ko: '기쁨', en: 'happy' },
-    surprise: { ko: '놀람', en: 'surprised' },
-    calm: { ko: '평온', en: 'calm' },
-    fearful: { ko: '두려움', en: 'fearful' },
-    disgust: { ko: '혐오', en: 'disgusted' },
-  } satisfies Record<SessionInsightsData['currentEmotion'], { ko: string; en: string }>;
-
-  return locale === 'en' ? map[emotion].en : map[emotion].ko;
 };
 
 const extractDistortionPatch = (payload: Record<string, unknown>) => {
@@ -543,28 +488,71 @@ export default function SessionAutoRecordPanel({
       setLiveEmotion(null);
     }
   }, [isRecording]);
+
+  const getSpeakerLabel = useCallback(
+    (speaker: 'counselor' | 'client') =>
+      speaker === 'counselor' ? tSession('speakerCounselorLower') : tSession('speakerClientLower'),
+    [tSession],
+  );
+
+  const getEmotionLabel = useCallback(
+    (emotion: SessionInsightsData['currentEmotion'] | null) => {
+      if (!emotion) return tSession('emotionAnalyzing');
+      return tSession(
+        (
+          {
+            anxious: 'insightsEmotionAnxiousLower',
+            sad: 'insightsEmotionSadLower',
+            angry: 'insightsEmotionAngryLower',
+            happy: 'insightsEmotionHappyLower',
+            surprise: 'insightsEmotionSurpriseLower',
+            calm: 'insightsEmotionCalmLower',
+            fearful: 'insightsEmotionFearfulLower',
+            disgust: 'insightsEmotionDisgustLower',
+          } as const
+        )[emotion],
+      );
+    },
+    [tSession],
+  );
+
   const liveSummaryTitle = useMemo(() => {
     if (!isRecording) return '';
-    const emotionLabel = emotionLabelByLocale(liveEmotion, locale);
+    const emotionLabel = getEmotionLabel(liveEmotion);
     const dialogueCount = transcriptItems.filter(
       (item) => !item.isPendingTranscription && item.text.trim().length > 0,
     ).length;
     if (dialogueCount < 1) return '';
 
-    if (locale === 'en') {
-      return `The client's real-time emotion is ${emotionLabel}. There have been ${dialogueCount} dialogue turns between the counselor and client so far.`;
-    }
-    return `현재 내담자의 실시간 감정은 ${emotionLabel}입니다. 상담자와 내담자 사이에 현재까지 ${dialogueCount}개의 대화가 오가고 있습니다.`;
-  }, [isRecording, liveEmotion, locale, transcriptItems]);
+    return tSession('liveSummaryGeneratedTitle', { emotionLabel, dialogueCount });
+  }, [getEmotionLabel, isRecording, liveEmotion, tSession, transcriptItems]);
 
   const liveSummaryBody = useMemo(() => {
     if (!isRecording) return '';
-    const completedCount = transcriptItems.filter(
+    const completed = transcriptItems.filter(
       (item) => !item.isPendingTranscription && item.text.trim().length > 0,
-    ).length;
-    if (completedCount < 1) return '';
-    return buildRecentTwoDialogueSummary(locale, transcriptItems);
-  }, [isRecording, locale, transcriptItems]);
+    );
+    if (completed.length < 1) return '';
+
+    const recent = completed.slice(-2);
+    const first = recent[0];
+    const second = recent[1];
+    if (!first) return '';
+
+    if (!second) {
+      return tSession('liveSummaryBodySingle', {
+        speaker: getSpeakerLabel(first.speaker),
+        text: normalizeForSummary(first.text, 70),
+      });
+    }
+
+    return tSession('liveSummaryBodyDouble', {
+      firstSpeaker: getSpeakerLabel(first.speaker),
+      firstText: normalizeForSummary(first.text, 70),
+      secondSpeaker: getSpeakerLabel(second.speaker),
+      secondText: normalizeForSummary(second.text, 70),
+    });
+  }, [getSpeakerLabel, isRecording, tSession, transcriptItems]);
 
   useEffect(() => {
     onRecorderStateChange?.({
@@ -581,13 +569,9 @@ export default function SessionAutoRecordPanel({
 
   useEffect(() => {
     if (!lastErrorMessage) return;
-    toast(
-      locale === 'en'
-        ? 'Failed to upload an audio chunk. Please try speaker switch again.'
-        : '오디오 청크 업로드에 실패했습니다. 발화자 전환을 다시 시도해 주세요.',
-    );
+    toast(tSession('audioChunkUploadFailed'));
     console.error('[audio-chunk][upload-failed]', { sessionId, message: lastErrorMessage });
-  }, [lastErrorMessage, locale, sessionId]);
+  }, [lastErrorMessage, sessionId, tSession]);
 
   const stopSegmentRecorder = useCallback(async (): Promise<Blob | null> => {
     const recorder = segmentRecorderRef.current;
@@ -682,25 +666,19 @@ export default function SessionAutoRecordPanel({
 
       resolvePendingTranscript({
         pendingId: pendingTranscriptId,
-        text:
-          locale === 'en'
-            ? 'Transcription failed. Please switch speaker again.'
-            : '음성 분석이 일시적으로 실패했어요. 다시 시도해 주세요.',
+        text: tSession('transcriptionFailedSwitchSpeaker'),
       });
     },
-    [locale, onAnalysisChange, resolvePendingTranscript, uploadChunk],
+    [onAnalysisChange, resolvePendingTranscript, tSession, uploadChunk],
   );
 
   const getPendingTranscriptMessage = useCallback(
     (speaker: 'counselor' | 'client') => {
-      if (locale === 'en') {
-        return speaker === 'counselor'
-          ? 'Analyzing counselor speech...'
-          : 'Analyzing client speech...';
-      }
-      return speaker === 'counselor' ? '상담사 발화를 분석 중...' : '내담자 발화를 분석 중...';
+      return speaker === 'counselor'
+        ? tSession('pendingCounselorSpeech')
+        : tSession('pendingClientSpeech');
     },
-    [locale],
+    [tSession],
   );
 
   const handleSpeakerSwitch = useCallback(async () => {
@@ -726,10 +704,7 @@ export default function SessionAutoRecordPanel({
       } else {
         resolvePendingTranscript({
           pendingId: pendingTranscriptId,
-          text:
-            locale === 'en'
-              ? 'No audio captured. Please try speaker switch again.'
-              : '녹음된 음성이 없습니다. 발화자 전환을 다시 시도해 주세요.',
+          text: tSession('noAudioCapturedSwitchSpeaker'),
         });
       }
     } finally {
@@ -743,9 +718,9 @@ export default function SessionAutoRecordPanel({
     getPendingTranscriptMessage,
     isPaused,
     isRecording,
-    locale,
     resolvePendingTranscript,
     startSegmentRecorder,
+    tSession,
     uploadCapturedSegment,
   ]);
 
@@ -900,25 +875,17 @@ export default function SessionAutoRecordPanel({
             }`}
           >
             {activeSpeaker === 'counselor'
-              ? locale === 'en'
-                ? 'Counselor'
-                : '상담사'
-              : locale === 'en'
-                ? 'Client'
-                : '내담자'}
+              ? tSession('speakerCounselor')
+              : tSession('speakerClient')}
           </span>
         </div>
         <div className="flex items-center gap-[6px]">
           <Image src="/icons/information-circle.svg" alt="information" width={24} height={24} />
-          <span className="text-label-alternative body-16">
-            {locale === 'en'
-              ? 'Press Enter or Space to switch speakers.'
-              : 'Enter 또는 Space를 눌러 발화자를 전환해 보세요.'}
-          </span>
+          <span className="text-label-alternative body-16">{tSession('switchSpeakerHint')}</span>
         </div>
         <span className="ml-auto hidden body-13 text-label-assistive sm:inline"></span>
         <span className="ml-auto body-13 text-label-assistive sm:hidden">
-          {locale === 'en' ? 'Enter / Space switch' : 'Enter / Space 전환'}
+          {tSession('switchSpeakerShortHint')}
         </span>
       </div>
       <div className="flex w-full flex-col items-start gap-4">
@@ -934,12 +901,11 @@ export default function SessionAutoRecordPanel({
           renderHighlightedText={renderHighlightedText}
         />
         <SessionLiveSummaryCard
-          locale={locale}
           statusLabel={undefined}
           title={liveSummaryTitle}
           body={liveSummaryBody}
         />
-        <SessionCounselorMemoCard locale={locale} defaultValue="" />
+        <SessionCounselorMemoCard defaultValue="" />
       </div>
       <div className="fixed bottom-[30px] left-[40%] right-0 z-30 flex justify-center px-8 max-[1200px]:left-0 max-[1200px]:right-0 max-[1200px]:px-6 max-[900px]:px-4">
         <SessionAudioControls

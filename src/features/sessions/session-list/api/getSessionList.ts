@@ -34,13 +34,13 @@ const requestSessionList = async (
 
     return {
       success: false,
-      status: 'scheduled',
+      status,
       message: response.ok ? undefined : '상담 세션 목록을 불러오지 못했습니다.',
     };
   } catch (error) {
     return {
       success: false,
-      status: 'scheduled',
+      status,
       message: error instanceof Error ? error.message : 'Network error',
     };
   }

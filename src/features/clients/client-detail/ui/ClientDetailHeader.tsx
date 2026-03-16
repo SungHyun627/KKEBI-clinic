@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/button';
 import StreakChip from '@/shared/ui/chips/streak-chip';
 import RiskTypeChip from '@/shared/ui/chips/risk-type-chip';
 import { DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
-import type { ClientLookupItem } from '@/features/clients/types/common';
+import type { ClientLookupItem } from '@/entities/client/model/types';
 import { useLocale, useTranslations } from 'next-intl';
 import { getClientNameByLocale } from '@/shared/lib/clientNameByLocale';
 import SessionReminderDrawer from '@/features/sessions/session-reminder/ui/SessionReminderDrawer';

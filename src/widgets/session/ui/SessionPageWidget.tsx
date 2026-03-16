@@ -1,28 +1,46 @@
 'use client';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useLocale } from 'next-intl';
+import dynamic from 'next/dynamic';
+import { useLocale, useTranslations } from 'next-intl';
+import {
+  completeSessionById,
+  isRiskType,
+  isSessionType,
+  SessionHeader,
+  SessionInsightsPanel,
+  useSessionInfo,
+  type CognitiveDistortionType,
+  type SessionEmotionType,
+  type SessionInsightsData,
+  type SessionInsightsSsePatch,
+} from '@/features/session';
 import { getSessionPageMock } from '@/shared/mock/session-page';
 import { toast } from '@/shared/ui/toast';
-import { completeSessionById } from '../../api/completeSessionById';
-import SessionHeader from '../header/SessionHeader';
-import SessionInsightsPanel from '../insights/SessionInsightsPanel';
-import SessionAutoRecordPanel from '../auto-record/SessionAutoRecordPanel';
-import type {
-  CognitiveDistortionType,
-  SessionEmotionType,
-  SessionInsightsData,
-  SessionInsightsSsePatch,
-} from '../../types/session';
-import { isRiskType, isSessionType } from '../../types/session';
-import { useSessionInfo } from '../../hooks/useSessionInfo';
 
-interface SessionPageContentProps {
+function RecordingPanelLoading() {
+  const tSession = useTranslations('sessionList');
+  return (
+    <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
+      {tSession('recordingPanelLoading')}
+    </div>
+  );
+}
+
+const SessionAutoRecordPanelLazy = dynamic(
+  () => import('@/features/session').then((module) => module.SessionAutoRecordPanel),
+  {
+    loading: () => <RecordingPanelLoading />,
+  },
+);
+
+interface SessionPageWidgetProps {
   sessionId: string;
 }
 
-export default function SessionPageContent({ sessionId }: SessionPageContentProps) {
+export default function SessionPageWidget({ sessionId }: SessionPageWidgetProps) {
   const locale = useLocale();
+  const tSession = useTranslations('sessionList');
   const { data, loading, error } = useSessionInfo({ sessionId });
   const pageMock = useMemo(() => getSessionPageMock(sessionId, locale), [locale, sessionId]);
   const [recorderState, setRecorderState] = useState({
@@ -120,8 +138,8 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     }
   }, []);
 
-  const mergedInsights: SessionInsightsData = useMemo(() => {
-    return {
+  const mergedInsights: SessionInsightsData = useMemo(
+    () => ({
       ...pageMock.insights,
       riskType: data && isRiskType(data.riskType) ? data.riskType : pageMock.insights.riskType,
       currentEmotion: analysisSsePatch?.currentEmotion ?? pageMock.insights.currentEmotion,
@@ -135,20 +153,22 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
       distortionExample: hasDistortionFromSse
         ? (analysisSsePatch?.distortionExample ?? pageMock.insights.distortionExample)
         : '',
-    };
-  }, [
-    analysisSsePatch,
-    confidenceScore,
-    data,
-    distortionType,
-    hasDistortionFromSse,
-    pageMock.insights,
-    phq9Score,
-  ]);
+    }),
+    [
+      analysisSsePatch,
+      confidenceScore,
+      data,
+      distortionType,
+      hasDistortionFromSse,
+      pageMock.insights,
+      phq9Score,
+    ],
+  );
 
   const handleRegisterPrepareEndSession = useCallback((handler: () => void) => {
     prepareEndSessionRef.current = handler;
   }, []);
+
   const handleRegisterUploadFullAudio = useCallback((handler: () => Promise<boolean>) => {
     uploadFullAudioRef.current = handler;
   }, []);
@@ -157,30 +177,22 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
     prepareEndSessionRef.current?.();
     await new Promise((resolve) => setTimeout(resolve, 0));
   }, []);
+
   const handleBeforeEndSession = useCallback(async () => {
     const isUploadSucceeded = (await uploadFullAudioRef.current?.()) ?? true;
     if (!isUploadSucceeded) {
-      toast(
-        locale === 'en'
-          ? 'Failed to upload recording file. Please try again.'
-          : '녹음 파일 업로드에 실패했습니다. 다시 시도해 주세요.',
-      );
+      toast(tSession('recordingUploadFailedRetry'));
       return false;
     }
 
     const completeResult = await completeSessionById({ sessionId });
     if (!completeResult.success) {
-      toast(
-        completeResult.message ||
-          (locale === 'en'
-            ? 'Failed to complete session. Please try again.'
-            : '상담 종료 처리에 실패했습니다. 다시 시도해 주세요.'),
-      );
+      toast(completeResult.message || tSession('completeSessionFailedRetry'));
       return false;
     }
 
     return true;
-  }, [locale, sessionId]);
+  }, [sessionId, tSession]);
 
   return (
     <section className="flex min-h-[calc(100dvh)] w-full flex-col gap-5 bg-white">
@@ -216,9 +228,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
               !
             </span>
             <div className="min-w-0">
-              <p className="body-14 font-medium text-[#B42323]">
-                {locale === 'en' ? 'Risk signal detected' : '위험 신호 감지'}
-              </p>
+              <p className="body-14 font-medium text-[#B42323]">{tSession('riskSignalDetected')}</p>
               <p className="body-14 truncate text-[#8F3030]">
                 {riskBanner.text} · {riskBanner.timestamp}
               </p>
@@ -229,17 +239,17 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             className="shrink-0 rounded-[8px] bg-[#FA5454] px-3 py-[6px] body-14 font-semibold text-white hover:cursor-pointer"
             onClick={() => setRiskBanner(null)}
           >
-            {locale === 'en' ? 'Confirm' : '확인'}
+            {tSession('riskSignalConfirm')}
           </button>
         </div>
       ) : null}
       {loading ? (
         <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
-          Loading session data...
+          {tSession('sessionDataLoading')}
         </div>
       ) : error || !data ? (
-        <div className="flex min-h-[320px] items-center justify-center body-14 text-status-negative">
-          {error ?? 'Failed to load session data'}
+        <div className="flex min-h-[320px] items-center justify-center body-14 text-black">
+          {error ?? tSession('sessionDataLoadFailed')}
         </div>
       ) : (
         <div className="grid w-full flex-1 grid-cols-[1fr_1.5fr] gap-[34px]">
@@ -254,7 +264,7 @@ export default function SessionPageContent({ sessionId }: SessionPageContentProp
             keyConcernHistory={[]}
             distortionExampleHistory={distortionExampleHistory}
           />
-          <SessionAutoRecordPanel
+          <SessionAutoRecordPanelLazy
             sessionId={sessionId}
             autoRecord={pageMock.autoRecord}
             baseInsights={pageMock.insights}

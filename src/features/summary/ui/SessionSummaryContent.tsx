@@ -1,19 +1,15 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
-import {
-  AiSummaryCard,
-  CompletionCard,
-  CounselorEvaluationCard,
-  NextSessionBookingCard,
-  RecommendedMissionsCard,
-  SummaryTopBar,
-  EmotionPatternsCard,
-  DetectedCognitiveDistortionCard,
-  BookmarkedMomentsCard,
-} from './components';
+import AiSummaryCard from './components/AiSummaryCard';
+import CompletionCard from './components/CompletionCard';
+import SummaryTopBar from './components/SummaryTopBar';
+import EmotionPatternsCard from './components/EmotionPatternsCard';
+import DetectedCognitiveDistortionCard from './components/DetectedCognitiveDistortionCard';
+import BookmarkedMomentsCard from './components/BookmarkedMomentsCard';
 import { useSessionSummary } from '../hooks/useSessionSummary';
 
 interface SessionSummaryContentProps {
@@ -21,6 +17,10 @@ interface SessionSummaryContentProps {
   sessionId: number;
   backLabel: string;
 }
+
+const CounselorEvaluationCard = dynamic(() => import('./components/CounselorEvaluationCard'));
+const RecommendedMissionsCard = dynamic(() => import('./components/RecommendedMissionsCard'));
+const NextSessionBookingCard = dynamic(() => import('./components/NextSessionBookingCard'));
 
 export default function SessionSummaryContent({
   locale,
@@ -102,7 +102,7 @@ export default function SessionSummaryContent({
 
       <div className="flex flex-col gap-[53px] items-start w-full px-15">
         {hasLoadError ? (
-          <div className="w-full rounded-[10px] border border-status-negative/20 bg-status-negative/5 px-4 py-3 body-14 text-status-negative">
+          <div className="w-full rounded-[10px] border border-status-negative/20 bg-status-negative/5 px-4 py-3 body-14 text-black">
             {tSummary('loadFailed')}
           </div>
         ) : null}

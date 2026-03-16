@@ -19,16 +19,18 @@ import {
   clearAuthSession,
   getAuthSession,
   subscribeAuthSession,
-} from '@/features/auth/login/lib/authSession';
-import { useLogoutMutation } from '@/features/auth/login/hooks/useLogoutMutation';
+  useLogoutMutation,
+} from '@/features/auth';
+
 import { Toast, toast } from '@/shared/ui/toast';
-import { NotificationDrawer } from '@/features/notification';
 import {
   getUnreadNotificationCount,
-  useNotificationSse,
+  NotificationDrawer,
   type NotificationItem,
+  useNotificationSse,
 } from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
+import { isLighthouseBypassAuthEnabled } from '@/shared/lib/perf-flags';
 import { ensureAccessToken } from '@/shared/api/http-client';
 
 const navItems = [
@@ -43,6 +45,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
   const tClients = useTranslations('clients');
+  const tSession = useTranslations('sessionList');
+  const tNotification = useTranslations('notification');
   const logoutMutation = useLogoutMutation();
   const locale = useLocale();
   const switchLocale = () => {
@@ -54,22 +58,28 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const authSession = useSyncExternalStore(subscribeAuthSession, getAuthSession, () => null);
+  const authBypassEnabled = isLighthouseBypassAuthEnabled();
   const userName = authSession?.userName || tCommon('defaultUserName');
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     const latestSession = getAuthSession();
     if (!latestSession?.authenticated) {
       router.replace('/login');
     }
-  }, [authSession, router]);
+  }, [authBypassEnabled, authSession, router]);
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     const latestSession = getAuthSession();
     if (!latestSession?.authenticated) return;
+
+    // 초기 진입 시 access token 1회 복구로 401 동시 폭주를 완화한다.
     void ensureAccessToken();
-  }, [authSession]);
+  }, [authBypassEnabled, authSession]);
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     const latestSession = getAuthSession();
     if (!latestSession?.authenticated) return;
 
@@ -80,17 +90,18 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     };
 
     void loadUnreadCount();
-  }, [authSession]);
+  }, [authBypassEnabled, authSession]);
 
   const displayedUnreadNotificationCount = authSession?.authenticated ? unreadNotificationCount : 0;
 
   useEffect(() => {
+    if (authBypassEnabled) return;
     return subscribeAuthRequired(() => {
       clearAuthSession();
       localStorage.removeItem('kkebi-login-info');
       router.replace('/login');
     });
-  }, [router]);
+  }, [authBypassEnabled, router]);
 
   useEffect(() => {
     if (pathname !== '/') return;
@@ -98,8 +109,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     if (!shouldShowSummaryToast) return;
 
     window.sessionStorage.removeItem('kkebi:summarySubmitted');
-    toast(locale === 'en' ? 'Session content has been saved.' : '상담 내용이 저장되었습니다.');
-  }, [locale, pathname]);
+    toast(tSession('summarySavedToast'));
+  }, [pathname, tSession]);
 
   const handleNotificationReceived = useCallback(
     (notification: NotificationItem) => {
@@ -109,28 +120,20 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
       switch (notification.type) {
         case 'HIGH_PHQ9':
-          toast(
-            notification.message ||
-              (locale === 'en' ? 'High PHQ-9 risk detected.' : 'PHQ-9 고위험 알림이 도착했습니다.'),
-          );
+          toast(notification.message || tNotification('riskHighPhq9Detected'));
           break;
         case 'SCHEDULE_CHANGE_REQUEST':
-          toast(
-            notification.message ||
-              (locale === 'en'
-                ? 'A schedule change request has arrived.'
-                : '일정 변경 요청 알림이 도착했습니다.'),
-          );
+          toast(notification.message || tNotification('scheduleChangeRequestArrived'));
           break;
         default:
           break;
       }
     },
-    [locale],
+    [tNotification],
   );
 
   useNotificationSse({
-    enabled: Boolean(authSession?.authenticated),
+    enabled: authBypassEnabled ? false : Boolean(authSession?.authenticated),
     onNotification: handleNotificationReceived,
   });
 
@@ -141,7 +144,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.key ?? 'dashboard';
   const isClientsBackHeaderPage =
-    pathname === '/clients/closed' || pathname.startsWith('/clients/new');
+    pathname === '/clients/terminated' ||
+    pathname === '/clients/closed' ||
+    pathname.startsWith('/clients/new');
   const clientsBackHeaderTitle = pathname.startsWith('/clients/new')
     ? tClients('listRegister')
     : tNav('clients');

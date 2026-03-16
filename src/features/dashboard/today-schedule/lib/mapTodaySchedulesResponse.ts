@@ -1,4 +1,4 @@
-import type { TodayScheduleItem } from '@/features/dashboard/types/schedule';
+import type { TodayScheduleItem } from '@/entities/dashboard/model/types';
 
 export const extractScheduleItems = (data: unknown): unknown[] | null => {
   if (Array.isArray(data)) {

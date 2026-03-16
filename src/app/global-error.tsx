@@ -10,6 +10,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  void error;
   const locale = useLocale();
   const tError = useTranslations('error');
 

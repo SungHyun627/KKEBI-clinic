@@ -1,1 +1,1 @@
-export type { ClientLookupItem } from '@/features/clients/types/common';
+export type { ClientLookupItem } from '@/entities/client/model/types';

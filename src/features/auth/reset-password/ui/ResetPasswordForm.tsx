@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/shared/ui/button';
@@ -26,6 +26,8 @@ const ResetPasswordForm = () => {
       confirmPassword: '',
     },
   });
+  const newPassword = useWatch({ control: form.control, name: 'newPassword' }) ?? '';
+  const confirmPassword = useWatch({ control: form.control, name: 'confirmPassword' }) ?? '';
 
   const onSubmit = async (values: ResetPasswordFields) => {
     if (values.newPassword !== values.confirmPassword) {
@@ -185,11 +187,7 @@ const ResetPasswordForm = () => {
             <span className="body-14 text-label-alternative">{tAuth('resetPasswordRule')}</span>
           </div>
         </div>
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={!form.watch('newPassword') || !form.watch('confirmPassword')}
-        >
+        <Button type="submit" className="w-full" disabled={!newPassword || !confirmPassword}>
           {tCommon('change')}
         </Button>
       </form>

@@ -3,25 +3,45 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Title } from '@/shared/ui/title';
+import { resolveUserErrorMessage } from '@/shared/lib/resolve-user-error-message';
 import type { TodayScheduleItem } from '../types/schedule';
 import { getTodaySchedules } from './api/getTodaySchedules';
 import TodayScheduleHeader from './ui/TodayScheduleHeader';
 import TodayScheduleListItem from './ui/TodayScheduleItem';
 
-export default function TodayScheduleSection() {
+interface TodayScheduleSectionProps {
+  initialSchedules?: TodayScheduleItem[];
+  initialLoaded?: boolean;
+}
+
+export default function TodayScheduleSection({
+  initialSchedules = [],
+  initialLoaded = false,
+}: TodayScheduleSectionProps) {
   const tDashboard = useTranslations('dashboard');
-  const [schedules, setSchedules] = useState<TodayScheduleItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const tCommon = useTranslations('common');
+  const [schedules, setSchedules] = useState<TodayScheduleItem[]>(() => initialSchedules);
+  const [isLoading, setIsLoading] = useState(!initialLoaded);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    if (initialLoaded) {
+      return;
+    }
+
     const loadTodaySchedules = async () => {
       setIsLoading(true);
       const result = await getTodaySchedules();
 
       if (!result.success || !Array.isArray(result.data)) {
         setSchedules([]);
-        setErrorMessage(result.message || tDashboard('todayScheduleLoadFailed'));
+        setErrorMessage(
+          resolveUserErrorMessage(result.message, {
+            defaultMessage: tDashboard('todayScheduleLoadFailed'),
+            sessionExpiredMessage: tCommon('errorSessionExpired'),
+            temporaryUnavailableMessage: tCommon('errorTemporaryUnavailable'),
+          }),
+        );
         setIsLoading(false);
         return;
       }
@@ -33,7 +53,7 @@ export default function TodayScheduleSection() {
     };
 
     void loadTodaySchedules();
-  }, []);
+  }, [initialLoaded, tCommon, tDashboard]);
 
   if (isLoading) {
     return (
@@ -49,7 +69,7 @@ export default function TodayScheduleSection() {
       <div className="w-full mb-[21px]">
         <TodayScheduleHeader />
         {errorMessage ? (
-          <div className="body-14 flex w-full h-[180px] items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-label-alternative">
+          <div className="body-14 flex w-full h-[180px] items-center justify-center border-x border-b border-neutral-95 bg-white py-6 text-black">
             {errorMessage}
           </div>
         ) : schedules.length === 0 ? (

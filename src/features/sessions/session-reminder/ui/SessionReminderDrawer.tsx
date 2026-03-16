@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from '@/shared/ui/drawer';
 import { Textarea } from '@/shared/ui/textarea';
@@ -24,13 +24,12 @@ interface SessionReminderDrawerProps {
 const CHANNELS: Array<{
   value: ReminderChannel;
   icon: string;
-  ko: string;
-  en: string;
+  labelKey: 'reminderChannelPush' | 'reminderChannelEmail' | 'reminderChannelSms';
   disabled?: boolean;
 }> = [
-  { value: 'push', icon: '/icons/alert.svg', ko: '앱 푸시 알림', en: 'App push', disabled: true },
-  { value: 'email', icon: '/icons/email.svg', ko: '이메일', en: 'Email' },
-  { value: 'sms', icon: '/icons/sms.svg', ko: 'SMS 문자', en: 'SMS', disabled: true },
+  { value: 'push', icon: '/icons/alert.svg', labelKey: 'reminderChannelPush', disabled: true },
+  { value: 'email', icon: '/icons/email.svg', labelKey: 'reminderChannelEmail' },
+  { value: 'sms', icon: '/icons/sms.svg', labelKey: 'reminderChannelSms', disabled: true },
 ];
 
 const SessionReminderDrawer = ({
@@ -41,33 +40,30 @@ const SessionReminderDrawer = ({
   scheduledTime,
 }: SessionReminderDrawerProps) => {
   const locale = useLocale();
+  const tCommon = useTranslations('common');
+  const tSession = useTranslations('sessionList');
   const todayDateKey = getTodayDateKey();
   const todayDate = formatDateForDisplay(todayDateKey, locale);
   const fixedTime = normalizeScheduleTime(scheduledTime) ?? '09:00';
   const [channels, setChannels] = useState<ReminderChannel[]>([]);
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const defaultMessage =
-    locale === 'en'
-      ? `Hello ${clientName}, this is a reminder for your counseling session scheduled on ${todayDate} ${fixedTime}. If you cannot attend, please let us know in advance.`
-      : `안녕하세요 ${clientName}님, ${todayDate} ${fixedTime}에 예정된 상담 세션을 알려드립니다. 참석이 어려우시면 미리 알려주세요.`;
+  const defaultMessage = tSession('reminderDefaultMessage', {
+    clientName,
+    schedule: `${todayDate} ${fixedTime}`,
+  });
 
   const labels = useMemo(
     () => ({
-      title: locale === 'en' ? 'Send Session Reminder' : '세션 알림 발송',
-      subtitle:
-        locale === 'en'
-          ? `Send the next session reminder to ${clientName}.`
-          : `${clientName}님께 다음 상담 세션 알림을 발송합니다.`,
-      scheduleTitle: locale === 'en' ? 'Next session schedule' : '다음 상담',
-      channelTitle: locale === 'en' ? 'Notification channels' : '알림 유형 선택',
-      messageTitle: locale === 'en' ? 'Message' : '메시지 내용',
-      messagePlaceholder:
-        locale === 'en' ? 'Please enter the message content.' : '메시지 내용을 입력해 주세요.',
-      cancel: locale === 'en' ? 'Cancel' : '취소',
-      send: locale === 'en' ? 'Send' : '발송하기',
+      title: tSession('reminderTitle'),
+      subtitle: tSession('reminderSubtitle', { clientName }),
+      scheduleTitle: tSession('reminderScheduleTitle'),
+      channelTitle: tSession('reminderChannelTitle'),
+      messageTitle: tSession('reminderMessageTitle'),
+      messagePlaceholder: tSession('reminderMessagePlaceholder'),
+      send: tSession('reminderSend'),
     }),
-    [clientName, locale],
+    [clientName, tSession],
   );
 
   const readonlyScheduleLabel = `${todayDate} ${fixedTime}`;
@@ -105,18 +101,11 @@ const SessionReminderDrawer = ({
     setIsSubmitting(false);
 
     if (!result.success) {
-      toast(
-        result.message ||
-          (locale === 'en' ? 'Failed to send session reminder.' : '세션 알림 발송에 실패했습니다.'),
-      );
+      toast(result.message || tSession('reminderSendFailed'));
       return;
     }
 
-    toast(
-      locale === 'en'
-        ? `Session reminder sent to ${clientName}.`
-        : `${clientName} 님에게 세션 알림이 발송되었습니다.`,
-    );
+    toast(tSession('reminderSendSuccess', { clientName }));
     onOpenChange(false);
   };
 
@@ -198,7 +187,7 @@ const SessionReminderDrawer = ({
                         }}
                         aria-hidden
                       />
-                      {locale === 'en' ? channel.en : channel.ko}
+                      {tSession(channel.labelKey)}
                     </button>
                   );
                 })}
@@ -225,7 +214,7 @@ const SessionReminderDrawer = ({
             onClick={() => onOpenChange(false)}
             className="w-full max-w-[144px]"
           >
-            {labels.cancel}
+            {tCommon('cancel')}
           </Button>
           <Button
             type="button"
@@ -234,7 +223,7 @@ const SessionReminderDrawer = ({
             disabled={!isSendEnabled || isSubmitting}
             onClick={handleSend}
           >
-            {isSubmitting ? (locale === 'en' ? 'Sending...' : '발송 중...') : labels.send}
+            {isSubmitting ? tSession('reminderSending') : labels.send}
           </Button>
         </div>
       </DrawerContent>
