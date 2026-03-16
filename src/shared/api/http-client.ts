@@ -33,10 +33,7 @@ interface RequestOptions extends Omit<RequestInit, 'body' | 'headers'> {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '') ?? '';
-const REFRESH_TIMEOUT_MS = 8000;
-const REFRESH_RETRY_DELAY_MS = 500;
-type RefreshResult = 'success' | 'auth' | 'transient';
-let refreshPromise: Promise<RefreshResult> | null = null;
+let refreshPromise: Promise<boolean> | null = null;
 
 function buildUrl(path: string) {
   if (/^https?:\/\//.test(path)) return path;
@@ -51,61 +48,36 @@ interface ApiEnvelope<TData = unknown> {
   data?: TData;
 }
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function requestTokenRefresh(): Promise<RefreshResult> {
+async function requestTokenRefresh(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REFRESH_TIMEOUT_MS);
 
   refreshPromise = (async () => {
     try {
       const response = await fetch(buildUrl('/api/v1/counselor/auth/refresh'), {
         method: 'POST',
         credentials: 'include',
-        signal: controller.signal,
       });
       if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          clearAccessToken();
-          emitAuthRequired();
-          return 'auth';
-        } else {
-          return 'transient';
-        }
+        clearAccessToken();
+        emitAuthRequired();
+        return false;
       }
 
       const payload = (await parseResponse<ApiEnvelope<Record<string, unknown>>>(response)) ?? {};
       const token = payload?.data?.accessToken;
       if (typeof token === 'string' && token) {
         setAccessToken(token);
-        return 'success';
+        return true;
       }
 
-      const code = typeof payload.code === 'string' ? payload.code.toUpperCase() : '';
-      const message = typeof payload.message === 'string' ? payload.message.toUpperCase() : '';
-      const isAuthFailure =
-        code.includes('UNAUTHORIZED') ||
-        code.includes('FORBIDDEN') ||
-        code.includes('INVALID_REFRESH') ||
-        code.includes('EXPIRED') ||
-        message.includes('UNAUTHORIZED') ||
-        message.includes('FORBIDDEN') ||
-        message.includes('INVALID_REFRESH') ||
-        message.includes('EXPIRED');
-
-      if (isAuthFailure) {
-        clearAccessToken();
-        emitAuthRequired();
-        return 'auth';
-      } else {
-        return 'transient';
-      }
+      clearAccessToken();
+      emitAuthRequired();
+      return false;
     } catch {
-      return 'transient';
+      clearAccessToken();
+      emitAuthRequired();
+      return false;
     } finally {
-      clearTimeout(timeoutId);
       refreshPromise = null;
     }
   })();
@@ -116,16 +88,7 @@ async function requestTokenRefresh(): Promise<RefreshResult> {
 export async function ensureAccessToken(): Promise<boolean> {
   const token = getAccessToken();
   if (token) return true;
-
-  const firstTry = await requestTokenRefresh();
-  if (firstTry === 'success') return true;
-
-  if (firstTry === 'transient') {
-    await wait(REFRESH_RETRY_DELAY_MS);
-    return (await requestTokenRefresh()) === 'success';
-  }
-
-  return false;
+  return requestTokenRefresh();
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -175,19 +138,11 @@ export async function request<T = unknown>(path: string, options: RequestOptions
   });
 
   if (response.status === 401 && !skipAuth && !skipRefresh) {
-    const refreshResult = await requestTokenRefresh();
-    if (refreshResult === 'success') {
+    const refreshed = await requestTokenRefresh();
+    if (refreshed) {
       return request<T>(path, {
         ...options,
         skipRefresh: true,
-      });
-    }
-
-    if (refreshResult === 'transient') {
-      throw new ApiError({
-        status: 503,
-        code: 'AUTH_REFRESH_TEMPORARILY_UNAVAILABLE',
-        message: 'AUTH_REFRESH_TEMPORARILY_UNAVAILABLE',
       });
     }
   }

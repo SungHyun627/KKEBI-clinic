@@ -31,6 +31,7 @@ import {
 } from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
 import { isLighthouseBypassAuthEnabled } from '@/shared/lib/perf-flags';
+import { ensureAccessToken } from '@/shared/api/http-client';
 
 const navItems = [
   { key: 'dashboard', href: '/', icon: '/icons/dashboard.svg' },
@@ -67,6 +68,15 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       router.replace('/login');
     }
   }, [authBypassEnabled, authSession, router]);
+
+  useEffect(() => {
+    if (authBypassEnabled) return;
+    const latestSession = getAuthSession();
+    if (!latestSession?.authenticated) return;
+
+    // 초기 진입 시 access token 1회 복구로 401 동시 폭주를 완화한다.
+    void ensureAccessToken();
+  }, [authBypassEnabled, authSession]);
 
   useEffect(() => {
     if (authBypassEnabled) return;
