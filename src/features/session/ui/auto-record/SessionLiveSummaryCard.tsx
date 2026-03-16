@@ -2,39 +2,33 @@
 
 import Divider from '@/shared/ui/divider';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 interface SessionLiveSummaryCardProps {
-  locale: string;
   title: string;
   body: string;
   statusLabel?: string;
 }
 
 export default function SessionLiveSummaryCard({
-  locale,
   title,
   body,
   statusLabel,
 }: SessionLiveSummaryCardProps) {
+  const tSession = useTranslations('sessionList');
   const isEmpty = title.trim().length === 0 && body.trim().length === 0;
 
   return (
     <div className="flex w-full flex-col justify-center items-start gap-[23px] rounded-[24px] bg-white p-[26px]">
       <div className="flex flex-col gap-3">
-        <span className="body-18 font-medium text-neutral-40">
-          {locale === 'en' ? 'Live summary' : '실시간 요약'}
-        </span>
+        <span className="body-18 font-medium text-neutral-40">{tSession('liveSummaryTitle')}</span>
         <div className="flex min-h-[28px] w-full items-center gap-2">
           <div
             className={`body-18 ${
               isEmpty ? 'font-medium text-label-assistive' : 'font-semibold text-label-normal'
             }`}
           >
-            {isEmpty
-              ? locale === 'en'
-                ? 'No active recording session.'
-                : '녹음 중인 상담이 없습니다.'
-              : title}
+            {isEmpty ? tSession('liveSummaryEmpty') : title}
           </div>
           {!isEmpty && statusLabel ? (
             <span className="rounded-full bg-neutral-95 px-2 py-1 body-12 font-medium text-label-neutral">

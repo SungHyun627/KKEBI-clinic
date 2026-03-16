@@ -107,7 +107,7 @@ export default function ClientOverviewSection({
                 setIsSessionCloseDialogOpen(true);
               }}
             >
-              {isEditing ? '저장하기' : tCommon('closeCase')}
+              {isEditing ? tCommon('save') : tCommon('closeCase')}
             </Button>
           </div>
         </div>
@@ -254,7 +254,7 @@ export default function ClientOverviewSection({
         onConfirm={async ({ reason, detail: closeDetail }) => {
           const result = await closeClient(detail.clientId, { reason, detail: closeDetail });
           if (result.success) {
-            toast('성공적으로 종결이 처리되었습니다');
+            toast(tClients('detailCloseSuccess'));
             onClientClosed(detail.clientId);
           }
         }}

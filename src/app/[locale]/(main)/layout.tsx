@@ -44,6 +44,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
   const tClients = useTranslations('clients');
+  const tSession = useTranslations('sessionList');
+  const tNotification = useTranslations('notification');
   const logoutMutation = useLogoutMutation();
   const locale = useLocale();
   const switchLocale = () => {
@@ -97,8 +99,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     if (!shouldShowSummaryToast) return;
 
     window.sessionStorage.removeItem('kkebi:summarySubmitted');
-    toast(locale === 'en' ? 'Session content has been saved.' : '상담 내용이 저장되었습니다.');
-  }, [locale, pathname]);
+    toast(tSession('summarySavedToast'));
+  }, [pathname, tSession]);
 
   const handleNotificationReceived = useCallback(
     (notification: NotificationItem) => {
@@ -108,24 +110,16 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
       switch (notification.type) {
         case 'HIGH_PHQ9':
-          toast(
-            notification.message ||
-              (locale === 'en' ? 'High PHQ-9 risk detected.' : 'PHQ-9 고위험 알림이 도착했습니다.'),
-          );
+          toast(notification.message || tNotification('riskHighPhq9Detected'));
           break;
         case 'SCHEDULE_CHANGE_REQUEST':
-          toast(
-            notification.message ||
-              (locale === 'en'
-                ? 'A schedule change request has arrived.'
-                : '일정 변경 요청 알림이 도착했습니다.'),
-          );
+          toast(notification.message || tNotification('scheduleChangeRequestArrived'));
           break;
         default:
           break;
       }
     },
-    [locale],
+    [tNotification],
   );
 
   useNotificationSse({

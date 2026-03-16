@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   completeSessionById,
   isRiskType,
@@ -18,14 +18,19 @@ import {
 import { getSessionPageMock } from '@/shared/mock/session-page';
 import { toast } from '@/shared/ui/toast';
 
+function RecordingPanelLoading() {
+  const tSession = useTranslations('sessionList');
+  return (
+    <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
+      {tSession('recordingPanelLoading')}
+    </div>
+  );
+}
+
 const SessionAutoRecordPanelLazy = dynamic(
   () => import('@/features/session').then((module) => module.SessionAutoRecordPanel),
   {
-    loading: () => (
-      <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
-        Loading recording panel...
-      </div>
-    ),
+    loading: () => <RecordingPanelLoading />,
   },
 );
 
@@ -35,6 +40,7 @@ interface SessionPageWidgetProps {
 
 export default function SessionPageWidget({ sessionId }: SessionPageWidgetProps) {
   const locale = useLocale();
+  const tSession = useTranslations('sessionList');
   const { data, loading, error } = useSessionInfo({ sessionId });
   const pageMock = useMemo(() => getSessionPageMock(sessionId, locale), [locale, sessionId]);
   const [recorderState, setRecorderState] = useState({
@@ -175,27 +181,18 @@ export default function SessionPageWidget({ sessionId }: SessionPageWidgetProps)
   const handleBeforeEndSession = useCallback(async () => {
     const isUploadSucceeded = (await uploadFullAudioRef.current?.()) ?? true;
     if (!isUploadSucceeded) {
-      toast(
-        locale === 'en'
-          ? 'Failed to upload recording file. Please try again.'
-          : '녹음 파일 업로드에 실패했습니다. 다시 시도해 주세요.',
-      );
+      toast(tSession('recordingUploadFailedRetry'));
       return false;
     }
 
     const completeResult = await completeSessionById({ sessionId });
     if (!completeResult.success) {
-      toast(
-        completeResult.message ||
-          (locale === 'en'
-            ? 'Failed to complete session. Please try again.'
-            : '상담 종료 처리에 실패했습니다. 다시 시도해 주세요.'),
-      );
+      toast(completeResult.message || tSession('completeSessionFailedRetry'));
       return false;
     }
 
     return true;
-  }, [locale, sessionId]);
+  }, [sessionId, tSession]);
 
   return (
     <section className="flex min-h-[calc(100dvh)] w-full flex-col gap-5 bg-white">
@@ -231,9 +228,7 @@ export default function SessionPageWidget({ sessionId }: SessionPageWidgetProps)
               !
             </span>
             <div className="min-w-0">
-              <p className="body-14 font-medium text-[#B42323]">
-                {locale === 'en' ? 'Risk signal detected' : '위험 신호 감지'}
-              </p>
+              <p className="body-14 font-medium text-[#B42323]">{tSession('riskSignalDetected')}</p>
               <p className="body-14 truncate text-[#8F3030]">
                 {riskBanner.text} · {riskBanner.timestamp}
               </p>
@@ -244,17 +239,17 @@ export default function SessionPageWidget({ sessionId }: SessionPageWidgetProps)
             className="shrink-0 rounded-[8px] bg-[#FA5454] px-3 py-[6px] body-14 font-semibold text-white hover:cursor-pointer"
             onClick={() => setRiskBanner(null)}
           >
-            {locale === 'en' ? 'Confirm' : '확인'}
+            {tSession('riskSignalConfirm')}
           </button>
         </div>
       ) : null}
       {loading ? (
         <div className="flex min-h-[320px] items-center justify-center body-14 text-label-alternative">
-          Loading session data...
+          {tSession('sessionDataLoading')}
         </div>
       ) : error || !data ? (
         <div className="flex min-h-[320px] items-center justify-center body-14 text-black">
-          {error ?? 'Failed to load session data'}
+          {error ?? tSession('sessionDataLoadFailed')}
         </div>
       ) : (
         <div className="grid w-full flex-1 grid-cols-[1fr_1.5fr] gap-[34px]">

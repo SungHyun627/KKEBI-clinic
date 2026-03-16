@@ -51,6 +51,7 @@ export default function SessionHeader({
   onBeforeEndSession,
 }: SessionHeaderProps) {
   const tCommon = useTranslations('common');
+  const tSession = useTranslations('sessionList');
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -154,13 +155,7 @@ export default function SessionHeader({
                 aria-hidden
               />
               <span className="body-16 font-semibold text-label-normal">
-                {isPaused
-                  ? locale === 'en'
-                    ? 'Paused'
-                    : '일시정지'
-                  : locale === 'en'
-                    ? 'Recording'
-                    : '녹음 중'}
+                {isPaused ? tSession('headerPaused') : tSession('headerRecording')}
               </span>
             </div>
 
@@ -191,7 +186,7 @@ export default function SessionHeader({
             }}
             className="h-[38px] w-[92px] rounded-[8px]"
           >
-            {locale === 'en' ? 'End' : '상담 종료'}
+            {tSession('headerEndButton')}
           </Button>
         </div>
         <LocaleSwitchButton />

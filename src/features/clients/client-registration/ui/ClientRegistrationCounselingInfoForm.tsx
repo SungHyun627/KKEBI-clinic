@@ -36,6 +36,7 @@ const ClientRegistrationCounselingInfoForm = ({
   form,
 }: ClientRegistrationCounselingInfoFormProps) => {
   const t = useTranslations('clientRegistration.counselingInfo');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const [openTimePicker, setOpenTimePicker] = useState<'start' | 'end' | null>(null);
   const referralOptions = REFERRAL_OPTIONS.map((option) => ({
@@ -62,6 +63,7 @@ const ClientRegistrationCounselingInfoForm = ({
                     value={field.value}
                     onValueChange={field.onChange}
                     placeholder={t('placeholders.counselingStartDate')}
+                    saveLabel={tCommon('save')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -326,11 +328,13 @@ const DatePickerField = ({
   value,
   onValueChange,
   placeholder,
+  saveLabel,
 }: {
   locale: string;
   value: string;
   onValueChange: (value: string) => void;
   placeholder: string;
+  saveLabel: string;
 }) => {
   const [open, setOpen] = useState(false);
   const [visibleMonth, setVisibleMonth] = useState(parseDateFromIso(value) ?? new Date());
@@ -396,7 +400,7 @@ const DatePickerField = ({
             }}
             className="inline-flex h-[42px] w-full max-w-[244px] rounded-[12px]"
           >
-            {locale === 'en' ? 'Save' : '저장'}
+            {saveLabel}
           </Button>
         </div>
       </PopoverContent>

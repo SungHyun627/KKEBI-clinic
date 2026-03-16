@@ -1,6 +1,6 @@
 'use client';
 
-import { useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog';
 import { VisuallyHidden } from '@/shared/ui/visually-hidden';
@@ -18,20 +18,21 @@ export default function SessionEndConfirmDialog({
   onOpenChange,
   onConfirm,
 }: SessionEndConfirmDialogProps) {
-  const locale = useLocale();
+  const tCommon = useTranslations('common');
+  const tSession = useTranslations('sessionList');
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col items-start max-w-[480px] w-full gap-[26px] rounded-[24px] px-8 py-7">
         <DialogTitle className="absolute h-0 w-0 overflow-hidden p-0 m-0">
-          <VisuallyHidden>{locale === 'en' ? 'End session' : '상담 종료'}</VisuallyHidden>
+          <VisuallyHidden>{tSession('endDialogA11yTitle')}</VisuallyHidden>
         </DialogTitle>
         <div className="flex flex-col w-full items-center gap-[6px]">
           <span className="body-14 text-neutral-40 text-center">
-            {locale === 'en' ? 'Do you want to end this session?' : '상담을 종료하시겠습니까?'}
+            {tSession('endDialogQuestion')}
           </span>
           <span className="body-18 font-semibold">
-            {locale === 'en' ? `Total ${totalSessionTime}` : `총 ${totalSessionTime} 상담`}
+            {tSession('endDialogTotal', { totalSessionTime })}
           </span>
         </div>
         <div className="flex w-full items-center gap-2">
@@ -42,7 +43,7 @@ export default function SessionEndConfirmDialog({
             variant={'outline'}
             onClick={() => onOpenChange(false)}
           >
-            {locale === 'en' ? 'Cancel' : '취소'}
+            {tCommon('cancel')}
           </Button>
           <Button
             type="button"
@@ -51,7 +52,7 @@ export default function SessionEndConfirmDialog({
               void onConfirm();
             }}
           >
-            {locale === 'en' ? 'End & Save' : '종료 및 저장'}
+            {tSession('endDialogConfirm')}
           </Button>
         </div>
       </DialogContent>

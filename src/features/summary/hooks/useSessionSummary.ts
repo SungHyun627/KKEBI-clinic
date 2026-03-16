@@ -60,7 +60,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
 
       if (!result.success || !result.data) {
         setPayload(null);
-        setError(result.message || 'Failed to load session summary data.');
+        setError(result.message || tSummary('loadFailed'));
         setLoading(false);
         return;
       }
@@ -75,7 +75,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     return () => {
       cancelled = true;
     };
-  }, [locale, sessionId]);
+  }, [locale, sessionId, tSummary]);
 
   const normalizeSpeaker = (value?: string) => {
     if (value === 'counselor' || value === 'COUNSELOR') return 'counselor' as const;
@@ -170,19 +170,17 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     if (recommended.length > 0) {
       return recommended.map((mission, index) => ({
         id: String(mission.id ?? `recommended-${index + 1}`),
-        name: mission.title ?? (locale === 'en' ? 'Recommended mission' : '추천 미션'),
+        name: mission.title ?? tSummary('missionRecommendedFallback'),
         category: mission.description ?? '-',
         duration:
           typeof mission.duration === 'number'
-            ? locale === 'en'
-              ? `${mission.duration} days`
-              : `${mission.duration}일`
+            ? tSummary('missionDurationDays', { days: mission.duration })
             : '-',
       }));
     }
 
     return [];
-  }, [locale, payload?.summarySnapshot?.recommendedMissions]);
+  }, [payload?.summarySnapshot?.recommendedMissions, tSummary]);
 
   const hasAnyNextSessionInput =
     Boolean(nextDate) || Boolean(nextStartTime) || Boolean(nextEndTime);
@@ -231,7 +229,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     try {
       await downloadSessionReport(sessionId, 'txt');
     } catch {
-      toast(locale === 'en' ? 'Failed to download TXT.' : 'TXT 다운로드에 실패했습니다.');
+      toast(tSummary('downloadTxtFailed'));
     }
   };
 
@@ -239,7 +237,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
     try {
       await downloadSessionReport(sessionId, 'pdf');
     } catch {
-      toast(locale === 'en' ? 'Failed to download PDF.' : 'PDF 다운로드에 실패했습니다.');
+      toast(tSummary('downloadPdfFailed'));
     }
   };
 
@@ -251,7 +249,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
       downloadSessionRecordingFile({
         sessionId,
         transcriptItems,
-        locale,
+        emptyRecordingText: tSummary('downloadAudioFallbackEmpty'),
         audioUrl: recordingAudioUrl || undefined,
       });
     }
@@ -297,7 +295,7 @@ export function useSessionSummary({ locale, sessionId }: UseSessionSummaryProps)
 
       toast(
         shouldReplaceWithEnglishFallback
-          ? 'An internal server error occurred while processing session summary.'
+          ? tSummary('submitInternalServerErrorEn')
           : normalizedMessage || tSummary('submitFailed'),
       );
       if (isInternalServerError) {

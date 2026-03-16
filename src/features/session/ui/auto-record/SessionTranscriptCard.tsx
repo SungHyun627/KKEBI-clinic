@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SessionTranscriptItem } from '../../model/types';
 
 interface SessionTranscriptCardProps {
@@ -22,9 +23,9 @@ export default function SessionTranscriptCard({
   formatTimestampToHms,
   renderHighlightedText,
 }: SessionTranscriptCardProps) {
+  const tSession = useTranslations('sessionList');
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const emptyMessage =
-    locale === 'en' ? 'Transcript will appear when recording starts' : '녹음 중인 상담이 없습니다';
+  const emptyMessage = tSession('transcriptEmpty');
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -52,12 +53,8 @@ export default function SessionTranscriptCard({
                   } ${item.speaker === 'counselor' ? 'text-label-neutral' : 'text-[#FF6363]'}`}
                 >
                   {item.speaker === 'counselor'
-                    ? locale === 'en'
-                      ? 'Counselor'
-                      : '상담사'
-                    : locale === 'en'
-                      ? 'Client'
-                      : '내담자'}
+                    ? tSession('speakerCounselor')
+                    : tSession('speakerClient')}
                 </span>
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div
@@ -79,7 +76,7 @@ export default function SessionTranscriptCard({
                       className={`inline-flex h-6 w-6 items-center justify-center rounded-[6px] hover:cursor-pointer ${
                         bookmarkIds.has(item.id) ? 'text-label-normal' : 'text-label-assistive'
                       }`}
-                      aria-label={locale === 'en' ? 'Bookmark' : '북마크'}
+                      aria-label={tSession('bookmarkAria')}
                     >
                       <span
                         className="h-6 w-6 bg-current"
