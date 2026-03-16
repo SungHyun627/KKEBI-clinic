@@ -84,10 +84,9 @@ const toClosedClientsResponse = (value: unknown): ClosedClientsResponse => {
 
 const requestTerminatedClients = async (): Promise<ClosedClientsResponse> => {
   try {
-    const response =
-      await httpClient.get<components['schemas']['ApiResponsePageTerminatedClientResponse']>(
-        '/api/v1/clients/closed',
-      );
+    const response = await httpClient.get<
+      components['schemas']['ApiResponsePageTerminatedClientResponse']
+    >('/api/v1/clients/terminated');
     return toClosedClientsResponse(response);
   } catch (error) {
     return {
@@ -111,7 +110,7 @@ const requestTerminatedClientsServer = async (): Promise<ClosedClientsResponse> 
   }
 
   try {
-    const response = await fetch(`${SERVER_API_BASE_URL}/api/v1/clients/closed`, {
+    const response = await fetch(`${SERVER_API_BASE_URL}/api/v1/clients/terminated`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       cache: 'no-store',

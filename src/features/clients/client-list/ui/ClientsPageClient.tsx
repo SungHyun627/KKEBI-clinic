@@ -102,10 +102,10 @@ export default function ClientsPageClient() {
           riskCaution: tClients('filterRiskCaution'),
           riskHigh: tClients('filterRiskHigh'),
           register: tClients('listRegister'),
-          closedSessions: tClients('listClosedSessions'),
+          closedSessions: tClients('listTerminatedClients'),
         }}
         onRegisterClick={() => router.push('/clients/new')}
-        onClosedClick={() => router.push('/clients/closed')}
+        onClosedClick={() => router.push('/clients/terminated')}
         onFilterChanged={() => setPage(1)}
       />
       <ClientListTableSection

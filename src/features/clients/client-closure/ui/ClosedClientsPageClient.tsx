@@ -45,11 +45,11 @@ export default function ClosedClientsPageClient() {
   const locale = useLocale();
   const queryClient = useQueryClient();
   const [pendingClientIds, setPendingClientIds] = useState<Set<string>>(new Set());
-  const periodLabel = tClients('closedColumnPeriod');
-  const ageGenderLabel = tClients('closedColumnAgeGender');
-  const closeReasonLabel = tClients('closedColumnReason');
-  const detailLabel = tClients('closedDetail');
-  const restoreLabel = tClients('closedRestore');
+  const periodLabel = tClients('terminatedColumnPeriod');
+  const ageGenderLabel = tClients('terminatedColumnAgeGender');
+  const closeReasonLabel = tClients('terminatedColumnReason');
+  const detailLabel = tClients('terminatedDetail');
+  const restoreLabel = tClients('terminatedRestore');
 
   const closedClientsQuery = useQuery({
     queryKey: closedClientsQueryKey,
@@ -111,9 +111,9 @@ export default function ClosedClientsPageClient() {
     <section className="flex w-full flex-col items-start gap-[23px]">
       <div className="flex flex-col w-full items-start gap-[6px]">
         <h1 className="body-18 font-semibold text-label-normal">
-          {tClients('listClosedSessions')}
+          {tClients('listTerminatedClients')}
         </h1>
-        <p className="body-16 text-label-neutral">{tClients('closedDescription')}</p>
+        <p className="body-16 text-label-neutral">{tClients('terminatedDescription')}</p>
       </div>
       <div className="w-full mb-12">
         <div className="grid w-full grid-cols-[4fr_2fr_2fr_4fr_2fr_4fr] items-center gap-3 rounded-t-2xl border border-neutral-95 bg-neutral-99 px-4 py-3 max-[1200px]:gap-2 max-[1100px]:grid-cols-[4fr_2fr_4fr_2fr_4fr] max-[1100px]:px-3">
@@ -136,13 +136,13 @@ export default function ClosedClientsPageClient() {
 
         {isLoading ? (
           <div className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-            {tClients('closedLoading')}
+            {tClients('terminatedLoading')}
           </div>
         ) : (
           <ul className="flex w-full flex-col">
             {terminatedClients.length === 0 ? (
               <li className="body-14 flex h-[180px] w-full items-center justify-center border-x border-b border-neutral-95 bg-white text-label-alternative">
-                {tClients('closedEmptyLast30Days')}
+                {tClients('terminatedEmptyLast30Days')}
               </li>
             ) : (
               terminatedClients.map((item, index) => (

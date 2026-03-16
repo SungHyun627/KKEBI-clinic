@@ -16,9 +16,9 @@ const closeReasonStyleByValue: Record<ClosedClientItem['closeReason'], string> =
 const CloseReasonChip = ({ value, className }: CloseReasonChipProps) => {
   const tClients = useTranslations('clients');
   const closeReasonLabelByValue: Record<ClosedClientItem['closeReason'], string> = {
-    '회기 종료': tClients('closedReasonSessionComplete'),
-    '중도 탈락': tClients('closedReasonDropout'),
-    기타: tClients('closedReasonOther'),
+    '회기 종료': tClients('terminatedReasonSessionComplete'),
+    '중도 탈락': tClients('terminatedReasonDropout'),
+    기타: tClients('terminatedReasonOther'),
   };
 
   return (

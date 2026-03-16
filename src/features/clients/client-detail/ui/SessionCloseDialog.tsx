@@ -38,10 +38,10 @@ const SessionCloseDialog = ({
     () => [
       {
         value: 'session-complete' as const,
-        label: tClients('closedReasonSessionComplete'),
+        label: tClients('terminatedReasonSessionComplete'),
       },
-      { value: 'dropout' as const, label: tClients('closedReasonDropout') },
-      { value: 'other' as const, label: tClients('closedReasonOther') },
+      { value: 'dropout' as const, label: tClients('terminatedReasonDropout') },
+      { value: 'other' as const, label: tClients('terminatedReasonOther') },
     ],
     [tClients],
   );

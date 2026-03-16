@@ -134,7 +134,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         (item.href !== '/' && pathname.startsWith(item.href)),
     )?.key ?? 'dashboard';
   const isClientsBackHeaderPage =
-    pathname === '/clients/closed' || pathname.startsWith('/clients/new');
+    pathname === '/clients/terminated' ||
+    pathname === '/clients/closed' ||
+    pathname.startsWith('/clients/new');
   const clientsBackHeaderTitle = pathname.startsWith('/clients/new')
     ? tClients('listRegister')
     : tNav('clients');
