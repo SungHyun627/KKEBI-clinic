@@ -186,7 +186,8 @@ export async function request<T = unknown>(path: string, options: RequestOptions
     if (refreshResult === 'transient') {
       throw new ApiError({
         status: 503,
-        message: 'Auth refresh temporarily unavailable',
+        code: 'AUTH_REFRESH_TEMPORARILY_UNAVAILABLE',
+        message: 'AUTH_REFRESH_TEMPORARILY_UNAVAILABLE',
       });
     }
   }

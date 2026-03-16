@@ -11,6 +11,7 @@ import type {
 } from '../types/session-list';
 import type { SessionStatusTab } from '../ui/SessionStatusTabs';
 import { sessionListQueryKey } from '../lib/query-keys';
+import { resolveUserErrorMessage } from '@/shared/lib/resolve-user-error-message';
 
 export type SessionViewFilter = 'list' | 'calendar';
 
@@ -18,6 +19,8 @@ interface UseSessionListParams {
   initialStatus: SessionStatus;
   locale: string;
   loadFailedMessage: string;
+  sessionExpiredMessage: string;
+  temporaryUnavailableMessage: string;
 }
 
 const isSessionStatusTab = (value: string | null): value is SessionStatusTab =>
@@ -49,6 +52,8 @@ export const useSessionList = ({
   initialStatus,
   locale,
   loadFailedMessage,
+  sessionExpiredMessage,
+  temporaryUnavailableMessage,
 }: UseSessionListParams) => {
   const searchParams = useSearchParams();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -87,7 +92,16 @@ export const useSessionList = ({
         : [],
     [queryResult, selectedStatus],
   );
-  const errorMessage = sessionListQuery.isError || isQueryInvalid ? loadFailedMessage : null;
+  const queryErrorMessage =
+    sessionListQuery.error instanceof Error ? sessionListQuery.error.message : undefined;
+  const errorMessage =
+    sessionListQuery.isError || isQueryInvalid
+      ? resolveUserErrorMessage(queryResult?.message || queryErrorMessage, {
+          defaultMessage: loadFailedMessage,
+          sessionExpiredMessage,
+          temporaryUnavailableMessage,
+        })
+      : null;
   const isLoading = sessionListQuery.isPending;
 
   const visibleScheduledGroups = useMemo(() => {

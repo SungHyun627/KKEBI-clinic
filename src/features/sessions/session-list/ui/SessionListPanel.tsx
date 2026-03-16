@@ -15,6 +15,7 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
   const locale = useLocale();
   const tClients = useTranslations('clients');
   const tSessions = useTranslations('sessionList');
+  const tCommon = useTranslations('common');
   const {
     isLoading,
     errorMessage,
@@ -31,6 +32,8 @@ const SessionListPanel = ({ initialStatus = 'scheduled' }: SessionListPanelProps
     initialStatus,
     locale,
     loadFailedMessage: tSessions('loadFailed'),
+    sessionExpiredMessage: tCommon('errorSessionExpired'),
+    temporaryUnavailableMessage: tCommon('errorTemporaryUnavailable'),
   });
 
   const listContent = (() => {

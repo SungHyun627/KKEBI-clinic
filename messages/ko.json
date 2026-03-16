@@ -32,7 +32,9 @@
     "sessionStartTitle": "상담 세션 시작",
     "sessionStartDescription": "선택한 내담자의 상담 세션 시작 페이지입니다.",
     "inputAssistiveButton": "입력 보조 버튼",
-    "inputClearContent": "입력 내용 초기화"
+    "inputClearContent": "입력 내용 초기화",
+    "errorSessionExpired": "로그인이 만료되었어요. 다시 로그인해 주세요.",
+    "errorTemporaryUnavailable": "일시적인 오류가 발생했어요. 잠시 후 다시 시도해 주세요."
   },
   "nav": {
     "dashboard": "대시보드",

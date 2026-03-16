@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Title } from '@/shared/ui/title';
+import { resolveUserErrorMessage } from '@/shared/lib/resolve-user-error-message';
 import type { TodayScheduleItem } from '../types/schedule';
 import { getTodaySchedules } from './api/getTodaySchedules';
 import TodayScheduleHeader from './ui/TodayScheduleHeader';
@@ -18,6 +19,7 @@ export default function TodayScheduleSection({
   initialLoaded = false,
 }: TodayScheduleSectionProps) {
   const tDashboard = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
   const [schedules, setSchedules] = useState<TodayScheduleItem[]>(() => initialSchedules);
   const [isLoading, setIsLoading] = useState(!initialLoaded);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -33,7 +35,13 @@ export default function TodayScheduleSection({
 
       if (!result.success || !Array.isArray(result.data)) {
         setSchedules([]);
-        setErrorMessage(result.message || tDashboard('todayScheduleLoadFailed'));
+        setErrorMessage(
+          resolveUserErrorMessage(result.message, {
+            defaultMessage: tDashboard('todayScheduleLoadFailed'),
+            sessionExpiredMessage: tCommon('errorSessionExpired'),
+            temporaryUnavailableMessage: tCommon('errorTemporaryUnavailable'),
+          }),
+        );
         setIsLoading(false);
         return;
       }
@@ -45,7 +53,7 @@ export default function TodayScheduleSection({
     };
 
     void loadTodaySchedules();
-  }, [initialLoaded, tDashboard]);
+  }, [initialLoaded, tCommon, tDashboard]);
 
   if (isLoading) {
     return (

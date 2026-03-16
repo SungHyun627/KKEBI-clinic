@@ -22,6 +22,7 @@ const toRiskFilterFromQuery = (value: string | null): RiskFilter => {
 
 export default function ClientsPageClient() {
   const tClients = useTranslations('clients');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -43,6 +44,8 @@ export default function ClientsPageClient() {
     useClientList({
       locale,
       listLoadFailedMessage: tClients('listLoadFailed'),
+      sessionExpiredMessage: tCommon('errorSessionExpired'),
+      temporaryUnavailableMessage: tCommon('errorTemporaryUnavailable'),
       fallbackConcerns,
       page,
       pageSize: PAGE_SIZE,

@@ -11,10 +11,13 @@ import { mapClientSummariesToClients } from '@/features/clients/client-list/lib/
 import { clientListQueryKey } from '@/features/clients/client-list/lib/query-keys';
 import type { RiskFilter } from '@/features/clients/client-list/types/client-list';
 import type { components } from '@/shared/api/generated-types';
+import { resolveUserErrorMessage } from '@/shared/lib/resolve-user-error-message';
 
 interface UseClientListParams {
   locale: string;
   listLoadFailedMessage: string;
+  sessionExpiredMessage: string;
+  temporaryUnavailableMessage: string;
   fallbackConcerns: string[];
   page: number;
   pageSize: number;
@@ -43,6 +46,8 @@ const mapRiskFilterToRiskLevel = (riskFilter: RiskFilter): RiskLevel | undefined
 const useClientList = ({
   locale,
   listLoadFailedMessage,
+  sessionExpiredMessage,
+  temporaryUnavailableMessage,
   fallbackConcerns,
   page,
   pageSize,
@@ -93,10 +98,21 @@ const useClientList = ({
     clientListQuery.data && (!clientListQuery.data.success || !clientListQuery.data.data),
   );
   const isLoading = clientListQuery.isPending || (clientListQuery.isFetching && hasInvalidResponse);
+  const resolvedMessage = resolveUserErrorMessage(clientListQuery.data?.message, {
+    defaultMessage: listLoadFailedMessage,
+    sessionExpiredMessage,
+    temporaryUnavailableMessage,
+  });
+  const queryErrorMessage =
+    clientListQuery.error instanceof Error ? clientListQuery.error.message : undefined;
   const errorMessage = hasInvalidResponse
-    ? clientListQuery.data?.message || listLoadFailedMessage
+    ? resolvedMessage
     : clientListQuery.isError
-      ? listLoadFailedMessage
+      ? resolveUserErrorMessage(queryErrorMessage, {
+          defaultMessage: listLoadFailedMessage,
+          sessionExpiredMessage,
+          temporaryUnavailableMessage,
+        })
       : null;
 
   const removeClient = (clientId: string) => {

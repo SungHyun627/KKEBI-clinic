@@ -32,7 +32,9 @@
     "sessionStartTitle": "Start Session",
     "sessionStartDescription": "This is the session start page for the selected client.",
     "inputAssistiveButton": "Input assistive button",
-    "inputClearContent": "Clear input content"
+    "inputClearContent": "Clear input content",
+    "errorSessionExpired": "Your session has expired. Please sign in again.",
+    "errorTemporaryUnavailable": "A temporary error occurred. Please try again shortly."
   },
   "nav": {
     "dashboard": "Dashboard",

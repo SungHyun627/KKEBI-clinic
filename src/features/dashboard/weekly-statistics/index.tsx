@@ -10,6 +10,7 @@ import type {
 import { getRiskAlerts } from './api/getRiskAlerts';
 import { getWeeklyStatistics } from './api/getWeeklyStatistics';
 import { subscribeNotificationReceived } from '@/features/notification/lib/notification-events';
+import { resolveUserErrorMessage } from '@/shared/lib/resolve-user-error-message';
 import WeeklyStatisticsCard from './ui/WeeklyStatisticsCard';
 import RiskAlert from './ui/RiskAlert';
 
@@ -25,6 +26,7 @@ const WeeklyStatisticsSection = ({
   initialLoaded = false,
 }: WeeklyStatisticsSectionProps) => {
   const tDashboard = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
   const [statistics, setStatistics] = useState<WeeklyStatistics | null>(initialStatistics);
   const [riskAlerts, setRiskAlerts] = useState<RiskAlertType[]>(initialRiskAlerts);
   const [isLoading, setIsLoading] = useState(!initialLoaded);
@@ -38,7 +40,13 @@ const WeeklyStatisticsSection = ({
     ]);
 
     if (!statisticsResult.success || !statisticsResult.data) {
-      setErrorMessage(statisticsResult.message || tDashboard('weeklyStatsLoadFailed'));
+      setErrorMessage(
+        resolveUserErrorMessage(statisticsResult.message, {
+          defaultMessage: tDashboard('weeklyStatsLoadFailed'),
+          sessionExpiredMessage: tCommon('errorSessionExpired'),
+          temporaryUnavailableMessage: tCommon('errorTemporaryUnavailable'),
+        }),
+      );
       setStatistics(null);
       setRiskAlerts([]);
       setIsLoading(false);
@@ -49,7 +57,7 @@ const WeeklyStatisticsSection = ({
     setRiskAlerts(riskAlertsResult.success && riskAlertsResult.data ? riskAlertsResult.data : []);
     setErrorMessage(null);
     setIsLoading(false);
-  }, [tDashboard]);
+  }, [tCommon, tDashboard]);
 
   useEffect(() => {
     if (initialLoaded) {
