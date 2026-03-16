@@ -30,7 +30,6 @@ import {
   useNotificationSse,
 } from '@/features/notification';
 import { subscribeAuthRequired } from '@/shared/lib/auth-events';
-import { ensureAccessToken } from '@/shared/api/http-client';
 import { isLighthouseBypassAuthEnabled } from '@/shared/lib/perf-flags';
 
 const navItems = [
@@ -66,13 +65,6 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       router.replace('/login');
     }
   }, [authBypassEnabled, authSession, router]);
-
-  useEffect(() => {
-    if (authBypassEnabled) return;
-    const latestSession = getAuthSession();
-    if (!latestSession?.authenticated) return;
-    void ensureAccessToken();
-  }, [authBypassEnabled, authSession]);
 
   useEffect(() => {
     if (authBypassEnabled) return;

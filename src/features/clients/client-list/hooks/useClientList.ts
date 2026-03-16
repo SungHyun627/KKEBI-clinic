@@ -70,9 +70,8 @@ const useClientList = ({
         name: normalizedKeyword,
         riskLevel: normalizedRiskLevel,
       }),
-    staleTime: 0,
+    staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    refetchOnMount: 'always',
     placeholderData: (previousData) => previousData,
   });
 
