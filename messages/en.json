@@ -151,6 +151,7 @@
     "listEmpty": "No clients match the selected criteria.",
     "listLoading": "Loading client list.",
     "listLoadFailed": "Failed to load client list.",
+    "listNoCheckin": "None",
     "listSearchPlaceholder": "Search by client name.",
     "listRiskType": "Risk level",
     "listAll": "All",

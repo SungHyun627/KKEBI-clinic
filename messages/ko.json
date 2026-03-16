@@ -151,6 +151,7 @@
     "listEmpty": "조건에 맞는 내담자가 없습니다.",
     "listLoading": "내담자 목록을 불러오는 중입니다.",
     "listLoadFailed": "내담자 목록을 불러오지 못했습니다.",
+    "listNoCheckin": "없음",
     "listSearchPlaceholder": "내담자 성함을 검색해 보세요.",
     "listRiskType": "위험 유형",
     "listAll": "전체",

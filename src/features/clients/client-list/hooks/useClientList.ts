@@ -18,6 +18,7 @@ interface UseClientListParams {
   listLoadFailedMessage: string;
   sessionExpiredMessage: string;
   temporaryUnavailableMessage: string;
+  noCheckinLabel: string;
   fallbackConcerns: string[];
   page: number;
   pageSize: number;
@@ -48,6 +49,7 @@ const useClientList = ({
   listLoadFailedMessage,
   sessionExpiredMessage,
   temporaryUnavailableMessage,
+  noCheckinLabel,
   fallbackConcerns,
   page,
   pageSize,
@@ -83,8 +85,8 @@ const useClientList = ({
   const clients = useMemo(() => {
     const response = clientListQuery.data;
     if (!response?.success || !response.data) return [];
-    return mapClientSummariesToClients(response.data, locale, fallbackConcerns);
-  }, [clientListQuery.data, fallbackConcerns, locale]);
+    return mapClientSummariesToClients(response.data, locale, fallbackConcerns, noCheckinLabel);
+  }, [clientListQuery.data, fallbackConcerns, locale, noCheckinLabel]);
 
   const totalElements =
     clientListQuery.data?.success && clientListQuery.data

@@ -9,6 +9,7 @@ export const mapClientSummariesToClients = (
   summaries: ClientSummaryResponse[],
   locale: string,
   fallbackConcerns: string[],
+  noCheckinLabel: string,
 ): ClientLookupItem[] =>
   summaries.map((summary) => {
     const clientId = String(summary.id ?? '');
@@ -20,7 +21,7 @@ export const mapClientSummariesToClients = (
       : fallbackConcerns;
 
     return {
-      time: summary.lastCheckInLabel?.trim() ? summary.lastCheckInLabel : '1일 전',
+      time: summary.lastCheckInLabel?.trim() ? summary.lastCheckInLabel : noCheckinLabel,
       clientId,
       clientName: getClientNameByLocale(clientId, summary.name ?? '-', locale),
       streakDays: Number(summary.streak ?? 0),

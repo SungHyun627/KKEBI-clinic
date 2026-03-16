@@ -46,6 +46,7 @@ export default function ClientsPageClient() {
       listLoadFailedMessage: tClients('listLoadFailed'),
       sessionExpiredMessage: tCommon('errorSessionExpired'),
       temporaryUnavailableMessage: tCommon('errorTemporaryUnavailable'),
+      noCheckinLabel: tClients('listNoCheckin'),
       fallbackConcerns,
       page,
       pageSize: PAGE_SIZE,
