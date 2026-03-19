@@ -34,6 +34,107 @@ export const withMockedAuthenticatedSession = async (context: BrowserContext, pa
       }),
     });
   });
+
+  await page.route(/\/api\/v1\/notifications\/subscribe(\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: {
+        'content-type': 'text/event-stream; charset=utf-8',
+        'cache-control': 'no-cache, no-transform',
+        connection: 'keep-alive',
+      },
+      body: '',
+    });
+  });
+
+  await page.route('**/api/v1/counselor/dashboard/weekly-stats', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {},
+      }),
+    });
+  });
+
+  await page.route('**/api/v1/counselor/dashboard/today-schedule', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {
+          schedules: [],
+        },
+      }),
+    });
+  });
+
+  await page.route('**/api/v1/counselor/dashboard/risk-alerts', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {
+          items: [],
+        },
+      }),
+    });
+  });
+
+  await page.route('**/api/v1/clients?**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+        },
+      }),
+    });
+  });
+
+  await page.route('**/api/v1/sessions?**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {
+          scheduledSessions: [],
+          completedSessions: [],
+        },
+      }),
+    });
+  });
+
+  await page.route(/\/api\/v1\/sessions\/\d+\/insights\/stream(\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: {
+        'content-type': 'text/event-stream; charset=utf-8',
+        'cache-control': 'no-cache, no-transform',
+        connection: 'keep-alive',
+      },
+      body: '',
+    });
+  });
+
+  await page.route(/\/api\/v1\/sessions\/\d+\/summary(\?.*)?$/, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {},
+      }),
+    });
+  });
 };
 
 export const withClientRegistrationDraft = async (context: BrowserContext) => {
