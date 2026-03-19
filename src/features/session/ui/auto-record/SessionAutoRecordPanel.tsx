@@ -20,6 +20,12 @@ import SessionCounselorMemoCard from './SessionCounselorMemoCard';
 import SessionAudioControls from './SessionAudioControls';
 import { toast } from '@/shared/ui/toast';
 import Image from 'next/image';
+import {
+  normalizeForSummary,
+  parseSessionStreamEventData,
+  resolveEmotionFromChunkResult,
+  shouldTriggerSpeakerSwitchShortcut,
+} from './session-auto-record-utils';
 
 type PersistedAutoRecordState = {
   transcriptItems: SessionAutoRecordData['transcripts'];
@@ -44,228 +50,6 @@ const formatNowAsLocalDateTime = () => {
   const mi = String(now.getMinutes()).padStart(2, '0');
   const ss = String(now.getSeconds()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}`;
-};
-
-const parseJsonObject = (value: unknown): Record<string, unknown> | null => {
-  if (typeof value === 'object' && value) return value as Record<string, unknown>;
-  if (typeof value !== 'string') return null;
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    return typeof parsed === 'object' && parsed ? (parsed as Record<string, unknown>) : null;
-  } catch {
-    return null;
-  }
-};
-
-const mapEmotionKeyToSessionEmotion = (
-  key: string,
-): SessionInsightsData['currentEmotion'] | undefined => {
-  const normalized = key.toLowerCase();
-  if (normalized === 'happy') return 'happy';
-  if (normalized === 'sad') return 'sad';
-  if (normalized === 'angry') return 'angry';
-  if (normalized === 'disgust') return 'disgust';
-  if (normalized === 'fear' || normalized === 'feaer' || normalized === 'fearful') return 'fearful';
-  if (normalized === 'neutral') return 'calm';
-  if (normalized === 'surprise') return 'surprise';
-  return undefined;
-};
-
-const mapDistortionToType = (value: string): SessionInsightsData['distortionType'] | undefined => {
-  const normalized = value.trim().toLowerCase().replace(/\s+/g, '');
-  if (normalized === 'black_and_white' || normalized === '흑백논리') return 'black_and_white';
-  if (
-    normalized === 'overgeneralization' ||
-    normalized === '과잉일반화' ||
-    normalized === '과일반화' ||
-    normalized === '과도한일반화'
-  ) {
-    return 'overgeneralization';
-  }
-  if (normalized === 'catastrophizing' || normalized === '파국화') return 'catastrophizing';
-  if (
-    normalized === 'emotionalreasoning' ||
-    normalized === '감정적추론' ||
-    normalized === '정서적추론'
-  ) {
-    return 'catastrophizing';
-  }
-  if (
-    normalized === 'selfdeprecation' ||
-    normalized === 'self-criticism' ||
-    normalized === '자기비하'
-  ) {
-    return 'should_statement';
-  }
-  if (
-    normalized === 'none' ||
-    normalized === '없음' ||
-    normalized === '없다' ||
-    normalized === '해당 없음' ||
-    normalized === 'no_distortion' ||
-    normalized === 'no distortion'
-  ) {
-    return 'none';
-  }
-  if (
-    normalized === 'should_statement' ||
-    normalized === '당위적 사고' ||
-    normalized === '당위적사고'
-  ) {
-    return 'should_statement';
-  }
-  return undefined;
-};
-
-const splitDistortionValues = (value: string) =>
-  value
-    .split(/[,，/|;]+/g)
-    .map((item) => item.trim())
-    .filter((item) => item.length > 0);
-
-const toFiniteNumber = (value: unknown) => {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string' && value.trim().length > 0) {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return undefined;
-};
-
-const pickNonEmptyString = (...values: unknown[]) => {
-  for (const value of values) {
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      if (trimmed.length > 0) return trimmed;
-    }
-  }
-  return undefined;
-};
-
-const normalizeForSummary = (value: string, maxLength = 50) => {
-  const collapsed = value.replace(/\s+/g, ' ').trim();
-  if (collapsed.length <= maxLength) return collapsed;
-  return `${collapsed.slice(0, maxLength)}...`;
-};
-
-const extractDistortionPatch = (payload: Record<string, unknown>) => {
-  const distortionPayload = parseJsonObject(payload.distortion);
-  const mappedTypeCandidates = [
-    payload.distortionType,
-    payload.distortion_type,
-    payload.cognitiveDistortionType,
-    payload.cognitive_distortion_type,
-    distortionPayload?.distortionType,
-    distortionPayload?.distortion_type,
-    distortionPayload?.type,
-    distortionPayload?.distortion,
-  ]
-    .filter((item): item is string => typeof item === 'string')
-    .flatMap((item) => splitDistortionValues(item))
-    .map((item) => mapDistortionToType(item))
-    .filter((item): item is SessionInsightsData['distortionType'] => Boolean(item));
-
-  const distortionType =
-    mappedTypeCandidates.find((item) => item !== 'none') ?? mappedTypeCandidates[0];
-  const distortionSummary = pickNonEmptyString(
-    payload.distortionSummary,
-    payload.distortion_summary,
-    payload.cognitiveDistortionSummary,
-    payload.cognitive_distortion_summary,
-    payload.distortionExample,
-    payload.distortion_example,
-    distortionPayload?.summary,
-    distortionPayload?.distortionSummary,
-    distortionPayload?.distortion_summary,
-    distortionPayload?.cognitiveDistortionSummary,
-    distortionPayload?.cognitive_distortion_summary,
-    distortionPayload?.example,
-    distortionPayload?.distortionExample,
-    distortionPayload?.distortion_example,
-    distortionPayload?.detail,
-  );
-
-  return {
-    distortionType,
-    distortionSummary,
-  };
-};
-
-const extractPhq9ScoreFromPayload = (payload: Record<string, unknown>) => {
-  const directCandidates = [
-    payload.phq9Score,
-    payload.phq9,
-    payload.phqScore,
-    payload.phq,
-    payload.phq_9,
-    payload.phq9_score,
-  ];
-
-  for (const candidate of directCandidates) {
-    const parsed = toFiniteNumber(candidate);
-    if (typeof parsed === 'number') {
-      const rounded = Math.round(parsed);
-      if (rounded >= 0 && rounded <= 27) return rounded;
-    }
-  }
-
-  const nestedPhq =
-    typeof payload.phq9 === 'object' && payload.phq9
-      ? (payload.phq9 as Record<string, unknown>)
-      : null;
-  if (nestedPhq) {
-    const parsed = toFiniteNumber(nestedPhq.score ?? nestedPhq.total ?? nestedPhq.value);
-    if (typeof parsed === 'number') {
-      const rounded = Math.round(parsed);
-      if (rounded >= 0 && rounded <= 27) return rounded;
-    }
-  }
-
-  return undefined;
-};
-
-const resolveEmotionFromChunkResult = (chunkData?: {
-  topEmotion?: string;
-  emotionProbs?: Record<string, number>;
-}) => {
-  if (!chunkData) {
-    return { emotion: undefined, confidence: undefined };
-  }
-
-  const mappedFromTop = chunkData.topEmotion
-    ? mapEmotionKeyToSessionEmotion(chunkData.topEmotion)
-    : undefined;
-  if (mappedFromTop) {
-    const probs = chunkData.emotionProbs && Object.entries(chunkData.emotionProbs);
-    const topProb =
-      probs && probs.length > 0
-        ? probs.reduce((prev, curr) => (curr[1] > prev[1] ? curr : prev))[1]
-        : undefined;
-    const confidence =
-      typeof topProb === 'number'
-        ? Math.max(0, Math.min(100, Math.round(topProb <= 1 ? topProb * 100 : topProb)))
-        : undefined;
-    return { emotion: mappedFromTop, confidence };
-  }
-
-  const probs = chunkData.emotionProbs ? Object.entries(chunkData.emotionProbs) : [];
-  if (probs.length === 0) {
-    return { emotion: undefined, confidence: undefined };
-  }
-
-  const topEntry = probs.reduce((prev, curr) => (curr[1] > prev[1] ? curr : prev));
-  const mappedFromProb = mapEmotionKeyToSessionEmotion(topEntry[0]);
-  if (!mappedFromProb) {
-    return { emotion: undefined, confidence: undefined };
-  }
-
-  return {
-    emotion: mappedFromProb,
-    confidence: Math.max(
-      0,
-      Math.min(100, Math.round(topEntry[1] <= 1 ? topEntry[1] * 100 : topEntry[1])),
-    ),
-  };
 };
 
 interface SessionAutoRecordPanelProps {
@@ -413,67 +197,23 @@ export default function SessionAutoRecordPanel({
     hydrate,
   });
 
-  // Extract nested data envelope if SSE payload shape is { code, message, data }
-  const unwrapStreamData = useCallback((input: unknown) => {
-    if (typeof input === 'object' && input && 'data' in input) {
-      return (input as { data?: unknown }).data ?? input;
-    }
-    return input;
-  }, []);
-
   // Parse SSE events to transcript/summary/insights targets
   const handleStreamEvent = useCallback(
     (event: { type: string; data: unknown }) => {
-      const payload = unwrapStreamData(event.data);
-      if (!payload || typeof payload !== 'object') return;
-      const obj = payload as Record<string, unknown>;
-      const rawSpeaker = typeof obj.speaker === 'string' ? obj.speaker.toLowerCase() : undefined;
+      const parsed = parseSessionStreamEventData(event.data);
+      if (!parsed) return;
 
-      // Transcript event: append or patch transcript row
-      if (typeof obj.transcriptId === 'number' && typeof obj.text === 'string') {
-        upsertTranscriptFromSse({
-          transcriptId: obj.transcriptId,
-          text: obj.text,
-          speaker: rawSpeaker === 'counselor' || rawSpeaker === 'client' ? rawSpeaker : undefined,
-          timestamp: typeof obj.timestamp === 'string' ? obj.timestamp : undefined,
-        });
+      if (parsed.transcriptUpsert) {
+        upsertTranscriptFromSse(parsed.transcriptUpsert);
       }
-
-      const eventEmotion = pickNonEmptyString(
-        obj.currentEmotion,
-        obj.current_emotion,
-        obj.emotion,
-        obj.emotionType,
-        obj.emotion_type,
-        obj.topEmotion,
-        obj.top_emotion,
-      );
-      const mappedEventEmotion = eventEmotion
-        ? mapEmotionKeyToSessionEmotion(eventEmotion)
-        : undefined;
-      if (mappedEventEmotion) {
-        setLiveEmotion(mappedEventEmotion);
+      if (parsed.nextEmotion) {
+        setLiveEmotion(parsed.nextEmotion);
       }
-
-      // Insights event: PHQ-9/인지왜곡은 SSE 기준으로 반영
-      const nextPhq9Score = extractPhq9ScoreFromPayload(obj);
-      const { distortionType, distortionSummary } = extractDistortionPatch(obj);
-
-      if (
-        typeof mappedEventEmotion === 'string' ||
-        typeof nextPhq9Score === 'number' ||
-        typeof distortionType === 'string' ||
-        typeof distortionSummary === 'string'
-      ) {
-        onAnalysisChange?.({
-          currentEmotion: mappedEventEmotion,
-          phq9Score: nextPhq9Score,
-          distortionType,
-          distortionExample: distortionSummary,
-        });
+      if (parsed.analysisPatch) {
+        onAnalysisChange?.(parsed.analysisPatch);
       }
     },
-    [onAnalysisChange, unwrapStreamData, upsertTranscriptFromSse],
+    [onAnalysisChange, upsertTranscriptFromSse],
   );
 
   // Subscribe to SSE after recording starts
@@ -817,22 +557,15 @@ export default function SessionAutoRecordPanel({
     // Keyboard shortcuts:
     // - Enter / Space: upload current speaker chunk then toggle speaker
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.isComposing) return;
-      if (event.repeat) return;
-      const target = event.target as HTMLElement | null;
-      const tag = target?.tagName?.toLowerCase();
-      const isEditable =
-        tag === 'input' ||
-        tag === 'textarea' ||
-        tag === 'select' ||
-        Boolean(target?.isContentEditable);
-      if (isEditable) return;
-
+      const target = event.target as Pick<HTMLElement, 'tagName' | 'isContentEditable'> | null;
       if (
-        event.code === 'Space' ||
-        event.key === ' ' ||
-        event.code === 'Enter' ||
-        event.key === 'Enter'
+        shouldTriggerSpeakerSwitchShortcut({
+          code: event.code,
+          key: event.key,
+          repeat: event.repeat,
+          isComposing: event.isComposing,
+          target,
+        })
       ) {
         event.preventDefault();
         void handleSpeakerSwitch();
