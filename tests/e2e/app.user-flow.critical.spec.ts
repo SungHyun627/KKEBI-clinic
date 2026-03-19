@@ -1,17 +1,20 @@
 import { expect, test } from '@playwright/test';
 import { withMockedAuthenticatedSession } from './helpers/auth';
 import { captureServerErrorResponses, expectNoServerError } from './helpers/assertions';
+import { mockSessionInfoRoute, withActiveRealtimeRecordingState } from './helpers/session';
 
 test('인증 세션 기준 핵심 사용자 플로우가 500 없이 동작한다', async ({ context, page }) => {
   await withMockedAuthenticatedSession(context, page);
+  await withActiveRealtimeRecordingState(context, '1');
+  await mockSessionInfoRoute(page, { sessionId: '1' });
   const serverErrorCapture = captureServerErrorResponses(page);
 
   try {
     await page.goto('/ko');
     await expectNoServerError(page);
     await expect(page).toHaveURL(/\/ko$/);
-    await expect(page.getByText('주간 통계')).toBeVisible();
-    await expect(page.getByText('오늘의 일정')).toBeVisible();
+    await expect(page.getByText('주간 통계', { exact: true })).toBeVisible();
+    await expect(page.getByText('오늘의 일정', { exact: true })).toBeVisible();
 
     await page
       .getByRole('link', { name: /내담자|clients/i })

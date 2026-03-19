@@ -1,16 +1,19 @@
 import { expect, test } from '@playwright/test';
 import { captureServerErrorResponses, expectNoServerError } from './helpers/assertions';
 import { withMockedAuthenticatedSession } from './helpers/auth';
+import { mockSessionInfoRoute, withActiveRealtimeRecordingState } from './helpers/session';
 
 test('EN 핵심 경로가 인증 세션에서 500 없이 렌더링된다', async ({ context, page }) => {
   await withMockedAuthenticatedSession(context, page);
+  await withActiveRealtimeRecordingState(context, '1');
+  await mockSessionInfoRoute(page, { sessionId: '1', clientName: 'John Doe' });
   const serverErrorCapture = captureServerErrorResponses(page);
 
   try {
     await page.goto('/en');
     await expectNoServerError(page);
     await expect(page).toHaveURL(/\/en$/);
-    await expect(page.getByText('Weekly stats')).toBeVisible();
+    await expect(page.getByText('Weekly stats', { exact: true })).toBeVisible();
     await expect(page.getByText(/Today.?s schedule/)).toBeVisible();
 
     await page.goto('/en/clients');
