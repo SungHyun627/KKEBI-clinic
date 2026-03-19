@@ -246,13 +246,15 @@ export const parseSessionStreamEventData = (rawData: unknown): ParsedSessionStre
 
   const obj = payload as Record<string, unknown>;
   const rawSpeaker = typeof obj.speaker === 'string' ? obj.speaker.toLowerCase() : undefined;
+  const parsedSpeaker: 'counselor' | 'client' | undefined =
+    rawSpeaker === 'counselor' || rawSpeaker === 'client' ? rawSpeaker : undefined;
 
   const transcriptUpsert =
     typeof obj.transcriptId === 'number' && typeof obj.text === 'string'
       ? {
           transcriptId: obj.transcriptId,
           text: obj.text,
-          speaker: rawSpeaker === 'counselor' || rawSpeaker === 'client' ? rawSpeaker : undefined,
+          speaker: parsedSpeaker,
           timestamp: typeof obj.timestamp === 'string' ? obj.timestamp : undefined,
         }
       : undefined;
