@@ -4,11 +4,11 @@
 
 ## Tech Stack
 
-- Framework: Next.js 16 (App Router), React 19,
+- Framework: Next.js 16 (App Router), React 19
 - Language: TypeScript
 - State Management: TanStack Query
 - UI: Tailwind CSS v4, Radix UI primitives
-- Form/Validation: React Hook Form
+- Form, Validation: React Hook Form
 - Test: Vitest, Testing Library, Playwright
 - Tooling: ESLint, Prettier, Husky, lint-staged
 - API Schema & Types: openapi-typescript
@@ -31,8 +31,7 @@
 
 ## Commands
 
-- Node.js 20+
-- pnpm 9+
+- Node.js 20+, pnpm 9+
 
 ```bash
 # Run
@@ -56,16 +55,13 @@ pnpm generate:types   # openapi -> src/shared/api/generated-types.ts
 
 ## Environment Variables
 
-`.env.local`:
-
 ```bash
+## .env.local
 API_BASE_URL=
 NEXT_PUBLIC_API_BASE_URL=
 ```
 
-## Project Structure & Architecture Principles
-
-### Structure Overview
+## Project Structure
 
 ```text
 src/
@@ -80,14 +76,11 @@ src/
 └── proxy.ts                  # 로케일 미들웨어 엔트리
 
 messages/
-├── ko.json
-└── en.json
-
-scripts/
-└── sync-i18n-from-csv.mjs
+├── ko.json                   # 한국어 번역 메시지 리소스
+└── en.json                   # 영어 번역 메시지 리소스
 ```
 
-### Architecture Principles
+## Architecture Principles & API Conventions
 
 - 허용: `app -> features -> shared`, `features -> shared`
 - 금지: `shared -> features/app`
@@ -99,17 +92,17 @@ scripts/
 
 - 로케일 prefix 기반 라우팅: `/ko`, `/en`
 - 사용자 노출 텍스트 변경 시 `messages/ko.json`, `messages/en.json` 동시 반영
-- 번역 키 추가/수정 후 ko/en parity를 확인
 
 ## Branch Strategy
 
 ```text
 main
  └── dev
-      ├── feat/{slug}
-      ├── fix/{slug}
-      ├── chore/{slug}
-      └── style/{slug}
+      ├── feat/{slug}                  # 신규 기능 개발
+      ├── fix/{slug}                   # 버그 수정
+      ├── chore/{slug}                 # 설정/빌드/의존성/스크립트 등 유지보수
+      └── style/{slug}                 # UI 스타일/마크업/포맷 조정
+      └── docs/{slug}                  # 문서 작성/수정
 ```
 
 - 모든 작업 브랜치는 `dev`에서 분기
@@ -117,8 +110,6 @@ main
 - 배포 시점에만 `dev`를 `main`으로 병합
 
 ## Commit Message Rules
-
-Allowed types:
 
 ```text
 feat: 새로운 기능 추가
