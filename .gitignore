@@ -54,3 +54,5 @@ openapi.json
 api.md
 local-docs/
 *.local.md
+data
+.idea
