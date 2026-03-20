@@ -35,8 +35,6 @@
 - pnpm 9+
 
 ```bash
-pnpm install
-
 # Run
 pnpm dev                # dev server (http://localhost:3000)
 pnpm build              # production build
@@ -54,7 +52,6 @@ pnpm test:e2e:ui        # Playwright UI 모드로 E2E 실행
 
 # Utilities
 pnpm generate:types   # openapi -> src/shared/api/generated-types.ts
-pnpm i18n:sync        # /tmp/i18n_sheet.csv 기준 번역 동기화
 ```
 
 ## Environment Variables

@@ -3,14 +3,16 @@
 ## Language & Workflow Rules
 
 ### Language Rules
-| Context | Language |
-|---|---|
-| Conversation | Korean (informal) |
-| Code | English |
-| Code comments | Korean |
-| Commit messages | Korean |
+
+| Context         | Language          |
+| --------------- | ----------------- |
+| Conversation    | Korean (informal) |
+| Code            | English           |
+| Code comments   | Korean            |
+| Commit messages | Korean            |
 
 ### Workflow Rules
+
 - This repository does not require Jira tickets.
 - Ignore global Jira-related instructions for this project.
 - Do not mention AI tools in commits or PRs.
@@ -41,14 +43,17 @@ type: 작업 내용
 ```
 
 Examples:
+
 - `feat: 예약시간 30분전에 세션 시작하기 버튼 활성화되도록 구현`
 - `fix: 세션 시간대 보정 적용 및 일정 변경 시 UTC 변환 전송`
 - `refactor: 세션 목록 조회에서 mock fallback 제거하고 서버 응답만 사용`
 
 Allowed types:
+
 - `feat`, `fix`, `refactor`, `style`, `docs`, `chore`, `test`
 
 Rules:
+
 - Write commit subjects in Korean.
 - Keep one clear change per commit message.
 - Follow recent repository style (no feature-number prefix).
@@ -68,12 +73,13 @@ pnpm start          # Start production server
 pnpm lint           # Run ESLint
 pnpm format         # Run Prettier
 pnpm generate:types # Generate API types from OpenAPI source
-pnpm i18n:sync      # Sync i18n messages from CSV input
+
 ```
 
 ## Architecture
 
 ### Stack
+
 - Framework: Next.js 16 (App Router), React 19, TypeScript
 - i18n: next-intl
 - Data/state: TanStack Query
@@ -83,6 +89,7 @@ pnpm i18n:sync      # Sync i18n messages from CSV input
 - API typing: openapi-typescript
 
 ### Directory Structure
+
 ```text
 src/
 ├── app/                  # App Router pages/layouts + BFF API routes
@@ -102,6 +109,7 @@ scripts/
 ```
 
 ### Key Patterns
+
 - FSD-style layering:
   - `app` composes routes/pages
   - `features` contains domain logic
@@ -128,6 +136,7 @@ NEXT_PUBLIC_API_BASE_URL=
 ```
 
 Notes:
+
 - At least one API base URL must be configured.
 - Keep secrets out of client-exposed variables unless explicitly required.
 
